@@ -14,7 +14,7 @@ Minutes (linked to wiki)
 - [ ] Testing
 ## Acceptance Criteria
 - [ ] All sub-issues (client and server) of this version are closed
-- [ ] Use-case specifications, analysis and design models linked from the 
+- [ ] Use-case specifications, analysis and design models linked from the wiki
 - [ ] Interfaces match the contracts (see parent issue)
 - [ ] Code reviewed (human review of AI-generated code)
 - [ ] Unit and integration tests designed and reviewed.
