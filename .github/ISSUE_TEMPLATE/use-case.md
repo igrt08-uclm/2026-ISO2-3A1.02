@@ -1,12 +1,13 @@
 ---
 name: Use case
-about: One iteration = one use case
+about: Use case template
 title: ‘CUxx – Name (module vX.Y.Z)’
 ---
 ## Use Case
 UC · RF · Phase · Module · Minutes
 Minutes (linked to wiki)
 ## RADIT Disciplines
+**A phase will only be marked as completed ("checked") if and only if both phases have been completed in the sub-issues.**
 - [ ] Requirements 
 - [ ] Analysis
 - [ ] Design
