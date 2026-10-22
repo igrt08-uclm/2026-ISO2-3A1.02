@@ -11,12 +11,8 @@ assignees: ''
 | Field | Value |
 |---|---|
 | Component | <!-- e.g. C5 – Appointment planning --> |
-| Side | <!-- Client / Server / Both --> |
 | Version (SemVer) | <!-- e.g. v1.1.0 --> |
-| Change type | <!-- First release / MINOR (new functionality) / PATCH (fix) / MAJOR (breaking change) --> |
 | Iteration | <!-- e.g. Iteration 5 --> |
-| Milestone | <!-- e.g. Appointment planning v1.1.0 – delivery date --> |
-| Responsible | <!-- @developer --> |
 | Planned delivery date | <!-- dd/mm/yyyy --> |
 
 ## 2. Objective
@@ -27,21 +23,10 @@ assignees: ''
 
 <!-- One sub-issue per use case. Keep 1 FR = 1 UC. Order by priority. -->
 
-- [ ] #__ FRxx – <use case name> (priority __)
-- [ ] #__ FRxx – <use case name> (priority __)
+- [ ] #__ UCxx – <use case name> (priority __)
 
 **Not included in this version (deferred):**
 <!-- Use cases of this component planned for later versions. -->
-
-## 4. RADIT disciplines involved
-
-- [ ] Requirements
-- [ ] Analysis
-- [ ] Design
-- [ ] Implementation
-- [ ] Tests
-
-<!-- Briefly note what is done in each discipline in this version. -->
 
 ## 5. Dependencies
 
@@ -63,26 +48,13 @@ assignees: ''
 ## 7. Acceptance criteria (Definition of Done)
 
 - [ ] All sub-issues (use cases) of this version are closed
-- [ ] Each use case has its client GUI and its server logic and data
-- [ ] Unit and integration tests designed and passing
-- [ ] Access to clinical data emits audit events (FR19)
-- [ ] Interfaces match the contracts in section 6
-- [ ] CHANGELOG updated with the content of this version
-- [ ] Use-case specifications, analysis and design models linked from the wiki
-- [ ] Code reviewed (human review of AI-generated code)
+- [ ] Interfaces match the contracts in section 6.
 - [ ] Git tag created: `<component>-v<version>`
-- [ ] Milestone closed
 
 ## 8. Effort estimation (hours)
+[Click to see the table that describes the effort estimation of each UC in this component.](https://url/to/excel/page)
 
-| Use case | Without AI agent | With AI agent | Actual | Notes |
-|---|---|---|---|---|
-| FRxx | | | | |
-| FRxx | | | | |
-| Integration and review of the component | | | | |
-| **Total** | | | | |
-
-**Agent / model used:** <!-- e.g. Claude Code, model and version -->
+**Agent / model used:** Github Copilot <!-- e.g. Claude Code, model and version // Github Copilot by default. -->
 
 ## 9. Risks and assumptions
 
