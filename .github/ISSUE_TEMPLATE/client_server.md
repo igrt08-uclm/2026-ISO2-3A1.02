@@ -1,10 +1,10 @@
 ---
-name: Use case
+name: Use case for client/server
 about: Use case template
 title: ‘CUxx – Client/Server (module vX.Y.Z)’
 ---
 ## Use Case
-UC · RF · Phase · Module · Minutes
+UC · RF · Phase · Module · [Minutes](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-3)
 
 **Description:**
 
