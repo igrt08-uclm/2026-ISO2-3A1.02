@@ -1,10 +1,10 @@
 ---
 name: Use case
 about: Use case template
-title: ‘CUxx – Name (module vX.Y.Z)’
+title: "UCxx – Name (module vX.Y.Z)"
 ---
 ## Use Case
-UC · RF · Phase · Module · Minutes
+UC · FR · Phase · Module · Minutes
 Minutes (linked to wiki)
 ## RADIT Disciplines
 **A phase will only be marked as completed ("checked") if and only if both phases have been completed in the sub-issues.**
@@ -13,6 +13,12 @@ Minutes (linked to wiki)
 - [ ] Design
 - [ ] Implementation
 - [ ] Testing
+## Effort estimation (hours)
+| | R | A | D | I | T | Total |
+|---|---|---|---|---|---|---|
+| With AI | | | | | | |
+| Without AI | | | | | | |
+
 ## Acceptance Criteria
 - [ ] All sub-issues (client and server) of this version are closed
 - [ ] Use-case specifications, analysis and design models linked from the wiki
