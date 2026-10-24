@@ -54,7 +54,7 @@ assignees: ''
 ## 8. Effort estimation (hours)
 [Click to see the table that describes the effort estimation of each UC in this component.](https://url/to/excel/page)
 
-**Agent / model used:** Github Copilot <!-- e.g. Claude Code, model and version // Github Copilot by default. -->
+**Agent / model used:** GitHub Copilot
 
 ## 9. Risks and assumptions
 
