@@ -166,6 +166,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** One issue per use case with no sub-issues. Two separate issues per use case. Developing all the server first and then all the client.
 - **Reason:** Each part can be assigned and tracked on its own, and a use case is only finished when both parts work together. Developing both parts in the same iteration allows testing each use case end to end, for example the login.
 - **Consequences:** There are two use case diagrams, one for the client and one for the server, and the effort is estimated for both parts. The Maven modules are named `server` and `client`, in English like the rest of the project and the branches (the Maven practice uses `servidor` and `cliente`).
+- **Status:** Updated by D-018 on 27/10/2026: the issues of later components can be created in advance.
 
 ## D-016 · Maven structure and client–server communication
 **Date:** 25/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:13:35–0:24:43) · **Issues:** #18, #35
@@ -189,3 +190,12 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Each member keeps their own version.
 - **Reason:** Everyone must be able to open and edit the same project files.
 - **Consequences:** Every member updates to Visual Paradigm 18.1 before working on the diagrams.
+
+## D-018 · Use case issues can be created in advance
+**Date:** 27/10/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5)
+
+- **Context:** D-015 said that the use case issues are created one component at a time, once the previous component is approved. During Iteration 1, the coordinator created the issues of C2 and C3 (#33, #38 to #47), so that the team can plan the next iterations, especially the week of 4 November, which has no classes and in which three iterations end.
+- **Decision:** The issues of a component (the parent issue, its use cases and their client and server sub-issues) can be created before the previous component is finished. Each issue is in the milestone of its iteration, and the work on it follows the dependencies of D-013: an issue that is blocked is not worked on until the issues that block it are closed.
+- **Alternatives:** Keeping D-015: creating the issues one component at a time.
+- **Reason:** The team can see, plan and assign the work in advance, and the issues already show the dependencies between components.
+- **Consequences:** Updates D-015.
