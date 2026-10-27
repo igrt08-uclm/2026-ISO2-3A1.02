@@ -13,12 +13,6 @@ Minutes (linked to wiki)
 - [ ] Design
 - [ ] Implementation
 - [ ] Testing
-## Effort estimation (hours)
-| | R | A | D | I | T | Total |
-|---|---|---|---|---|---|---|
-| With AI | | | | | | |
-| Without AI | | | | | | |
-
 ## Acceptance Criteria
 - [ ] All sub-issues (client and server) of this version are closed
 - [ ] Use-case specifications, analysis and design models linked from the wiki
