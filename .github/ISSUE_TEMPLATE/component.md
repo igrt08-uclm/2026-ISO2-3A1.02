@@ -2,7 +2,6 @@
 name: Component version
 about: Parent issue for one version of a component. Its use cases are sub-issues.
 title: "Creation of <Component> v<MAJOR.MINOR.PATCH>"
-labels: component
 assignees: ''
 ---
 
