@@ -116,6 +116,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** None. It is required by the professor.
 - **Reason:** The plan must answer how many hours the project takes, how much it costs and when it ends, and it must be agreed by everyone who has to follow it.
 - **Consequences:** The Iteration 1 work already done (use case diagram and analysis) is on hold until the plan is approved, and will be reused. The AI agent must not generate diagrams or specifications for use cases outside the current iteration.
+- **Status:** Updated by D-019 on 28/10/2026: the estimate is kept in the plan and only linked from the component issue.
 
 ## D-012 · One iteration per component
 **Date:** 21/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 3](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-3) (0:00:39–0:04:30, 0:29:20, 0:55:10–0:57:37), [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:07:26–0:10:05, 0:27:01–0:27:47)
@@ -150,6 +151,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** One version per component, shared by the client and the server (proposed in Meeting 3). Separate versions for the client and the server with a compatibility table between them.
 - **Reason:** Follow the course guidelines (Maven practice, Git Flow and T.2.01): the version lives in the poms and in the tags of `main`, so it can be traced and built.
 - **Consequences:** Every issue shows the version of the module it changes (for example, server 1.0.0). Tags per component, such as `C1-v1.0.0`, are not used. When the product version changes, `<parent><version>` must also change in the server and client poms.
+- **Status:** Updated by D-021 on 28/10/2026: order of the module versions within an iteration.
 
 ## D-015 · Client and server: sub-issues and development order
 **Date:** 21/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 3](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-3) (0:08:59–0:27:58, 1:23:47–1:24:55), [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:20:25)
@@ -181,6 +183,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Two repositories; a single module; one Maven module per component; Spanish names (`radiodiagnostico`, `servidor`, `cliente`), as in the Spanish version of the Maven practice; the contracts copied in both modules; real communication over the network (REST or sockets).
 - **Reason:** One `mvn verify` builds and tests everything, and the versions and libraries are set once in the parent. The names are in English, like the rest of the project and the branches. With a single copy of the contracts, the client and the server cannot get out of sync, and the build fails if they stop matching. Real network communication is outside the scope of the subject.
 - **Consequences:** The `common` module has to be added to the Maven structure, with its own version (D-014) (#35). Nobody approves a pull request with a red build. The team will check with Ismael that the `common` module is accepted (#34).
+- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated.
 
 ## D-017 · Visual Paradigm version
 **Date:** 25/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:34:47–0:37:16)
@@ -192,10 +195,66 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Consequences:** Every member updates to Visual Paradigm 18.1 before working on the diagrams.
 
 ## D-018 · Use case issues can be created in advance
-**Date:** 27/10/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5)
+**Date:** 27/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:25:45–0:26:55
 
 - **Context:** D-015 said that the use case issues are created one component at a time, once the previous component is approved. During Iteration 1, the coordinator created the issues of C2 and C3 (#33, #38 to #47), so that the team can plan the next iterations, especially the week of 4 November, which has no classes and in which three iterations end.
 - **Decision:** The issues of a component (the parent issue, its use cases and their client and server sub-issues) can be created before the previous component is finished. Each issue is in the milestone of its iteration, and the work on it follows the dependencies of D-013: an issue that is blocked is not worked on until the issues that block it are closed.
 - **Alternatives:** Keeping D-015: creating the issues one component at a time.
 - **Reason:** The team can see, plan and assign the work in advance, and the issues already show the dependencies between components.
-- **Consequences:** Updates D-015.
+- **Consequences:** Updates D-015. Approved in Meeting 5 (28/10/2026).
+
+## D-019 · The effort estimate is kept in the plan and linked from the component issue
+**Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52, PR #51
+
+- **Context:** D-011 says that the estimate is kept in the planning table and in each component issue. The use case template also had an effort table, which was never filled in for C1 and repeated the numbers of the plan.
+- **Decision:** The effort estimate (hours with and without AI, per RADIT discipline) is recorded once, on the *Planification* page and in its spreadsheet. Each component issue links to the tab of its component. Use case issues do not have an effort table.
+- **Alternatives:** Keeping the table in the component issue and in every use case issue.
+- **Reason:** A single source of the numbers: two copies stop matching as soon as a member updates the hours of their discipline.
+- **Consequences:** Updates D-011. The effort table was removed from the use case template (PR #51).
+
+## D-020 · One milestone per delivery date
+**Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52
+
+- **Context:** D-018 places each issue in the milestone of its iteration, but several iterations end on the same date: It2, It3 and It4 on 4 November, and It6 and It7 on 18 November.
+- **Decision:** There is one milestone per delivery date, not per iteration. A milestone can cover several iterations: Milestone 2 = It2, It3 and It4; Milestone 4 = It6 and It7. The iterations are still the unit of work and of release (one product version each).
+- **Alternatives:** One milestone per iteration, with several milestones on the same date.
+- **Reason:** The team works by weeks, and the board is easier to follow with one milestone per deadline.
+- **Consequences:** Milestones 1 to 7 cover It1 to It10, due on 28/10, 04/11, 11/11, 18/11, 25/11, 02/12 and 09/12. An issue goes in the milestone of the date of its iteration, so UC08 (It9) is in Milestone 6.
+
+## D-021 · Order of the module versions within an iteration
+**Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52
+
+- **Context:** D-014 raises the MINOR version with each use case, but it does not say which use case of an iteration takes the lower version. In C1, the use cases are listed as UC22, UC18 and UC19, but UC19 is developed before UC18.
+- **Decision:** When a use case depends on another one of the same iteration, it takes the higher version. When they do not depend on each other, the order is free. The real versions are written on the *Traceability and releases* page when the iteration ends.
+- **Alternatives:** Following the order in which the use cases are listed on the traceability page.
+- **Reason:** The versions must show the order in which the use cases are really built, and a dependency is the only order that cannot be broken.
+- **Consequences:** Updates D-014. C1 is planned as UC22 `1.0.0`, UC19 `1.1.0` and UC18 `1.2.0`.
+
+## D-022 · Records are deactivated, never deleted
+**Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52, #33, #47
+
+- **Context:** The C2 and C3 issues already say that a test type "is deactivated, never deleted" (#33) and that discharging a patient "deactivates the record" (#47). The components spreadsheet says the same for appointments: cancelling changes their status.
+- **Decision:** No use case deletes a record. Test types, protocols, schedules, policies, priorities, patients, orders and appointments change their status (inactive, discharged, cancelled) and keep their identifier.
+- **Alternatives:** Deleting the records, or deleting only the ones that nothing references.
+- **Reason:** A clinical record is evidence for the audit (UC19), the history of the patient and the statistics (C9). Deleting it would break the references that other components keep.
+- **Consequences:** The contracts offer operations to deactivate or cancel instead of deleting, and the queries filter by status.
+
+## D-023 · Each component owns its data; interfaces of later components are simulated
+**Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52, #35
+
+- **Context:** D-016 places the contracts between client and server in interfaces, but it does not say who owns each piece of data. Some use cases also need components that are delivered later: for example, the discharge of a patient (C3) cancels appointments of C5 (#47).
+- **Decision:**
+  - Each component is the only one that writes its data. The other components use it only through the interfaces of that component.
+  - When a use case needs an operation of a component that is delivered in a later iteration, the operation is declared now as an interface and has a simulated implementation. The real implementation replaces it when that component is delivered, without changing the interface.
+- **Alternatives:** Letting each component read the data of the others directly. Waiting for the other component before developing the use case.
+- **Reason:** The components stay independent and can be developed and tested one at a time (D-012), and D-013 only postpones the part of a use case that depends on another component.
+- **Consequences:** Extends D-016. The interfaces are part of section 6 of each component issue. Where the shared interfaces live depends on the `common` module, still pending Ismael's answer (#34, #35).
+
+## D-024 · Discharging a patient deactivates the record
+**Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52, #47
+
+- **Context:** The C3 issue (#47) has an assumption to be confirmed by the team: "discharge" means deactivating the patient's record, not a hospital discharge.
+- **Decision:** Discharging a patient deactivates their record. The history stays readable (reports, audit, statistics), the patient's scheduled appointments are cancelled through C5, and no new order or appointment can be created for an inactive patient.
+- **Alternatives:** A hospital discharge. Deleting the patient.
+- **Reason:** The clinical history must be kept, and cancelling the appointments frees slots for the waitlist (UC15).
+- **Consequences:** The discharge is delivered in It8, after C5 (D-013). C4 and C5 reject inactive patients. The patient identifier (national ID or health card number) is not decided yet: it is decided with the requirements of C3.
