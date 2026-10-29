@@ -1,75 +1,115 @@
 # AGENTS.md
 
-Instructions for the AI agents (GitHub Copilot) that work on this repository. Read this file before doing anything.
-The reasons behind every rule are in [DECISIONS.md](DECISIONS.md); the project data (components, dependencies,
-versions) is in [doc/CONTEXT.md](doc/CONTEXT.md).
+Instructions for every AI agent that works on this repository (GitHub Copilot or any other tool). This is the only
+file of rules: read it completely before doing anything. The reasons behind every rule
+are in [DECISIONS.md](DECISIONS.md).
 
 ## The project
-Lab project of Software Engineering II (UCLM, 2026/27), team 3A1.02. We build the Radiodiagnostics and Medical
-Imaging Management System of SESCAM: a Java 21 client–server application, developed with the Unified Process
-(iterations with RADIT disciplines: Requirements, Analysis, Design, Implementation, Testing).
-The professor assesses how we follow **our own plan**, not how much code exists (Kickoff, p. 20).
+Lab project of Software Engineering II (UCLM, 2026/27), team 3A1.02: the Radiodiagnostics and Medical Imaging
+Management System of SESCAM, a Java 21 client–server application developed with the Unified Process (iterations with
+the RADIT disciplines: Requirements, Analysis, Design, Implementation, Testing). The professor assesses how we follow
+**our own plan**, not how much code exists (Kickoff, p. 20).
+
+People do the requirements, the analysis, the design and the design of the tests; agents implement what was designed
+and run the tests (assignment, p. 3). "The engineer designs the interfaces; the AI implements the contracts"
+(assignment, p. 8).
+
+## How you work: Spec-Driven Development (D-025)
+Every task that changes files follows this cycle. Do not skip steps, and do not write code before step 4.
+
+1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. Then read the sub-issue and its
+   use case issue (`gh issue view <n>`), the contracts (section 6 of the component issue), the approved design
+   (`doc/design/`), the decisions they cite and, if it exists, the plan of the sub-issue in `doc/plans/`.
+2. **Ask.** Write every doubt, ambiguity or missing piece in one message and wait for the answers. Never fill a gap
+   with an assumption. If the design or a contract is missing or looks wrong, say so.
+3. **Plan.** Write or update `doc/plans/UCxx-server.md` or `doc/plans/UCxx-client.md` from
+   [doc/plans/TEMPLATE.md](doc/plans/TEMPLATE.md): the questions and answers, the files you will create or change,
+   the classes and methods, the tests, and the steps in order.
+4. **Wait for an explicit "yes"** from the member before changing anything. Anything outside the approved plan needs a
+   new yes.
+5. **Implement one step at a time.** Before each step, apply rule 14 and write the step as *In progress* in the
+   plan. After the step, `mvn -B verify` must be green; then commit, tick the step in the plan with the commit hash,
+   and set *In progress* back to nothing.
+6. **If something does not go as planned, stop and re-plan** with the member. Do not improvise.
+7. **Done needs evidence:** a green build, the tests passing and every acceptance criterion of the sub-issue checked.
+   Never mark something as done because it "looks right".
+8. **Leave it ready for the next session.** Before you stop, the plan says what is done, what was in progress and
+   the exact next step (file, class or method), so that another session or another member can continue without
+   asking.
+
+A question that does not change any file does not need a plan.
 
 ## Rules you must always follow
-1. **You suggest, the team decides** (D-008). Do not take requirements, analysis, design or architecture decisions
-   on your own, and do not change a decision of DECISIONS.md. If something is not decided, ask.
-2. **Ask before acting on GitHub.** Do not create, edit or close issues, milestones, branches, pull requests or wiki
-   pages unless the user asked for that exact action.
-3. **Never commit to `main` or `develop`.** Work on a branch and open a pull request to `develop`; another member
-   approves it (D-001). Never merge your own pull request. Never delete branches (Kickoff, p. 9).
-4. **Only the current iteration.** Do not specify, model or implement use cases of other iterations (D-011;
+1. **You suggest, the team decides** (D-008). Do not take requirements, analysis, design or architecture decisions,
+   and do not change a decision of DECISIONS.md.
+2. **Only your sub-issue.** One sub-issue and one branch per session. Change only what your sub-issue needs: do not
+   refactor, rename or "improve" anything else; write it in the plan as an open question instead.
+3. **Only the current iteration.** Do not specify, model or implement use cases of other iterations (D-011;
    assignment, p. 6, note 14).
-5. **Implement what was designed.** Code follows the approved Visual Paradigm diagrams and the contracts of the
-   component issue. If the design is missing or wrong, say so instead of inventing it (Kickoff, p. 28).
+4. **Implement what was designed.** The code follows the approved design and the contracts of the component issue
+   (Kickoff, p. 28).
+5. **Keep it simple.** The smallest change that meets the specification: no extra features, no temporary fixes, no
+   overengineering (assignment, p. 3).
 6. **No new dependencies, frameworks or tools** unless the team decided them (assignment, p. 4).
-7. **Authorship:** commits are made with the identity of the member who asked for the work, with no
-   `Co-Authored-By` lines or tool signatures.
-8. **Do not invent facts.** If a piece of data is not in this repository or its wiki, say that you do not know.
+7. **Branches.** Work only on the branch of your sub-issue, `feature/UCxx-server` or `feature/UCxx-client` (D-015).
+   A member creates it on GitHub from the issue: never create, rename or delete a branch yourself. Never commit to
+   `main` or `develop`, and never merge a pull request: another member approves it (D-001).
+8. **Ask before acting on GitHub.** Push, open pull requests, and create, edit or close issues, milestones or wiki
+   pages only when the member asks for that exact action.
+9. **Human approval for structural changes.** Ask before you create, move, rename or delete a file or folder that is
+   not in the approved plan, a worktree, a Java package or a Maven module, and before you change a `pom.xml`, the CI
+   workflow, the issue templates, `AGENTS.md`, `DECISIONS.md` or the files in `agents/`.
+10. **No destructive Git commands:** no `push --force`, `reset --hard`, `rebase` of a pushed branch, `clean` or
+    `--no-verify`. If you think one is needed, stop and ask.
+11. **Git is the truth.** If a plan or a document says one thing and `git log`, `git status` or the build say
+    another, trust Git and the build, and tell the member.
+12. **Cite your sources; do not invent.** Every fact about the project comes from a decision, an issue, a file or a
+    diagram. If you cannot cite it, say that you do not know.
+13. **Authorship.** Commits are made with the identity of the member who asked for the work, with no
+    `Co-Authored-By` lines or tool signatures.
+14. **Only start a step you can finish.** Before each step, estimate whether the context and tokens you have left are
+    enough to implement it, build it, commit it **and** update the plan, and always keep a reserve for the plan
+    update. If you are not sure, split the step into smaller ones, or do step 8 of the cycle now and stop.
+15. **Never share a branch or a folder with another agent.** Two agents never work on the same branch or in the same
+    folder at the same time: one can overwrite the other's changes without any warning. To work on two sub-issues at
+    once on the same computer, each agent uses its own Git worktree (a second folder of the repository, on another
+    branch), created only after the member approves it (rule 9):
+    `git worktree add ../2026-ISO2-3A1.02-UC20-server feature/UC20-server`.
+    Remove it with `git worktree remove <folder>` once its pull request is merged; the branch is kept (rule 7).
+
+If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
+choose on your own: tell the member.
 
 ## Conventions
 | Topic | Convention | Source |
 |---|---|---|
 | Names | Use cases `UCxx`, functional requirements `FRxx` (1 FR = 1 UC) | D-002, D-015 |
 | Branches | `feature/UCxx-server`, `feature/UCxx-client`, `feature/short-description`, `bugfix/…`, `release/x.y.z`, `hotfix/x.y.z` | D-015, Kickoff p. 9, 19 |
-| Commits | Conventional Commits: `type(scope): summary (#issue)`, e.g. `feat(UC22): validate credentials against the SSO (#13)`, `fix(UC22): … (#13)` | Git practice p. 28, Kickoff p. 9 |
+| Commits | Conventional Commits: `type(scope): summary (#issue)`, e.g. `feat(UC22): validate credentials against the SSO (#13)`, `fix(UC22): … (#13)`, `docs(UC22): plan for the server part (#13)` | Git practice p. 28, Kickoff p. 9 |
 | Pull requests | To `develop`, with `Closes #n` in the description; one sub-issue = one branch = one pull request | Kickoff p. 19 |
 | Issues | Component issue → use case issue → client and server sub-issues, using the templates in `.github/ISSUE_TEMPLATE/` | D-015, D-018 |
-| Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); `server` and `client` have independent versions: MINOR per use case, PATCH per fix | D-014, Maven practice p. 19 |
+| Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); `server` and `client` have independent versions: MINOR per use case, PATCH per fix | D-014, D-021, Maven practice p. 19 |
 | Releases | `release/0.x.0` from `develop`, merged into `main` and `develop`, annotated tag `v0.x.0` on `main` | Kickoff p. 9, Git practice p. 19 |
 | Diagrams | Propose them as PlantUML text, never as images; the team imports and approves them in Visual Paradigm 18.1 | D-008, D-017, assignment p. 5, note 9 |
 | Language | Code, comments, commits, issues and documents in English | D-016 |
-
-## Code structure (D-016)
-```
-radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, Java 21, JUnit 6.1.3
-├── server/              server application
-└── client/              client application
-```
-- One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1.
-- Client and server talk through **interfaces (contracts)**; the communication is simulated with direct Java calls,
-  not a network. A shared `common` module for those contracts is planned (#35) but **does not exist yet**.
-- External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces.
-- "The engineer designs the interfaces; the AI implements the contracts" (assignment, p. 8).
-
-## Build and test
-- `mvn -B verify` builds and runs all the tests. The CI (`.github/workflows/maven.yml`) runs it on every push and
-  pull request to `main` and `develop`; a pull request with a red build is not approved.
-- Every use case has unit tests. The team designs the tests; you can write and run them (assignment, p. 3).
 
 ## Where to find things
 | What | Where |
 |---|---|
 | Why the project is the way it is | [DECISIONS.md](DECISIONS.md) |
-| Components, dependencies, version sequence | [doc/CONTEXT.md](doc/CONTEXT.md) |
+| Code structure, build and tests | [agents/architecture.md](agents/architecture.md) |
+| Components, iterations, versions and dependencies | [agents/components.md](agents/components.md) |
+| Plan and progress of each sub-issue | [doc/plans/](doc/plans/) |
+| Approved design that agents can read | [doc/design/](doc/design/) (agents cannot open `doc/ISO-Project.vpp`) |
 | Requirements (FR table, actors) | Wiki: *Requirements and Use Cases* |
 | Plan, effort and cost | Wiki: *Planification* |
 | Iterations, dates and versions | Wiki: *Traceability and releases* |
 | Meeting minutes and assigned tasks | Wiki: *Minutes of meetings* and the issues |
 | Errors already made | Wiki: *Errors and lessons learned* |
-| Diagrams | `doc/ISO-Project.vpp` (Visual Paradigm 18.1) |
 
-The wiki is at https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki. With the GitHub CLI, issues can be read with
-`gh issue view <n>`.
+The wiki is at https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki. The course guidelines (assignment, Kickoff, Git
+and Maven practices) are not in this repository; if a local `guidelines/` folder exists, read it for the full rules.
 
-The course guidelines (assignment, Kickoff, Git and Maven practices) are not in this repository. If a local
-`guidelines/` folder exists, read it for the full rules; otherwise, the references above point to them.
+## Lessons
+When the member corrects you, or you find a mistake that could happen again, propose a short lesson for the wiki
+page *Errors and lessons learned*. Do not edit the wiki yourself (rule 8).

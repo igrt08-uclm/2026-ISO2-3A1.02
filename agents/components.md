@@ -1,4 +1,4 @@
-# Project context
+# Components, iterations and dependencies
 
 Data that the AI agents need and that is not written anywhere else in the repository. It comes from the team's
 components spreadsheet and the plan approved in Meeting 4. If this file and the wiki disagree, **the wiki wins**
