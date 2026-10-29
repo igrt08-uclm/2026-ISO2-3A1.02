@@ -1,9 +1,9 @@
-# Project context
+# Components, iterations and dependencies
 
 Data that the AI agents need and that is not written anywhere else in the repository. It comes from the team's
 components spreadsheet and the plan approved in Meeting 4. If this file and the wiki disagree, **the wiki wins**
 (*Traceability and releases* for dates and versions, *Requirements and Use Cases* for the requirements), and this
-file must be corrected. The rules for agents are in [AGENTS.md](../AGENTS.md).
+file must be corrected. The rules for agents are in [rules.md](rules.md).
 
 ## Components and iterations (D-012, D-013)
 | Component | Use cases | Iteration | Product version |
