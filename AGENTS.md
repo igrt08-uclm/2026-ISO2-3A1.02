@@ -1,7 +1,7 @@
 # AGENTS.md
 
-Instructions for the AI agents (GitHub Copilot) that work on this repository. This is the only file that is loaded
-automatically, so all the rules are here: read it completely before doing anything. The reasons behind every rule
+Instructions for every AI agent that works on this repository (GitHub Copilot or any other tool). This is the only
+file of rules: read it completely before doing anything. The reasons behind every rule
 are in [DECISIONS.md](DECISIONS.md).
 
 ## The project
