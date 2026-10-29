@@ -32,6 +32,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [ ] `mvn -B verify` is green.
 
 ## Status
+- **In progress:** nothing (the step being done right now; rule 14 in AGENTS.md)
 - **Next step:** … (file, class or method)
 - **Open questions:** …
 - **Last update:** dd/mm/yyyy, member

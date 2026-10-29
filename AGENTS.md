@@ -27,13 +27,15 @@ Every task that changes files follows this cycle. Do not skip steps, and do not 
    the classes and methods, the tests, and the steps in order.
 4. **Wait for an explicit "yes"** from the member before changing anything. Anything outside the approved plan needs a
    new yes.
-5. **Implement one step at a time.** After each step `mvn -B verify` must be green; then commit and tick the step in
-   the plan with the commit hash.
+5. **Implement one step at a time.** Before each step, apply rule 14 and write the step as *In progress* in the
+   plan. After the step, `mvn -B verify` must be green; then commit, tick the step in the plan with the commit hash,
+   and set *In progress* back to nothing.
 6. **If something does not go as planned, stop and re-plan** with the member. Do not improvise.
 7. **Done needs evidence:** a green build, the tests passing and every acceptance criterion of the sub-issue checked.
    Never mark something as done because it "looks right".
-8. **Leave it ready for the next session.** Before you stop, the plan says what is done and the exact next step
-   (file, class or method), so that another session or another member can continue without asking.
+8. **Leave it ready for the next session.** Before you stop, the plan says what is done, what was in progress and
+   the exact next step (file, class or method), so that another session or another member can continue without
+   asking.
 
 A question that does not change any file does not need a plan.
 
@@ -55,8 +57,8 @@ A question that does not change any file does not need a plan.
 8. **Ask before acting on GitHub.** Push, open pull requests, and create, edit or close issues, milestones or wiki
    pages only when the member asks for that exact action.
 9. **Human approval for structural changes.** Ask before you create, move, rename or delete a file or folder that is
-   not in the approved plan, a Java package or a Maven module, and before you change a `pom.xml`, the CI workflow,
-   the issue templates, `AGENTS.md`, `DECISIONS.md` or the files in `agents/`.
+   not in the approved plan, a worktree, a Java package or a Maven module, and before you change a `pom.xml`, the CI
+   workflow, the issue templates, `AGENTS.md`, `DECISIONS.md` or the files in `agents/`.
 10. **No destructive Git commands:** no `push --force`, `reset --hard`, `rebase` of a pushed branch, `clean` or
     `--no-verify`. If you think one is needed, stop and ask.
 11. **Git is the truth.** If a plan or a document says one thing and `git log`, `git status` or the build say
@@ -65,6 +67,15 @@ A question that does not change any file does not need a plan.
     diagram. If you cannot cite it, say that you do not know.
 13. **Authorship.** Commits are made with the identity of the member who asked for the work, with no
     `Co-Authored-By` lines or tool signatures.
+14. **Only start a step you can finish.** Before each step, estimate whether the context and tokens you have left are
+    enough to implement it, build it, commit it **and** update the plan, and always keep a reserve for the plan
+    update. If you are not sure, split the step into smaller ones, or do step 8 of the cycle now and stop.
+15. **Never share a branch or a folder with another agent.** Two agents never work on the same branch or in the same
+    folder at the same time: one can overwrite the other's changes without any warning. To work on two sub-issues at
+    once on the same computer, each agent uses its own Git worktree (a second folder of the repository, on another
+    branch), created only after the member approves it (rule 9):
+    `git worktree add ../2026-ISO2-3A1.02-UC20-server feature/UC20-server`.
+    Remove it with `git worktree remove <folder>` once its pull request is merged; the branch is kept (rule 7).
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
