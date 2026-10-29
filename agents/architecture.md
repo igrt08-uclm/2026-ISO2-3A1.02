@@ -3,12 +3,15 @@
 ## Code structure (D-016)
 ```
 radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, Java 21, JUnit 6.1.3
-├── server/              server application
-└── client/              client application
+├── common/              shared contracts (interfaces and data classes), version 1.0.0-SNAPSHOT
+├── server/              server application, depends on common
+└── client/              client application, depends on common
 ```
-- One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1.
-- Client and server talk through **interfaces (contracts)**; the communication is simulated with direct Java calls,
-  not a network. A shared `common` module for those contracts is planned (#35) but **does not exist yet**.
+- One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1. A component's package
+  is created in its own iteration; for now `common` only has `es.uclm.esi.iso2.common.access` (C1).
+- Client and server talk through **interfaces (contracts)** in `common` (D-016, #35): the server implements them and
+  the client uses them. The communication is simulated with direct Java calls, not a network. The version of
+  `common` is set once in the `<dependencyManagement>` of the parent pom.
 - External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces.
 - Each component is the only one that writes its data; the others use it through its interfaces. An operation of a
   component that is delivered later is declared as an interface now and has a simulated implementation (D-023).

@@ -29,7 +29,7 @@
 Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 1. This plan. `462270a`
 - [x] 2. Module `common`: `common/pom.xml`, `package-info.java`, `SmokeTest.java`, and `common` in the parent pom. `19d8146`
-- [ ] 3. `server` and `client` depend on `common`.
+- [x] 3. `server` and `client` depend on `common`. `2d863b9`
 - [ ] 4. `agents/architecture.md` describes the `common` module.
 
 ## Verification
