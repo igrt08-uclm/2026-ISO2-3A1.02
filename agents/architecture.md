@@ -20,4 +20,4 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, J
   pull request to `main` and `develop`; a pull request with a red build is not approved.
 - Every use case has unit tests. The team designs the tests; you can write and run them (assignment, p. 3).
 - When a use case is delivered, its module version goes up in `server/pom.xml` or `client/pom.xml` (D-014, D-021).
-  Changing a `pom.xml` needs the user's approval (rule 19 in [rules.md](rules.md)).
+  Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).

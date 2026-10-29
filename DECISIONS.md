@@ -258,3 +258,15 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** A hospital discharge. Deleting the patient.
 - **Reason:** The clinical history must be kept, and cancelling the appointments frees slots for the waitlist (UC15).
 - **Consequences:** The discharge is delivered in It8, after C5 (D-013). C4 and C5 reject inactive patients. The patient identifier (national ID or health card number) is not decided yet: it is decided with the requirements of C3.
+
+## D-025 · Working method with AI agents: Spec-Driven Development
+**Date:** 29/10/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #60, PR #61
+
+- **Context:** The team implements the use cases with GitHub Copilot (D-006). The assignment asks to bind the artefacts of the Unified Process to development descriptors such as PLAN.md or CONTEXT.md under Spec-Driven Development, always with a person in the loop (assignment, pp. 4 and 10), and the Kickoff describes the cycle: the team designs, the agent proposes PlantUML, the team approves it in Visual Paradigm, and the agent implements what was designed (Kickoff, p. 28). Without a fixed method, an agent can start coding on its own, fill gaps with assumptions or change things outside its task.
+- **Decision:**
+  - Every task done with an agent follows the same cycle, written in AGENTS.md: read → ask every doubt → plan → explicit approval of a member → implement step by step with a green build → verify with evidence.
+  - The specification is the use case issue and the use case specification on the wiki, and the design is the approved diagrams and the contracts of the component issue: both are made by people. The plan of each sub-issue is a file in `doc/plans/`, written by the agent and approved by the member; it also records the progress, so that another session or member can continue.
+  - AGENTS.md is the single file of rules for every agent; the instruction file of a tool only points to it (`.github/copilot-instructions.md`).
+- **Alternatives:** An SDD tool such as GitHub Spec Kit or Kiro, which would make the agent write the requirements and choose the architecture, and both are human tasks here (Kickoff, p. 23; D-016). A state file per component, which would conflict between branches and double the commits. No fixed method.
+- **Reason:** The agent only works on what was specified and designed, every doubt reaches a person before the code is written, and the plans are evidence of how the team uses AI.
+- **Consequences:** Extends D-006 and D-008. The designers keep the approved diagrams in `doc/design/` in a form that agents can read, because they cannot open `.vpp` files. Each sub-issue has its plan in `doc/plans/`, committed on its branch with the code.
