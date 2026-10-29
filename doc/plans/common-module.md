@@ -30,15 +30,17 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 1. This plan. `462270a`
 - [x] 2. Module `common`: `common/pom.xml`, `package-info.java`, `SmokeTest.java`, and `common` in the parent pom. `19d8146`
 - [x] 3. `server` and `client` depend on `common`. `2d863b9`
-- [ ] 4. `agents/architecture.md` describes the `common` module.
+- [x] 4. `agents/architecture.md` describes the `common` module. `393500d`
 
 ## Verification
-- [ ] `mvn -B verify` is green and builds `common` before `server` and `client`.
-- [ ] Every checkbox of #35 is done: `common` in the parent pom with its own version, `server` and `client` depend on
-      it, one Java package per component (C1 for now), `mvn verify` passes in the CI workflow.
+- [x] `mvn -B verify` is green and builds `common` before `server` and `client` (reactor order: radiodiagnostics,
+      common, server, client; 3 tests passed).
+- [x] Every checkbox of #35 is done: `common` in the parent pom with its own version, `server` and `client` depend on
+      it, one Java package per component (C1 for now), `mvn verify` passes in the CI workflow (checked
+      when the pull request runs).
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 2, `common/pom.xml`
+- **Next step:** none; push and open the pull request when the member asks (rule 8)
 - **Open questions:** none
 - **Last update:** 29/10/2026, Javier
