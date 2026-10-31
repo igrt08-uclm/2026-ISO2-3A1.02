@@ -108,9 +108,10 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 4. `IU_Login`: `enterCredentials`, `showLoginError` with the messages, focus after an error, and `showSuccess`. `ff9646e`
 - [x] 5. `IU_Welcome`: name, roles and *Log out*. `df043a5`
 - [x] 6. `Main`: native look and feel, window and change of screens. `09eb16e`
-- [ ] 7. `agents/architecture.md`.
-- [ ] 8. Javier checks by hand the five users of #13 and the three errors, and the usability decisions are ticked; the
-      result is written here.
+- [x] 7. `agents/architecture.md`. `9ebfbca`
+- [x] 8. Javier checks by hand the five users of #13 and the three errors, and the usability decisions are ticked; the
+      result is written here. Result on 31/10/2026: Javier ran the application and everything worked as expected: login,
+      the three error messages, the focus after an error, *Log out* and the keyboard shortcuts.
 
 ## How to run it
 `mvn -B package -DskipTests`, and then, on Windows:
@@ -118,16 +119,16 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 
 ## Verification
 - [x] `mvn -B verify` is green.
-- [ ] After the user enters the credentials, the welcome screen with their roles or an error is shown (#12).
+- [x] After the user enters the credentials, the welcome screen with their roles or an error is shown (#12).
 - [x] `IU_Login` and `IU_Welcome` only import `common` and Swing, never `server`.
-- [ ] Each row of *Usability decisions* is checked in the running application.
+- [x] Each row of *Usability decisions* is checked in the running application.
 - [ ] Adam's tests are in `client/src/test/java/` and pass. **The sub-issue is not done before this.**
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 8: Javier checks the application by hand. Then push and pull request when the member asks (rule 8),
-  after #13 *UC22 – Server (module v1.0.0)* is merged.
+- **Next step:** push when the member asks (rule 8). Then Adam adds his tests in `client/src/test/java/`, and the pull
+  request is opened after #13 *UC22 – Server (module v1.0.0)* is merged.
 - **Open questions:**
   - Meeting 6: final GUI technology (Swing for now).
   - Design (Marcos and Denis): add `IU_Welcome`, `Main` and the dependency of `client` on `server` to the diagram.
