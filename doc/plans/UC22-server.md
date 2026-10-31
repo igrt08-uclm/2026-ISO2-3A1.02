@@ -62,7 +62,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 3. `common`: `AuthenticationFailureReason`, `AuthenticationException` and `IAuthenticationService`. `9bfe29a`
 - [x] 4. `server`: `IAuthenticatorSystem` and `AuthenticatorSystemSimulator`. `f77b8ca`
 - [x] 5. `server`: `IUserAccountRepository` and `InMemoryUserAccountRepository`. `a742dce`
-- [ ] 6. `server`: `IAuditRecorder` and `AuditRecorderSimulator`.
+- [x] 6. `server`: `IAuditRecorder` and `AuditRecorderSimulator`. `49b7f25`
 - [ ] 7. `server`: `AuthenticationService`, with the checks in the agreed order.
 - [ ] 8. Check the five users and an unknown user with a temporary program outside the repository (not committed), and
       write the result here.
@@ -76,7 +76,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 6
+- **In progress:** step 7
 - **Next step:** step 2, `Role`
 - **Open questions:** none for the implementation. For #12 *UC22 – Client (module v1.0.0)*: who creates
   `AuthenticationService`, because `client` only depends on `common`.
