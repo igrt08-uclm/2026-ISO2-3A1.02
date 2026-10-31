@@ -63,21 +63,25 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 4. `server`: `IAuthenticatorSystem` and `AuthenticatorSystemSimulator`. `f77b8ca`
 - [x] 5. `server`: `IUserAccountRepository` and `InMemoryUserAccountRepository`. `a742dce`
 - [x] 6. `server`: `IAuditRecorder` and `AuditRecorderSimulator`. `49b7f25`
-- [ ] 7. `server`: `AuthenticationService`, with the checks in the agreed order.
-- [ ] 8. Check the five users and an unknown user with a temporary program outside the repository (not committed), and
-      write the result here.
+- [x] 7. `server`: `AuthenticationService`, with the checks in the agreed order. `773d21b`
+- [x] 8. Check the five users and an unknown user with a temporary program outside the repository (not committed), and
+      write the result here. Result on 31/10/2026, with 12 logins, all as expected and each one registered in the audit:
+      the four active users log in with their roles (`mgarcia` with two); `pnavarro` with his password gives
+      `INACTIVE_USER`, and with a wrong one `WRONG_PASSWORD`; an unknown, null or empty username gives `UNKNOWN_USER`;
+      a wrong, null or empty password gives `WRONG_PASSWORD`.
 
 ## Verification
-- [ ] `mvn -B verify` is green.
-- [ ] The SSO validates the username and password, and `login` returns the `UserAccount` or an error (#13).
-- [ ] The interfaces match the contracts: `login(username, password)` of section 6 of #8.
-- [ ] Each failed and successful login is registered in the audit.
+- [x] `mvn -B verify` is green.
+- [x] The SSO validates the username and password, and `login` returns the `UserAccount` or an error (#13).
+- [x] The interfaces match the contracts: `login(username, password)` of section 6 of #8.
+- [x] Each failed and successful login is registered in the audit.
 - [ ] Adam's unit and integration tests are in `server/src/test/java/` and pass. **The sub-issue is not done before this.**
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 7
-- **Next step:** step 2, `Role`
+- **In progress:** nothing
+- **Next step:** Adam adds his tests in `server/src/test/java/` on this branch. The push and the pull request are done
+  when the member asks (rule 8).
 - **Open questions:** none for the implementation. For #12 *UC22 – Client (module v1.0.0)*: who creates
   `AuthenticationService`, because `client` only depends on `common`.
 - **Last update:** 31/10/2026, Javier
