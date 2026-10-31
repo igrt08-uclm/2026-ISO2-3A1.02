@@ -103,7 +103,7 @@ The screens are `JPanel`, not `JFrame`, so that Adam's tests can create them in 
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 1. This plan. `55f2829`
-- [ ] 2. `pom.xml` and `client/pom.xml`: `client` depends on `server`.
+- [x] 2. `pom.xml` and `client/pom.xml`: `client` depends on `server`. `1d2d722`
 - [ ] 3. `IU_Login`: fields, layout, shortcuts and *Log in* disabled until both fields have text.
 - [ ] 4. `IU_Login`: `enterCredentials`, `showLoginError` with the messages, focus after an error, and `showSuccess`.
 - [ ] 5. `IU_Welcome`: name, roles and *Log out*.
@@ -125,7 +125,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 2
+- **In progress:** step 3
 - **Next step:** a member creates `feature/UC22-client`; then step 1
 - **Open questions:**
   - Meeting 6: final GUI technology (Swing for now).
