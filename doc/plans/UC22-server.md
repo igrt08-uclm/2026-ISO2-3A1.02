@@ -70,6 +70,24 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
       `INACTIVE_USER`, and with a wrong one `WRONG_PASSWORD`; an unknown, null or empty username gives `UNKNOWN_USER`;
       a wrong, null or empty password gives `WRONG_PASSWORD`.
 
+## How it works and how to try it
+`AuthenticationService.login(username, password)` makes three checks, in this order:
+1. `IUserAccountRepository.findByUsername`: if the user does not exist, `UNKNOWN_USER`.
+2. `IAuthenticatorSystem.validateCredentials`: if the SSO rejects the password, `WRONG_PASSWORD`.
+3. `UserAccount.isActive`: if the account is inactive, `INACTIVE_USER`.
+
+If they pass, `login` returns the `UserAccount` with its roles. Otherwise it throws `AuthenticationException` with the
+reason. Each attempt is registered through `IAuditRecorder`: `LOGIN_OK` with `authentication`, or `LOGIN_FAILED` with
+`authentication:<reason>`. `AuditRecorderSimulator` writes it to the standard output.
+
+To try it:
+- `mvn -B verify` builds everything and runs the tests.
+- Create the service with its three dependencies and call `login` from a small `main` or a test, with
+  `common/target/classes` and `server/target/classes` in the classpath:
+  `new AuthenticationService(new AuthenticatorSystemSimulator(), new InMemoryUserAccountRepository(), new AuditRecorderSimulator())`.
+- The test users and their passwords are in Adam's comment in #13. For a test, pass your own `IAuditRecorder` to the
+  constructor to check what is registered.
+
 ## Verification
 - [x] `mvn -B verify` is green.
 - [x] The SSO validates the username and password, and `login` returns the `UserAccount` or an error (#13).
