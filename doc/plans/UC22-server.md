@@ -59,7 +59,7 @@ No `pom.xml` changes: `server` and `common` stay at `1.0.0-SNAPSHOT`.
 Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 1. This plan. `90a8239`
 - [x] 2. `common`: `Role` and `UserAccount`. `a261cb7`
-- [ ] 3. `common`: `AuthenticationFailureReason`, `AuthenticationException` and `IAuthenticationService`.
+- [x] 3. `common`: `AuthenticationFailureReason`, `AuthenticationException` and `IAuthenticationService`. `9bfe29a`
 - [ ] 4. `server`: `IAuthenticatorSystem` and `AuthenticatorSystemSimulator`.
 - [ ] 5. `server`: `IUserAccountRepository` and `InMemoryUserAccountRepository`.
 - [ ] 6. `server`: `IAuditRecorder` and `AuditRecorderSimulator`.
@@ -76,7 +76,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 3
+- **In progress:** step 4
 - **Next step:** step 2, `Role`
 - **Open questions:** none for the implementation. For #12 *UC22 – Client (module v1.0.0)*: who creates
   `AuthenticationService`, because `client` only depends on `common`.
