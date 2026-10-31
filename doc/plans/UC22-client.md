@@ -107,7 +107,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 3. `IU_Login`: fields, layout, shortcuts and *Log in* disabled until both fields have text. `d022ea6`
 - [x] 4. `IU_Login`: `enterCredentials`, `showLoginError` with the messages, focus after an error, and `showSuccess`. `ff9646e`
 - [x] 5. `IU_Welcome`: name, roles and *Log out*. `df043a5`
-- [ ] 6. `Main`: native look and feel, window and change of screens.
+- [x] 6. `Main`: native look and feel, window and change of screens. `09eb16e`
 - [ ] 7. `agents/architecture.md`.
 - [ ] 8. Javier checks by hand the five users of #13 and the three errors, and the usability decisions are ticked; the
       result is written here.
@@ -117,16 +117,17 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 `java -cp "common/target/classes;server/target/classes;client/target/classes" es.uclm.esi.iso2.client.Main`
 
 ## Verification
-- [ ] `mvn -B verify` is green.
+- [x] `mvn -B verify` is green.
 - [ ] After the user enters the credentials, the welcome screen with their roles or an error is shown (#12).
-- [ ] `IU_Login` and `IU_Welcome` only import `common` and Swing, never `server`.
+- [x] `IU_Login` and `IU_Welcome` only import `common` and Swing, never `server`.
 - [ ] Each row of *Usability decisions* is checked in the running application.
 - [ ] Adam's tests are in `client/src/test/java/` and pass. **The sub-issue is not done before this.**
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 6
-- **Next step:** a member creates `feature/UC22-client`; then step 1
+- **In progress:** nothing
+- **Next step:** step 8: Javier checks the application by hand. Then push and pull request when the member asks (rule 8),
+  after #13 *UC22 – Server (module v1.0.0)* is merged.
 - **Open questions:**
   - Meeting 6: final GUI technology (Swing for now).
   - Design (Marcos and Denis): add `IU_Welcome`, `Main` and the dependency of `client` on `server` to the diagram.
