@@ -110,7 +110,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 **Stage 1: implementation of the server**
 - [x] 1. This plan. `93c1b6c`
-- [ ] 2. `common`: `AuditLog`.
+- [x] 2. `common`: `AuditLog`. `dbe98ad`
 - [ ] 3. `common`: `AccessDeniedException` and `IAuditService`.
 - [ ] 4. `server`: `IAuditLogRepository` and `JsonAuditLogRepository`, with the filters, and `data/` in `.gitignore`.
 - [ ] 5. `server`: `AuditService`.
@@ -131,7 +131,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 2
+- **In progress:** step 3
 - **Next step:** a member creates `feature/UC19-server` from #15; then step 1
 - **Open questions:**
   - The points of the design above.
