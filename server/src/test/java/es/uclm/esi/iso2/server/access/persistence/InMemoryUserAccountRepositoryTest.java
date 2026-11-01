@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import es.uclm.esi.iso2.common.access.domain.Role;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
@@ -94,5 +95,23 @@ class InMemoryUserAccountRepositoryTest {
         assertAll(
                 () -> assertSame(activePnavarro, found),
                 () -> assertTrue(found.isActive()));
+    }
+
+    // An account without a username used to break every later search and save.
+    @Test
+    @DisplayName("Rejects an account without a username and keeps working")
+    void saveRejectsAccountWithoutUsernameAndKeepsWorking() {
+        // Arrange
+        UserAccount noUsername = new UserAccount(null, "No Username", "no.username@sescam.test", true, List.of());
+        UserAccount nlopez = new UserAccount("nlopez", "Nuria López", "nuria.lopez@sescam.test", true, List.of());
+
+        // Act
+        assertThrows(NullPointerException.class, () -> repository.save(noUsername));
+        repository.save(nlopez);
+
+        // Assert
+        assertAll(
+                () -> assertNull(repository.findByUsername("nobody")),
+                () -> assertSame(nlopez, repository.findByUsername("nlopez")));
     }
 }
