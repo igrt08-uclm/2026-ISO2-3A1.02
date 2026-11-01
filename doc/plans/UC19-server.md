@@ -59,7 +59,7 @@ Answered by Javier on 01/11/2026.
 | `pom.xml`, `common/pom.xml`, `server/pom.xml` | change | `common` and `server` go to `1.1.0-SNAPSHOT` (D-014, D-021) |
 | `common/src/test/java/…/domain/AuditLogTest.java` and `…/contracts/AccessDeniedExceptionTest.java` | create | test cases below |
 | `server/src/test/java/…/persistence/InMemoryAuditLogRepositoryTest.java` | create | test cases below |
-| `server/src/test/java/…/service/AuditServiceTest.java` | create | test cases below |
+| `server/src/test/java/…/service/AuditServiceTest.java` and `FakeAuditLogRepository.java` | create | test cases below, and their test double |
 | `server/src/test/java/…/service/AuditServiceIntegrationTest.java` | create | test cases below |
 
 ## Test cases (design of the tests)
@@ -122,21 +122,22 @@ denied to the other four requesters, every filter and the wrong filters.
 **Stage 3: tests of the server** (after stage 2, in `doc/plans/UC19-client.md`)
 - [x] 7. Design of the tests: Javier approves the test cases, written here. `48bb774`
 - [x] 8. Tests of `common`. `f047044`
-- [ ] 9. Tests of `InMemoryAuditLogRepository`.
+- [x] 9. Tests of `InMemoryAuditLogRepository`. `90d448e`
 - [ ] 10. Tests of `AuditService`, unit and integration.
 
 ## Verification
-- [ ] `mvn -B verify` is green, with every test case above.
-- [ ] Each failed test was checked to fail for the right reason: a test that cannot fail proves nothing.
+- [x] `mvn -B verify` is green, with every test case above.
+- [x] The tests were checked to fail when the code is wrong: 10 errors were introduced on purpose in a temporary copy (the active
+      check, the role check, each registered consultation, the ids, the order, three filters and the copy of the date), and all
+      of them were detected.
 - [ ] The interfaces match the contracts: `register(action)` and `getActivityLog(requester, filters)` of section 6 of #8, once
       it is updated.
-- [ ] Storing an activity has effect and it can be consulted by an administrator, and only by one (#15).
+- [x] Storing an activity has effect and it can be consulted by an administrator, and only by one (#15).
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 9
-- **Next step:** stage 2: push this branch when the member asks (rule 8), a member creates `feature/UC19-client` from it, and the
-  agent writes `doc/plans/UC19-client.md`. Then step 7 here.
+- **In progress:** nothing
+- **Next step:** stage 4, on `feature/UC19-client`: merge this branch and write the tests of the client.
 - **Open questions:**
   - The points of the design above.
   - Meeting 6: persistence. The audit log and the users are in memory, and everything is lost on closing.
