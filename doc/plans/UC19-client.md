@@ -103,8 +103,10 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 3. `IU_Audit`: search, messages and shortcuts. `c2410c1`
 - [x] 4. `IU_Welcome`: *View audit log*, only for administrators. `8606152`
 - [x] 5. `Main`: `AuditService`, the audit screen, and `AuditRecorderSimulator` deleted. `e568917`
-- [ ] 6. `client/pom.xml`: version `1.1.0-SNAPSHOT`.
-- [ ] 7. Javier checks the application by hand, and the usability decisions are ticked.
+- [x] 6. `client/pom.xml`: version `1.1.0-SNAPSHOT`. `586118b`
+- [x] 7. Javier checks the application by hand, and the usability decisions are ticked. Result on 01/11/2026: everything worked
+      as expected: the button only for administrators, the search, *Clear*, *Back*, and a wrong date keeps the table and shows
+      its message.
 
 **Stage 4: tests of the client** (after stage 3)
 - [ ] 8. `git merge` of `feature/UC19-server`.
@@ -117,15 +119,15 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 ## Verification
 - [ ] `mvn -B verify` is green.
-- [ ] The system administrator can check the registry and filter it by who, what, when and which patient (#14).
-- [ ] A user who is not an administrator does not see the option, and the server rejects the request (#15).
-- [ ] `IU_Audit` and `IU_Welcome` only import `common` and Swing, never `server`.
-- [ ] Each row of *Usability decisions* is checked in the running application.
+- [x] The system administrator can check the registry and filter it by who, what, when and which patient (#14).
+- [x] A user who is not an administrator does not see the option, and the server rejects the request (#15).
+- [x] `IU_Audit` and `IU_Welcome` only import `common` and Swing, never `server`.
+- [x] Each row of *Usability decisions* is checked in the running application.
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 6
-- **Next step:** Javier approves this plan; then step 1
+- **In progress:** nothing
+- **Next step:** stage 3, the tests of the server, on `feature/UC19-server`. Then step 8 here.
 - **Open questions:**
   - Design (Marcos and Denis): the answer about the access check, in #15 *UC19 – Server (module v1.1.0)*.
   - The audit log is in memory, so it is lost on closing. Persistence is discussed in Meeting 6.
