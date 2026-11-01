@@ -79,25 +79,27 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 6. `server`: `findAll()` in `IUserAccountRepository`, its implementation and the test double. `d06e57b`
 - [x] 7. `server`: `RoleManagementService`: `getRoles`, `getPermissions` and `getAvailablePermissions`. `acda231`
 - [x] 8. `server`: `RoleManagementService`: the four operations of change, the checks and the audit. `3e11094`
-- [ ] 9. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.2.0-SNAPSHOT`.
-- [ ] 10. Check by hand with a temporary program, and write the result here.
+- [x] 9. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.2.0-SNAPSHOT`. `a1acc76`
+- [x] 10. Check by hand with a temporary program, and write the result here. Result on 02/11/2026, all as expected: the queries; the
+      four changes, also repeated; four rejected requesters; unknown or null values; a change of permissions reaches the users at
+      once; the last active administrator cannot lose the role or `MANAGE_ROLES`, an inactive one does not count; and the audit.
 
 **Stage 3: tests of the server** (after the client)
 - [ ] 11. Design of the tests: Javier approves the test cases, written here.
 - [ ] 12. Tests, in Adam's style.
 
 ## Verification
-- [ ] `mvn -B verify` is green.
-- [ ] A change of roles or permissions takes full effect at once (#17).
-- [ ] Only an active user with `MANAGE_ROLES` can make a change, and each change and each rejected attempt is registered.
-- [ ] No operation leaves the system without an active administrator.
+- [x] `mvn -B verify` is green.
+- [x] A change of roles or permissions takes full effect at once (#17).
+- [x] Only an active user with `MANAGE_ROLES` can make a change, and each change and each rejected attempt is registered.
+- [x] No operation leaves the system without an active administrator.
 - [ ] The tests were checked to fail when the code is wrong.
 - [ ] The interfaces match the contracts of section 6 of #8, once it is updated.
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 9
-- **Next step:** Javier approves this plan; then step 1
+- **In progress:** nothing
+- **Next step:** stage 2 waits for UC19 to be on `develop`. Stage 3 can start before if the member asks: step 11.
 - **Open questions:**
   - The points of the design above.
   - The server trusts the `requester` it receives: there are no sessions (D09 of the analysis), and the client and the server are one
