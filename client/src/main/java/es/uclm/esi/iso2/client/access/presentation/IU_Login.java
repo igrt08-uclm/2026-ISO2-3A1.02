@@ -69,7 +69,7 @@ public class IU_Login extends JPanel {
         lblError.setText(ERROR_ICON + messageFor(reason));
     }
 
-    public void showSuccess() {
+    private void showSuccess() {
         onSuccess.accept(authenticatedUser);
     }
 

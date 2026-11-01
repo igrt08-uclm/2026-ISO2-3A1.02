@@ -23,6 +23,8 @@ Answered by Javier on 31/10/2026.
 - **Q:** Language of the GUI? **A:** English (D-016).
 - **Q:** Error messages? **A:** One message per reason.
 - **Q:** Who writes the tests? **A:** Adam, after the implementation and on this branch, as in #13.
+- **Q:** Is `showSuccess` public, as in the diagram? **A:** No, private: called before a login, it sent `null` to the welcome
+  screen and crashed it (found by Adam, fix approved by Javier).
 - **Q:** Recover password? **A:** Out of UC22 in Iteration 1 (David in #13, D01 of the analysis); Design removed
   `clickRecoverPassword()` from `IU_Login`. There is no link in the screen.
 
@@ -131,6 +133,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
   #13 *UC22 – Server (module v1.0.0)* is merged.
 - **Open questions:**
   - Meeting 6: final GUI technology (Swing for now).
-  - Design (Marcos and Denis): add `IU_Welcome`, `Main` and the dependency of `client` on `server` to the diagram.
+  - Design (Marcos and Denis): review the points of their comment in #12, including `showSuccess`, which is now private
+    (`-showSuccess()`) in the code and public in the diagram.
   - Requirements: #12 still describes the recover password link; mark it as postponed.
 - **Last update:** 01/11/2026, Javier
