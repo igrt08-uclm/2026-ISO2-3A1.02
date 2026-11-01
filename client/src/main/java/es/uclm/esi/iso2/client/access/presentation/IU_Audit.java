@@ -1,6 +1,10 @@
 package es.uclm.esi.iso2.client.access.presentation;
 
+import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
+import es.uclm.esi.iso2.common.access.contracts.IAuditService;
+import es.uclm.esi.iso2.common.access.domain.AuditLog;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -8,6 +12,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -27,6 +34,12 @@ public class IU_Audit extends JPanel {
     private static final String[] ACTIONS =
             {ALL_ACTIONS, "LOGIN_OK", "LOGIN_FAILED", "AUDIT_CONSULTED", "AUDIT_ACCESS_DENIED"};
     private static final String[] COLUMNS = {"Date", "User", "Action", "Resource"};
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final Color ERROR_COLOR = new Color(0xB00020);
+    private static final String ERROR_ICON = "⚠ ";
+
+    private final transient IAuditService auditService;
+    private final String requester;
 
     private final JTextField filterAuthor = new JTextField(16);
     private final JComboBox<String> filterAction = new JComboBox<>(ACTIONS);
@@ -44,8 +57,10 @@ public class IU_Audit extends JPanel {
     private final JButton btnClear = new JButton("Clear");
     private final JButton btnBack = new JButton("Back");
 
-    public IU_Audit(Runnable onBack) {
+    public IU_Audit(IAuditService auditService, String requester, Runnable onBack) {
         super(new BorderLayout(0, 12));
+        this.auditService = auditService;
+        this.requester = requester;
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
         rejectFilterSeparator(filterAuthor);
         rejectFilterSeparator(filterTarget);
@@ -55,10 +70,83 @@ public class IU_Audit extends JPanel {
         btnClear.setMnemonic('C');
         btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> onBack.run());
+        btnSearch.addActionListener(event -> search());
+        btnClear.addActionListener(event -> clear());
+        filterAuthor.addActionListener(event -> search());
+        filterTarget.addActionListener(event -> search());
+        filterFrom.addActionListener(event -> search());
+        filterTo.addActionListener(event -> search());
 
         add(buildFilters(), BorderLayout.NORTH);
         add(buildTable(), BorderLayout.CENTER);
         add(buildFooter(), BorderLayout.SOUTH);
+        applyFilter("");
+    }
+
+    public void applyFilter(String filters) {
+        try {
+            displayActivity(auditService.getActivityLog(requester, filters));
+        } catch (AccessDeniedException exception) {
+            tableModel.setRowCount(0);
+            showError("You do not have permission to consult the audit log.");
+        } catch (IllegalArgumentException exception) {
+            showError("Check the dates: use the format yyyy-MM-dd.");
+        }
+    }
+
+    public void displayActivity(List<AuditLog> logs) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+        tableModel.setRowCount(0);
+        for (AuditLog log : logs) {
+            tableModel.addRow(new Object[] {dateFormat.format(log.getTimestamp()), log.getAuthor(), log.getAction(),
+                log.getTargetResource()});
+        }
+        lblStatus.setForeground(getForeground());
+        lblStatus.setText(statusFor(logs.size()));
+    }
+
+    private static String statusFor(int entries) {
+        return switch (entries) {
+            case 0 -> "No activity matches these filters.";
+            case 1 -> "1 entry";
+            default -> entries + " entries";
+        };
+    }
+
+    private void showError(String message) {
+        lblStatus.setForeground(ERROR_COLOR);
+        lblStatus.setText(ERROR_ICON + message);
+    }
+
+    private void search() {
+        applyFilter(buildFilterText());
+    }
+
+    private void clear() {
+        filterAuthor.setText("");
+        filterAction.setSelectedItem(ALL_ACTIONS);
+        filterTarget.setText("");
+        filterFrom.setText("");
+        filterTo.setText("");
+        applyFilter("");
+    }
+
+    private String buildFilterText() {
+        List<String> filters = new ArrayList<>();
+        addFilter(filters, "author", filterAuthor.getText());
+        if (!ALL_ACTIONS.equals(filterAction.getSelectedItem())) {
+            addFilter(filters, "action", (String) filterAction.getSelectedItem());
+        }
+        addFilter(filters, "target", filterTarget.getText());
+        addFilter(filters, "from", filterFrom.getText());
+        addFilter(filters, "to", filterTo.getText());
+        return String.join(";", filters);
+    }
+
+    private static void addFilter(List<String> filters, String key, String value) {
+        if (!value.isBlank()) {
+            filters.add(key + "=" + value.trim());
+        }
     }
 
     /** A value cannot contain {@code ;}, because it separates the filters sent to the server. */
