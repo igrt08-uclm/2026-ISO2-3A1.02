@@ -120,7 +120,7 @@ Checked by hand on 01/11/2026 with a temporary program, with the repository in m
 denied to the other four requesters, every filter and the wrong filters.
 
 **Stage 3: tests of the server** (after stage 2, in `doc/plans/UC19-client.md`)
-- [ ] 7. Design of the tests: Javier approves the test cases, written here.
+- [x] 7. Design of the tests: Javier approves the test cases, written here. `48bb774`
 - [ ] 8. Tests of `common`.
 - [ ] 9. Tests of `InMemoryAuditLogRepository`.
 - [ ] 10. Tests of `AuditService`, unit and integration.
@@ -134,7 +134,7 @@ denied to the other four requesters, every filter and the wrong filters.
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 7
+- **In progress:** step 8
 - **Next step:** stage 2: push this branch when the member asks (rule 8), a member creates `feature/UC19-client` from it, and the
   agent writes `doc/plans/UC19-client.md`. Then step 7 here.
 - **Open questions:**
