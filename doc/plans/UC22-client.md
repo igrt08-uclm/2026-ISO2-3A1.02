@@ -129,8 +129,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 
 ## Status
 - **In progress:** nothing
-- **Next step:** open the pull request to `develop` with `Closes #12` when the member asks (rule 8), after
-  #13 *UC22 – Server (module v1.0.0)* is merged.
+- **Next step:** a member reviews the pull request of this sub-issue; #13 *UC22 – Server (module v1.0.0)* is already merged.
 - **Open questions:**
   - Meeting 6: final GUI technology (Swing for now).
   - Design (Marcos and Denis): review the points of their comment in #12, including `showSuccess`, which is now private
