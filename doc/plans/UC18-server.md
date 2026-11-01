@@ -72,7 +72,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 **Stage 1: implementation of the server**
 - [x] 1. This plan. `9df81dc`
-- [ ] 2. `common`: `Permission`, and the permissions of `Role`.
+- [x] 2. `common`: `Permission`, and the permissions of `Role`. `472b5ca`
 - [ ] 3. `common`: `AccessDeniedException` and `IRoleManagementService`.
 - [ ] 4. `server`: `IPermissionRepository` and `InMemoryPermissionRepository`.
 - [ ] 5. `server`: `IRoleRepository` and `InMemoryRoleRepository`.
@@ -96,7 +96,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 2
+- **In progress:** step 3
 - **Next step:** Javier approves this plan; then step 1
 - **Open questions:**
   - The points of the design above.
