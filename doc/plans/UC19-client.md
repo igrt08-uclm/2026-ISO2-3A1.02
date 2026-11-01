@@ -137,7 +137,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 **Stage 4: tests of the client** (after stage 3)
 - [x] 8. `git merge` of `feature/UC19-server`. `796f093`
 - [x] 9. Design of the tests: Javier approves the test cases, written here. `606da98`
-- [ ] 10. Tests of `IU_Audit` and `IU_Welcome`.
+- [x] 10. Tests of `IU_Audit` and `IU_Welcome`. `ff2d229`
 
 ## How to run it
 `mvn -B package -DskipTests`, and then, on Windows:
