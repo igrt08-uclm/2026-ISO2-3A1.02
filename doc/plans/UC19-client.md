@@ -90,6 +90,32 @@ Messages:
 
 `IU_Audit` only imports `common` and Swing, never `server`, like the other screens.
 
+## Test cases (design of the tests)
+Approved by Javier on 01/11/2026 (step 9). Same style as Adam's tests: `@DisplayName`, *Arrange, Act, Assert*, `@ParameterizedTest` for the
+similar cases, hand-written test doubles (`FakeAuditService`), and the controls found with `getComponents()`. The panels are only
+built, never shown, so the tests run in the CI, which has no display.
+
+| Class | Case | Expected result |
+|---|---|---|
+| `IU_AuditTest` | Open the screen | Asks for every entry with the logged user, and shows them in the table |
+| `IU_AuditTest` | An entry in the table | Date as `yyyy-MM-dd HH:mm:ss`, user, action and resource, in that order |
+| `IU_AuditTest` | 0, 1 and several entries | `No activity matches these filters.`, `1 entry` and `n entries` |
+| `IU_AuditTest` | Fill in each filter and press *Search* | Sends its `key=value` pair |
+| `IU_AuditTest` | Fill in every filter | Sends all the pairs, separated by `;` |
+| `IU_AuditTest` | Spaces around the values, and fields with only spaces | The values are trimmed, and the empty ones are not sent |
+| `IU_AuditTest` | *All actions* | The action is not sent |
+| `IU_AuditTest` | Press Enter in a text field | Searches like *Search* |
+| `IU_AuditTest` | Type or paste `;` in a text field | It does not appear |
+| `IU_AuditTest` | Press *Clear* | Empties the filters, selects *All actions* and shows everything |
+| `IU_AuditTest` | Wrong date | Shows the message, and the table does not change |
+| `IU_AuditTest` | After an error, a correct search | The message disappears |
+| `IU_AuditTest` | `AccessDeniedException` | Shows the message and empties the table |
+| `IU_AuditTest` | Edit a cell | It cannot be edited |
+| `IU_AuditTest` | Press *Back* | Runs the action for going back |
+| `IU_WelcomeTest` | An administrator | Sees *View audit log*, which runs its action |
+| `IU_WelcomeTest` | A user who is not an administrator | Does not see it |
+| `IU_WelcomeTest` | The constructor without the action | Does not see it |
+
 ## Order of the work
 This plan covers stages 2 and 4 of `doc/plans/UC19-server.md`. Stage 3, the tests of the server, is done on `feature/UC19-server`,
 and it is merged here before stage 4.
@@ -109,7 +135,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
       its message.
 
 **Stage 4: tests of the client** (after stage 3)
-- [ ] 8. `git merge` of `feature/UC19-server`.
+- [x] 8. `git merge` of `feature/UC19-server`. `796f093`
 - [ ] 9. Design of the tests: Javier approves the test cases, written here.
 - [ ] 10. Tests of `IU_Audit` and `IU_Welcome`.
 
@@ -126,8 +152,8 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** stage 3, the tests of the server, on `feature/UC19-server`. Then step 8 here.
+- **In progress:** step 9
+- **Next step:** Javier approves the test cases (step 9).
 - **Open questions:**
   - Design (Marcos and Denis): the answer about the access check, in #15 *UC19 – Server (module v1.1.0)*.
   - The audit log is in memory, so it is lost on closing. Persistence is discussed in Meeting 6.
