@@ -25,10 +25,9 @@ Answered by Javier on 01/11/2026.
   system administrator, but the design had no check. This changes the contract in section 6 of #8.
 - **Q:** Is consulting the log audited (D12 of the analysis)? **A:** Yes, option (a), as the server now knows who asks: an allowed
   consultation is registered as `AUDIT_CONSULTED` and a rejected one as `AUDIT_ACCESS_DENIED`, both with the target `audit` (Javier).
-- **Q:** Is the log kept when the application closes? **A:** Yes: for now it is saved in a JSON file, `data/audit-log.json`,
-  which Git ignores. How to store the records and the users is decided in Meeting 6, so this is temporary (Javier).
-- **Q:** Which JSON library? **A:** None, so that no dependency is added (rule 6). `AuditLog` has five simple fields, so a small
-  piece of code writes and reads them (Javier).
+- **Q:** Is the log kept when the application closes? **A:** No: it stays in memory, like the users, so it is lost on closing.
+  A JSON file was implemented first (9fbb64a), but Marcos said in #15 that, as Ismael mentioned in class, persistence is not
+  needed, so it was replaced (Javier). Persistence is discussed in Meeting 6.
 - **Q:** Order and date type? **A:** The newest entries first, and `java.util.Date`, as in the diagram.
 - **Q:** `AuditRecorderSimulator`? **A:** It is deleted when `AuditService` replaces it (D-023). As `client`'s `Main` uses it,
   this happens in #14 *UC19 – Client (module v1.1.0)*, not here.
@@ -39,7 +38,8 @@ Answered by Javier on 01/11/2026.
   Each step has its own commit, one at a time (Javier).
 
 ## Points of the design to confirm (Marcos and Denis)
-- `JsonAuditLogRepository` is not in the diagram. It implements `IAuditLogRepository` and it is temporary until Meeting 6.
+- `InMemoryAuditLogRepository` is not in the diagram. It implements `IAuditLogRepository`, like
+  `InMemoryUserAccountRepository` does for the users.
 - **Contract:** `IAuditService.getActivityLog(requester : String, filters : String)`, the new `AccessDeniedException` in
   `common`, and `IU_Audit` passing the logged user. Section 6 of #8 and the diagrams have to be updated.
 - `AuditService` uses `IUserAccountRepository` to check who asks. The communication diagram uses `UserAccount` for another
@@ -54,12 +54,11 @@ Answered by Javier on 01/11/2026.
 | `common/src/main/java/es/uclm/esi/iso2/common/access/contracts/AccessDeniedException.java` | create | checked exception, like `AuthenticationException` |
 | `common/src/main/java/es/uclm/esi/iso2/common/access/contracts/IAuditService.java` | create | `getActivityLog(requester, filters) : List<AuditLog>`, which throws `AccessDeniedException` |
 | `server/src/main/java/es/uclm/esi/iso2/server/access/persistence/IAuditLogRepository.java` | create | `save(entry)` and `find(filters) : List<AuditLog>` |
-| `server/src/main/java/es/uclm/esi/iso2/server/access/persistence/JsonAuditLogRepository.java` | create | keeps the entries in a JSON file (UTF-8) whose path it receives in its constructor, only adds (D11), reads the filters and orders the results; a damaged file gives an error instead of losing entries |
-| `.gitignore` | change | ignores `data/` |
+| `server/src/main/java/es/uclm/esi/iso2/server/access/persistence/InMemoryAuditLogRepository.java` | create | keeps the entries in memory, only adds (D11), reads the filters and orders the results |
 | `server/src/main/java/es/uclm/esi/iso2/server/access/service/AuditService.java` | create | implements `IAuditService` and `IAuditRecorder`; `register` gives each entry the next `id`, after the highest one saved, and its date; `getActivityLog` checks the requester with `IUserAccountRepository` and registers the consultation |
 | `pom.xml`, `common/pom.xml`, `server/pom.xml` | change | `common` and `server` go to `1.1.0-SNAPSHOT` (D-014, D-021) |
 | `common/src/test/java/…/domain/AuditLogTest.java` | create | test cases below |
-| `server/src/test/java/…/persistence/JsonAuditLogRepositoryTest.java` | create | test cases below |
+| `server/src/test/java/…/persistence/InMemoryAuditLogRepositoryTest.java` | create | test cases below |
 | `server/src/test/java/…/service/AuditServiceTest.java` | create | test cases below |
 | `server/src/test/java/…/service/AuditServiceIntegrationTest.java` | create | test cases below |
 
@@ -72,22 +71,18 @@ hand-written test doubles, and a comment with the decision when a test comes fro
 |---|---|---|
 | `AuditLogTest` | Create an entry | Keeps its five attributes |
 | `AuditLogTest` | Change the `Date` used to create it, or the one returned | The entry does not change (D11) |
-| `JsonAuditLogRepositoryTest` | Empty repository | An empty list |
-| `JsonAuditLogRepositoryTest` | `find` with a null or empty `String` | Every entry |
-| `JsonAuditLogRepositoryTest` | Entries with different dates | The newest first |
-| `JsonAuditLogRepositoryTest` | Filter by `author`, by `action`, each exact | Only those entries; a part of the text finds nothing |
-| `JsonAuditLogRepositoryTest` | Filter by `target` with part of the text | The entries that contain it |
-| `JsonAuditLogRepositoryTest` | `from`, `to`, and both | Both dates included, the whole day of `to` |
-| `JsonAuditLogRepositoryTest` | Several filters together | Only the entries that meet all of them |
-| `JsonAuditLogRepositoryTest` | Filters with no result | An empty list |
-| `JsonAuditLogRepositoryTest` | Unknown key, pair without `=`, wrong date | `IllegalArgumentException` |
-| `JsonAuditLogRepositoryTest` | Change the returned list | The repository does not change (D11) |
-| `JsonAuditLogRepositoryTest` | The file does not exist yet | An empty list, and the file is created with the first entry |
-| `JsonAuditLogRepositoryTest` | A new repository on the same file | Finds the entries saved before: they survive a restart |
-| `JsonAuditLogRepositoryTest` | Values with quotes, backslashes and accents | They are read back exactly |
-| `JsonAuditLogRepositoryTest` | A damaged file | An error, and the file is not overwritten |
+| `InMemoryAuditLogRepositoryTest` | Empty repository | An empty list |
+| `InMemoryAuditLogRepositoryTest` | `find` with a null or empty `String` | Every entry |
+| `InMemoryAuditLogRepositoryTest` | Entries with different dates | The newest first |
+| `InMemoryAuditLogRepositoryTest` | Filter by `author`, by `action`, each exact | Only those entries; a part of the text finds nothing |
+| `InMemoryAuditLogRepositoryTest` | Filter by `target` with part of the text | The entries that contain it |
+| `InMemoryAuditLogRepositoryTest` | `from`, `to`, and both | Both dates included, the whole day of `to` |
+| `InMemoryAuditLogRepositoryTest` | Several filters together | Only the entries that meet all of them |
+| `InMemoryAuditLogRepositoryTest` | Filters with no result | An empty list |
+| `InMemoryAuditLogRepositoryTest` | Unknown key, pair without `=`, wrong date | `IllegalArgumentException` |
+| `InMemoryAuditLogRepositoryTest` | Change the returned list | The repository does not change (D11) |
 | `AuditServiceTest` | `register` | Saves one entry with its author, action, target and date |
-| `AuditServiceTest` | Several `register` calls, also after a restart | Different `id` in each entry |
+| `AuditServiceTest` | Several `register` calls | Different `id` in each entry |
 | `AuditServiceTest` | `register` for a user that does not exist | It is saved: failed logins have an author |
 | `AuditServiceTest` | `getActivityLog` by an active administrator | Sends the filters to the repository and returns its result |
 | `AuditServiceTest` | Requester unknown, null, inactive, or without the administrator role | `AccessDeniedException`, and no records are returned |
@@ -112,17 +107,18 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 1. This plan. `93c1b6c`
 - [x] 2. `common`: `AuditLog`. `dbe98ad`
 - [x] 3. `common`: `AccessDeniedException` and `IAuditService`. `e4dd5ff`
-- [x] 4. `server`: `IAuditLogRepository` and `JsonAuditLogRepository`, with the filters, and `data/` in `.gitignore`. `9fbb64a`
+- [x] 4. `server`: `IAuditLogRepository` and a repository with the filters, first as a JSON file. `9fbb64a`
 - [x] 5. `server`: `AuditService`. `a000b85`
 - [x] 6. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.1.0-SNAPSHOT`. `fd50454`
+- [x] 6a. `InMemoryAuditLogRepository` replaces the JSON file, and `data/` leaves `.gitignore`, after Marcos' comment in #15.
 
-Checked by hand on 01/11/2026 with a temporary program: logins saved in the file and consulted by `admin`, access denied to
-the other four requesters, every filter, the wrong filters, the data after a restart, and a damaged file, which is not overwritten.
+Checked by hand on 01/11/2026 with a temporary program, with the repository in memory: logins consulted by `admin`, access
+denied to the other four requesters, every filter and the wrong filters.
 
 **Stage 3: tests of the server** (after stage 2, in `doc/plans/UC19-client.md`)
 - [ ] 7. Design of the tests: Javier approves the test cases, written here.
 - [ ] 8. Tests of `common`.
-- [ ] 9. Tests of `JsonAuditLogRepository`.
+- [ ] 9. Tests of `InMemoryAuditLogRepository`.
 - [ ] 10. Tests of `AuditService`, unit and integration.
 
 ## Verification
@@ -139,7 +135,7 @@ the other four requesters, every filter, the wrong filters, the data after a res
   agent writes `doc/plans/UC19-client.md`. Then step 7 here.
 - **Open questions:**
   - The points of the design above.
-  - Meeting 6: how to store the records and the users. The JSON file is temporary, and the users are still in memory.
+  - Meeting 6: persistence. The audit log and the users are in memory, and everything is lost on closing.
   - The server trusts the `requester` it receives: there are no sessions (D09 of the analysis), and the client and the server
     are one program (D-016).
   - The role check is temporary: with UC18 it should use the permissions.
