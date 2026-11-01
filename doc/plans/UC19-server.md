@@ -57,28 +57,30 @@ Answered by Javier on 01/11/2026.
 | `server/src/main/java/es/uclm/esi/iso2/server/access/persistence/InMemoryAuditLogRepository.java` | create | keeps the entries in memory, only adds (D11), reads the filters and orders the results |
 | `server/src/main/java/es/uclm/esi/iso2/server/access/service/AuditService.java` | create | implements `IAuditService` and `IAuditRecorder`; `register` gives each entry the next `id`, after the highest one saved, and its date; `getActivityLog` checks the requester with `IUserAccountRepository` and registers the consultation |
 | `pom.xml`, `common/pom.xml`, `server/pom.xml` | change | `common` and `server` go to `1.1.0-SNAPSHOT` (D-014, D-021) |
-| `common/src/test/java/…/domain/AuditLogTest.java` | create | test cases below |
+| `common/src/test/java/…/domain/AuditLogTest.java` and `…/contracts/AccessDeniedExceptionTest.java` | create | test cases below |
 | `server/src/test/java/…/persistence/InMemoryAuditLogRepositoryTest.java` | create | test cases below |
-| `server/src/test/java/…/service/AuditServiceTest.java` | create | test cases below |
+| `server/src/test/java/…/service/AuditServiceTest.java` and `FakeAuditLogRepository.java` | create | test cases below, and their test double |
 | `server/src/test/java/…/service/AuditServiceIntegrationTest.java` | create | test cases below |
 
-## Test cases (draft)
-The design of the tests is done after the client (step 7), and Javier approves it then. This list is the starting
-point, and it can change with what the client needs. Same style as Adam's tests: `@DisplayName`, *Arrange, Act, Assert*, `@ParameterizedTest` for the similar cases,
+## Test cases (design of the tests)
+Approved by Javier on 01/11/2026 (step 7). Same style as Adam's tests: `@DisplayName`, *Arrange, Act, Assert*, `@ParameterizedTest` for the similar cases,
 hand-written test doubles, and a comment with the decision when a test comes from one.
 
 | Class | Case | Expected result |
 |---|---|---|
 | `AuditLogTest` | Create an entry | Keeps its five attributes |
 | `AuditLogTest` | Change the `Date` used to create it, or the one returned | The entry does not change (D11) |
+| `AccessDeniedExceptionTest` | Create it with a requester | Keeps the requester, also if it is null |
 | `InMemoryAuditLogRepositoryTest` | Empty repository | An empty list |
 | `InMemoryAuditLogRepositoryTest` | `find` with a null or empty `String` | Every entry |
 | `InMemoryAuditLogRepositoryTest` | Entries with different dates | The newest first |
+| `InMemoryAuditLogRepositoryTest` | Entries with the same date | The highest `id` first |
 | `InMemoryAuditLogRepositoryTest` | Filter by `author`, by `action`, each exact | Only those entries; a part of the text finds nothing |
 | `InMemoryAuditLogRepositoryTest` | Filter by `target` with part of the text | The entries that contain it |
 | `InMemoryAuditLogRepositoryTest` | `from`, `to`, and both | Both dates included, the whole day of `to` |
 | `InMemoryAuditLogRepositoryTest` | Several filters together | Only the entries that meet all of them |
 | `InMemoryAuditLogRepositoryTest` | Filters with no result | An empty list |
+| `InMemoryAuditLogRepositoryTest` | Spaces around the values, and an empty pair (`author=admin;`) | They are ignored |
 | `InMemoryAuditLogRepositoryTest` | Unknown key, pair without `=`, wrong date | `IllegalArgumentException` |
 | `InMemoryAuditLogRepositoryTest` | Change the returned list | The repository does not change (D11) |
 | `AuditServiceTest` | `register` | Saves one entry with its author, action, target and date |
@@ -88,7 +90,9 @@ hand-written test doubles, and a comment with the decision when a test comes fro
 | `AuditServiceTest` | Requester unknown, null, inactive, or without the administrator role | `AccessDeniedException`, and no records are returned |
 | `AuditServiceTest` | An allowed consultation | Registers `AUDIT_CONSULTED`, which does not appear in its own results (D12) |
 | `AuditServiceTest` | A rejected consultation | Registers `AUDIT_ACCESS_DENIED` with the requester as author |
-| `AuditServiceIntegrationTest` | Successful and failed logins with `AuthenticationService` | They can be consulted with `getActivityLog` |
+| `AuditServiceTest` | Wrong filters from an administrator | `IllegalArgumentException`, and no consultation is registered |
+| `AuditServiceIntegrationTest` | Successful and failed logins with `AuthenticationService` | `admin` can consult them with `getActivityLog` |
+| `AuditServiceIntegrationTest` | `mgarcia` and `pnavarro` try to consult | Access denied, and `admin` then sees both attempts |
 
 ## Order of the work
 | Stage | What | Branch |
@@ -110,29 +114,30 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 4. `server`: `IAuditLogRepository` and a repository with the filters, first as a JSON file. `9fbb64a`
 - [x] 5. `server`: `AuditService`. `a000b85`
 - [x] 6. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.1.0-SNAPSHOT`. `fd50454`
-- [x] 6a. `InMemoryAuditLogRepository` replaces the JSON file, and `data/` leaves `.gitignore`, after Marcos' comment in #15.
+- [x] 6a. `InMemoryAuditLogRepository` replaces the JSON file, and `data/` leaves `.gitignore`, after Marcos' comment in #15. `34aa3b0`
 
 Checked by hand on 01/11/2026 with a temporary program, with the repository in memory: logins consulted by `admin`, access
 denied to the other four requesters, every filter and the wrong filters.
 
 **Stage 3: tests of the server** (after stage 2, in `doc/plans/UC19-client.md`)
-- [ ] 7. Design of the tests: Javier approves the test cases, written here.
-- [ ] 8. Tests of `common`.
-- [ ] 9. Tests of `InMemoryAuditLogRepository`.
-- [ ] 10. Tests of `AuditService`, unit and integration.
+- [x] 7. Design of the tests: Javier approves the test cases, written here. `48bb774`
+- [x] 8. Tests of `common`. `f047044`
+- [x] 9. Tests of `InMemoryAuditLogRepository`. `90d448e`
+- [x] 10. Tests of `AuditService`, unit and integration. `7ac4de3`
 
 ## Verification
-- [ ] `mvn -B verify` is green, with every test case above.
-- [ ] Each failed test was checked to fail for the right reason: a test that cannot fail proves nothing.
+- [x] `mvn -B verify` is green, with every test case above.
+- [x] The tests were checked to fail when the code is wrong: 10 errors were introduced on purpose in a temporary copy (the active
+      check, the role check, each registered consultation, the ids, the order, three filters and the copy of the date), and all
+      of them were detected.
 - [ ] The interfaces match the contracts: `register(action)` and `getActivityLog(requester, filters)` of section 6 of #8, once
       it is updated.
-- [ ] Storing an activity has effect and it can be consulted by an administrator, and only by one (#15).
+- [x] Storing an activity has effect and it can be consulted by an administrator, and only by one (#15).
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** stage 2: push this branch when the member asks (rule 8), a member creates `feature/UC19-client` from it, and the
-  agent writes `doc/plans/UC19-client.md`. Then step 7 here.
+- **Next step:** stage 4, on `feature/UC19-client`: merge this branch and write the tests of the client.
 - **Open questions:**
   - The points of the design above.
   - Meeting 6: persistence. The audit log and the users are in memory, and everything is lost on closing.
