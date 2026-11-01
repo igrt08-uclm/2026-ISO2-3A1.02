@@ -37,8 +37,8 @@ Answered in the comments of #13 by David (Requirements), Denis (Design) and Adam
 - **Q:** Who writes the tests? **A:** Adam designs and writes them after the implementation, on this branch; the agent
   writes no JUnit tests (Javier).
 - **Q:** What does `save` do with an account without a username? **A:** It rejects it, because it left the repository
-  unusable (found by Adam, fix approved by Javier). As Adam's laptop is being repaired, Javier writes the test of this
-  fix for now.
+  unusable (found by Adam, fix approved by Javier). As Adam's laptop is being repaired, the agent writes the test of this
+  fix at Javier's request; Adam reviews it when he can.
 
 ## Files
 | File | Action | What |
@@ -102,8 +102,7 @@ To try it:
 
 ## Status
 - **In progress:** nothing
-- **Next step:** Javier adds the test of the fix in `save` to `InMemoryUserAccountRepositoryTest`. Then open the pull
-  request to `develop` with `Closes #13` when the member asks (rule 8), for a member's review.
+- **Next step:** open the pull request to `develop` with `Closes #13` when the member asks (rule 8), for a member's review.
 - **Open questions:** none for the implementation. For #12 *UC22 – Client (module v1.0.0)*: who creates
   `AuthenticationService`, because `client` only depends on `common`.
 - **Last update:** 01/11/2026, Javier
