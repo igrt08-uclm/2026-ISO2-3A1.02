@@ -86,7 +86,7 @@ Messages:
 | `client/src/main/java/es/uclm/esi/iso2/client/Main.java` | change | one `AuditService`, shared with `AuthenticationService`, and the change to the audit screen |
 | `server/src/main/java/es/uclm/esi/iso2/server/access/service/AuditRecorderSimulator.java` | delete | `AuditService` replaces it (D-023) |
 | `client/pom.xml` | change | version `1.1.0-SNAPSHOT` |
-| `client/src/test/java/…/presentation/IU_AuditTest.java` and `IU_WelcomeTest.java` | create, change | stage 4 |
+| `client/src/test/java/…/presentation/IU_AuditTest.java`, `FakeAuditService.java` and `IU_WelcomeTest.java` | create, change | stage 4 |
 
 `IU_Audit` only imports `common` and Swing, never `server`, like the other screens.
 
@@ -136,7 +136,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 **Stage 4: tests of the client** (after stage 3)
 - [x] 8. `git merge` of `feature/UC19-server`. `796f093`
-- [ ] 9. Design of the tests: Javier approves the test cases, written here.
+- [x] 9. Design of the tests: Javier approves the test cases, written here. `606da98`
 - [ ] 10. Tests of `IU_Audit` and `IU_Welcome`.
 
 ## How to run it
@@ -144,7 +144,9 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 `java -cp "common/target/classes;server/target/classes;client/target/classes" es.uclm.esi.iso2.client.Main`
 
 ## Verification
-- [ ] `mvn -B verify` is green.
+- [x] `mvn -B verify` is green.
+- [x] The tests were checked to fail when the code is wrong: 12 errors were introduced on purpose in a temporary copy (filters,
+      buttons, messages and the check of the role), and all of them were detected.
 - [x] The system administrator can check the registry and filter it by who, what, when and which patient (#14).
 - [x] A user who is not an administrator does not see the option, and the server rejects the request (#15).
 - [x] `IU_Audit` and `IU_Welcome` only import `common` and Swing, never `server`.
@@ -152,8 +154,9 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 9
-- **Next step:** Javier approves the test cases (step 9).
+- **In progress:** nothing
+- **Next step:** after #15 *UC19 – Server (module v1.1.0)* is merged, open the pull request to `develop` with `Closes #14` when the
+  member asks (rule 8).
 - **Open questions:**
   - Design (Marcos and Denis): the answer about the access check, in #15 *UC19 – Server (module v1.1.0)*.
   - The audit log is in memory, so it is lost on closing. Persistence is discussed in Meeting 6.
