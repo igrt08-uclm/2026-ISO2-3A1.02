@@ -122,15 +122,15 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] After the user enters the credentials, the welcome screen with their roles or an error is shown (#12).
 - [x] `IU_Login` and `IU_Welcome` only import `common` and Swing, never `server`.
 - [x] Each row of *Usability decisions* is checked in the running application.
-- [ ] Adam's tests are in `client/src/test/java/` and pass. **The sub-issue is not done before this.**
+- [x] Adam's tests are in `client/src/test/java/` and pass. **The sub-issue is not done before this.**
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** push when the member asks (rule 8). Then Adam adds his tests in `client/src/test/java/`, and the pull
-  request is opened after #13 *UC22 – Server (module v1.0.0)* is merged.
+- **Next step:** open the pull request to `develop` with `Closes #12` when the member asks (rule 8), after
+  #13 *UC22 – Server (module v1.0.0)* is merged.
 - **Open questions:**
   - Meeting 6: final GUI technology (Swing for now).
   - Design (Marcos and Denis): add `IU_Welcome`, `Main` and the dependency of `client` on `server` to the diagram.
   - Requirements: #12 still describes the recover password link; mark it as postponed.
-- **Last update:** 31/10/2026, Javier
+- **Last update:** 01/11/2026, Javier
