@@ -114,7 +114,10 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 3. `common`: `AccessDeniedException` and `IAuditService`. `e4dd5ff`
 - [x] 4. `server`: `IAuditLogRepository` and `JsonAuditLogRepository`, with the filters, and `data/` in `.gitignore`. `9fbb64a`
 - [x] 5. `server`: `AuditService`. `a000b85`
-- [ ] 6. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.1.0-SNAPSHOT`.
+- [x] 6. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.1.0-SNAPSHOT`. `fd50454`
+
+Checked by hand on 01/11/2026 with a temporary program: logins saved in the file and consulted by `admin`, access denied to
+the other four requesters, every filter, the wrong filters, the data after a restart, and a damaged file, which is not overwritten.
 
 **Stage 3: tests of the server** (after stage 2, in `doc/plans/UC19-client.md`)
 - [ ] 7. Design of the tests: Javier approves the test cases, written here.
@@ -131,8 +134,9 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 6
-- **Next step:** a member creates `feature/UC19-server` from #15; then step 1
+- **In progress:** nothing
+- **Next step:** stage 2: push this branch when the member asks (rule 8), a member creates `feature/UC19-client` from it, and the
+  agent writes `doc/plans/UC19-client.md`. Then step 7 here.
 - **Open questions:**
   - The points of the design above.
   - Meeting 6: how to store the records and the users. The JSON file is temporary, and the users are still in memory.
