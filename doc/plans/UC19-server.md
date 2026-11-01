@@ -123,7 +123,7 @@ denied to the other four requesters, every filter and the wrong filters.
 - [x] 7. Design of the tests: Javier approves the test cases, written here. `48bb774`
 - [x] 8. Tests of `common`. `f047044`
 - [x] 9. Tests of `InMemoryAuditLogRepository`. `90d448e`
-- [ ] 10. Tests of `AuditService`, unit and integration.
+- [x] 10. Tests of `AuditService`, unit and integration. `7ac4de3`
 
 ## Verification
 - [x] `mvn -B verify` is green, with every test case above.
