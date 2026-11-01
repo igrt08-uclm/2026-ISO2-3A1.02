@@ -101,7 +101,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 1. This plan. `49e0492`
 - [x] 2. `IU_Audit`: filters, table and layout. `ff486b7`
 - [x] 3. `IU_Audit`: search, messages and shortcuts. `c2410c1`
-- [ ] 4. `IU_Welcome`: *View audit log*, only for administrators.
+- [x] 4. `IU_Welcome`: *View audit log*, only for administrators. `8606152`
 - [ ] 5. `Main`: `AuditService`, the audit screen, and `AuditRecorderSimulator` deleted.
 - [ ] 6. `client/pom.xml`: version `1.1.0-SNAPSHOT`.
 - [ ] 7. Javier checks the application by hand, and the usability decisions are ticked.
@@ -124,7 +124,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 4
+- **In progress:** step 5
 - **Next step:** Javier approves this plan; then step 1
 - **Open questions:**
   - Design (Marcos and Denis): the answer about the access check, in #15 *UC19 – Server (module v1.1.0)*.
