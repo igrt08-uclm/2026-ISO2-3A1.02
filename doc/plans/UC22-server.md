@@ -93,13 +93,13 @@ To try it:
 - [x] The SSO validates the username and password, and `login` returns the `UserAccount` or an error (#13).
 - [x] The interfaces match the contracts: `login(username, password)` of section 6 of #8.
 - [x] Each failed and successful login is registered in the audit.
-- [ ] Adam's unit and integration tests are in `server/src/test/java/` and pass. **The sub-issue is not done before this.**
+- [x] Adam's unit and integration tests are in `server/src/test/java/` and `common/src/test/java/` and pass.
+      **The sub-issue is not done before this.**
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** Adam adds his tests in `server/src/test/java/` on this branch. The push and the pull request are done
-  when the member asks (rule 8).
+- **Next step:** open the pull request to `develop` with `Closes #13` when the member asks (rule 8), for a member's review.
 - **Open questions:** none for the implementation. For #12 *UC22 – Client (module v1.0.0)*: who creates
   `AuthenticationService`, because `client` only depends on `common`.
-- **Last update:** 31/10/2026, Javier
+- **Last update:** 01/11/2026, Javier
