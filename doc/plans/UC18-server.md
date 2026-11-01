@@ -71,7 +71,7 @@ versions of the `pom.xml` files is solved then.
 One step, one commit, one at a time. Tick each step with the hash of its commit (green `mvn -B verify`).
 
 **Stage 1: implementation of the server**
-- [ ] 1. This plan.
+- [x] 1. This plan. `9df81dc`
 - [ ] 2. `common`: `Permission`, and the permissions of `Role`.
 - [ ] 3. `common`: `AccessDeniedException` and `IRoleManagementService`.
 - [ ] 4. `server`: `IPermissionRepository` and `InMemoryPermissionRepository`.
@@ -96,7 +96,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 2
 - **Next step:** Javier approves this plan; then step 1
 - **Open questions:**
   - The points of the design above.
