@@ -78,7 +78,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 5. `server`: `IRoleRepository` and `InMemoryRoleRepository`. `05125e0`
 - [x] 6. `server`: `findAll()` in `IUserAccountRepository`, its implementation and the test double. `d06e57b`
 - [x] 7. `server`: `RoleManagementService`: `getRoles`, `getPermissions` and `getAvailablePermissions`. `acda231`
-- [ ] 8. `server`: `RoleManagementService`: the four operations of change, the checks and the audit.
+- [x] 8. `server`: `RoleManagementService`: the four operations of change, the checks and the audit. `3e11094`
 - [ ] 9. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.2.0-SNAPSHOT`.
 - [ ] 10. Check by hand with a temporary program, and write the result here.
 
@@ -96,7 +96,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 8
+- **In progress:** step 9
 - **Next step:** Javier approves this plan; then step 1
 - **Open questions:**
   - The points of the design above.
