@@ -112,7 +112,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 1. This plan. `93c1b6c`
 - [x] 2. `common`: `AuditLog`. `dbe98ad`
 - [x] 3. `common`: `AccessDeniedException` and `IAuditService`. `e4dd5ff`
-- [ ] 4. `server`: `IAuditLogRepository` and `JsonAuditLogRepository`, with the filters, and `data/` in `.gitignore`.
+- [x] 4. `server`: `IAuditLogRepository` and `JsonAuditLogRepository`, with the filters, and `data/` in `.gitignore`. `9fbb64a`
 - [ ] 5. `server`: `AuditService`.
 - [ ] 6. `pom.xml`, `common/pom.xml` and `server/pom.xml`: version `1.1.0-SNAPSHOT`.
 
@@ -131,7 +131,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 4
+- **In progress:** step 5
 - **Next step:** a member creates `feature/UC19-server` from #15; then step 1
 - **Open questions:**
   - The points of the design above.
