@@ -4,6 +4,7 @@ import es.uclm.esi.iso2.common.access.domain.Role;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** Keeps the accounts in memory, preloaded with the test users agreed in #13. */
 public class InMemoryUserAccountRepository implements IUserAccountRepository {
@@ -40,6 +41,7 @@ public class InMemoryUserAccountRepository implements IUserAccountRepository {
 
     @Override
     public void save(UserAccount user) {
+        Objects.requireNonNull(user.getUsername(), "username");
         users.removeIf(existing -> existing.getUsername().equals(user.getUsername()));
         users.add(user);
     }
