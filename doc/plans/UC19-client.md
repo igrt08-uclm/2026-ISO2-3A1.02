@@ -98,7 +98,7 @@ and it is merged here before stage 4.
 One step, one commit, one at a time. Tick each step with the hash of its commit (green `mvn -B verify`).
 
 **Stage 2: implementation of the client**
-- [ ] 1. This plan.
+- [x] 1. This plan. `49e0492`
 - [ ] 2. `IU_Audit`: filters, table and layout.
 - [ ] 3. `IU_Audit`: search, messages and shortcuts.
 - [ ] 4. `IU_Welcome`: *View audit log*, only for administrators.
@@ -124,7 +124,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 2
 - **Next step:** Javier approves this plan; then step 1
 - **Open questions:**
   - Design (Marcos and Denis): the answer about the access check, in #15 *UC19 – Server (module v1.1.0)*.
