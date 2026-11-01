@@ -19,6 +19,10 @@
       <artifactId>common</artifactId>
     </dependency>
     <dependency>
+      <groupId>es.uclm.esi.iso2</groupId>
+      <artifactId>server</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>

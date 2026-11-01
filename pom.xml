@@ -28,6 +28,11 @@
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
       <dependency>
+        <groupId>es.uclm.esi.iso2</groupId>
+        <artifactId>server</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>6.1.3</version>
