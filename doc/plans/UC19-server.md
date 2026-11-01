@@ -109,7 +109,7 @@ The pull requests follow the same order as in UC22: first the server, and the cl
 One step, one commit, one at a time. Tick each step with the hash of its commit (green `mvn -B verify`).
 
 **Stage 1: implementation of the server**
-- [ ] 1. This plan.
+- [x] 1. This plan. `93c1b6c`
 - [ ] 2. `common`: `AuditLog`.
 - [ ] 3. `common`: `AccessDeniedException` and `IAuditService`.
 - [ ] 4. `server`: `IAuditLogRepository` and `JsonAuditLogRepository`, with the filters, and `data/` in `.gitignore`.
@@ -131,7 +131,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 2
 - **Next step:** a member creates `feature/UC19-server` from #15; then step 1
 - **Open questions:**
   - The points of the design above.
