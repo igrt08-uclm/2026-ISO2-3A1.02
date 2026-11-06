@@ -100,6 +100,34 @@ Every row was checked by Javier in the running application on 06/11/2026.
 `IU_ManageRoles` only imports `common` and Swing, never `server`. The confirmation is received in the constructor, so that the tests do
 not open a window: `Main` passes a dialog with *OK* and *Cancel*, and the tests pass an answer.
 
+## Test cases (design of the tests)
+Approved by Javier on 06/11/2026 (step 11). Same style as Adam's tests: `@DisplayName`, *Arrange, Act,
+Assert*, `@ParameterizedTest` for the similar cases, a hand-written test double (`FakeRoleManagementService`), and the
+controls found through `getComponents()`. The panels are only built, never shown, so the tests run in the CI, which has
+no display. The confirmation is a function that the test passes, so no window is opened.
+
+| Class | Case | Expected result |
+|---|---|---|
+| `IU_ManageRolesTest` | Open the screen | The users and the roles come from the service in its order, the first user and the first role are selected, and their roles and permissions are shown |
+| `IU_ManageRolesTest` | The texts of the lists | `username - full name` for the users, the name for the roles, and `CODE - description` for the permissions, not the ids |
+| `IU_ManageRolesTest` | Select another user; another role | Its roles; its permissions (`selectUser`, `displayRoles`, `selectRole`, `selectPermissions`) |
+| `IU_ManageRolesTest` | Nothing selected in a list; something selected | *Revoke selected* is disabled; it is enabled |
+| `IU_ManageRolesTest` | Assign and revoke a role, and a permission, with *OK* | The service receives the logged user and the selected values, the list shows the new state, the same user or role stays selected, and the message is green with ✔ (`showOperationResultSuccess`) |
+| `IU_ManageRolesTest` | The question of each of the four operations | `Assign the role X to user?`, `Revoke the role X from user?`, and the same with the permissions |
+| `IU_ManageRolesTest` | *Cancel*, in the four operations | The service is not called, and there is no message |
+| `IU_ManageRolesTest` | Assign something already held; revoke something no longer held | No question, the service is not called, and `Nothing changed: …` |
+| `IU_ManageRolesTest` | `AccessDeniedException`, `IllegalStateException`, `IllegalArgumentException` | The red message of the table *Messages*, with ⚠, and the lists show the state of the server |
+| `IU_ManageRolesTest` | After an error, a change that works | The green message replaces the red one |
+| `IU_ManageRolesTest` | Press *Back* | Runs the action for going back |
+| `IU_ManageRolesTest` | The shortcuts | Alt+U and Alt+P on the tabs, and Alt+A, Alt+R and Alt+B on the buttons |
+| `IU_WelcomeTest` | A user with `MANAGE_ROLES` | Sees *Manage roles*, which runs its action; an administrator sees *View audit log*, *Manage roles* and *Log out*, in that order |
+| `IU_WelcomeTest` | A user without `MANAGE_ROLES` | Does not see it |
+| `IU_WelcomeTest` | Without the action | Not even a user with `MANAGE_ROLES` sees it |
+| `IU_WelcomeTest` | The constructors of UC22 and UC19 | Do not show it |
+
+New files, in `client/src/test/java/…/access/presentation`: `IU_ManageRolesTest` and `FakeRoleManagementService`.
+`IU_WelcomeTest` gets the new tests; the existing ones do not change.
+
 ## Order of the work
 This plan covers stages 2 and 4 of `doc/plans/UC18-server.md`. Step 11 of the server goes first, as this screen needs it.
 
@@ -118,9 +146,10 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 9. Javier checks the application by hand, and the usability decisions are ticked. 06/11/2026, Javier
 
 **Stage 4: tests of the client** (after stage 3)
-- [ ] 10. `git merge` of `feature/UC18-server`.
+- [x] 10. `git merge` of `feature/UC18-server`. `a9baa9f`
 - [ ] 11. Design of the tests: Javier approves the test cases, written here.
-- [ ] 12. Tests of `IU_ManageRoles` and `IU_Welcome`.
+- [ ] 12. Tests of `IU_ManageRoles`, with `FakeRoleManagementService`.
+- [ ] 13. Tests of `IU_Welcome`, and the check that the tests fail when the code is wrong.
 
 ## How to run it
 `mvn -B package -DskipTests`, and then, on Windows:
@@ -136,7 +165,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** stage 3, steps 12 and 13 of `doc/plans/UC18-server.md`, on `feature/UC18-server`; then step 10 here
+- **In progress:** step 11, design of the tests
+- **Next step:** Javier approves the design of the tests; then step 12
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
 - **Last update:** 06/11/2026, Javier: stage 2 done
