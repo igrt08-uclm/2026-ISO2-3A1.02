@@ -1,5 +1,6 @@
 package es.uclm.esi.iso2.client.access.presentation;
 
+import es.uclm.esi.iso2.common.access.domain.Permission;
 import es.uclm.esi.iso2.common.access.domain.Role;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import java.awt.Component;
@@ -7,6 +8,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,13 +18,23 @@ import javax.swing.JPanel;
 public class IU_Welcome extends JPanel {
     // Temporary: with UC18 this check uses the permissions of the role.
     private static final String ADMINISTRATOR_ROLE = "SYSTEM_ADMINISTRATOR";
-    private static final int COLUMNS = 2;
+    private static final String MANAGE_ROLES = "MANAGE_ROLES";
+    private static final int COLUMNS = 3;
 
     public IU_Welcome(UserAccount user, Runnable onLogout) {
         this(user, onLogout, null);
     }
 
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit) {
+        this(user, onLogout, onViewAudit, List.of(), null);
+    }
+
+    /**
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -42,7 +54,17 @@ public class IU_Welcome extends JPanel {
             btnViewAudit.addActionListener(event -> onViewAudit.run());
             addButton(btnViewAudit, 0);
         }
-        addButton(btnLogout, 1);
+        if (onManageRoles != null && hasPermission(permissions, MANAGE_ROLES)) {
+            JButton btnManageRoles = new JButton("Manage roles");
+            btnManageRoles.setMnemonic('M');
+            btnManageRoles.addActionListener(event -> onManageRoles.run());
+            addButton(btnManageRoles, 1);
+        }
+        addButton(btnLogout, 2);
+    }
+
+    private static boolean hasPermission(List<Permission> permissions, String code) {
+        return permissions.stream().anyMatch(permission -> code.equals(permission.getCode()));
     }
 
     private static boolean isAdministrator(UserAccount user) {
@@ -55,7 +77,7 @@ public class IU_Welcome extends JPanel {
         constraints.gridy = 3;
         constraints.weightx = column == 0 ? 1 : 0;
         constraints.anchor = GridBagConstraints.LINE_END;
-        constraints.insets = new Insets(24, 0, 0, column == 0 ? 8 : 0);
+        constraints.insets = new Insets(24, 0, 0, column < COLUMNS - 1 ? 8 : 0);
         add(button, constraints);
     }
 
