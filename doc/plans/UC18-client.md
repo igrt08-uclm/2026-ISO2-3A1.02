@@ -26,6 +26,11 @@ Answered by Javier on 02/11/2026 and 06/11/2026. The decisions of the server are
   with an icon if it fails. The lists are updated at once.
 - **Q:** GUI technology and language? **A:** Swing and English, as in UC22 and UC19.
 - **Q:** Who writes the tests? **A:** The agent, in Adam's style, after Javier approves their design (stage 4).
+- **Q:** How does the welcome screen know whether the user has `MANAGE_ROLES`? **A:** The roles of the logged user do not
+  carry their permissions, because they are kept in `IRoleRepository`. `Main` reads them with `getPermissions(username)` and
+  passes them to a new constructor of `IU_Welcome`; the other constructors do not change (step 6).
+- **Q:** Where are the error messages? **A:** In step 3 instead of step 5, because `assignRole` throws
+  `AccessDeniedException` and the code does not compile without handling it. Step 5 added the rest.
 
 ## Screens (low-fidelity prototype)
 Tab *User roles*:
@@ -81,6 +86,8 @@ Messages:
 | Gestalt: proximity | The selection on the left and the current state on the right, each label right above its control |
 | Colour and readability | Errors and successes have an icon and text, not only colour |
 
+Every row was checked by Javier in the running application on 06/11/2026.
+
 ## Files
 | File | Action | What |
 |---|---|---|
@@ -107,8 +114,8 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 5. `IU_ManageRoles`: confirmation, messages and shortcuts. `2c7c24f`
 - [x] 6. `IU_Welcome`: *Manage roles*, only for whoever has `MANAGE_ROLES`. `bd5fea9`
 - [x] 7. `Main`: `RoleManagementService`, the shared repositories and the new screen. `2eaa585`
-- [ ] 8. `client/pom.xml`: version `1.2.0-SNAPSHOT`.
-- [ ] 9. Javier checks the application by hand, and the usability decisions are ticked.
+- [x] 8. `client/pom.xml`: version `1.2.0-SNAPSHOT`. `bc6e7ab`
+- [x] 9. Javier checks the application by hand, and the usability decisions are ticked. 06/11/2026, Javier
 
 **Stage 4: tests of the client** (after stage 3)
 - [ ] 10. `git merge` of `feature/UC18-server`.
@@ -120,16 +127,16 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 `java -cp "common/target/classes;server/target/classes;client/target/classes" es.uclm.esi.iso2.client.Main`
 
 ## Verification
-- [ ] `mvn -B verify` is green.
-- [ ] The system administrator can assign and revoke roles and permissions, and the changes take effect at once (#16).
-- [ ] A user without `MANAGE_ROLES` does not see the option, and the server rejects the request.
-- [ ] `IU_ManageRoles` and `IU_Welcome` only import `common` and Swing, never `server`.
-- [ ] Each row of *Usability decisions* is checked in the running application.
+- [x] `mvn -B verify` is green.
+- [x] The system administrator can assign and revoke roles and permissions, and the changes take effect at once (#16).
+- [x] A user without `MANAGE_ROLES` does not see the option, and the server rejects the request.
+- [x] `IU_ManageRoles` and `IU_Welcome` only import `common` and Swing, never `server`.
+- [x] Each row of *Usability decisions* is checked in the running application.
 - [ ] The tests were checked to fail when the code is wrong.
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 8, `client/pom.xml`: version `1.2.0-SNAPSHOT`
-- **Next step:** step 2, `IU_ManageRoles` in `client/.../access/presentation/`: the two tabs, their lists and buttons
+- **In progress:** nothing
+- **Next step:** stage 3, steps 12 and 13 of `doc/plans/UC18-server.md`, on `feature/UC18-server`; then step 10 here
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
-- **Last update:** 06/11/2026, Javier
+- **Last update:** 06/11/2026, Javier: stage 2 done
