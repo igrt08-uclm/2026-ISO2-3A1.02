@@ -80,6 +80,11 @@ public class IU_ManageRoles extends JPanel {
         lstUserRoles.addListSelectionListener(event -> btnRevokeRole.setEnabled(!lstUserRoles.isSelectionEmpty()));
         btnAssignRole.addActionListener(event -> assignSelectedRole());
         btnRevokeRole.addActionListener(event -> revokeSelectedRole());
+        cmbRole.addActionListener(event -> selectRole((Role) cmbRole.getSelectedItem()));
+        lstRolePermissions.addListSelectionListener(
+                event -> btnRevokePermission.setEnabled(!lstRolePermissions.isSelectionEmpty()));
+        btnAssignPermission.addActionListener(event -> assignSelectedPermission());
+        btnRevokePermission.addActionListener(event -> revokeSelectedPermission());
 
         JLabel lblTitle = new JLabel("Manage roles and permissions");
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
@@ -92,6 +97,47 @@ public class IU_ManageRoles extends JPanel {
         add(tabs, BorderLayout.CENTER);
         add(buildFooter(), BorderLayout.SOUTH);
         loadUserRoles(null);
+        loadRolePermissions(null);
+    }
+
+    public void selectRole(Role role) {
+        if (role != null) {
+            selectPermissions(role.getPermissions());
+        }
+    }
+
+    public void selectPermissions(List<Permission> permissions) {
+        rolePermissionsModel.clear();
+        rolePermissionsModel.addAll(permissions);
+    }
+
+    /** Reads the roles and the permissions again, and keeps the role that was selected. */
+    private void loadRolePermissions(String selectedRoleId) {
+        List<Role> roles = roleService.getAvailableRoles();
+        cmbRole.setModel(new DefaultComboBoxModel<>(roles.toArray(new Role[0])));
+        cmbPermissionToAssign.setModel(
+                new DefaultComboBoxModel<>(roleService.getAvailablePermissions().toArray(new Permission[0])));
+        roles.stream().filter(role -> role.getId().equals(selectedRoleId)).findFirst()
+                .ifPresent(cmbRole::setSelectedItem);
+        selectRole((Role) cmbRole.getSelectedItem());
+    }
+
+    private void assignSelectedPermission() {
+        Role role = (Role) cmbRole.getSelectedItem();
+        Permission permission = (Permission) cmbPermissionToAssign.getSelectedItem();
+        if (role != null && permission != null) {
+            change(() -> roleService.assignPermission(requester, role, permission),
+                    () -> loadRolePermissions(role.getId()));
+        }
+    }
+
+    private void revokeSelectedPermission() {
+        Role role = (Role) cmbRole.getSelectedItem();
+        Permission permission = lstRolePermissions.getSelectedValue();
+        if (role != null && permission != null) {
+            change(() -> roleService.revokePermission(requester, role, permission),
+                    () -> loadRolePermissions(role.getId()));
+        }
     }
 
     public void selectUser(UserAccount user) {

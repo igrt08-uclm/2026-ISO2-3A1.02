@@ -102,7 +102,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 **Stage 2: implementation of the client**
 - [x] 1. This plan. `7c47a58`
 - [x] 2. `IU_ManageRoles`: the two tabs, their lists and buttons, and the layout. `adb5f88`
-- [ ] 3. `IU_ManageRoles`: tab *User roles*: load the lists, assign, revoke and refresh.
+- [x] 3. `IU_ManageRoles`: tab *User roles*: load the lists, assign, revoke and refresh. `8c7caa3`
 - [ ] 4. `IU_ManageRoles`: tab *Role permissions*: the same with the permissions.
 - [ ] 5. `IU_ManageRoles`: confirmation, messages and shortcuts.
 - [ ] 6. `IU_Welcome`: *Manage roles*, only for whoever has `MANAGE_ROLES`.
@@ -129,7 +129,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 3, `IU_ManageRoles`: tab *User roles*: load the lists, assign, revoke and refresh
+- **In progress:** step 4, `IU_ManageRoles`: tab *Role permissions*: the same with the permissions
 - **Next step:** step 2, `IU_ManageRoles` in `client/.../access/presentation/`: the two tabs, their lists and buttons
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
 - **Last update:** 06/11/2026, Javier
