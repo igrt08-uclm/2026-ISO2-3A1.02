@@ -59,6 +59,65 @@ class IU_WelcomeTest {
         assertEquals(1, logouts[0]);
     }
 
+    @Test
+    @DisplayName("An administrator sees View audit log, which runs onViewAudit")
+    void administratorSeesViewAuditLog() {
+        // Arrange
+        UserAccount admin = new UserAccount("admin", "Laura Sánchez Ruiz", "laura.sanchez@sescam.test", true,
+                List.of(new Role("SYSTEM_ADMINISTRATOR", "System administrator", "Configures and manages the system")));
+        int[] views = {0};
+        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> views[0]++);
+
+        // Act
+        buttonWithText(welcome, "View audit log").doClick();
+
+        // Assert
+        assertEquals(1, views[0]);
+    }
+
+    @Test
+    @DisplayName("A user who is not an administrator does not see View audit log")
+    void otherUsersDoNotSeeViewAuditLog() {
+        // Act
+        IU_Welcome welcome = new IU_Welcome(mgarcia, () -> { }, () -> { });
+
+        // Assert
+        assertEquals(List.of("Log out"), buttonTexts(welcome));
+    }
+
+    @Test
+    @DisplayName("Without the action, not even an administrator sees View audit log")
+    void withoutTheActionNobodySeesViewAuditLog() {
+        // Arrange
+        UserAccount admin = new UserAccount("admin", "Laura Sánchez Ruiz", "laura.sanchez@sescam.test", true,
+                List.of(new Role("SYSTEM_ADMINISTRATOR", "System administrator", "Configures and manages the system")));
+
+        // Act
+        IU_Welcome welcome = new IU_Welcome(admin, () -> { });
+
+        // Assert
+        assertEquals(List.of("Log out"), buttonTexts(welcome));
+    }
+
+    private static List<String> buttonTexts(IU_Welcome welcome) {
+        List<String> texts = new ArrayList<>();
+        for (Component component : welcome.getComponents()) {
+            if (component instanceof JButton button) {
+                texts.add(button.getText());
+            }
+        }
+        return texts;
+    }
+
+    private static JButton buttonWithText(IU_Welcome welcome, String text) {
+        for (Component component : welcome.getComponents()) {
+            if (component instanceof JButton button && text.equals(button.getText())) {
+                return button;
+            }
+        }
+        throw new AssertionError("No \"" + text + "\" button found");
+    }
+
     private static List<String> labelTexts(IU_Welcome welcome) {
         List<String> texts = new ArrayList<>();
         for (Component component : welcome.getComponents()) {

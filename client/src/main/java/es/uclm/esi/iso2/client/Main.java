@@ -1,12 +1,15 @@
 package es.uclm.esi.iso2.client;
 
+import es.uclm.esi.iso2.client.access.presentation.IU_Audit;
 import es.uclm.esi.iso2.client.access.presentation.IU_Login;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
 import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import es.uclm.esi.iso2.server.access.integration.AuthenticatorSystemSimulator;
+import es.uclm.esi.iso2.server.access.persistence.IUserAccountRepository;
+import es.uclm.esi.iso2.server.access.persistence.InMemoryAuditLogRepository;
 import es.uclm.esi.iso2.server.access.persistence.InMemoryUserAccountRepository;
-import es.uclm.esi.iso2.server.access.service.AuditRecorderSimulator;
+import es.uclm.esi.iso2.server.access.service.AuditService;
 import es.uclm.esi.iso2.server.access.service.AuthenticationService;
 import java.awt.Container;
 import javax.swing.JFrame;
@@ -19,8 +22,11 @@ public final class Main {
     private static final String APPLICATION_TITLE = "Radiodiagnostics System";
 
     private final JFrame window = new JFrame(APPLICATION_TITLE);
-    private final IAuthenticationService authenticationService = new AuthenticationService(
-            new AuthenticatorSystemSimulator(), new InMemoryUserAccountRepository(), new AuditRecorderSimulator());
+    private final IUserAccountRepository userAccountRepository = new InMemoryUserAccountRepository();
+    private final AuditService auditService =
+            new AuditService(new InMemoryAuditLogRepository(), userAccountRepository);
+    private final IAuthenticationService authenticationService =
+            new AuthenticationService(new AuthenticatorSystemSimulator(), userAccountRepository, auditService);
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().start());
@@ -31,7 +37,6 @@ public final class Main {
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
         showLogin();
-        window.setLocationRelativeTo(null);
         window.setVisible(true);
     }
 
@@ -50,11 +55,17 @@ public final class Main {
 
     private void showWelcome(UserAccount user) {
         window.setTitle(APPLICATION_TITLE);
-        show(new IU_Welcome(user, this::showLogin));
+        show(new IU_Welcome(user, this::showLogin, () -> showAudit(user)));
+    }
+
+    private void showAudit(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Audit log");
+        show(new IU_Audit(auditService, user.getUsername(), () -> showWelcome(user)));
     }
 
     private void show(Container screen) {
         window.setContentPane(screen);
         window.pack();
+        window.setLocationRelativeTo(null);
     }
 }
