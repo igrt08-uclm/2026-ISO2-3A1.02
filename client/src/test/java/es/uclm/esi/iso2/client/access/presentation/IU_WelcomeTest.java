@@ -3,6 +3,7 @@ package es.uclm.esi.iso2.client.access.presentation;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import es.uclm.esi.iso2.common.access.domain.Permission;
 import es.uclm.esi.iso2.common.access.domain.Role;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import java.awt.Component;
@@ -20,6 +21,9 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("IU_Welcome")
 class IU_WelcomeTest {
+    private static final Permission MANAGE_ROLES =
+            new Permission("MANAGE_ROLES", "Assign roles to users and permissions to roles");
+
     private UserAccount mgarcia;
 
     @BeforeEach
@@ -97,6 +101,72 @@ class IU_WelcomeTest {
 
         // Assert
         assertEquals(List.of("Log out"), buttonTexts(welcome));
+    }
+
+    // The permissions come from the server, because the roles of the logged user do not carry them (UC18).
+    @Test
+    @DisplayName("A user with MANAGE_ROLES sees Manage roles, which runs onManageRoles")
+    void userWithManageRolesSeesManageRoles() {
+        // Arrange
+        int[] opened = {0};
+        IU_Welcome welcome = new IU_Welcome(mgarcia, () -> { }, () -> { }, List.of(MANAGE_ROLES), () -> opened[0]++);
+
+        // Act
+        buttonWithText(welcome, "Manage roles").doClick();
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("Manage roles", "Log out"), buttonTexts(welcome)),
+                () -> assertEquals(1, opened[0]));
+    }
+
+    @Test
+    @DisplayName("An administrator sees View audit log, Manage roles and Log out, in that order")
+    void administratorSeesTheThreeButtonsInOrder() {
+        // Act
+        IU_Welcome welcome = new IU_Welcome(admin(), () -> { }, () -> { }, List.of(MANAGE_ROLES), () -> { });
+
+        // Assert
+        assertEquals(List.of("View audit log", "Manage roles", "Log out"), buttonTexts(welcome));
+    }
+
+    @Test
+    @DisplayName("A user without MANAGE_ROLES does not see Manage roles")
+    void userWithoutManageRolesDoesNotSeeIt() {
+        // Act
+        IU_Welcome welcome = new IU_Welcome(mgarcia, () -> { }, () -> { }, List.of(), () -> { });
+
+        // Assert
+        assertEquals(List.of("Log out"), buttonTexts(welcome));
+    }
+
+    @Test
+    @DisplayName("Without the action, not even a user with MANAGE_ROLES sees Manage roles")
+    void withoutTheActionNobodySeesManageRoles() {
+        // Act
+        IU_Welcome welcome = new IU_Welcome(mgarcia, () -> { }, () -> { }, List.of(MANAGE_ROLES), null);
+
+        // Assert
+        assertEquals(List.of("Log out"), buttonTexts(welcome));
+    }
+
+    // The constructors of UC22 and UC19 keep working as before.
+    @Test
+    @DisplayName("The constructors of UC22 and UC19 do not show Manage roles")
+    void theOlderConstructorsDoNotShowManageRoles() {
+        // Act
+        IU_Welcome login = new IU_Welcome(admin(), () -> { });
+        IU_Welcome audit = new IU_Welcome(admin(), () -> { }, () -> { });
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("Log out"), buttonTexts(login)),
+                () -> assertEquals(List.of("View audit log", "Log out"), buttonTexts(audit)));
+    }
+
+    private static UserAccount admin() {
+        return new UserAccount("admin", "Laura Sánchez Ruiz", "laura.sanchez@sescam.test", true,
+                List.of(new Role("SYSTEM_ADMINISTRATOR", "System administrator", "Configures and manages the system")));
     }
 
     private static List<String> buttonTexts(IU_Welcome welcome) {

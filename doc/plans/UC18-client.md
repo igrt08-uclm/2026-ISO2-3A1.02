@@ -148,8 +148,8 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 **Stage 4: tests of the client** (after stage 3)
 - [x] 10. `git merge` of `feature/UC18-server`. `a9baa9f`
 - [x] 11. Design of the tests: Javier approves the test cases, written here. `3e9f332`
-- [ ] 12. Tests of `IU_ManageRoles`, with `FakeRoleManagementService`.
-- [ ] 13. Tests of `IU_Welcome`, and the check that the tests fail when the code is wrong.
+- [x] 12. Tests of `IU_ManageRoles`, with `FakeRoleManagementService`. `b91e6b2`
+- [x] 13. Tests of `IU_Welcome`, and the check that the tests fail when the code is wrong. Commit *test(UC18): tests of Manage roles in the welcome screen (#16)*
 
 ## How to run it
 `mvn -B package -DskipTests`, and then, on Windows:
@@ -161,11 +161,15 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] A user without `MANAGE_ROLES` does not see the option, and the server rejects the request.
 - [x] `IU_ManageRoles` and `IU_Welcome` only import `common` and Swing, never `server`.
 - [x] Each row of *Usability decisions* is checked in the running application.
-- [ ] The tests were checked to fail when the code is wrong.
+- [x] The tests were checked to fail when the code is wrong: 13 errors were introduced on purpose in a temporary copy,
+      one at a time (no confirmation, the colour of the success message, no refresh, the selected user not kept,
+      *Revoke selected* enabled at the start, a role already held sent again, another requester, the message of the last
+      administrator, the user shown by its id, a missing shortcut, the list of permissions not emptied, and *Manage roles*
+      without the permission or without the action), and all of them were detected.
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 12, tests of `IU_ManageRoles`
-- **Next step:** step 12, `IU_ManageRolesTest` and `FakeRoleManagementService`
+- **In progress:** nothing
+- **Next step:** the pull request of `feature/UC18-server` (#17) first; this one (#16) is a draft until it is merged, and then `develop` is merged here
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
-- **Last update:** 06/11/2026, Javier: stage 2 done
+- **Last update:** 06/11/2026, Javier: stage 4 done

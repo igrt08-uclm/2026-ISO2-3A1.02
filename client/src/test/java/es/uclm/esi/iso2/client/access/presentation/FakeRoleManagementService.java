@@ -43,7 +43,7 @@ class FakeRoleManagementService implements IRoleManagementService {
         nextFailure = failure;
     }
 
-    /** Each change as {@code operation requester role user-or-permission}, e.g. {@code assignRole admin PATIENT mgarcia}. */
+    /** Each change as {@code operation requester role target}, for example {@code assignRole admin PATIENT mgarcia}. */
     List<String> changes() {
         return Collections.unmodifiableList(changes);
     }
