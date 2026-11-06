@@ -114,4 +114,18 @@ class InMemoryUserAccountRepositoryTest {
                 () -> assertNull(repository.findByUsername("nobody")),
                 () -> assertSame(nlopez, repository.findByUsername("nlopez")));
     }
+
+    // findAll is used by UC18 to show the users in a list (#16).
+    @Test
+    @DisplayName("findAll returns the five preloaded users, and the list cannot be modified")
+    void findAllReturnsThePreloadedUsers() {
+        // Act
+        List<UserAccount> users = repository.findAll();
+
+        // Assert
+        List<String> usernames = users.stream().map(UserAccount::getUsername).sorted().toList();
+        assertAll(
+                () -> assertEquals(List.of("admin", "jfernandez", "lmartin", "mgarcia", "pnavarro"), usernames),
+                () -> assertThrows(UnsupportedOperationException.class, users::clear));
+    }
 }

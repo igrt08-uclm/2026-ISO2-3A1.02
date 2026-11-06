@@ -40,6 +40,11 @@ public class InMemoryUserAccountRepository implements IUserAccountRepository {
     }
 
     @Override
+    public List<UserAccount> findAll() {
+        return List.copyOf(users);
+    }
+
+    @Override
     public void save(UserAccount user) {
         Objects.requireNonNull(user.getUsername(), "username");
         users.removeIf(existing -> existing.getUsername().equals(user.getUsername()));

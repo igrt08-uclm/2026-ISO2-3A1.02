@@ -3,6 +3,7 @@ package es.uclm.esi.iso2.server.access.service;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import es.uclm.esi.iso2.server.access.persistence.IUserAccountRepository;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Test double of {@link IUserAccountRepository} backed by a map. It counts the calls to {@code save}. */
@@ -23,6 +24,11 @@ class FakeUserAccountRepository implements IUserAccountRepository {
     @Override
     public UserAccount findByUsername(String username) {
         return accounts.get(username);
+    }
+
+    @Override
+    public List<UserAccount> findAll() {
+        return List.copyOf(accounts.values());
     }
 
     @Override
