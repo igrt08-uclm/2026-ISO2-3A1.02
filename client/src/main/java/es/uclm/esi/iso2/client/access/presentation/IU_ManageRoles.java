@@ -1,10 +1,12 @@
 package es.uclm.esi.iso2.client.access.presentation;
 
+import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
 import es.uclm.esi.iso2.common.access.contracts.IRoleManagementService;
 import es.uclm.esi.iso2.common.access.domain.Permission;
 import es.uclm.esi.iso2.common.access.domain.Role;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -12,8 +14,10 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.List;
 import java.util.function.Function;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -26,6 +30,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 
 public class IU_ManageRoles extends JPanel {
+    private static final Color ERROR_COLOR = new Color(0xB00020);
+    private static final String ERROR_ICON = "⚠ ";
+
     private final transient IRoleManagementService roleService;
     private final String requester;
 
@@ -69,6 +76,10 @@ public class IU_ManageRoles extends JPanel {
         btnRevokeRole.setEnabled(false);
         btnRevokePermission.setEnabled(false);
         btnBack.addActionListener(event -> onBack.run());
+        cmbUser.addActionListener(event -> selectUser((UserAccount) cmbUser.getSelectedItem()));
+        lstUserRoles.addListSelectionListener(event -> btnRevokeRole.setEnabled(!lstUserRoles.isSelectionEmpty()));
+        btnAssignRole.addActionListener(event -> assignSelectedRole());
+        btnRevokeRole.addActionListener(event -> revokeSelectedRole());
 
         JLabel lblTitle = new JLabel("Manage roles and permissions");
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
@@ -80,6 +91,69 @@ public class IU_ManageRoles extends JPanel {
         add(lblTitle, BorderLayout.NORTH);
         add(tabs, BorderLayout.CENTER);
         add(buildFooter(), BorderLayout.SOUTH);
+        loadUserRoles(null);
+    }
+
+    public void selectUser(UserAccount user) {
+        if (user != null) {
+            displayRoles(roleService.getRoles(user.getUsername()));
+        }
+    }
+
+    public void displayRoles(List<Role> roles) {
+        userRolesModel.clear();
+        userRolesModel.addAll(roles);
+    }
+
+    /** Reads the users and the roles again, and keeps the user that was selected. */
+    private void loadUserRoles(String selectedUsername) {
+        List<UserAccount> users = roleService.getUsers();
+        cmbUser.setModel(new DefaultComboBoxModel<>(users.toArray(new UserAccount[0])));
+        cmbRoleToAssign.setModel(new DefaultComboBoxModel<>(roleService.getAvailableRoles().toArray(new Role[0])));
+        users.stream().filter(user -> user.getUsername().equals(selectedUsername)).findFirst()
+                .ifPresent(cmbUser::setSelectedItem);
+        selectUser((UserAccount) cmbUser.getSelectedItem());
+    }
+
+    private void assignSelectedRole() {
+        UserAccount user = (UserAccount) cmbUser.getSelectedItem();
+        Role role = (Role) cmbRoleToAssign.getSelectedItem();
+        if (user != null && role != null) {
+            change(() -> roleService.assignRole(requester, role, user), () -> loadUserRoles(user.getUsername()));
+        }
+    }
+
+    private void revokeSelectedRole() {
+        UserAccount user = (UserAccount) cmbUser.getSelectedItem();
+        Role role = lstUserRoles.getSelectedValue();
+        if (user != null && role != null) {
+            change(() -> roleService.revokeRole(requester, role, user), () -> loadUserRoles(user.getUsername()));
+        }
+    }
+
+    /** Sends a change to the server and shows the new state, or why it was rejected. */
+    private void change(RoleChange change, Runnable refresh) {
+        try {
+            change.run();
+            lblStatus.setText(" ");
+        } catch (AccessDeniedException exception) {
+            showError("You do not have permission to manage roles.");
+        } catch (IllegalStateException exception) {
+            showError("This change would leave the system without an active administrator.");
+        } catch (IllegalArgumentException exception) {
+            showError("That user, role or permission no longer exists. Reload the screen.");
+        }
+        refresh.run();
+    }
+
+    private void showError(String message) {
+        lblStatus.setForeground(ERROR_COLOR);
+        lblStatus.setText(ERROR_ICON + message);
+    }
+
+    /** A change of roles or permissions, which the server can reject. */
+    private interface RoleChange {
+        void run() throws AccessDeniedException;
     }
 
     /** The selection on the left and the current state on the right, each label right above its control. */
