@@ -16,6 +16,12 @@ public interface IRoleManagementService {
 
     List<Permission> getAvailablePermissions();
 
+    /** Every user account, ordered by username, so that the client can show them in a list. */
+    List<UserAccount> getUsers();
+
+    /** Every role, ordered by name, so that the client can show them in a list. */
+    List<Role> getAvailableRoles();
+
     void assignRole(String requester, Role role, UserAccount user) throws AccessDeniedException;
 
     void revokeRole(String requester, Role role, UserAccount user) throws AccessDeniedException;

@@ -9,6 +9,7 @@ import es.uclm.esi.iso2.server.access.persistence.IPermissionRepository;
 import es.uclm.esi.iso2.server.access.persistence.IRoleRepository;
 import es.uclm.esi.iso2.server.access.persistence.IUserAccountRepository;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,16 @@ public class RoleManagementService implements IRoleManagementService {
     @Override
     public List<Permission> getAvailablePermissions() {
         return permissionRepository.findAll();
+    }
+
+    @Override
+    public List<UserAccount> getUsers() {
+        return userAccountRepository.findAll().stream().sorted(Comparator.comparing(UserAccount::getUsername)).toList();
+    }
+
+    @Override
+    public List<Role> getAvailableRoles() {
+        return roleRepository.findAll().stream().sorted(Comparator.comparing(Role::getName)).toList();
     }
 
     @Override

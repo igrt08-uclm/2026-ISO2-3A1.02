@@ -92,7 +92,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 **Stage 1, added on 06/11/2026** (after UC19 was merged into `develop`)
 - [x] 10a. Only `MANAGE_ROLES`: `VIEW_AUDIT_LOG` is removed from the permissions and from the role System administrator. `c752e22`
-- [ ] 11. `common` and `server`: `getUsers()` and `getAvailableRoles()`.
+- [x] 11. `common` and `server`: `getUsers()` and `getAvailableRoles()`.
 
 **Stage 3: tests of the server** (after the client)
 - [ ] 12. Design of the tests: Javier approves the test cases, written here.
@@ -108,8 +108,8 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 11
-- **Next step:** step 11.
+- **In progress:** nothing
+- **Next step:** stage 2, in `doc/plans/UC18-client.md`, on `feature/UC18-client`. Then step 12 here.
 - **Open questions:**
   - Should the audit log be controlled by a permission instead of the role? It would mean changing UC19: a question for the team.
   - The points of the design above.
