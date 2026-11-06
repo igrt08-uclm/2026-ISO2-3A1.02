@@ -8,7 +8,7 @@ import java.util.List;
 public class InMemoryRoleRepository implements IRoleRepository {
     private final List<Role> roles = new ArrayList<>(List.of(
             new Role("SYSTEM_ADMINISTRATOR", "System administrator", "Configures and manages the system",
-                    List.of(InMemoryPermissionRepository.MANAGE_ROLES, InMemoryPermissionRepository.VIEW_AUDIT_LOG)),
+                    List.of(InMemoryPermissionRepository.MANAGE_ROLES)),
             new Role("PHYSICIAN", "Physician", "Requests and reviews tests and reports"),
             new Role("ADMISSIONS_STAFF", "Admissions staff", "Registers patients and manages appointments"),
             new Role("PATIENT", "Patient", "Accesses their own appointments and results")));
