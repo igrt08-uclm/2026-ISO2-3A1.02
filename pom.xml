@@ -25,12 +25,12 @@
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>server</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
