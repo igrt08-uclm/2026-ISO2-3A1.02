@@ -270,3 +270,47 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** An SDD tool such as GitHub Spec Kit or Kiro, which would make the agent write the requirements and choose the architecture, and both are human tasks here (Kickoff, p. 23; D-016). A state file per component, which would conflict between branches and double the commits. No fixed method.
 - **Reason:** The agent only works on what was specified and designed, every doubt reaches a person before the code is written, and the plans are evidence of how the team uses AI.
 - **Consequences:** Extends D-006 and D-008. The designers keep the approved diagrams in `doc/design/` in a form that agents can read, because they cannot open `.vpp` files. Each sub-issue has its plan in `doc/plans/`, committed on its branch with the code.
+
+## D-026 · Conclusions on the effect of AI on the plan
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+
+- **Context:** The Kickoff (p. 29) asks to record five conclusions in this file, and the assignment asks to discount the optimism bias of AI and to compare the estimate with one made by an agent (pp. 5 and 6). None of them was recorded.
+- **Decision:**
+  - **Disciplines that AI reduces:** Testing (36.0 %) and Implementation (30.8 %) the most, Requirements (20.7 %) and Analysis (20.6 %) less, and Design (12.2 %) the least.
+  - **Disciplines that must not be touched:** the decisions of requirements, analysis, design, architecture and test design stay with people (assignment, p. 3; D-008). AI only helps to draft them.
+  - **Estimate in tokens:** an AI agent forecast about 34.4 million input tokens and 1.6 million output tokens, from the real size of UC22. At an illustrative price of 3 € and 15 € per million tokens that is about 128 €, 6.4 % of the human cost of Implementation and Testing. With the UCLM licence it costs 0 € (D-006).
+  - **Cost and date:** 9,080 € with AI and 10,982.50 € without AI; 29 working days of development with AI and 36 without. The final date does not change, because it is fixed by the course.
+  - **Optimism bias:** the members estimate the hours and include the review of what the agent produces; the estimate is corrected with the real hours of each component; and the plan is checked against a scenario in which AI only gives half of the saving: 281.3 hours, 10,031.25 € and 33 working days.
+- **Alternatives:** Taking the forecast of the agent as the estimate. Not applying any discount.
+- **Reason:** The forecast does not count failed sessions, and it shows that what changes the budget is the time people need to review the output, not the tokens.
+- **Consequences:** These conclusions are in sections 9.2, 9.4 and 9.6 of the theory report.
+
+## D-027 · One desktop client, and data in memory
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+
+- **Context:** The assignment describes clients for desktop and mobile, and web access with DICOM image viewers (p. 1). The Kickoff (p. 11) speaks of one Maven module per type of client. Our client is a desktop application in Swing, and the users and the audit log are kept in memory. Marcos recalls Ismael saying in class that persistence is not needed.
+- **Decision:** We build one client, a Java desktop application. Mobile and web clients and DICOM viewers are out of scope. The data is kept in memory while the program runs, and no database is implemented.
+- **Alternatives:** A web client or a mobile client as well. A database.
+- **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients or a database.
+- **Consequences:** They are assumptions A9 and A10 of the theory report. Another client would be a new Maven module with the same contracts, and a database would be a new implementation behind the same repository interfaces.
+
+## D-028 · Correction of the plan totals and recovery of the delay
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #57
+
+- **Context:** The totals of the plan counted the discharge of FR12 twice (E-15). C1 did not end on the date of Milestone 1 (E-10), and C2, C3 and C4 have not started. The assignment asks to explain how the deviations are recovered (p. 6, note 13).
+- **Decision:**
+  - The totals are 243.2 hours and 9,080 € with AI, and 319.3 hours and 10,982.50 € without AI.
+  - The 236.7 hours left are delivered in five weeks, in the same order: 09/11–15/11, end of C1 and C2 (36.0 h); 16/11–22/11, C3 and C4 (32.2 h); 23/11–29/11, C5 and the first part of C6 (55.6 h); 30/11–06/12, C7 and It8 (52.4 h); 07/12–11/12, It9 and C9 (60.5 h).
+  - It11 overlaps with the last week from 7 December, and it includes the testing plan, the test reports and the maintenance plan, within its fixed cost.
+- **Alternatives:** Keeping the dates and accepting more delays. Reducing the scope, which the assignment does not allow.
+- **Reason:** All the functional requirements have to be fulfilled, and the final date is fixed.
+- **Consequences:** It asks for 5 to 9 hours per member per week. When it is approved, the dates of the milestones and of *Traceability and releases* are updated.
+
+## D-029 · Critical quality characteristics
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #54
+
+- **Context:** The professor asked the team to choose three quality attributes (Meeting 5), and the assignment asks to identify and justify the critical characteristics for this healthcare domain (p. 9).
+- **Decision:** The three critical characteristics of ISO/IEC 25010 are **Security**, **Functional suitability** and **Reliability**. The other five are kept with a lower weight.
+- **Alternatives:** Usability instead of Reliability. All eight with the same weight.
+- **Reason:** A failure in any of the three has a clinical or legal consequence: clinical data exposed, a clinical workflow interrupted, or an appointment lost.
+- **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them.
