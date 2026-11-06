@@ -147,7 +147,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 **Stage 4: tests of the client** (after stage 3)
 - [x] 10. `git merge` of `feature/UC18-server`. `a9baa9f`
-- [ ] 11. Design of the tests: Javier approves the test cases, written here.
+- [x] 11. Design of the tests: Javier approves the test cases, written here. `3e9f332`
 - [ ] 12. Tests of `IU_ManageRoles`, with `FakeRoleManagementService`.
 - [ ] 13. Tests of `IU_Welcome`, and the check that the tests fail when the code is wrong.
 
@@ -165,7 +165,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 11, design of the tests
-- **Next step:** Javier approves the design of the tests; then step 12
+- **In progress:** step 12, tests of `IU_ManageRoles`
+- **Next step:** step 12, `IU_ManageRolesTest` and `FakeRoleManagementService`
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
 - **Last update:** 06/11/2026, Javier: stage 2 done
