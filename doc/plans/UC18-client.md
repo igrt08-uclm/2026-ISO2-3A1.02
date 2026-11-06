@@ -170,6 +170,6 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 ## Status
 - **In progress:** nothing
-- **Next step:** the pull request of `feature/UC18-server` (#17) first; this one (#16) is a draft until it is merged, and then `develop` is merged here
+- **Next step:** a member reviews #85; `develop`, with #84 merged, is already merged here (`9a51325`)
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
-- **Last update:** 06/11/2026, Javier: stage 4 done
+- **Last update:** 06/11/2026, Javier: #84 merged, #85 ready for review
