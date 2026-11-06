@@ -14,8 +14,10 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -32,9 +34,12 @@ import javax.swing.ListSelectionModel;
 public class IU_ManageRoles extends JPanel {
     private static final Color ERROR_COLOR = new Color(0xB00020);
     private static final String ERROR_ICON = "⚠ ";
+    private static final Color SUCCESS_COLOR = new Color(0x1B5E20);
+    private static final String SUCCESS_ICON = "✔ ";
 
     private final transient IRoleManagementService roleService;
     private final String requester;
+    private final transient Predicate<String> confirm;
 
     private final JTabbedPane tabs = new JTabbedPane();
 
@@ -57,10 +62,16 @@ public class IU_ManageRoles extends JPanel {
     private final JLabel lblStatus = new JLabel(" ");
     private final JButton btnBack = new JButton("Back");
 
-    public IU_ManageRoles(IRoleManagementService roleService, String requester, Runnable onBack) {
+    /**
+     * @param confirm asks the question of a change and returns {@code true} if the user accepts it; the tests pass an
+     *                answer, so that they do not open a window
+     */
+    public IU_ManageRoles(IRoleManagementService roleService, String requester, Predicate<String> confirm,
+            Runnable onBack) {
         super(new BorderLayout(0, 12));
         this.roleService = roleService;
         this.requester = requester;
+        this.confirm = confirm;
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
         Function<UserAccount, String> userText = user -> user.getUsername() + " - " + user.getFullName();
@@ -75,6 +86,11 @@ public class IU_ManageRoles extends JPanel {
         lstRolePermissions.setCellRenderer(showing(permissionText));
         btnRevokeRole.setEnabled(false);
         btnRevokePermission.setEnabled(false);
+        btnAssignRole.setMnemonic('A');
+        btnRevokeRole.setMnemonic('R');
+        btnAssignPermission.setMnemonic('A');
+        btnRevokePermission.setMnemonic('R');
+        btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> onBack.run());
         cmbUser.addActionListener(event -> selectUser((UserAccount) cmbUser.getSelectedItem()));
         lstUserRoles.addListSelectionListener(event -> btnRevokeRole.setEnabled(!lstUserRoles.isSelectionEmpty()));
@@ -92,6 +108,8 @@ public class IU_ManageRoles extends JPanel {
                 "Roles of the user", lstUserRoles, btnRevokeRole));
         tabs.addTab("Role permissions", buildTab("Role", cmbRole, "Permission to assign", cmbPermissionToAssign,
                 btnAssignPermission, "Permissions of the role", lstRolePermissions, btnRevokePermission));
+        tabs.setMnemonicAt(0, KeyEvent.VK_U);
+        tabs.setMnemonicAt(1, KeyEvent.VK_P);
 
         add(lblTitle, BorderLayout.NORTH);
         add(tabs, BorderLayout.CENTER);
@@ -125,8 +143,16 @@ public class IU_ManageRoles extends JPanel {
     private void assignSelectedPermission() {
         Role role = (Role) cmbRole.getSelectedItem();
         Permission permission = (Permission) cmbPermissionToAssign.getSelectedItem();
-        if (role != null && permission != null) {
-            change(() -> roleService.assignPermission(requester, role, permission),
+        if (role == null || permission == null) {
+            return;
+        }
+        if (currentPermissionCodes(role).contains(permission.getCode())) {
+            showNothingChanged(role.getName() + " already has that permission.");
+            loadRolePermissions(role.getId());
+        } else {
+            change("Assign the permission " + permission.getCode() + " to " + role.getName() + "?",
+                    () -> roleService.assignPermission(requester, role, permission),
+                    "Permission " + permission.getCode() + " assigned to " + role.getName() + ".",
                     () -> loadRolePermissions(role.getId()));
         }
     }
@@ -134,8 +160,16 @@ public class IU_ManageRoles extends JPanel {
     private void revokeSelectedPermission() {
         Role role = (Role) cmbRole.getSelectedItem();
         Permission permission = lstRolePermissions.getSelectedValue();
-        if (role != null && permission != null) {
-            change(() -> roleService.revokePermission(requester, role, permission),
+        if (role == null || permission == null) {
+            return;
+        }
+        if (!currentPermissionCodes(role).contains(permission.getCode())) {
+            showNothingChanged(role.getName() + " does not have that permission.");
+            loadRolePermissions(role.getId());
+        } else {
+            change("Revoke the permission " + permission.getCode() + " from " + role.getName() + "?",
+                    () -> roleService.revokePermission(requester, role, permission),
+                    "Permission " + permission.getCode() + " revoked from " + role.getName() + ".",
                     () -> loadRolePermissions(role.getId()));
         }
     }
@@ -164,24 +198,56 @@ public class IU_ManageRoles extends JPanel {
     private void assignSelectedRole() {
         UserAccount user = (UserAccount) cmbUser.getSelectedItem();
         Role role = (Role) cmbRoleToAssign.getSelectedItem();
-        if (user != null && role != null) {
-            change(() -> roleService.assignRole(requester, role, user), () -> loadUserRoles(user.getUsername()));
+        if (user == null || role == null) {
+            return;
+        }
+        if (currentRoleIds(user).contains(role.getId())) {
+            showNothingChanged(user.getUsername() + " already has that role.");
+            loadUserRoles(user.getUsername());
+        } else {
+            change("Assign the role " + role.getName() + " to " + user.getUsername() + "?",
+                    () -> roleService.assignRole(requester, role, user),
+                    "Role " + role.getName() + " assigned to " + user.getUsername() + ".",
+                    () -> loadUserRoles(user.getUsername()));
         }
     }
 
     private void revokeSelectedRole() {
         UserAccount user = (UserAccount) cmbUser.getSelectedItem();
         Role role = lstUserRoles.getSelectedValue();
-        if (user != null && role != null) {
-            change(() -> roleService.revokeRole(requester, role, user), () -> loadUserRoles(user.getUsername()));
+        if (user == null || role == null) {
+            return;
+        }
+        if (!currentRoleIds(user).contains(role.getId())) {
+            showNothingChanged(user.getUsername() + " does not have that role.");
+            loadUserRoles(user.getUsername());
+        } else {
+            change("Revoke the role " + role.getName() + " from " + user.getUsername() + "?",
+                    () -> roleService.revokeRole(requester, role, user),
+                    "Role " + role.getName() + " revoked from " + user.getUsername() + ".",
+                    () -> loadUserRoles(user.getUsername()));
         }
     }
 
-    /** Sends a change to the server and shows the new state, or why it was rejected. */
-    private void change(RoleChange change, Runnable refresh) {
+    /** The roles that the user has now in the server, which can differ from the list if another user changed them. */
+    private List<String> currentRoleIds(UserAccount user) {
+        return roleService.getRoles(user.getUsername()).stream().map(Role::getId).toList();
+    }
+
+    private List<String> currentPermissionCodes(Role role) {
+        return roleService.getAvailableRoles().stream().filter(current -> current.getId().equals(role.getId()))
+                .flatMap(current -> current.getPermissions().stream()).map(Permission::getCode).toList();
+    }
+
+    /** Asks for confirmation, sends the change to the server and shows the new state, or why it was rejected. */
+    private void change(String question, RoleChange change, String success, Runnable refresh) {
+        if (!confirm.test(question)) {
+            lblStatus.setText(" ");
+            return;
+        }
         try {
             change.run();
-            lblStatus.setText(" ");
+            showOperationResultSuccess(success);
         } catch (AccessDeniedException exception) {
             showError("You do not have permission to manage roles.");
         } catch (IllegalStateException exception) {
@@ -190,6 +256,16 @@ public class IU_ManageRoles extends JPanel {
             showError("That user, role or permission no longer exists. Reload the screen.");
         }
         refresh.run();
+    }
+
+    public void showOperationResultSuccess(String message) {
+        lblStatus.setForeground(SUCCESS_COLOR);
+        lblStatus.setText(SUCCESS_ICON + message);
+    }
+
+    private void showNothingChanged(String message) {
+        lblStatus.setForeground(getForeground());
+        lblStatus.setText("Nothing changed: " + message);
     }
 
     private void showError(String message) {
