@@ -100,7 +100,7 @@ This plan covers stages 2 and 4 of `doc/plans/UC18-server.md`. Step 11 of the se
 One step, one commit, one at a time. Tick each step with the hash of its commit (green `mvn -B verify`).
 
 **Stage 2: implementation of the client**
-- [ ] 1. This plan.
+- [x] 1. This plan. `7c47a58`
 - [ ] 2. `IU_ManageRoles`: the two tabs, their lists and buttons, and the layout.
 - [ ] 3. `IU_ManageRoles`: tab *User roles*: load the lists, assign, revoke and refresh.
 - [ ] 4. `IU_ManageRoles`: tab *Role permissions*: the same with the permissions.
@@ -129,7 +129,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 2, `IU_ManageRoles`: the two tabs, their lists and buttons, and the layout
 - **Next step:** step 2, `IU_ManageRoles` in `client/.../access/presentation/`: the two tabs, their lists and buttons
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
 - **Last update:** 06/11/2026, Javier
