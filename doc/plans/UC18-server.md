@@ -139,24 +139,28 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 12. Design of the tests: Javier approves the test cases, written here. `a963994`
 - [x] 13. Tests of `common`: `PermissionTest` and `RoleTest`. `7282d0d`
 - [x] 14. Tests of the repositories: `InMemoryPermissionRepositoryTest`, `InMemoryRoleRepositoryTest` and `findAll` of the users. `37b8129`
-- [ ] 15. Tests of `RoleManagementService`, unit, with `FakeRoleRepository` and `FakePermissionRepository`.
-- [ ] 16. Tests of `RoleManagementService`, integration, and the check that they fail when the code is wrong.
+- [x] 15. Tests of `RoleManagementService`, unit, with `FakeRoleRepository` and `FakePermissionRepository`. `1071e94`
+- [x] 16. Tests of `RoleManagementService`, integration, and the check that they fail when the code is wrong. Commit *test(UC18): integration tests of RoleManagementService (#17)*
 
 ## Verification
 - [x] `mvn -B verify` is green.
 - [x] A change of roles or permissions takes full effect at once (#17).
 - [x] Only an active user with `MANAGE_ROLES` can make a change, and each change and each rejected attempt is registered.
 - [x] No operation leaves the system without an active administrator.
-- [ ] The tests were checked to fail when the code is wrong.
+- [x] The tests were checked to fail when the code is wrong: 19 errors were introduced on purpose in a temporary copy,
+      one at a time (the copy of the permissions of `Role`, the active check, the check by permission instead of role, the
+      rejected request not registered, the action and the target registered, two repeated changes, the last administrator
+      in both revokes, the old copy of the roles, the two orders, repeated permissions, an unknown role, a null user, the
+      preloaded `MANAGE_ROLES`, the copy of `findAll` and the case of `findByCode`), and all of them were detected.
 - [ ] The interfaces match the contracts of section 6 of #8, once it is updated.
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 15, unit tests of `RoleManagementService`
-- **Next step:** stage 2, in `doc/plans/UC18-client.md`, on `feature/UC18-client`. Then step 12 here.
+- **In progress:** nothing
+- **Next step:** stage 4, step 10 of `doc/plans/UC18-client.md`: merge this branch into `feature/UC18-client`. The pull request of this branch goes first.
 - **Open questions:**
   - Should the audit log be controlled by a permission instead of the role? It would mean changing UC19: a question for the team.
   - The points of the design above.
   - The server trusts the `requester` it receives: there are no sessions (D09 of the analysis), and the client and the server are one
     program (D-016).
-- **Last update:** 06/11/2026, Javier
+- **Last update:** 06/11/2026, Javier: stage 3 done
