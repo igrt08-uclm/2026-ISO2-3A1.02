@@ -106,7 +106,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [x] 4. `IU_ManageRoles`: tab *Role permissions*: the same with the permissions. `3a4efba`
 - [x] 5. `IU_ManageRoles`: confirmation, messages and shortcuts. `2c7c24f`
 - [x] 6. `IU_Welcome`: *Manage roles*, only for whoever has `MANAGE_ROLES`. `bd5fea9`
-- [ ] 7. `Main`: `RoleManagementService`, the shared repositories and the new screen.
+- [x] 7. `Main`: `RoleManagementService`, the shared repositories and the new screen. `2eaa585`
 - [ ] 8. `client/pom.xml`: version `1.2.0-SNAPSHOT`.
 - [ ] 9. Javier checks the application by hand, and the usability decisions are ticked.
 
@@ -129,7 +129,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 7, `Main`: `RoleManagementService`, the shared repositories and the new screen
+- **In progress:** step 8, `client/pom.xml`: version `1.2.0-SNAPSHOT`
 - **Next step:** step 2, `IU_ManageRoles` in `client/.../access/presentation/`: the two tabs, their lists and buttons
 - **Open questions:** Design (Marcos and Denis) updates the diagrams with `requester`, the lists and the confirmation.
 - **Last update:** 06/11/2026, Javier
