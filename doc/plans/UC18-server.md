@@ -138,7 +138,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 **Stage 3: tests of the server** (after the client)
 - [x] 12. Design of the tests: Javier approves the test cases, written here. `a963994`
 - [x] 13. Tests of `common`: `PermissionTest` and `RoleTest`. `7282d0d`
-- [ ] 14. Tests of the repositories: `InMemoryPermissionRepositoryTest`, `InMemoryRoleRepositoryTest` and `findAll` of the users.
+- [x] 14. Tests of the repositories: `InMemoryPermissionRepositoryTest`, `InMemoryRoleRepositoryTest` and `findAll` of the users. `37b8129`
 - [ ] 15. Tests of `RoleManagementService`, unit, with `FakeRoleRepository` and `FakePermissionRepository`.
 - [ ] 16. Tests of `RoleManagementService`, integration, and the check that they fail when the code is wrong.
 
@@ -152,7 +152,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** step 14, tests of the repositories
+- **In progress:** step 15, unit tests of `RoleManagementService`
 - **Next step:** stage 2, in `doc/plans/UC18-client.md`, on `feature/UC18-client`. Then step 12 here.
 - **Open questions:**
   - Should the audit log be controlled by a permission instead of the role? It would mean changing UC19: a question for the team.
