@@ -62,6 +62,47 @@ Answered by Javier on 02/11/2026.
 | `server/src/main/java/es/uclm/esi/iso2/server/access/service/RoleManagementService.java` | create | implements `IRoleManagementService` |
 | `pom.xml`, `common/pom.xml`, `server/pom.xml` | change | `common` and `server` go to `1.2.0-SNAPSHOT` (D-014, D-021) |
 
+## Test cases (design of the tests)
+Approved by Javier on 06/11/2026 (step 12). Same style as Adam's tests: `@DisplayName`, *Arrange, Act,
+Assert*, `@ParameterizedTest` for the similar cases, hand-written test doubles, and a comment with the decision or the issue
+when a test comes from one. The unit tests use test data of their own (`ana`, `bob`…), not the users of the application.
+
+| Class | Case | Expected result |
+|---|---|---|
+| `PermissionTest` | Create a permission | Keeps its code and its description |
+| `RoleTest` | Create a role with three arguments | Keeps its data and has no permissions |
+| `RoleTest` | Create it with permissions | Keeps them in the same order |
+| `RoleTest` | Change the list used to create it, or try to change the one returned | The role does not change |
+| `InMemoryPermissionRepositoryTest` | `findAll` | Only `MANAGE_ROLES` |
+| `InMemoryPermissionRepositoryTest` | `findByCode` of `MANAGE_ROLES`; of an unknown or null code | The permission; `null` |
+| `InMemoryRoleRepositoryTest` | `findAll` | The four roles; only System administrator has `MANAGE_ROLES` |
+| `InMemoryRoleRepositoryTest` | `findById` of a role; of an unknown or null id | The role; `null` |
+| `InMemoryRoleRepositoryTest` | `save` a role with an existing id; with a new id | It replaces the old one; it is added |
+| `InMemoryRoleRepositoryTest` | Try to change the list returned by `findAll` | `UnsupportedOperationException`, and the repository does not change |
+| `InMemoryUserAccountRepositoryTest` | `findAll` | The five users of the application, and the list cannot be changed |
+| `RoleManagementServiceTest` | `getRoles` of a user | Its roles, with the permissions saved in the repository of roles, not the old copy of the account |
+| `RoleManagementServiceTest` | `getRoles` and `getPermissions` of an unknown or null user | `IllegalArgumentException` |
+| `RoleManagementServiceTest` | `getPermissions` of a user with two roles that share a permission | Each permission once |
+| `RoleManagementServiceTest` | `getAvailablePermissions` | The permissions of the repository |
+| `RoleManagementServiceTest` | `getUsers`; `getAvailableRoles` | Ordered by username; ordered by name (#16) |
+| `RoleManagementServiceTest` | `assignRole`; `revokeRole` | The account is saved with the role added or removed, and `ROLE_ASSIGNED` or `ROLE_REVOKED` is registered with the requester and `user:x/role:Y` |
+| `RoleManagementServiceTest` | `assignPermission`; `revokePermission` | The role is saved with the permission added or removed, and `PERMISSION_ASSIGNED` or `PERMISSION_REVOKED` is registered with `role:X/permission:Y` |
+| `RoleManagementServiceTest` | Assign something already held; revoke something not held, in the four operations | Nothing is saved and nothing is registered |
+| `RoleManagementServiceTest` | Requester unknown, null, inactive, or without `MANAGE_ROLES`, in the four operations | `AccessDeniedException` with the requester, `ROLE_CHANGE_DENIED` with target `roles`, and nothing changes |
+| `RoleManagementServiceTest` | Requester with `MANAGE_ROLES` through a role that is not System administrator | The change is made: the check uses the permission, not the role (#17) |
+| `RoleManagementServiceTest` | A permission given to a role | Its users can make changes at once (#17) |
+| `RoleManagementServiceTest` | Unknown or null user, role or permission, from an allowed requester | `IllegalArgumentException`, and nothing is saved or registered |
+| `RoleManagementServiceTest` | The only active user with `MANAGE_ROLES` loses the role, or the role loses `MANAGE_ROLES` | `IllegalStateException`, and nothing changes |
+| `RoleManagementServiceTest` | The same with a second active administrator | The change is made |
+| `RoleManagementServiceTest` | The same when the second administrator is inactive | `IllegalStateException`: an inactive user does not count |
+| `RoleManagementServiceIntegrationTest` | `admin` assigns a role, with the real repositories and `AuditService` | The next login of that user returns the new role, and `admin` sees `ROLE_ASSIGNED` in the audit log |
+| `RoleManagementServiceIntegrationTest` | `mgarcia` tries to make a change | `AccessDeniedException`, and `admin` sees `ROLE_CHANGE_DENIED` in the audit log |
+
+New files, all in `src/test/java`: `PermissionTest` and `RoleTest` in `common/…/access/domain`;
+`InMemoryPermissionRepositoryTest` and `InMemoryRoleRepositoryTest` in `server/…/access/persistence`; and
+`RoleManagementServiceTest`, `RoleManagementServiceIntegrationTest`, `FakeRoleRepository` and `FakePermissionRepository` in
+`server/…/access/service`. `InMemoryUserAccountRepositoryTest` gets one more test; the other existing tests do not change.
+
 ## Order of the work
 | Stage | What | Branch |
 |---|---|---|
@@ -92,11 +133,14 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 
 **Stage 1, added on 06/11/2026** (after UC19 was merged into `develop`)
 - [x] 10a. Only `MANAGE_ROLES`: `VIEW_AUDIT_LOG` is removed from the permissions and from the role System administrator. `c752e22`
-- [x] 11. `common` and `server`: `getUsers()` and `getAvailableRoles()`.
+- [x] 11. `common` and `server`: `getUsers()` and `getAvailableRoles()`. `e52d3c1`
 
 **Stage 3: tests of the server** (after the client)
 - [ ] 12. Design of the tests: Javier approves the test cases, written here.
-- [ ] 13. Tests, in Adam's style.
+- [ ] 13. Tests of `common`: `PermissionTest` and `RoleTest`.
+- [ ] 14. Tests of the repositories: `InMemoryPermissionRepositoryTest`, `InMemoryRoleRepositoryTest` and `findAll` of the users.
+- [ ] 15. Tests of `RoleManagementService`, unit, with `FakeRoleRepository` and `FakePermissionRepository`.
+- [ ] 16. Tests of `RoleManagementService`, integration, and the check that they fail when the code is wrong.
 
 ## Verification
 - [x] `mvn -B verify` is green.
@@ -108,7 +152,7 @@ One step, one commit, one at a time. Tick each step with the hash of its commit 
 - [ ] Code reviewed by a member, in the pull request.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 12, design of the tests
 - **Next step:** stage 2, in `doc/plans/UC18-client.md`, on `feature/UC18-client`. Then step 12 here.
 - **Open questions:**
   - Should the audit log be controlled by a permission instead of the role? It would mean changing UC19: a question for the team.
