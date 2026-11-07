@@ -297,14 +297,14 @@ This file is also context for the AI agent: it must follow these decisions and n
 ## D-028 · Correction of the plan totals and recovery of the delay
 **Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #57
 
-- **Context:** The totals of the plan counted the discharge of FR12 twice (E-15). C1 did not end on the date of Milestone 1 (E-10), and C2, C3 and C4 have not started. The assignment asks to explain how the deviations are recovered (p. 6, note 13).
+- **Context:** The totals of the plan counted the discharge of FR12 twice (E-15). C1 ended on 7 November instead of 28 October (E-10), with the release v0.1.0, and C2, C3 and C4 have not started. The assignment asks to explain how the deviations are recovered (p. 6, note 13).
 - **Decision:**
   - The totals are 243.2 hours and 9,080 € with AI, and 319.3 hours and 10,982.50 € without AI.
-  - The 236.7 hours left are delivered in five weeks, in the same order: 09/11–15/11, end of C1 and C2 (36.0 h); 16/11–22/11, C3 and C4 (32.2 h); 23/11–29/11, C5 and the first part of C6 (55.6 h); 30/11–06/12, C7 and It8 (52.4 h); 07/12–11/12, It9 and C9 (60.5 h).
-  - It11 overlaps with the last week from 7 December, and it includes the testing plan, the test reports and the maintenance plan, within its fixed cost.
+  - The 221.2 hours left are delivered in the same order: 09/11–15/11, C2 and C3 (32.5 h); 16/11–22/11, C4 and C5 (52.8 h); 23/11–29/11, the first part of C6, and C7 (45.1 h); 30/11–06/12, It8 and It9 (54.1 h); 07/12–09/12, C9 (36.7 h).
+  - The end of development stays on 9 December. It11 does not move, and it includes the testing plan, the test reports and the maintenance plan, within its fixed cost.
 - **Alternatives:** Keeping the dates and accepting more delays. Reducing the scope, which the assignment does not allow.
 - **Reason:** All the functional requirements have to be fulfilled, and the final date is fixed.
-- **Consequences:** It asks for 5 to 9 hours per member per week. When it is approved, the dates of the milestones and of *Traceability and releases* are updated.
+- **Consequences:** It asks for 5 to 8 hours per member per week. When it is approved, the dates of the next milestones and of *Traceability and releases* are updated. The due date of Milestone 1 stays as it was, so that the delay can be seen (#57).
 
 ## D-029 · Critical quality characteristics
 **Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #54
