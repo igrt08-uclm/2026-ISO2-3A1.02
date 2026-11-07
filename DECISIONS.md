@@ -285,14 +285,14 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** The forecast does not count failed sessions, and it shows that what changes the budget is the time people need to review the output, not the tokens.
 - **Consequences:** These conclusions are in sections 9.2, 9.4 and 9.6 of the theory report.
 
-## D-027 · One desktop client, and data in memory
+## D-027 · One desktop client
 **Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
 
-- **Context:** The assignment describes clients for desktop and mobile, and web access with DICOM image viewers (p. 1). The Kickoff (p. 11) speaks of one Maven module per type of client. Our client is a desktop application in Swing, and the users and the audit log are kept in memory. Marcos recalls Ismael saying in class that persistence is not needed.
-- **Decision:** We build one client, a Java desktop application. Mobile and web clients and DICOM viewers are out of scope. The data is kept in memory while the program runs, and no database is implemented.
-- **Alternatives:** A web client or a mobile client as well. A database.
-- **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients or a database.
-- **Consequences:** They are assumptions A9 and A10 of the theory report. Another client would be a new Maven module with the same contracts, and a database would be a new implementation behind the same repository interfaces.
+- **Context:** The assignment describes clients for desktop and mobile, and web access with DICOM image viewers (p. 1). The Kickoff (p. 11) speaks of one Maven module per type of client.
+- **Decision:** We build one client, a Java desktop application. Mobile and web clients and DICOM viewers are out of scope.
+- **Alternatives:** A web client or a mobile client as well.
+- **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients.
+- **Consequences:** It is assumption A9 of the theory report. Another client would be a new Maven module with the same contracts.
 
 ## D-028 · Correction of the plan totals and recovery of the delay
 **Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #57
@@ -314,3 +314,13 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Usability instead of Reliability. All eight with the same weight.
 - **Reason:** A failure in any of the three has a clinical or legal consequence: clinical data exposed, a clinical workflow interrupted, or an appointment lost.
 - **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them.
+
+## D-030 · Swing for the client, and data in memory
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** reported in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #34, #80
+
+- **Context:** The client of C1 is already written in Swing, and the users and the audit log are kept in memory. Marcos recalls Ismael saying in class that persistence is not needed.
+- **Decision:** The desktop client uses Swing. The data is kept in memory while the program runs, and no database is implemented.
+- **Alternatives:** Another graphical library, such as JavaFX. A database, or saving the data in files.
+- **Reason:** Swing comes with Java, so it adds no dependency, and C1 already uses it. The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include a database.
+- **Consequences:** The data is lost when the program closes. It is assumption A10 of the theory report. A database would be a new implementation behind the same repository interfaces.
+- **Status:** Approved.
