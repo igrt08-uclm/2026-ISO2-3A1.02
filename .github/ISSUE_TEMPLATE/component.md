@@ -64,3 +64,9 @@ assignees: ''
 - Planned vs actual delivery date:
 - Causes of any deviation:
 - Corrective actions:
+
+## 11. Changelog (fill in at every release)
+
+| Version | Date | Added | Changed / fixed |
+| --- | --- | --- | --- |
+| | | | |
