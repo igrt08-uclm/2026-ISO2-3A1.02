@@ -324,3 +324,22 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** Swing comes with Java, so it adds no dependency, and C1 already uses it. The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include a database.
 - **Consequences:** The data is lost when the program closes. It is assumption A10 of the theory report. A database would be a new implementation behind the same repository interfaces.
 - **Status:** Approved.
+
+## D-031 · Operational assumptions of the plan
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+
+- **Context:** The assignment requires all operational assumptions to be documented in the theory report, in the wiki and in this file (p. 3). The assumptions about requirements are in D-002 to D-005 and D-009, and those of the plan were only in the report.
+- **Decision:** The plan relies on these assumptions:
+  - **A1.** Each consultant is available 40 hours per week, and the team has seven members, but not all of them work on every discipline: R and D have two owners; A, I and T have one each. *If it is false:* The critical path of It5 and It10 (the two heaviest iterations) lengthens; the calendar of section 6 of the report is no longer feasible and the end date moves.
+  - **A2.** AI assistance is available 24 hours a day, but every AI output needs human review before it is merged; the schedule therefore books the review, not the generation. *If it is false:* A higher AI ratio does not shorten anything: the bottleneck is reviewer availability, not token throughput (E-12, E-13).
+  - **A3.** The cost of AI tooling is zero for the team: GitHub Copilot is covered by the university licence. *If it is false:* The budget of section 8 of the report must add a licensing line. The 9,080 € figure assumes no tooling cost.
+  - **A4.** Visual Paradigm 18.1 is available to all seven members with an academic licence (D-017). *If it is false:* Model exchange between members breaks, and the design discipline becomes a serial bottleneck.
+  - **A5.** The external systems are simulated behind interfaces, and no integration test uses a real endpoint. *If it is false:* FR20 grows from a configuration use case to an integration project; C2 and C1 both change.
+  - **A6.** The examination catalogue is seed data, not a separate requirement (D-003). *If it is false:* FR17 would not cover the catalogue: a new requirement would be needed, and FR06 and FR13 would depend on it.
+  - **A7.** Iteration 0 and Iteration 11 have fixed costs of 1,000 € and 2,000 € given by the assignment, not estimated by us. *If it is false:* The total of 9,080 € and the comparison with 10,982.50 € both become invalid.
+  - **A8.** Human work costs 25 € per hour in every discipline, the rate of the example in the Kickoff (p. 27). The specification itself gives no rate. *If it is false:* Every cost of section 8 of the report changes. Exercise E.01.02 also considers a different rate for each profile.
+  - **A9.** We build one client, a Java desktop application. Mobile and web clients and DICOM image viewers are out of scope (D-027). The Kickoff (p. 11) speaks of one Maven module per type of client. *If it is false:* Each new type of client is a new Maven module that uses the same contracts, and FR09 needs a viewer for the images.
+  - **A10.** The client uses Swing, and the data is kept in memory while the program runs: no database is implemented (D-030). *If it is false:* The repositories get a new implementation behind the same interfaces, for example IUserAccountRepository.
+- **Alternatives:** Keep them only in the report.
+- **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
+- **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
