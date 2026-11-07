@@ -6,7 +6,7 @@
 
   <groupId>es.uclm.esi.iso2</groupId>
   <artifactId>radiodiagnostics</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -25,12 +25,12 @@
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>common</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0</version>
       </dependency>
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>server</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
