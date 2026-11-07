@@ -307,13 +307,13 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Consequences:** It asks for 5 to 8 hours per member per week. When it is approved, the dates of the next milestones and of *Traceability and releases* are updated. The due date of Milestone 1 stays as it was, so that the delay can be seen (#57).
 
 ## D-029 · Critical quality characteristics
-**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #54
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #54
 
-- **Context:** The professor asked the team to choose three quality attributes (Meeting 5), and the assignment asks to identify and justify the critical characteristics for this healthcare domain (p. 9).
-- **Decision:** The three critical characteristics of ISO/IEC 25010 are **Security**, **Functional suitability** and **Reliability**. The other five are kept with a lower weight.
-- **Alternatives:** Usability instead of Reliability. All eight with the same weight.
-- **Reason:** A failure in any of the three has a clinical or legal consequence: clinical data exposed, a clinical workflow interrupted, or an appointment lost.
-- **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them.
+- **Context:** The professor asked the team to choose three quality attributes (Meeting 5). The practice P.01.03 asks for at least one subcharacteristic of each one and for their impact on the requirements (slide 13), and the assignment asks to identify and justify the critical characteristics for this healthcare domain (p. 9). Whatever we choose has to be fulfilled, so the proposal takes what C1 already does and what does not change the architecture.
+- **Decision:** The three critical characteristics of ISO/IEC 25010 are **Security** (non-repudiation), **Functional suitability** (functional appropriateness) and **Usability** (user error protection). The other five are kept with a lower weight.
+- **Alternatives:** Reliability instead of Usability: availability, fault tolerance and recoverability clash with having the data in memory (D-030), and C1 has no logging yet. All eight with the same weight.
+- **Reason:** A failure in any of the three has a clinical or legal consequence: nobody can prove who did what, a profile reaches functions that are not for it, or wrong data reaches the patient.
+- **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them. Each new component records its critical operations, checks the role and validates its forms, and the pull request template has the review checklist.
 
 ## D-030 · Swing for the client, and data in memory
 **Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** reported in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #34, #80
