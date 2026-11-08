@@ -270,3 +270,76 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** An SDD tool such as GitHub Spec Kit or Kiro, which would make the agent write the requirements and choose the architecture, and both are human tasks here (Kickoff, p. 23; D-016). A state file per component, which would conflict between branches and double the commits. No fixed method.
 - **Reason:** The agent only works on what was specified and designed, every doubt reaches a person before the code is written, and the plans are evidence of how the team uses AI.
 - **Consequences:** Extends D-006 and D-008. The designers keep the approved diagrams in `doc/design/` in a form that agents can read, because they cannot open `.vpp` files. Each sub-issue has its plan in `doc/plans/`, committed on its branch with the code.
+
+## D-026 · Conclusions on the effect of AI on the plan
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+
+- **Context:** The Kickoff (p. 29) asks to record five conclusions in this file, and the assignment asks to discount the optimism bias of AI and to compare the estimate with one made by an agent (pp. 5 and 6). None of them was recorded.
+- **Decision:**
+  - **Disciplines that AI reduces:** Testing (36.0 %) and Implementation (30.8 %) the most, Requirements (20.7 %) and Analysis (20.6 %) less, and Design (12.2 %) the least.
+  - **Disciplines that must not be touched:** the decisions of requirements, analysis, design, architecture and test design stay with people (assignment, p. 3; D-008). AI only helps to draft them.
+  - **Estimate in tokens:** an AI agent forecast about 34.4 million input tokens and 1.6 million output tokens, from the real size of UC22. At an illustrative price of 3 € and 15 € per million tokens that is about 128 €, 6.4 % of the human cost of Implementation and Testing. With the UCLM licence it costs 0 € (D-006).
+  - **Cost and date:** 9,080 € with AI and 10,982.50 € without AI; 29 working days of development with AI and 36 without. The final date does not change, because it is fixed by the course.
+  - **Optimism bias:** the members estimate the hours and include the review of what the agent produces; the estimate is corrected with the real hours of each component; and the plan is checked against a scenario in which AI only gives half of the saving: 281.3 hours, 10,031.25 € and 33 working days.
+- **Alternatives:** Taking the forecast of the agent as the estimate. Not applying any discount.
+- **Reason:** The forecast does not count failed sessions, and it shows that what changes the budget is the time people need to review the output, not the tokens.
+- **Consequences:** These conclusions are in sections 9.2, 9.4 and 9.6 of the theory report.
+
+## D-027 · One desktop client
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+
+- **Context:** The assignment describes clients for desktop and mobile, and web access with DICOM image viewers (p. 1). The Kickoff (p. 11) speaks of one Maven module per type of client.
+- **Decision:** We build one client, a Java desktop application. Mobile and web clients and DICOM viewers are out of scope.
+- **Alternatives:** A web client or a mobile client as well.
+- **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients.
+- **Consequences:** It is assumption A9 of the theory report. Another client would be a new Maven module with the same contracts.
+
+## D-028 · Correction of the plan totals and recovery of the delay
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #57
+
+- **Context:** The totals of the plan counted the discharge of FR12 twice (E-15). C1 ended on 7 November instead of 28 October (E-10), with the release v0.1.0, and C2, C3 and C4 have not started. The assignment asks to explain how the deviations are recovered (p. 6, note 13).
+- **Decision:**
+  - The totals are 243.2 hours and 9,080 € with AI, and 319.3 hours and 10,982.50 € without AI.
+  - The 221.2 hours left are delivered in the same order: 09/11–15/11, C2 and C3 (32.5 h); 16/11–22/11, C4 and C5 (52.8 h); 23/11–29/11, the first part of C6, and C7 (45.1 h); 30/11–06/12, It8 and It9 (54.1 h); 07/12–09/12, C9 (36.7 h).
+  - The end of development stays on 9 December. It11 does not move, and it includes the testing plan, the test reports and the maintenance plan, within its fixed cost.
+- **Alternatives:** Keeping the dates and accepting more delays. Reducing the scope, which the assignment does not allow.
+- **Reason:** All the functional requirements have to be fulfilled, and the final date is fixed.
+- **Consequences:** It asks for 5 to 8 hours per member per week. When it is approved, the dates of the next milestones and of *Traceability and releases* are updated. The due date of Milestone 1 stays as it was, so that the delay can be seen (#57).
+
+## D-029 · Critical quality characteristics
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #54
+
+- **Context:** The professor asked the team to choose three quality attributes (Meeting 5). The practice P.01.03 asks for at least one subcharacteristic of each one and for their impact on the requirements (slide 13), and the assignment asks to identify and justify the critical characteristics for this healthcare domain (p. 9). Whatever we choose has to be fulfilled, so the proposal takes what C1 already does and what does not change the architecture.
+- **Decision:** The three critical characteristics of ISO/IEC 25010 are **Security** (non-repudiation), **Functional suitability** (functional appropriateness) and **Usability** (user error protection). The other five are kept with a lower weight.
+- **Alternatives:** Reliability instead of Usability: availability, fault tolerance and recoverability clash with having the data in memory (D-030), and C1 has no logging yet. All eight with the same weight.
+- **Reason:** A failure in any of the three has a clinical or legal consequence: nobody can prove who did what, a profile reaches functions that are not for it, or wrong data reaches the patient.
+- **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them. Each new component records its critical operations, checks the role and validates its forms, and the pull request template has the review checklist.
+
+## D-030 · Swing for the client, and data in memory
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** reported in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #34, #80
+
+- **Context:** The client of C1 is already written in Swing, and the users and the audit log are kept in memory. Marcos recalls Ismael saying in class that persistence is not needed.
+- **Decision:** The desktop client uses Swing. The data is kept in memory while the program runs, and no database is implemented.
+- **Alternatives:** Another graphical library, such as JavaFX. A database, or saving the data in files.
+- **Reason:** Swing comes with Java, so it adds no dependency, and C1 already uses it. The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include a database.
+- **Consequences:** The data is lost when the program closes. It is assumption A10 of the theory report. A database would be a new implementation behind the same repository interfaces.
+- **Status:** Approved.
+
+## D-031 · Operational assumptions of the plan
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+
+- **Context:** The assignment requires all operational assumptions to be documented in the theory report, in the wiki and in this file (p. 3). The assumptions about requirements are in D-002 to D-005 and D-009, and those of the plan were only in the report.
+- **Decision:** The plan relies on these assumptions:
+  - **A1.** Each consultant is available 40 hours per week, and the team has seven members, but not all of them work on every discipline: R and D have two owners; A, I and T have one each. *If it is false:* The critical path of It5 and It10 (the two heaviest iterations) lengthens; the calendar of section 6 of the report is no longer feasible and the end date moves.
+  - **A2.** AI assistance is available 24 hours a day, but every AI output needs human review before it is merged; the schedule therefore books the review, not the generation. *If it is false:* A higher AI ratio does not shorten anything: the bottleneck is reviewer availability, not token throughput (E-12, E-13).
+  - **A3.** The cost of AI tooling is zero for the team: GitHub Copilot is covered by the university licence. *If it is false:* The budget of section 8 of the report must add a licensing line. The 9,080 € figure assumes no tooling cost.
+  - **A4.** Visual Paradigm 18.1 is available to all seven members with an academic licence (D-017). *If it is false:* Model exchange between members breaks, and the design discipline becomes a serial bottleneck.
+  - **A5.** The external systems are simulated behind interfaces, and no integration test uses a real endpoint. *If it is false:* FR20 grows from a configuration use case to an integration project; C2 and C1 both change.
+  - **A6.** The examination catalogue is seed data, not a separate requirement (D-003). *If it is false:* FR17 would not cover the catalogue: a new requirement would be needed, and FR06 and FR13 would depend on it.
+  - **A7.** Iteration 0 and Iteration 11 have fixed costs of 1,000 € and 2,000 € given by the assignment, not estimated by us. *If it is false:* The total of 9,080 € and the comparison with 10,982.50 € both become invalid.
+  - **A8.** Human work costs 25 € per hour in every discipline, the rate of the example in the Kickoff (p. 27). The specification itself gives no rate. *If it is false:* Every cost of section 8 of the report changes. Exercise E.01.02 also considers a different rate for each profile.
+  - **A9.** We build one client, a Java desktop application. Mobile and web clients and DICOM image viewers are out of scope (D-027). The Kickoff (p. 11) speaks of one Maven module per type of client. *If it is false:* Each new type of client is a new Maven module that uses the same contracts, and FR09 needs a viewer for the images.
+  - **A10.** The client uses Swing, and the data is kept in memory while the program runs: no database is implemented (D-030). *If it is false:* The repositories get a new implementation behind the same interfaces, for example IUserAccountRepository.
+- **Alternatives:** Keep them only in the report.
+- **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
+- **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
