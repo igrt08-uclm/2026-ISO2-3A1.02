@@ -343,3 +343,23 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Keep them only in the report.
 - **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
 - **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
+
+## D-032 · One Maven submodule per component
+**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** to be confirmed in [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Issues:** #34
+
+- **Context:** The assignment says that each component must be an individual Maven submodule of the root multi-module architecture (p. 7), while the Kickoff speaks of one module per application (p. 11). Until now each component was a package inside `server` and `client` (D-016), and section 5.3 of the theory report argued for it. The reference solution that the professor shared on 9 November uses one Maven submodule per component. Only C1 is written, so this is the moment when changing the structure costs least.
+- **Decision:** Each component is a Maven submodule. `server` and `client` become aggregator modules with one submodule per component on each side (for example `server/c1-access` and `client/c1-access`), and `common` keeps the contracts of all the components, one package per component. C1 is moved to its two submodules before C2 is implemented, in a feature branch with a pull request, and every later component is created directly as a submodule. Each component submodule has its own version: MINOR per use case of that component, starting at 1.0.0.
+- **Alternatives:** Keep one package per component inside `server` and `client` (D-016). Ask Ismael and wait for his answer before changing anything.
+- **Reason:** It meets both documents: the applications stay as modules, as the Kickoff asks, and the components become submodules, as the assignment asks. Each component gets its own pom, version and declared dependencies, so a component that uses the internals of another one does not compile unless its pom declares it.
+- **Consequences:** More poms to maintain and a longer build. The hours of moving C1 are not in the estimate and are recorded as real hours of It2. The version per module of D-014 becomes a version per component, so the traceability page shows one version per component instead of one for the whole server and client. The README and sections 5.3, 13, 15, 18 and 19 of the theory report change with it. If it is approved, D-014 and D-016 get a Status line that points here.
+- **Status:** Proposed, to be approved in Meeting 7.
+
+## D-033 · Test coverage threshold
+**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** to be confirmed in [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Issues:** #89
+
+- **Context:** The quality plan of the theory report (sections 19.8, 23 and 27.1) needs a measurable threshold for the tests. Until now coverage was not measured. C1 was measured on 9 November: 93 % of its lines and 91 % of its branches are covered.
+- **Decision:** Every module keeps at least 80 % of its lines and 70 % of its branches covered. JaCoCo checks it in `mvn verify` with a rule at BUNDLE level (#90), so the build fails below the threshold and the pull request cannot be merged (D-001). The same threshold applies to every release.
+- **Alternatives:** A threshold that rises with each release (from 60 % to 80 %). No threshold, only the coverage report.
+- **Reason:** It is below what C1 already reaches, so it works as a floor that new components must not break, and CI checks it on every pull request without anyone having to remember it.
+- **Consequences:** Each new module inherits the rule from the parent pom, including the component submodules of D-032. Modules without branches pass the check. Changing the numbers needs a new decision.
+- **Status:** Proposed, to be approved in Meeting 7.
