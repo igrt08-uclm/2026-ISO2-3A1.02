@@ -64,7 +64,7 @@ DECISIONS.md     Every decision of the team, with its reason (D-001, D-002…)
 AGENTS.md        Rules for the AI agents that help us implement and test
 ```
 
-Inside each module, every component has its own package, for example `es.uclm.esi.iso2.server.access` for C1. The interfaces are designed by the team and live in `common`, so the client and the server only depend on contracts.
+Inside each module, every component has its own package, for example `es.uclm.esi.iso2.server.access` for C1. From Iteration 2 each component becomes a Maven submodule of `server` and `client` (`server/c1-access`, `client/c1-access`…), with its own version (D-032). The interfaces are designed by the team and live in `common`, so the client and the server only depend on contracts.
 
 ## How we work
 
@@ -72,8 +72,8 @@ Inside each module, every component has its own package, for example `es.uclm.es
   - Use cases: `feature/UCxx-server` and `feature/UCxx-client`
   - Other tasks: `feature/short-description`
   - Fixes: `bugfix/…`; releases: `release/x.y.z`; urgent fixes: `hotfix/x.y.z`
-- **Pull requests** need a green build and the approval of a member who is not the author (D-001). The review checklist is in the [pull request template](.github/pull_request_template.md).
-- **Versions** follow [Semantic Versioning 2.0.0](https://semver.org/). The product goes from 0.1.0 to 1.0.0, one MINOR per iteration, and every release is an annotated tag on `main` (D-014).
+- **Pull requests** need a green build and the approval of a member who is not the author (D-001). The build fails below 80 % of line coverage or 70 % of branch coverage (JaCoCo, D-033). The review checklist is in the [pull request template](.github/pull_request_template.md).
+- **Versions** follow [Semantic Versioning 2.0.0](https://semver.org/). The product goes from 0.1.0 to 1.0.0, one MINOR per iteration, and every release is an annotated tag on `main` (D-014). Each component has its own version, starting at 1.0.0 (D-032).
 - **Tasks** are GitHub issues: one per component, one per use case and one sub-issue per RADIT discipline, grouped in one milestone per iteration.
 - **Meetings** are recorded, and their minutes and decisions are published on the wiki.
 - **AI agents** (GitHub Copilot and others) implement and test what the team has designed, following [AGENTS.md](AGENTS.md). The team does the requirements, the analysis, the design and the design of the tests, and reviews everything the agents produce before it is merged.

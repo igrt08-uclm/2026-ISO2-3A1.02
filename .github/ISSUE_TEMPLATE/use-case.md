@@ -1,7 +1,7 @@
 ---
 name: Use case
 about: Use case template
-title: "UCxx – Name (module vX.Y.Z)"
+title: "UCxx – Name (Cn vX.Y.Z)"
 ---
 ## Use Case
 UC · FR · Phase · Module · Minutes

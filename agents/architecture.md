@@ -3,8 +3,8 @@
 ## Code structure (D-016)
 D-032 changes it to one Maven submodule per component; this section is updated in the pull request that moves C1.
 ```
-radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, Java 21, JUnit 6.1.3
-├── common/              shared contracts (interfaces and data classes), version 1.0.0-SNAPSHOT
+radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SNAPSHOT during It2), Java 21, JUnit 6.1.3
+├── common/              shared contracts (interfaces and data classes), with its own version
 ├── server/              server application, depends on common
 └── client/              client application, depends on common and server
 ```
@@ -14,7 +14,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, J
   the client uses them. The communication is simulated with direct Java calls, not a network. The version of
   `common` is set once in the `<dependencyManagement>` of the parent pom.
 - The client starts the whole program: only `es.uclm.esi.iso2.client.Main` imports `server`, to create the services.
-  The screens (`IU_` classes, Swing for now; the final technology is decided in Meeting 6) only use `common`.
+  The screens (`IU_` classes, Swing, D-030) only use `common`.
 - External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces.
 - Each component is the only one that writes its data; the others use it through its interfaces. An operation of a
   component that is delivered later is declared as an interface now and has a simulated implementation (D-023).

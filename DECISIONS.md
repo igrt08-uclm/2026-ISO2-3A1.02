@@ -261,7 +261,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Consequences:** The discharge is delivered in It8, after C5 (D-013). C4 and C5 reject inactive patients. The patient identifier (national ID or health card number) is not decided yet: it is decided with the requirements of C3.
 
 ## D-025 · Working method with AI agents: Spec-Driven Development
-**Date:** 29/10/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #60, PR #61
+**Date:** 29/10/2026 · **Iteration:** 1 · **Minutes:** merged in PR #61, approved by two members; extended in [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) by D-034 · **Issues:** #60, PR #61
 
 - **Context:** The team implements the use cases with GitHub Copilot (D-006). The assignment asks to bind the artefacts of the Unified Process to development descriptors such as PLAN.md or CONTEXT.md under Spec-Driven Development, always with a person in the loop (assignment, pp. 4 and 10), and the Kickoff describes the cycle: the team designs, the agent proposes PlantUML, the team approves it in Visual Paradigm, and the agent implements what was designed (Kickoff, p. 28). Without a fixed method, an agent can start coding on its own, fill gaps with assumptions or change things outside its task.
 - **Decision:**
@@ -271,9 +271,10 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** An SDD tool such as GitHub Spec Kit or Kiro, which would make the agent write the requirements and choose the architecture, and both are human tasks here (Kickoff, p. 23; D-016). A state file per component, which would conflict between branches and double the commits. No fixed method.
 - **Reason:** The agent only works on what was specified and designed, every doubt reaches a person before the code is written, and the plans are evidence of how the team uses AI.
 - **Consequences:** Extends D-006 and D-008. The designers keep the approved diagrams in `doc/design/` in a form that agents can read, because they cannot open `.vpp` files. Each sub-issue has its plan in `doc/plans/`, committed on its branch with the code.
+- **Status:** In force since 29/10/2026. Extended by D-034 on 11/11/2026: tests, Javadoc and the professor's repository.
 
 ## D-026 · Conclusions on the effect of AI on the plan
-**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:29:24–0:36:12 · **Issues:** #80
 
 - **Context:** The Kickoff (p. 29) asks to record five conclusions in this file, and the assignment asks to discount the optimism bias of AI and to compare the estimate with one made by an agent (pp. 5 and 6). None of them was recorded.
 - **Decision:**
@@ -285,18 +286,20 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Taking the forecast of the agent as the estimate. Not applying any discount.
 - **Reason:** The forecast does not count failed sessions, and it shows that what changes the budget is the time people need to review the output, not the tokens.
 - **Consequences:** These conclusions are in sections 9.2, 9.4 and 9.6 of the theory report.
+- **Status:** Approved in Meeting 6 (08/11/2026).
 
 ## D-027 · One desktop client
-**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:17:23–0:21:20, 0:29:24–0:31:44 · **Issues:** #80
 
 - **Context:** The assignment describes clients for desktop and mobile, and web access with DICOM image viewers (p. 1). The Kickoff (p. 11) speaks of one Maven module per type of client.
 - **Decision:** We build one client, a Java desktop application. Mobile and web clients and DICOM viewers are out of scope.
 - **Alternatives:** A web client or a mobile client as well.
 - **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients.
 - **Consequences:** It is assumption A9 of the theory report. Another client would be a new Maven module with the same contracts.
+- **Status:** Approved in Meeting 6 (08/11/2026).
 
 ## D-028 · Correction of the plan totals and recovery of the delay
-**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #57
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:09:57–0:11:15, 0:29:24–0:31:44 · **Issues:** #80, #57
 
 - **Context:** The totals of the plan counted the discharge of FR12 twice (E-15). C1 ended on 7 November instead of 28 October (E-10), with the release v0.1.0, and C2, C3 and C4 have not started. The assignment asks to explain how the deviations are recovered (p. 6, note 13).
 - **Decision:**
@@ -306,15 +309,17 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Keeping the dates and accepting more delays. Reducing the scope, which the assignment does not allow.
 - **Reason:** All the functional requirements have to be fulfilled, and the final date is fixed.
 - **Consequences:** It asks for 5 to 8 hours per member per week. When it is approved, the dates of the next milestones and of *Traceability and releases* are updated. The due date of Milestone 1 stays as it was, so that the delay can be seen (#57).
+- **Status:** Approved in Meeting 6 (08/11/2026).
 
 ## D-029 · Critical quality characteristics
-**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80, #54
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:14:40–0:17:23 · **Issues:** #80, #54
 
 - **Context:** The professor asked the team to choose three quality attributes (Meeting 5). The practice P.01.03 asks for at least one subcharacteristic of each one and for their impact on the requirements (slide 13), and the assignment asks to identify and justify the critical characteristics for this healthcare domain (p. 9). Whatever we choose has to be fulfilled, so the proposal takes what C1 already does and what does not change the architecture.
 - **Decision:** The three critical characteristics of ISO/IEC 25010 are **Security** (non-repudiation), **Functional suitability** (functional appropriateness) and **Usability** (user error protection). The other five are kept with a lower weight.
 - **Alternatives:** Reliability instead of Usability: availability, fault tolerance and recoverability clash with having the data in memory (D-030), and C1 has no logging yet. All eight with the same weight.
 - **Reason:** A failure in any of the three has a clinical or legal consequence: nobody can prove who did what, a profile reaches functions that are not for it, or wrong data reaches the patient.
 - **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them. Each new component records its critical operations, checks the role and validates its forms, and the pull request template has the review checklist.
+- **Status:** Approved in Meeting 6 (08/11/2026).
 
 ## D-030 · Swing for the client, and data in memory
 **Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** reported in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #34, #80
@@ -327,23 +332,24 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Status:** Approved.
 
 ## D-031 · Operational assumptions of the plan
-**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #80
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:29:24–0:31:44 · **Issues:** #80
 
 - **Context:** The assignment requires all operational assumptions to be documented in the theory report, in the wiki and in this file (p. 3). The assumptions about requirements are in D-002 to D-005 and D-009, and those of the plan were only in the report.
 - **Decision:** The plan relies on these assumptions:
   - **A1.** Each consultant is available 40 hours per week, and the team has seven members, but not all of them work on every discipline: R and D have two owners; A, I and T have one each. *If it is false:* The critical path of It5 and It10 (the two heaviest iterations) lengthens; the calendar of section 6 of the report is no longer feasible and the end date moves.
   - **A2.** AI assistance is available 24 hours a day, but every AI output needs human review before it is merged; the schedule therefore books the review, not the generation. *If it is false:* A higher AI ratio does not shorten anything: the bottleneck is reviewer availability, not token throughput (E-12, E-13).
-  - **A3.** The cost of AI tooling is zero for the team: GitHub Copilot is covered by the university licence. *If it is false:* The budget of section 8 of the report must add a licensing line. The 9,080 € figure assumes no tooling cost.
+  - **A3.** The cost of AI tooling is zero for the team: GitHub Copilot is covered by the university licence. When the monthly Copilot quota runs out, the professor allows other AI agents, which are used under the same rules (AGENTS.md) and whose cost is not charged to the project (D-034). *If it is false:* The budget of section 8 of the report must add a licensing line. The 9,080 € figure assumes no tooling cost.
   - **A4.** Visual Paradigm 18.1 is available to all seven members with an academic licence (D-017). *If it is false:* Model exchange between members breaks, and the design discipline becomes a serial bottleneck.
   - **A5.** The external systems are simulated behind interfaces, and no integration test uses a real endpoint. *If it is false:* FR20 grows from a configuration use case to an integration project; C2 and C1 both change.
   - **A6.** The examination catalogue is seed data, not a separate requirement (D-003). *If it is false:* FR17 would not cover the catalogue: a new requirement would be needed, and FR06 and FR13 would depend on it.
   - **A7.** Iteration 0 and Iteration 11 have fixed costs of 1,000 € and 2,000 € given by the assignment, not estimated by us. *If it is false:* The total of 9,080 € and the comparison with 10,982.50 € both become invalid.
-  - **A8.** Human work costs 25 € per hour in every discipline, the rate of the example in the Kickoff (p. 27). The specification itself gives no rate. *If it is false:* Every cost of section 8 of the report changes. Exercise E.01.02 also considers a different rate for each profile.
+  - **A8.** Human work costs 25 € per hour in every discipline. The specification itself gives no rate. *If it is false:* Every cost of section 8 of the report changes. Exercise E.01.02 also considers a different rate for each profile.
   - **A9.** We build one client, a Java desktop application. Mobile and web clients and DICOM image viewers are out of scope (D-027). The Kickoff (p. 11) speaks of one Maven module per type of client. *If it is false:* Each new type of client is a new Maven module that uses the same contracts, and FR09 needs a viewer for the images.
   - **A10.** The client uses Swing, and the data is kept in memory while the program runs: no database is implemented (D-030). *If it is false:* The repositories get a new implementation behind the same interfaces, for example IUserAccountRepository.
 - **Alternatives:** Keep them only in the report.
 - **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
 - **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
+- **Status:** Approved in Meeting 6 (08/11/2026).
 
 ## D-032 · One Maven submodule per component
 **Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:02:26–0:04:07, 0:43:07 · **Issues:** #34
