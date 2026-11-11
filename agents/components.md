@@ -22,13 +22,33 @@ file must be corrected. The rules for agents are in [AGENTS.md](../AGENTS.md).
 
 It0 (Inception) was the project plan.
 
-## Module versions (D-014)
-- `server` and `client` versions are **cumulative for the whole project**: they start at `1.0.0` with the first use
-  case and MINOR goes up with each use case delivered (23 deliveries, because UC12 is delivered twice), so the
-  planned sequence runs from `1.0.0` (It1) to `1.22.0` (It10).
-- The version of each use case is written in the title of its issue, e.g. `UC17 – Server (module v1.3.0)`.
-- Inside an iteration, a use case that depends on another one takes the higher version. C1 is planned as UC22
-  `1.0.0`, UC19 `1.1.0`, UC18 `1.2.0`.
+## Component names and versions (D-014, D-032)
+Each component is a Maven submodule on each side, named `cN-<name>`: `server/cN-<name>` and `client/cN-<name>`
+(D-032). Each component has **its own version**: it starts at `1.0.0` with its first use case, MINOR goes up with
+each new use case of that component and PATCH with each fix. The server and the client side of a component may
+differ if a use case changes only one of them. `common` keeps one package per component and its own version.
+
+| Component | Submodule name | Use case → component version |
+|---|---|---|
+| C1 Access and security | `c1-access` | UC22 → 1.0.0, UC19 → 1.1.0, UC18 → 1.2.0 |
+| C2 Configuration and integrations | `c2-configuration` | UC17 → 1.0.0, UC20 → 1.1.0 |
+| C3 Patients | `c3-patients` | UC12 register and modify → 1.0.0, UC12 discharge → 1.1.0 (It8) |
+| C4 Clinical orders | `c4-orders` | UC06 → 1.0.0, UC07 → 1.1.0, UC08 → 1.2.0 (It9) |
+| C5 Appointment planning | `c5-appointments` | UC13 → 1.0.0, UC15 → 1.1.0, UC14 → 1.2.0 |
+| C6 Patient portal | `c6-portal` | UC01 → 1.0.0, UC04 → 1.1.0, UC03 → 1.2.0 and UC05 → 1.3.0 (It8) |
+| C7 Execution and reports | `c7-reports` | UC10 → 1.0.0, UC09 → 1.1.0 |
+| C8 Notifications | `c8-notifications` | UC02 → 1.0.0 |
+| C9 Statistics | `c9-statistics` | UC11 → 1.0.0, UC16 → 1.1.0, UC21 → 1.2.0 |
+
+- **Always name the component with its version**, never a bare number: write `C2 1.1.0`, not `1.1.0` or
+  `module v1.4.0`. Use it in issue titles (`UC20 – Server (C2 v1.1.0)`), plans, commit bodies, pull requests and
+  release notes.
+- Inside a component, a use case that depends on another one takes the higher version (D-021).
+- Release v0.1.0 was built before D-032, with C1 as a package of `server` and `client` at `1.2.0`. Until C1 is
+  moved to `server/c1-access` and `client/c1-access`, those two poms carry the version of C1. Older issue titles
+  still say `(module v1.x.0)`: that is the old cumulative numbering of D-014, and the table above replaces it.
+- If a submodule name of the table is not the one used in the repository, the repository wins: tell the member and
+  this file is corrected.
 
 ## Dependencies between use cases
 Common to all use cases: UC22 (identified user) and UC18 (permissions). Use cases that access clinical data also
