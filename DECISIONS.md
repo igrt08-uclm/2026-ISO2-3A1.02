@@ -67,6 +67,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Other agents allowed by the specification (OpenCode, Antigravity).
 - **Reason:** It is the reference environment recommended by the specification, and it is free with the UCLM student licence.
 - **Consequences:** The cost of AI models for the team is €0. *The agent suggests; we decide.*
+- **Status:** Updated by D-034 on 11/11/2026: other agents may be used when the Copilot quota runs out.
 
 ## D-007 · Iteration N = use cases with priority N
 **Date:** 13/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 2](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-2) · **Time in the recording:** 0:05:42, 0:28:21–0:34:24
@@ -151,7 +152,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** One version per component, shared by the client and the server (proposed in Meeting 3). Separate versions for the client and the server with a compatibility table between them.
 - **Reason:** Follow the course guidelines (Maven practice, Git Flow and T.2.01): the version lives in the poms and in the tags of `main`, so it can be traced and built.
 - **Consequences:** Every issue shows the version of the module it changes (for example, server 1.0.0). Tags per component, such as `C1-v1.0.0`, are not used. When the product version changes, `<parent><version>` must also change in the server and client poms.
-- **Status:** Updated by D-021 on 28/10/2026: order of the module versions within an iteration.
+- **Status:** Updated by D-021 on 28/10/2026: order of the module versions within an iteration. Updated by D-032 on 11/11/2026: each component submodule has its own version.
 
 ## D-015 · Client and server: sub-issues and development order
 **Date:** 21/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 3](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-3) (0:08:59–0:27:58, 1:23:47–1:24:55), [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:20:25)
@@ -183,7 +184,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Two repositories; a single module; one Maven module per component; Spanish names (`radiodiagnostico`, `servidor`, `cliente`), as in the Spanish version of the Maven practice; the contracts copied in both modules; real communication over the network (REST or sockets).
 - **Reason:** One `mvn verify` builds and tests everything, and the versions and libraries are set once in the parent. The names are in English, like the rest of the project and the branches. With a single copy of the contracts, the client and the server cannot get out of sync, and the build fails if they stop matching. Real network communication is outside the scope of the subject.
 - **Consequences:** The `common` module has to be added to the Maven structure, with its own version (D-014) (#35). Nobody approves a pull request with a red build. The team will check with Ismael that the `common` module is accepted (#34).
-- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated.
+- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated. Updated by D-032 on 11/11/2026: one Maven submodule per component instead of one package.
 
 ## D-017 · Visual Paradigm version
 **Date:** 25/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:34:47–0:37:16)
@@ -345,21 +346,35 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
 
 ## D-032 · One Maven submodule per component
-**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** to be confirmed in [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Issues:** #34
+**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:02:26–0:04:07, 0:43:07 · **Issues:** #34
 
 - **Context:** The assignment says that each component must be an individual Maven submodule of the root multi-module architecture (p. 7), while the Kickoff speaks of one module per application (p. 11). Until now each component was a package inside `server` and `client` (D-016), and section 5.3 of the theory report argued for it. The reference solution that the professor shared on 9 November uses one Maven submodule per component. Only C1 is written, so this is the moment when changing the structure costs least.
 - **Decision:** Each component is a Maven submodule. `server` and `client` become aggregator modules with one submodule per component on each side (for example `server/c1-access` and `client/c1-access`), and `common` keeps the contracts of all the components, one package per component. C1 is moved to its two submodules before C2 is implemented, in a feature branch with a pull request, and every later component is created directly as a submodule. Each component submodule has its own version: MINOR per use case of that component, starting at 1.0.0.
 - **Alternatives:** Keep one package per component inside `server` and `client` (D-016). Ask Ismael and wait for his answer before changing anything.
 - **Reason:** It meets both documents: the applications stay as modules, as the Kickoff asks, and the components become submodules, as the assignment asks. Each component gets its own pom, version and declared dependencies, so a component that uses the internals of another one does not compile unless its pom declares it.
 - **Consequences:** More poms to maintain and a longer build. The hours of moving C1 are not in the estimate and are recorded as real hours of It2. The version per module of D-014 becomes a version per component, so the traceability page shows one version per component instead of one for the whole server and client. The README and sections 5.3, 13, 15, 18 and 19 of the theory report change with it. If it is approved, D-014 and D-016 get a Status line that points here.
-- **Status:** Proposed, to be approved in Meeting 7.
+- **Status:** Approved in Meeting 7 (11/11/2026).
 
 ## D-033 · Test coverage threshold
-**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** to be confirmed in [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Issues:** #89
+**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:29:09–0:30:28 · **Issues:** #89, #90
 
 - **Context:** The quality plan of the theory report (sections 19.8, 23 and 27.1) needs a measurable threshold for the tests. Until now coverage was not measured. C1 was measured on 9 November: 93 % of its lines and 91 % of its branches are covered.
 - **Decision:** Every module keeps at least 80 % of its lines and 70 % of its branches covered. JaCoCo checks it in `mvn verify` with a rule at BUNDLE level (#90), so the build fails below the threshold and the pull request cannot be merged (D-001). The same threshold applies to every release.
 - **Alternatives:** A threshold that rises with each release (from 60 % to 80 %). No threshold, only the coverage report.
 - **Reason:** It is below what C1 already reaches, so it works as a floor that new components must not break, and CI checks it on every pull request without anyone having to remember it.
 - **Consequences:** Each new module inherits the rule from the parent pom, including the component submodules of D-032. Modules without branches pass the check. Changing the numbers needs a new decision.
-- **Status:** Proposed, to be approved in Meeting 7.
+- **Status:** Approved in Meeting 7 (11/11/2026). The check was merged in #90 on 10/11/2026.
+
+## D-034 · Rules for the agents after Meeting 7
+**Date:** 11/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:04:07–0:07:48, 0:24:36–0:25:46, 0:31:04–0:33:45
+
+- **Context:** The professor shared his own solution of the project, and the lab session on JUnit (S.04.01) explained how tests are designed and written with an agent. AGENTS.md only said that the team designs the tests and the agent writes and runs them. The report also said that only GitHub Copilot is used, and the professor said in class that other agents can be used when the Copilot quota runs out.
+- **Decision:**
+  - **The professor's repository as a reference.** When the agent has a doubt, it may read the reference repository shared by the professor, explain how he solved it and wait for the team to decide. It is only an inspiration: no code or text is copied, and our decisions win when they differ (for example, he uses a database, Spring Boot and JavaFX; we do not, D-030).
+  - **Tests as in S.04.01.** The team designs the cases in a table (equivalence classes, boundary values and error guessing, combined with each use or pairwise), and each expected result comes from a requirement. The agent writes them with JUnit 6 (`org.junit.jupiter`), one method per case, with `@DisplayName` in English and the structure arrange, act, assert, without changing the production code. When a test fails, the agent explains whether the error is in the test or in the code; a bug in the code gets an issue and a `bugfix/…` branch, and an expected value is never changed to make a test pass. The tests of a use case stay in its branch, `feature/UCxx-server` or `feature/UCxx-client` (D-015).
+  - **Javadoc.** The agent writes the Javadoc of every class and public method when it writes them, not at the end of the project.
+  - **Other agents.** When the monthly GitHub Copilot quota runs out, other AI agents may be used, with the same rules (AGENTS.md).
+- **Alternatives:** Not using the professor's repository; letting the agent design the tests; writing the Javadoc at the end of the project.
+- **Reason:** The professor's repository shows what he expects, but our decisions are different. In the assessment, the design of the cases counts for more than the coverage or the JUnit code (S.04.01, slide 19). Documenting while the code is written is easier than documenting it later.
+- **Consequences:** AGENTS.md and agents/architecture.md are updated in the same pull request. D-006 is updated by this decision.
+- **Status:** Approved.
