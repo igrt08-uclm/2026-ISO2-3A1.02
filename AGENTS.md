@@ -76,6 +76,16 @@ A question that does not change any file does not need a plan.
     branch), created only after the member approves it (rule 9):
     `git worktree add ../2026-ISO2-3A1.02-UC20-server feature/UC20-server`.
     Remove it with `git worktree remove <folder>` once its pull request is merged; the branch is kept (rule 7).
+16. **The professor's repository is only an inspiration** (D-034). When you have a doubt, you may read
+    https://github.com/IsmaelCaballero/PrISO2-25-26, explain to the member how it solves the problem and wait for the
+    team to decide. Never copy its code or text, and when it differs from DECISIONS.md, DECISIONS.md wins: it uses a
+    database, Spring Boot and JavaFX, and we do not (D-030, rule 6).
+17. **Tests as in the lab session S.04.01** (D-034). The member gives you the table of cases (equivalence classes,
+    boundary values, error guessing); you do not invent the expected results. Write one JUnit 6 method per case
+    (`org.junit.jupiter`, never JUnit 4), with `@DisplayName` in English and arrange, act, assert, without changing
+    the production code. When a test fails, explain whether the error is in the test or in the code, and never change
+    an expected value to make a test pass. The build fails below 80 % of lines or 70 % of branches (D-033).
+18. **Javadoc as you write** (D-034). Every class and public method you create or change has its Javadoc in English.
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
@@ -88,10 +98,12 @@ choose on your own: tell the member.
 | Commits | Conventional Commits: `type(scope): summary (#issue)`, e.g. `feat(UC22): validate credentials against the SSO (#13)`, `fix(UC22): … (#13)`, `docs(UC22): plan for the server part (#13)` | Git practice p. 28, Kickoff p. 9 |
 | Pull requests | To `develop`, with `Closes #n` in the description; one sub-issue = one branch = one pull request | Kickoff p. 19 |
 | Issues | Component issue → use case issue → client and server sub-issues, using the templates in `.github/ISSUE_TEMPLATE/` | D-015, D-018 |
-| Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); `server` and `client` have independent versions: MINOR per use case, PATCH per fix | D-014, D-021, Maven practice p. 19 |
+| Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); each component submodule (`server/cN`, `client/cN`) has its own version: MINOR per use case of that component, PATCH per fix | D-014, D-021, D-032, Maven practice p. 19 |
 | Releases | `release/0.x.0` from `develop`, merged into `main` and `develop`, annotated tag `v0.x.0` on `main` | Kickoff p. 9, Git practice p. 19 |
 | Diagrams | Propose them as PlantUML text, never as images; the team imports and approves them in Visual Paradigm 18.1 | D-008, D-017, assignment p. 5, note 9 |
 | Language | Code, comments, commits, issues and documents in English | D-016 |
+| Tests | Test class `<Class>Test` in `src/test/java`, same package; one method per case of the member's table; `@DisplayName` in English; arrange, act, assert | D-034, S.04.01 |
+| Javadoc | Every class and public method, in English, written together with the code | D-034 |
 
 ## Where to find things
 | What | Where |
@@ -106,6 +118,7 @@ choose on your own: tell the member.
 | Iterations, dates and versions | Wiki: *Traceability and releases* |
 | Meeting minutes and assigned tasks | Wiki: *Minutes of meetings* and the issues |
 | Errors already made | Wiki: *Errors and lessons learned* |
+| How the professor solved a similar problem (inspiration only, rule 16) | https://github.com/IsmaelCaballero/PrISO2-25-26 |
 
 The wiki is at https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki. The course guidelines (assignment, Kickoff, Git
 and Maven practices) are not in this repository; if a local `guidelines/` folder exists, read it for the full rules.

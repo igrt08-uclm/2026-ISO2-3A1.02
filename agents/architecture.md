@@ -1,6 +1,7 @@
 # Architecture, build and tests
 
 ## Code structure (D-016)
+D-032 changes it to one Maven submodule per component; this section is updated in the pull request that moves C1.
 ```
 radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, Java 21, JUnit 6.1.3
 ├── common/              shared contracts (interfaces and data classes), version 1.0.0-SNAPSHOT
@@ -23,6 +24,10 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, version 0.1.0-SNAPSHOT, J
 ## Build and test
 - `mvn -B verify` builds and runs all the tests. The CI (`.github/workflows/maven.yml`) runs it on every push and
   pull request to `main` and `develop`; a pull request with a red build is not approved.
-- Every use case has unit tests. The team designs the tests; you can write and run them (assignment, p. 3).
-- When a use case is delivered, its module version goes up in `server/pom.xml` or `client/pom.xml` (D-014, D-021).
+- Every use case has unit tests. The team designs the cases in a table and you write and run them, as in rule 17 of
+  [AGENTS.md](../AGENTS.md) (assignment, p. 3; D-034).
+- JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
+  build fails below 80 % of lines or 70 % of branches in any module (D-033).
+- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). Until C1 is moved to its
+  submodules, that is the version of `server/pom.xml` or `client/pom.xml`.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).
