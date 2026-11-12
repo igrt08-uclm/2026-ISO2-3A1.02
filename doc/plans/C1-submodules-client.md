@@ -37,20 +37,20 @@
 
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify`). Step 2 cannot be split.
-- [ ] 1. Plan of this sub-issue (`docs(C1): plan for the client submodule (#101)`).
-- [ ] 2. Move the code and the tests to `client/c1-access`, create its pom and turn `client/pom.xml` into an aggregator.
-- [ ] 3. Update `README.md`, `agents/architecture.md` and `agents/components.md`.
+- [x] 1. Plan of this sub-issue (`docs(C1): plan for the client submodule (#101)`). – 8ff717e.
+- [x] 2. Move the code and the tests to `client/c1-access`, create its pom and turn `client/pom.xml` into an aggregator. – dd6b97d.
+- [x] 3. Update `README.md`, `agents/architecture.md` and `agents/components.md`. – e9b6d5b.
 
 ## Verification
-- [ ] `git diff --stat -M` shows the Java files only as renames.
-- [ ] `mvn -B verify` is green: `common` 16, `server-c1-access` 144 and `client-c1-access` 73 tests, as before.
-- [ ] The JaCoCo check passes in `client-c1-access`.
+- [x] `git diff --stat -M` shows the Java files only as renames.
+- [x] `mvn -B verify` is green: `common` 16, `server-c1-access` 144 and `client-c1-access` 73 tests, as before.
+- [x] The JaCoCo check passes in `client-c1-access`.
 - [ ] The application starts with the new command of the README and the login, *Manage roles* and the audit log work (manual check by Javier).
 - [ ] After #104 is merged: `develop` merged into this branch, and the pull request only shows the client.
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** step 2 (move the code to `client/c1-access` and change the poms)
-- **Next step:** step 2 (move the code to `client/c1-access`)
+- **In progress:** nothing
+- **Next step:** manual check of the run command by Javier; wait for #104 to be merged, then merge develop and open the pull request
 - **Open questions:** none
 - **Last update:** 12/11/2026, Javier
