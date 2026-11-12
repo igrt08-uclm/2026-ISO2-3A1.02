@@ -47,8 +47,8 @@ differ if a use case changes only one of them. `common` keeps one package per co
   `module v1.4.0`. Use it in issue titles (`UC20 – Server (C2 v1.1.0)`), plans, commit bodies, pull requests and
   release notes.
 - Inside a component, a use case that depends on another one takes the higher version (D-021).
-- Release v0.1.0 was built before D-032, with C1 as a package of `server` and `client` at `1.2.0`. Until C1 is
-  moved to `server/c1-access` and `client/c1-access` (#93), those two poms carry the version of C1. The issue
+- Release v0.1.0 was built before D-032, with C1 as a package of `server` and `client` at `1.2.0`. Since #93, C1 is in
+  `server/c1-access` and `client/c1-access`, and those two poms carry the version of C1. The issue
   titles were changed to the component version on 11/11/2026 (#96); `(module v1.x.0)` in older commits or plans is
   the old cumulative numbering of D-014, and the table above replaces it.
 - If a submodule name of the table is not the one used in the repository, the repository wins: tell the member and
