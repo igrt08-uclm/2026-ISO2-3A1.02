@@ -45,12 +45,12 @@ Tick each step with the hash of its commit (green `mvn -B verify`). Step 2 canno
 - [x] `git diff --stat -M` shows the Java files only as renames.
 - [x] `mvn -B verify` is green: `common` 16, `server-c1-access` 144 and `client-c1-access` 73 tests, as before.
 - [x] The JaCoCo check passes in `client-c1-access`.
-- [ ] The application starts with the new command of the README and the login, *Manage roles* and the audit log work (manual check by Javier).
+- [x] The application starts with the new command of the README and the login, *Manage roles* and the audit log work (manual check by Javier). Checked by Javier on 12/11/2026.
 - [x] After #104 is merged: `develop` merged into this branch, and the pull request only shows the client. – abaa102 (#104 merged on 12/11/2026).
 - [ ] The CI of the pull request is green.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** manual check of the run command by Javier; open the pull request of #101 (when Javier asks)
+- **Next step:** open the pull request of #101 and wait for its review and CI
 - **Open questions:** none
 - **Last update:** 12/11/2026, Javier
