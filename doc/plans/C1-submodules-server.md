@@ -39,7 +39,7 @@
 Tick each step with the hash of its commit (green `mvn -B verify`). Step 1 cannot be split: if the code moves without the poms, or the poms change without the dependency of the client, the build is red.
 - [x] 1. Plan of this sub-issue (`docs(C1): plan for the server submodule (#100)`) – 16e77c4.
 - [x] 2. Move the code and the tests to `server/c1-access`, create its pom, turn `server/pom.xml` into an aggregator, and update `dependencyManagement` and the dependency of `client/pom.xml`. – b65c7ed.
-- [ ] 3. Update `README.md` and `agents/architecture.md` (server side).
+- [x] 3. Update `README.md` and `agents/architecture.md` (server side). – 962b913.
 
 ## Verification
 - [ ] `git diff --stat -M` shows the Java files only as renames (no content changes).
@@ -50,6 +50,6 @@ Tick each step with the hash of its commit (green `mvn -B verify`). Step 1 canno
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3 (README.md and agents/architecture.md, server side)
+- **Next step:** open the pull request of #100 (when Javier asks), then #101 on its own branch
 - **Open questions:** none
 - **Last update:** 12/11/2026, Javier
