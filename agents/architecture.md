@@ -1,13 +1,14 @@
 # Architecture, build and tests
 
 ## Code structure (D-016)
-D-032 changes it to one Maven submodule per component; this section is updated in the pull request that moves C1.
+Since D-032, each component is a Maven submodule of `server` and `client`, with its own version.
 ```
 radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SNAPSHOT during It2), Java 21, JUnit 6.1.3
 ├── common/              shared contracts (interfaces and data classes), with its own version
 ├── server/              aggregator of the server submodules (one per component)
 │   └── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.0), depends on common
-└── client/              client application, depends on common and server
+└── client/              aggregator of the client submodules (one per component)
+    └── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.0), depends on common and server-c1-access
 ```
 - One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1. A component's package
   is created in its own iteration; for now `common` only has `es.uclm.esi.iso2.common.access` (C1).
@@ -29,7 +30,6 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
   [AGENTS.md](../AGENTS.md) (assignment, p. 3; D-034).
 - JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
   build fails below 80 % of lines or 70 % of branches in any module (D-033).
-- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). The server of C1 is
-  already in `server/c1-access` (`server-c1-access`); until #101 moves its client, the version of the client of C1 is
-  that of `client/pom.xml`.
+- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). C1 is in `server/c1-access` (`server-c1-access`)
+  and `client/c1-access` (`client-c1-access`), both at 1.2.0.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).

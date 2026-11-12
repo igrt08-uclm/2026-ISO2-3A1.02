@@ -44,7 +44,7 @@ Run the application (a Swing desktop window):
 
 ```bash
 mvn -B install -DskipTests
-mvn -B -pl client exec:java -Dexec.mainClass=es.uclm.esi.iso2.client.Main
+mvn -B -pl client/c1-access exec:java -Dexec.mainClass=es.uclm.esi.iso2.client.Main
 ```
 
 The client and the server run in the same program: the client calls the server through Java interfaces, and the data is kept in memory, so it starts again from zero every time the application is opened (D-016, D-030). The test accounts are defined in [`AuthenticatorSystemSimulator`](server/c1-access/src/main/java/es/uclm/esi/iso2/server/access/integration/AuthenticatorSystemSimulator.java), which simulates the hospital's login system.
@@ -56,7 +56,8 @@ pom.xml          Parent pom: product version, Java 21 and the versions of the de
 common/          Contracts (interfaces), domain classes and exceptions shared by client and server
 server/          Aggregator of the server submodules, one per component
   c1-access/       C1: services, in-memory repositories and simulations of the external systems
-client/          Swing windows (IU_ classes) and Main, which starts the application
+client/          Aggregator of the client submodules, one per component
+  c1-access/       C1: Swing windows (IU_ classes) and Main, which starts the application
 doc/             Visual Paradigm project, approved designs and implementation plans
   ISO-Project.vpp  Official model with all the diagrams
   design/          Exported diagrams of each iteration
@@ -65,7 +66,7 @@ DECISIONS.md     Every decision of the team, with its reason (D-001, D-002…)
 AGENTS.md        Rules for the AI agents that help us implement and test
 ```
 
-Inside each module, every component has its own package, for example `es.uclm.esi.iso2.server.access` for C1. Each component is a Maven submodule of `server` and `client` (`server/c1-access`, `client/c1-access`…), with its own version (D-032). The server of C1 is already in `server/c1-access`; its client follows (#101). The interfaces are designed by the team and live in `common`, so the client and the server only depend on contracts.
+Inside each module, every component has its own package, for example `es.uclm.esi.iso2.server.access` for C1. Each component is a Maven submodule of `server` and `client` (`server/c1-access`, `client/c1-access`…), with its own version (D-032). C1 is already in `server/c1-access` and `client/c1-access`. The interfaces are designed by the team and live in `common`, so the client and the server only depend on contracts.
 
 ## How we work
 
