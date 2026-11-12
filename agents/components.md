@@ -28,7 +28,7 @@ Each component is a Maven submodule on each side, named `cN-<name>`: `server/cN-
 each new use case of that component and PATCH with each fix. The server and the client side of a component may
 differ if a use case changes only one of them. `common` keeps one package per component and its own version.
 
-| Component | Submodule name | Use case → component version |
+| Component | Submodule folder | Use case → component version |
 |---|---|---|
 | C1 Access and security | `c1-access` | UC22 → 1.0.0, UC19 → 1.1.0, UC18 → 1.2.0 |
 | C2 Configuration and integrations | `c2-configuration` | UC17 → 1.0.0, UC20 → 1.1.0 |
@@ -40,13 +40,17 @@ differ if a use case changes only one of them. `common` keeps one package per co
 | C8 Notifications | `c8-notifications` | UC02 → 1.0.0 |
 | C9 Statistics | `c9-statistics` | UC11 → 1.0.0, UC16 → 1.1.0, UC21 → 1.2.0 |
 
+- **Folder and artifactId.** The folder is the same on both sides (`server/c1-access`, `client/c1-access`), but
+  Maven needs a different `artifactId` for each pom: `server-c1-access` and `client-c1-access`, and the same for
+  the next components (`server-c2-configuration`, `client-c2-configuration`…) (#100, #101).
 - **Always name the component with its version**, never a bare number: write `C2 1.1.0`, not `1.1.0` or
   `module v1.4.0`. Use it in issue titles (`UC20 – Server (C2 v1.1.0)`), plans, commit bodies, pull requests and
   release notes.
 - Inside a component, a use case that depends on another one takes the higher version (D-021).
 - Release v0.1.0 was built before D-032, with C1 as a package of `server` and `client` at `1.2.0`. Until C1 is
-  moved to `server/c1-access` and `client/c1-access`, those two poms carry the version of C1. Older issue titles
-  still say `(module v1.x.0)`: that is the old cumulative numbering of D-014, and the table above replaces it.
+  moved to `server/c1-access` and `client/c1-access` (#93), those two poms carry the version of C1. The issue
+  titles were changed to the component version on 11/11/2026 (#96); `(module v1.x.0)` in older commits or plans is
+  the old cumulative numbering of D-014, and the table above replaces it.
 - If a submodule name of the table is not the one used in the repository, the repository wins: tell the member and
   this file is corrected.
 
