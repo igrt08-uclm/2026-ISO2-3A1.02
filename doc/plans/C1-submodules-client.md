@@ -50,7 +50,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`). Step 2 canno
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 2 (move the code to `client/c1-access` and change the poms)
 - **Next step:** step 2 (move the code to `client/c1-access`)
 - **Open questions:** none
 - **Last update:** 12/11/2026, Javier
