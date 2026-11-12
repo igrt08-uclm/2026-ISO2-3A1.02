@@ -7,7 +7,7 @@
 | | |
 |---|---|
 | **Sub-issue** | #n · branch `feature/UCxx-server` |
-| **Use case** | #n · FRxx · module version x.y.0 |
+| **Use case** | #n · FRxx · component version Cn x.y.0 |
 | **Specification** | use case issue #n and the wiki page *Requirements and Use Cases* |
 | **Design** | `doc/design/…` · contracts: section 6 of the component issue #n |
 | **Plan approved by** | member, dd/mm/yyyy |

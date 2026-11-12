@@ -1,7 +1,7 @@
 ---
 name: Client_Server
 about: Template for use case on Client or Server architecture
-title: "UCxx – Client/Server (module vX.Y.Z)"
+title: "UCxx – Client/Server (Cn vX.Y.Z)"
 ---
 ## Use Case
 UC · FR · Phase · Module · [Minutes](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-3)
