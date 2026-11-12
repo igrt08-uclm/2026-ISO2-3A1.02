@@ -5,7 +5,8 @@ D-032 changes it to one Maven submodule per component; this section is updated i
 ```
 radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SNAPSHOT during It2), Java 21, JUnit 6.1.3
 ├── common/              shared contracts (interfaces and data classes), with its own version
-├── server/              server application, depends on common
+├── server/              aggregator of the server submodules (one per component)
+│   └── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.0), depends on common
 └── client/              client application, depends on common and server
 ```
 - One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1. A component's package
@@ -28,6 +29,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
   [AGENTS.md](../AGENTS.md) (assignment, p. 3; D-034).
 - JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
   build fails below 80 % of lines or 70 % of branches in any module (D-033).
-- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). Until C1 is moved to its
-  submodules, that is the version of `server/pom.xml` or `client/pom.xml`.
+- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). The server of C1 is
+  already in `server/c1-access` (`server-c1-access`); until #101 moves its client, the version of the client of C1 is
+  that of `client/pom.xml`.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).
