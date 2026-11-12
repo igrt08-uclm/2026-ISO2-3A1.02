@@ -42,14 +42,14 @@ Tick each step with the hash of its commit (green `mvn -B verify`). Step 1 canno
 - [x] 3. Update `README.md` and `agents/architecture.md` (server side). – 962b913.
 
 ## Verification
-- [ ] `git diff --stat -M` shows the Java files only as renames (no content changes).
-- [ ] `mvn -B verify` is green: `common` 16, `server` 144 and `client` 73 tests, as before.
-- [ ] The JaCoCo check passes in `server-c1-access` (report in `server/c1-access/target/site/jacoco`).
-- [ ] The application still starts from `Main` (manual check with `mvn -B install -DskipTests` and the run command of the README).
+- [x] `git diff --stat -M` shows the Java files only as renames (no content changes).
+- [x] `mvn -B verify` is green: `common` 16, `server` 144 and `client` 73 tests, as before.
+- [x] The JaCoCo check passes in `server-c1-access` (report in `server/c1-access/target/site/jacoco`).
+- [x] The application still starts from `Main` (manual check with `mvn -B install -DskipTests` and the run command of the README). Checked by Javier on 12/11/2026: login, manage roles, audit and a user without permission.
 - [ ] The CI of the pull request is green.
 
 ## Status
 - **In progress:** nothing
 - **Next step:** open the pull request of #100 (when Javier asks), then #101 on its own branch
-- **Open questions:** none
+- **Open questions:** out of this sub-issue (rule 2): the welcome screen has no "Are you sure you want to log out?" confirmation (found by Javier while testing, 12/11/2026); it is a fix of the client of C1 (PATCH, C1 1.2.1) for the team to decide.
 - **Last update:** 12/11/2026, Javier
