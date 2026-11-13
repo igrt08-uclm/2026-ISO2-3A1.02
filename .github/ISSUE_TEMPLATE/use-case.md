@@ -4,7 +4,7 @@ about: Use case template
 title: "UCxx – Name (Cn vX.Y.Z)"
 ---
 ## Use Case
-UC · FR · Phase · Module · Minutes
+UC · FR · Phase · Component: Cn vX.Y.Z · Minutes
 Minutes (linked to wiki)
 ## RADIT Disciplines
 **A phase will only be marked as completed ("checked") if and only if both phases have been completed in the sub-issues.**
