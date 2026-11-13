@@ -78,7 +78,7 @@ Inside each module, every component has its own package, for example `es.uclm.es
 - **Versions** follow [Semantic Versioning 2.0.0](https://semver.org/). The product goes from 0.1.0 to 1.0.0, one MINOR per iteration, and every release is an annotated tag on `main` (D-014). Each component has its own version, starting at 1.0.0 (D-032).
 - **Tasks** are GitHub issues: one per component, one per use case and one sub-issue per RADIT discipline, grouped in one milestone per iteration.
 - **Meetings** are recorded, and their minutes and decisions are published on the wiki.
-- **AI agents** (GitHub Copilot and others) implement and test what the team has designed, following [AGENTS.md](AGENTS.md). The team does the requirements, the analysis, the design and the design of the tests, and reviews everything the agents produce before it is merged.
+- **AI agents** (GitHub Copilot, and Claude Code for the members who ran out of their Copilot quota, D-034) implement and test what the team has designed, following [AGENTS.md](AGENTS.md). The team does the requirements, the analysis, the design and the design of the tests, and reviews everything the agents produce before it is merged.
 
 ## Documentation
 
