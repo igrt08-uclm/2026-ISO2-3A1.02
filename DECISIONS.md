@@ -184,7 +184,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Two repositories; a single module; one Maven module per component; Spanish names (`radiodiagnostico`, `servidor`, `cliente`), as in the Spanish version of the Maven practice; the contracts copied in both modules; real communication over the network (REST or sockets).
 - **Reason:** One `mvn verify` builds and tests everything, and the versions and libraries are set once in the parent. The names are in English, like the rest of the project and the branches. With a single copy of the contracts, the client and the server cannot get out of sync, and the build fails if they stop matching. Real network communication is outside the scope of the subject.
 - **Consequences:** The `common` module has to be added to the Maven structure, with its own version (D-014) (#35). Nobody approves a pull request with a red build. The team will check with Ismael that the `common` module is accepted (#34).
-- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated. Updated by D-032 on 11/11/2026: one Maven submodule per component instead of one package.
+- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated. Updated by D-032 on 11/11/2026: one Maven submodule per component instead of one package. Confirmed by Ismael on 12/11/2026: the `common` module for the shared interfaces is correct (#34).
 
 ## D-017 · Visual Paradigm version
 **Date:** 25/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:34:47–0:37:16)
@@ -212,6 +212,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Keeping the table in the component issue and in every use case issue.
 - **Reason:** A single source of the numbers: two copies stop matching as soon as a member updates the hours of their discipline.
 - **Consequences:** Updates D-011. The effort table was removed from the use case template (PR #51).
+- **Status:** Updated by D-035 on 12/11/2026: the hours are also split between the server and the client.
 
 ## D-020 · One milestone per delivery date
 **Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52
@@ -336,7 +337,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 
 - **Context:** The assignment requires all operational assumptions to be documented in the theory report, in the wiki and in this file (p. 3). The assumptions about requirements are in D-002 to D-005 and D-009, and those of the plan were only in the report.
 - **Decision:** The plan relies on these assumptions:
-  - **A1.** Each consultant is available 40 hours per week, and the team has seven members, but not all of them work on every discipline: R and D have two owners; A, I and T have one each. *If it is false:* The critical path of It5 and It10 (the two heaviest iterations) lengthens; the calendar of section 6 of the report is no longer feasible and the end date moves.
+  - **A1.** Each consultant is available 40 hours per week, and the team has seven members, but not all of them work on every discipline: R and D have two owners; A, I and T have one each. Ismael confirmed on 12/11/2026 that 8 hours per day can be assumed for simplicity, although an organisation works 43 hours per week (#34). *If it is false:* The critical path of It5 and It10 (the two heaviest iterations) lengthens; the calendar of section 6 of the report is no longer feasible and the end date moves.
   - **A2.** AI assistance is available 24 hours a day, but every AI output needs human review before it is merged; the schedule therefore books the review, not the generation. *If it is false:* A higher AI ratio does not shorten anything: the bottleneck is reviewer availability, not token throughput (E-12, E-13).
   - **A3.** The cost of AI tooling is zero for the team: GitHub Copilot is covered by the university licence. When the monthly Copilot quota runs out, the professor allows other AI agents, which are used under the same rules (AGENTS.md) and whose cost is not charged to the project (D-034). *If it is false:* The budget of section 8 of the report must add a licensing line. The 9,080 € figure assumes no tooling cost.
   - **A4.** Visual Paradigm 18.1 is available to all seven members with an academic licence (D-017). *If it is false:* Model exchange between members breaks, and the design discipline becomes a serial bottleneck.
@@ -384,3 +385,13 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** The professor's repository shows what he expects, but our decisions are different. In the assessment, the design of the cases counts for more than the coverage or the JUnit code (S.04.01, slide 19). Documenting while the code is written is easier than documenting it later.
 - **Consequences:** AGENTS.md and agents/architecture.md are updated in the same pull request. D-006 is updated by this decision.
 - **Status:** Approved.
+
+## D-035 · The estimate is split between the server and the client
+**Date:** 12/11/2026 · **Iteration:** 2 · **Minutes:** Ismael's answer to #34 (12/11/2026) · **Issues:** #34
+
+- **Context:** Ismael answered that the hours of each RADIT discipline must be separated between the client and the server, because they are two different systems. The estimate of the plan (D-019) was made per use case and per discipline, without that split, and Theory Assignment 1 is delivered on 13/11/2026.
+- **Decision:** The hours of each use case and discipline are split between the server and the client with one rule per discipline: Requirements 50 % / 50 %, Analysis 60 % server / 40 % client, Design 50 % / 50 %, Implementation 40 % server / 60 % client, Testing 50 % / 50 %. The totals do not change: of the 243.2 hours with AI, 122.51 are for the server and 120.69 for the client (160.03 and 159.27 of the 319.3 hours without AI). From C2 on, each client and server sub-issue records its real hours, and the rule is corrected with them.
+- **Alternatives:** Estimating again each use case for each side, which could not be done before the delivery of 13/11/2026.
+- **Reason:** One specification per use case serves both sides. The control and entity classes of the analysis belong to the server and the boundary classes to the client. There is one design class diagram per side. In C1 the client has about 500 lines of code, and the server and `common` about 260 (JaCoCo, 09/11/2026).
+- **Consequences:** Section 8.1 of the theory report and the page Planification show the split per iteration. Updates D-019.
+- **Status:** Decided by David on 12/11/2026, after Ismael's answer; approved in the review of this pull request.
