@@ -56,7 +56,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [x] 4. `ValidationException` and the domain classes of C2 in `common`. – f623e0d.
 - [x] 5. The contract `ISystemParameterService` in `common`. – eefc57e.
 - [x] 6. The module `server/c2-configuration` (poms) and the generic repository. – dc2b524.
-- [ ] 7. `SystemParameterService`: permission check, validation, create, update, deactivate, audit.
+- [x] 7. `SystemParameterService`: permission check, validation, create, update, deactivate, audit. – 44b2942.
 - [ ] 8. The seed data (`loadSeedData()`).
 - [ ] 9. `agents/architecture.md`.
 - [ ] 10. Hand the branch over to Adam (tests of UC17-server) and close only with his tests green and the coverage check passing.
@@ -69,7 +69,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 7 (SystemParameterService)
+- **In progress:** step 8 (seed data)
+- **Next step:** step 8 (seed data, loadSeedData)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
