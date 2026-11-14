@@ -1,6 +1,7 @@
 package es.uclm.esi.iso2.server.access.service;
 
 import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
+import es.uclm.esi.iso2.common.access.contracts.IAuditRecorder;
 import es.uclm.esi.iso2.common.access.contracts.IAuditService;
 import es.uclm.esi.iso2.common.access.domain.AuditLog;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;

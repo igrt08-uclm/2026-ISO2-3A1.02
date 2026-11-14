@@ -2,6 +2,7 @@ package es.uclm.esi.iso2.server.access.service;
 
 import es.uclm.esi.iso2.common.access.contracts.AuthenticationException;
 import es.uclm.esi.iso2.common.access.contracts.AuthenticationFailureReason;
+import es.uclm.esi.iso2.common.access.contracts.IAuditRecorder;
 import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import es.uclm.esi.iso2.server.access.integration.IAuthenticatorSystem;

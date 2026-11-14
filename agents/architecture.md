@@ -6,7 +6,8 @@ Since D-032, each component is a Maven submodule of `server` and `client`, with 
 radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SNAPSHOT during It2), Java 21, JUnit 6.1.3
 ├── common/              shared contracts (interfaces and data classes), with its own version
 ├── server/              aggregator of the server submodules (one per component)
-│   └── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.0), depends on common
+│   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.1-SNAPSHOT), depends on common
+│   └── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.0.0-SNAPSHOT), depends only on common
 └── client/              aggregator of the client submodules (one per component)
     └── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.0), depends on common and server-c1-access
 ```
@@ -30,6 +31,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
   [AGENTS.md](../AGENTS.md) (assignment, p. 3; D-034).
 - JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
   build fails below 80 % of lines or 70 % of branches in any module (D-033).
-- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). C1 is in `server/c1-access` (`server-c1-access`)
-  and `client/c1-access` (`client-c1-access`), both at 1.2.0.
+- When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). C1 is in `server/c1-access` (`server-c1-access`,
+  1.2.1-SNAPSHOT after the patch #109) and `client/c1-access` (`client-c1-access`, 1.2.0). A component does not depend
+  on the module of another one: what they share is a contract in `common`, for example `IAuditRecorder`.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).
