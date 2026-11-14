@@ -4,6 +4,7 @@ import es.uclm.esi.iso2.client.access.presentation.IU_Audit;
 import es.uclm.esi.iso2.client.access.presentation.IU_Login;
 import es.uclm.esi.iso2.client.access.presentation.IU_ManageRoles;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
+import es.uclm.esi.iso2.client.configuration.presentation.IU_ConfigureParameters;
 import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
 import es.uclm.esi.iso2.common.access.contracts.IRoleManagementService;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
@@ -16,6 +17,7 @@ import es.uclm.esi.iso2.server.access.persistence.InMemoryUserAccountRepository;
 import es.uclm.esi.iso2.server.access.service.AuditService;
 import es.uclm.esi.iso2.server.access.service.AuthenticationService;
 import es.uclm.esi.iso2.server.access.service.RoleManagementService;
+import es.uclm.esi.iso2.server.configuration.service.SystemParameterService;
 import java.awt.Container;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -35,12 +37,15 @@ public final class Main {
             new AuthenticationService(new AuthenticatorSystemSimulator(), userAccountRepository, auditService);
     private final IRoleManagementService roleManagementService = new RoleManagementService(new InMemoryRoleRepository(),
             new InMemoryPermissionRepository(), userAccountRepository, auditService);
+    private final SystemParameterService systemParameterService =
+            new SystemParameterService(roleManagementService, auditService);
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().start());
     }
 
     private void start() {
+        systemParameterService.loadSeedData();
         useNativeLookAndFeel();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
@@ -64,12 +69,19 @@ public final class Main {
     private void showWelcome(UserAccount user) {
         window.setTitle(APPLICATION_TITLE);
         show(new IU_Welcome(user, this::showLogin, () -> showAudit(user),
-                roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user)));
+                roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user),
+                () -> showConfigureSystem(user)));
     }
 
     private void showManageRoles(UserAccount user) {
         window.setTitle(APPLICATION_TITLE + " - Manage roles");
         show(new IU_ManageRoles(roleManagementService, user.getUsername(), this::confirm,
+                () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
+    }
+
+    private void showConfigureSystem(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Configure system");
+        show(new IU_ConfigureParameters(systemParameterService, user.getUsername(), this::confirm,
                 () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
     }
 
