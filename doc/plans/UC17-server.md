@@ -55,7 +55,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [x] 3. Permission `CONFIGURE_SYSTEM` in C1, and the version `1.2.1-SNAPSHOT` (Q4). – 371298d (two tests of C1 updated with the approval of Javier).
 - [x] 4. `ValidationException` and the domain classes of C2 in `common`. – f623e0d.
 - [x] 5. The contract `ISystemParameterService` in `common`. – eefc57e.
-- [ ] 6. The module `server/c2-configuration` (poms) and the generic repository.
+- [x] 6. The module `server/c2-configuration` (poms) and the generic repository. – dc2b524.
 - [ ] 7. `SystemParameterService`: permission check, validation, create, update, deactivate, audit.
 - [ ] 8. The seed data (`loadSeedData()`).
 - [ ] 9. `agents/architecture.md`.
@@ -69,7 +69,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** step 6 (module server/c2-configuration and generic repository)
-- **Next step:** step 6 (module server/c2-configuration and generic repository)
+- **In progress:** nothing
+- **Next step:** step 7 (SystemParameterService)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
