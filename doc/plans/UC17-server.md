@@ -69,7 +69,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 10 (hand the branch over to Adam)
+- **In progress:** step 10 (the branch is handed over to Adam)
+- **Next step:** Adam writes the tests of UC17-server in this branch and opens the pull request himself (Closes #40 and #109); the plan is closed with his tests green and the coverage check passing
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
