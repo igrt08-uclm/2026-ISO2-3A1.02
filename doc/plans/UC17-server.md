@@ -53,7 +53,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [x] 1. Plan of this sub-issue (`docs(UC17): plan for the server part (#40)`). – 13d355c.
 - [x] 2. Move `IAuditRecorder` to `common` and update the imports in C1 (build green, 233 tests). – aa86211.
 - [x] 3. Permission `CONFIGURE_SYSTEM` in C1, and the version `1.2.1-SNAPSHOT` (Q4). – 371298d (two tests of C1 updated with the approval of Javier).
-- [ ] 4. `ValidationException` and the domain classes of C2 in `common`.
+- [x] 4. `ValidationException` and the domain classes of C2 in `common`. – f623e0d.
 - [ ] 5. The contract `ISystemParameterService` in `common`.
 - [ ] 6. The module `server/c2-configuration` (poms) and the generic repository.
 - [ ] 7. `SystemParameterService`: permission check, validation, create, update, deactivate, audit.
@@ -69,7 +69,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 4 (ValidationException and the domain classes in common)
+- **In progress:** step 5 (the contract ISystemParameterService)
+- **Next step:** step 5 (the contract ISystemParameterService)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
