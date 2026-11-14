@@ -80,6 +80,23 @@ public class SystemParameterService implements ISystemParameterService {
                 new InMemoryConfigurationRepository<>(Priority::getId), roleManagementService, auditRecorder);
     }
 
+    /**
+     * Loads the examination catalogue and the other initial data, only if the system starts with no data at all
+     * (D-003). It is called when the program starts, not by a user, so it does not need a permission and it is not
+     * registered in the audit log.
+     */
+    public void loadSeedData() {
+        boolean noData = testTypes.findAll().isEmpty() && protocols.findAll().isEmpty()
+                && schedules.findAll().isEmpty() && policies.findAll().isEmpty() && priorities.findAll().isEmpty();
+        if (noData) {
+            ConfigurationSeedData.priorities().forEach(priorities::save);
+            ConfigurationSeedData.testTypes().forEach(testTypes::save);
+            ConfigurationSeedData.protocols().forEach(protocols::save);
+            ConfigurationSeedData.schedules().forEach(schedules::save);
+            ConfigurationSeedData.policies().forEach(policies::save);
+        }
+    }
+
     @Override
     public List<TestType> getTestTypes(String requester) throws AccessDeniedException {
         checkPermission(requester, TEST_TYPE);
