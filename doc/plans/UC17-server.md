@@ -68,7 +68,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
+- **In progress:** step 2 (move `IAuditRecorder` to `common`)
 - **Next step:** step 2 (move `IAuditRecorder` to `common`)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier

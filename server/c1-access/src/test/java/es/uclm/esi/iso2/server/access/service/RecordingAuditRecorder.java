@@ -1,5 +1,6 @@
 package es.uclm.esi.iso2.server.access.service;
 
+import es.uclm.esi.iso2.common.access.contracts.IAuditRecorder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
