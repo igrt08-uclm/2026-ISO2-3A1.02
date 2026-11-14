@@ -15,5 +15,6 @@
 
   <modules>
     <module>c1-access</module>
+    <module>c2-configuration</module>
   </modules>
 </project>
