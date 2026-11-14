@@ -200,7 +200,8 @@ class ParameterGroupPanel<T> extends JPanel {
         T selected = selectedEntry();
         String id = selected == null ? txtId.getText().trim() : adapter.id(selected);
         if (selected == null && indexOf(id) >= 0) {
-            onError.accept("A " + kind + " with the id " + id + " already exists. Select it in the table to edit it.");
+            onError.accept(article(kind) + " " + kind + " with the id " + id
+                    + " already exists. Select it in the table to edit it.");
             return;
         }
         try {
@@ -252,6 +253,11 @@ class ParameterGroupPanel<T> extends JPanel {
             }
         }
         return -1;
+    }
+
+    /** "An" before a vowel ("An appointment policy"), "A" otherwise ("A protocol"). */
+    private static String article(String noun) {
+        return "aeiou".indexOf(Character.toLowerCase(noun.charAt(0))) >= 0 ? "An" : "A";
     }
 
     private static String capitalized(String text) {

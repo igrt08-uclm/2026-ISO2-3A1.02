@@ -15,6 +15,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -44,7 +45,8 @@ import javax.swing.table.DefaultTableModel;
  * panel.
  */
 class SchedulePanel extends JPanel {
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter TIME_FORMAT =
+            DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT);
     private static final String ACTIVE = "active";
     private static final String INACTIVE = "inactive";
 
