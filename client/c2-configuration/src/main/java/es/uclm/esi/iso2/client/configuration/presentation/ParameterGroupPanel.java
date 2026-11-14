@@ -305,7 +305,7 @@ class ParameterGroupPanel<T> extends JPanel {
     }
 
     /** Shows the deactivated entries in grey: the column "State" also says it with a word, not only with colour. */
-    private static class InactiveGreyRenderer extends DefaultTableCellRenderer {
+    static class InactiveGreyRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focused,
                 int row, int column) {

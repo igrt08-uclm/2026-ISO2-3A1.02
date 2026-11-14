@@ -62,6 +62,15 @@ public class IU_ConfigureParameters extends JPanel {
         btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> onBack.run());
 
+        TestTypePanel testTypes = new TestTypePanel(service, requester, confirm, this::showOperationResultSuccess,
+                this::showOperationResultError, this::accessDenied);
+        addTab("Test types", KeyEvent.VK_T, testTypes, testTypes::disableAll);
+        // The priorities may have changed in their tab: the list of the test types is read when the tab is shown.
+        tabs.addChangeListener(event -> {
+            if (tabs.getSelectedComponent() == testTypes) {
+                testTypes.refreshPriorities();
+            }
+        });
         ParameterGroupPanel<Protocol> protocols = protocolsPanel();
         addTab("Protocols", KeyEvent.VK_P, protocols, protocols::disableAll);
         ParameterGroupPanel<AppointmentPolicy> policies = policiesPanel();
