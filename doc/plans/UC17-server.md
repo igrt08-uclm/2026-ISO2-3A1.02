@@ -4,6 +4,7 @@
 |---|---|
 | **Sub-issue** | #40 *UC17 – Server (C2 v1.0.0)* · branch `feature/UC17-server` |
 | **Use case** | #38 *UC17 – Configure system parameters and exam catalogue (C2 v1.0.0)* · FR17 · component C2 1.0.0 |
+| **Patch of C1** | #109 *Patch of C1: permission CONFIGURE_SYSTEM and IAuditRecorder in common (C1 v1.2.1)* · done in this branch (steps 2 and 3) |
 | **Specification** | use case issue #38 and the wiki page *Requirements and Use Cases* |
 | **Design** | `doc/design/C2-server-design.png`, `doc/AN-C2-C3-DECISIONS.md` · contracts: section 6 of #33 *C2. Configuration and integrations* |
 | **Plan approved by** | Javier, 14/11/2026 |
@@ -49,9 +50,9 @@ Open points that #33 and the design do not settle; each one has a proposal.
 
 ## Steps
 Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; the rest do not touch it.
-- [ ] 1. Plan of this sub-issue (`docs(UC17): plan for the server part (#40)`).
-- [ ] 2. Move `IAuditRecorder` to `common` and update the imports in C1 (build green, 233 tests).
-- [ ] 3. Permission `CONFIGURE_SYSTEM` in C1, and the version `1.2.1-SNAPSHOT` (Q4).
+- [x] 1. Plan of this sub-issue (`docs(UC17): plan for the server part (#40)`). – 13d355c.
+- [x] 2. Move `IAuditRecorder` to `common` and update the imports in C1 (build green, 233 tests). – aa86211.
+- [x] 3. Permission `CONFIGURE_SYSTEM` in C1, and the version `1.2.1-SNAPSHOT` (Q4). – 371298d (two tests of C1 updated with the approval of Javier).
 - [ ] 4. `ValidationException` and the domain classes of C2 in `common`.
 - [ ] 5. The contract `ISystemParameterService` in `common`.
 - [ ] 6. The module `server/c2-configuration` (poms) and the generic repository.
@@ -68,7 +69,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** step 2 (move `IAuditRecorder` to `common`)
-- **Next step:** step 2 (move `IAuditRecorder` to `common`)
+- **In progress:** nothing
+- **Next step:** step 4 (ValidationException and the domain classes in common)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
