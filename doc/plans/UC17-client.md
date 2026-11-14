@@ -96,7 +96,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 3. `ParameterGroupPanel`: table, form (id, name, description), *New*, *Save*, *Deactivate*, inactive entries in grey, errors together. – fab0a74.
 - [x] 4. `IU_ConfigureParameters`: the window with the tabs for protocols, appointment policies and priorities, the message area, the confirmation and *Back*. – 1bf325c.
 - [x] 5. `TestTypePanel`: all the fields of FR17, the list of active priorities and the client check of the duration (Q6, Q9). – 48cc36f.
-- [ ] 6. `SchedulePanel`: room, days of the week, times and their client check (Q6, Q7).
+- [x] 6. `SchedulePanel`: room, days of the week, times and their client check (Q6, Q7). – 82eb650.
 - [ ] 7. `IU_Welcome` (button with the permission) and `Main` (service, seed data, navigation).
 - [ ] 8. `agents/architecture.md`.
 - [ ] 9. Javier checks by hand with `admin` and with `mgarcia` (no button) and the usability decisions of the table above; the result is written here.
@@ -115,6 +115,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 6 (`SchedulePanel` in `client/c2-configuration`, added as the third tab of `IU_ConfigureParameters`)
+- **Next step:** step 7 (`IU_Welcome` button and `Main` in `client/c1-access`)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
