@@ -94,7 +94,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 1. This plan (`docs(UC17): plan for the client part (#39)`). – 738f761.
 - [x] 2. Poms: new module `client/c2-configuration`, managed versions, dependencies and version of `client-c1-access` (Q1, Q2, Q3). The build stays green with an empty module. – a25e67e.
 - [x] 3. `ParameterGroupPanel`: table, form (id, name, description), *New*, *Save*, *Deactivate*, inactive entries in grey, errors together. – fab0a74.
-- [ ] 4. `IU_ConfigureParameters`: the window with the tabs for protocols, appointment policies and priorities, the message area, the confirmation and *Back*.
+- [x] 4. `IU_ConfigureParameters`: the window with the tabs for protocols, appointment policies and priorities, the message area, the confirmation and *Back*. – 1bf325c.
 - [ ] 5. `TestTypePanel`: all the fields of FR17, the list of active priorities and the client check of the duration (Q6, Q9).
 - [ ] 6. `SchedulePanel`: room, days of the week, times and their client check (Q6, Q7).
 - [ ] 7. `IU_Welcome` (button with the permission) and `Main` (service, seed data, navigation).
@@ -115,6 +115,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 4 (`IU_ConfigureParameters` with the three simple tabs)
+- **Next step:** step 5 (`TestTypePanel` in `client/c2-configuration`, added as the first tab of `IU_ConfigureParameters`)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
