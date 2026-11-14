@@ -73,6 +73,9 @@ public class IU_ConfigureParameters extends JPanel {
         });
         ParameterGroupPanel<Protocol> protocols = protocolsPanel();
         addTab("Protocols", KeyEvent.VK_P, protocols, protocols::disableAll);
+        SchedulePanel schedules = new SchedulePanel(service, requester, confirm, this::showOperationResultSuccess,
+                this::showOperationResultError, this::accessDenied);
+        addTab("Schedules", KeyEvent.VK_H, schedules, schedules::disableAll);
         ParameterGroupPanel<AppointmentPolicy> policies = policiesPanel();
         addTab("Appointment policies", KeyEvent.VK_A, policies, policies::disableAll);
         ParameterGroupPanel<Priority> priorities = prioritiesPanel();
