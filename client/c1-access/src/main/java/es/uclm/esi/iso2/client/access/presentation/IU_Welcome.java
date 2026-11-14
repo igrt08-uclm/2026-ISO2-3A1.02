@@ -19,7 +19,8 @@ public class IU_Welcome extends JPanel {
     // Temporary: with UC18 this check uses the permissions of the role.
     private static final String ADMINISTRATOR_ROLE = "SYSTEM_ADMINISTRATOR";
     private static final String MANAGE_ROLES = "MANAGE_ROLES";
-    private static final int COLUMNS = 3;
+    private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
+    private static final int COLUMNS = 4;
 
     public IU_Welcome(UserAccount user, Runnable onLogout) {
         this(user, onLogout, null);
@@ -35,6 +36,20 @@ public class IU_Welcome extends JPanel {
      */
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
             Runnable onManageRoles) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Configure system</em> of UC17.
+     *
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em>; the button is only shown to a
+     *                          user with the permission {@code CONFIGURE_SYSTEM}, and not at all if this is
+     *                          {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -60,7 +75,13 @@ public class IU_Welcome extends JPanel {
             btnManageRoles.addActionListener(event -> onManageRoles.run());
             addButton(btnManageRoles, 1);
         }
-        addButton(btnLogout, 2);
+        if (onConfigureSystem != null && hasPermission(permissions, CONFIGURE_SYSTEM)) {
+            JButton btnConfigureSystem = new JButton("Configure system");
+            btnConfigureSystem.setMnemonic('C');
+            btnConfigureSystem.addActionListener(event -> onConfigureSystem.run());
+            addButton(btnConfigureSystem, 2);
+        }
+        addButton(btnLogout, 3);
     }
 
     private static boolean hasPermission(List<Permission> permissions, String code) {
