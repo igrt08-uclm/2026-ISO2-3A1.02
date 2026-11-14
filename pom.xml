@@ -31,7 +31,7 @@
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>server-c1-access</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>

@@ -39,20 +39,20 @@ class InMemoryRoleRepositoryTest {
 
     @ParameterizedTest(name = "{0} has the permissions [{1}]")
     @CsvSource({
-        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES",
+        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM",
         "PHYSICIAN,            ''",
         "ADMISSIONS_STAFF,     ''",
         "PATIENT,              ''"
     })
-    @DisplayName("Only the System administrator has MANAGE_ROLES")
-    void onlyTheSystemAdministratorHasManageRoles(String id, String expectedPermissions) {
+    @DisplayName("Only the System administrator has permissions")
+    void onlyTheSystemAdministratorHasPermissions(String id, String expectedPermissions) {
         // Act
         Role role = repository.findById(id);
 
         // Assert
         assertNotNull(role);
         List<String> codes = role.getPermissions().stream().map(Permission::getCode).toList();
-        assertEquals(expectedPermissions.isEmpty() ? List.of() : List.of(expectedPermissions), codes);
+        assertEquals(expectedPermissions.isEmpty() ? List.of() : List.of(expectedPermissions.split(";")), codes);
     }
 
     // "physician" shows that the lookup is case sensitive.
