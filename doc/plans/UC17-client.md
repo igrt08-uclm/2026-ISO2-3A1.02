@@ -99,7 +99,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 6. `SchedulePanel`: room, days of the week, times and their client check (Q6, Q7). – 82eb650.
 - [x] 7. `IU_Welcome` (button with the permission) and `Main` (service, seed data, navigation). – 243570f. Checked roughly with a throwaway program outside the repo (five tabs, deactivate, error of the duration, `mgarcia` denied and without the button); no test was written.
 - [x] 8. `agents/architecture.md`. – 535cff2.
-- [ ] 9. Javier checks by hand with `admin` and with `mgarcia` (no button) and the usability decisions of the table above; the result is written here.
+- [ ] 9. Adam (Testing) checks by hand with `admin` and with `mgarcia` (no button) and the usability decisions of the table above; the result is written here. (Javier decided on 14/11/2026 that the manual checks are Adam's, as Testing.)
 - [ ] 10. Hand the branch over to Adam (tests of UC17-client, with a fake `ISystemParameterService`); the sub-issue is closed only with his tests green and the coverage check passing.
 
 ## How to run it
@@ -114,7 +114,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green; code reviewed by a member.
 
 ## Status
-- **In progress:** step 9 (waits for the manual check of Javier)
-- **Next step:** step 9 (Javier checks by hand with `admin` and `mgarcia`, see *How to run it*)
+- **In progress:** step 9 (waits for the manual check of Adam)
+- **Next step:** step 9 (Adam checks by hand with `admin` and `mgarcia`, see *How to run it*) and step 10 (his tests)
 - **Open questions:** none
 - **Last update:** 14/11/2026, Javier
