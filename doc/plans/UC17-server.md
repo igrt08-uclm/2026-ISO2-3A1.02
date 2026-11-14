@@ -27,6 +27,7 @@ Open points that #33 and the design do not settle; each one has a proposal.
 - **Q6:** Where does `ValidationException` (with the list of errors) live, since C3 also needs it? **Proposal:** a new package `es.uclm.esi.iso2.common.shared` in `common` (needs your approval, rule 9). **A:** approved as proposed (Javier, 14/11/2026)
 - **Q7:** Names of the audit entries. **Proposal:** as in C1, one action per change: `PARAMETER_CREATED`, `PARAMETER_UPDATED`, `PARAMETER_DEACTIVATED` and `PARAMETER_ACCESS_DENIED`, with the resource `<group>:<id>` (for example `TEST_TYPE:CT-HEAD`). Reads are not audited (they are not changes). **A:** approved as proposed (Javier, 14/11/2026)
 - **Q8:** The coverage check of D-033 (80 % lines, 70 % branches) fails in `common` and in the new module until Adam's tests exist. **Proposal:** in each step I run `mvn -B verify -Djacoco.skip=true` (everything compiles and the 233 tests of C1 pass); the full `mvn -B verify` is the criterion to close the pull request, with Adam's tests. **A:** approved, with a change: in each step I only check that it compiles and works roughly, without writing tests (Javier, 14/11/2026)
+- **Q9:** (Found by Adam while designing the test cases, 14/11/2026.) A test type with a priority that does not exist (for example `XYZ`) was accepted: #40 and Q1 only ask that the priority is not empty. **Proposal:** the server rejects it with the error `The priority <id> does not exist`, in create and in update; a priority that exists but is deactivated is still valid, so that a test type that already uses it can be edited; an empty priority only gets `The priority is required`. **A:** option B approved (Javier, 14/11/2026)
 - **Note:** adding a permission to the seed of C1 can break a C1 test that checks the exact list of permissions. If it happens I stop and tell you, because changing an expected value is a decision (rule 17).
 
 ## Files
@@ -59,6 +60,7 @@ Tick each step with the hash of its commit. Steps 2 and 3 are the change of C1; 
 - [x] 7. `SystemParameterService`: permission check, validation, create, update, deactivate, audit. – 44b2942.
 - [x] 8. The seed data (`loadSeedData()`). – f4ce0e7. Checked roughly with a throwaway program (seed loaded once, physician, inactive and unknown users denied, six validation errors, duplicate rejected, deactivate and audit entries); no test was written.
 - [x] 9. `agents/architecture.md`. – 5a8ce53.
+- [x] 11. The priority of a test type must exist (Q9), in `SystemParameterService.validate` and in the Javadoc of the contract. - ce14819 (checked roughly with a throwaway program: `XYZ` rejected in create and update, empty priority only "required", deactivated priority accepted; no test written). Adam adds the cases to his table.
 - [ ] 10. Hand the branch over to Adam (tests of UC17-server) and close only with his tests green and the coverage check passing.
 
 ## Verification

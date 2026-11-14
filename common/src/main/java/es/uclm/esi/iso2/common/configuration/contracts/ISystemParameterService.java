@@ -40,7 +40,7 @@ public interface ISystemParameterService {
      * @param testType the new test type
      * @return the saved test type
      * @throws AccessDeniedException if the requester does not have the permission
-     * @throws ValidationException if a field is missing or invalid, or the id already exists
+     * @throws ValidationException if a field is missing or invalid, the priority does not exist, or the id already exists
      */
     TestType createTestType(String requester, TestType testType) throws AccessDeniedException, ValidationException;
 
@@ -52,7 +52,7 @@ public interface ISystemParameterService {
      * @param testType the new data; its id must be the same
      * @return the saved test type
      * @throws AccessDeniedException if the requester does not have the permission
-     * @throws ValidationException if a field is invalid or the test type does not exist
+     * @throws ValidationException if a field is invalid, the priority does not exist, or the test type does not exist
      */
     TestType updateTestType(String requester, String testTypeId, TestType testType)
             throws AccessDeniedException, ValidationException;

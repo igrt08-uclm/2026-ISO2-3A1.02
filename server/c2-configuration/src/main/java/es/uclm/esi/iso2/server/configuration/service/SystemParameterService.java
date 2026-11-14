@@ -287,6 +287,9 @@ public class SystemParameterService implements ISystemParameterService {
         requireText(errors, testType.getModality(), "The modality");
         requireText(errors, testType.getRoom(), "The room");
         requireText(errors, testType.getPriority(), "The priority");
+        if (!blank(testType.getPriority()) && priorities.findById(testType.getPriority()) == null) {
+            errors.add("The priority " + testType.getPriority() + " does not exist");
+        }
         if (testType.getDurationMinutes() <= 0) {
             errors.add("The duration must be greater than zero");
         }
