@@ -21,6 +21,7 @@ import es.uclm.esi.iso2.server.configuration.persistence.IConfigurationRepositor
 import es.uclm.esi.iso2.server.configuration.persistence.InMemoryConfigurationRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -109,8 +110,8 @@ public class IntegrationManagementService implements IIntegrationManagementServi
     @Override
     public IntegrationConfiguration getIntegration(String requester, HospitalSystemType system)
             throws AccessDeniedException {
+        checkPermission(requester, system == null ? RESOURCE : resourceOf(system));
         requireSystem(system);
-        checkPermission(requester, resourceOf(system));
         return integrations.findById(system.name());
     }
 
@@ -125,7 +126,14 @@ public class IntegrationManagementService implements IIntegrationManagementServi
             throw new ValidationException(errors);
         }
         String endpoint = configuration.getEndpoint() == null ? "" : configuration.getEndpoint().strip();
-        IntegrationConfiguration saved = new IntegrationConfiguration(system, endpoint, configuration.getSettings(),
+        Map<String, String> settings = null;
+        if (configuration.getSettings() != null) {
+            settings = new LinkedHashMap<>();
+            for (Map.Entry<String, String> setting : configuration.getSettings().entrySet()) {
+                settings.put(setting.getKey().strip(), setting.getValue().strip());
+            }
+        }
+        IntegrationConfiguration saved = new IntegrationConfiguration(system, endpoint, settings,
                 configuration.isEnabled(), configuration.getMode(),
                 configuration.isEnabled() ? IntegrationStatus.ACTIVE : IntegrationStatus.INACTIVE);
         integrations.save(saved);
@@ -136,8 +144,8 @@ public class IntegrationManagementService implements IIntegrationManagementServi
     @Override
     public ConnectionTestResult testConnection(String requester, HospitalSystemType system)
             throws AccessDeniedException {
+        checkPermission(requester, system == null ? RESOURCE : resourceOf(system));
         requireSystem(system);
-        checkPermission(requester, resourceOf(system));
         IntegrationConfiguration configuration = integrations.findById(system.name());
         if (configuration == null) {
             return new ConnectionTestResult(false, 0, "integration not configured");
