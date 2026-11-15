@@ -22,6 +22,7 @@ import es.uclm.esi.iso2.server.configuration.persistence.InMemoryConfigurationRe
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -172,6 +173,25 @@ public class IntegrationManagementService implements IIntegrationManagementServi
         }
     }
 
+    /**
+     * Tells whether the text after {@code http://} or {@code https://} starts with a host (R-05): the part before the
+     * first {@code /}, {@code ?} or {@code #}, without a user ({@code user@}) and without a port ({@code :8443}), is
+     * not empty.
+     */
+    private static boolean hasHost(String afterScheme) {
+        int end = afterScheme.length();
+        for (char separator : new char[] {'/', '?', '#'}) {
+            int index = afterScheme.indexOf(separator);
+            if (index >= 0 && index < end) {
+                end = index;
+            }
+        }
+        String authority = afterScheme.substring(0, end);
+        authority = authority.substring(authority.lastIndexOf('@') + 1);
+        int colon = authority.indexOf(':');
+        return !(colon >= 0 ? authority.substring(0, colon) : authority).isBlank();
+    }
+
     private static void requireSystem(HospitalSystemType system) {
         if (system == null) {
             throw new IllegalArgumentException("The system is required");
@@ -197,8 +217,13 @@ public class IntegrationManagementService implements IIntegrationManagementServi
         String endpoint = configuration.getEndpoint() == null ? "" : configuration.getEndpoint().strip();
         if (endpoint.isEmpty() && configuration.getMode() == IntegrationMode.REAL) {
             errors.add("The endpoint is required in real mode");
-        } else if (!endpoint.isEmpty() && !endpoint.startsWith(HTTP) && !endpoint.startsWith(HTTPS)) {
-            errors.add("The endpoint must start with http:// or https://");
+        } else if (!endpoint.isEmpty()) {
+            String lower = endpoint.toLowerCase(Locale.ROOT);
+            if (!lower.startsWith(HTTP) && !lower.startsWith(HTTPS)) {
+                errors.add("The endpoint must start with http:// or https://");
+            } else if (!hasHost(lower.substring(lower.startsWith(HTTP) ? HTTP.length() : HTTPS.length()))) {
+                errors.add("The endpoint needs a host after http:// or https://");
+            }
         }
         if (configuration.getSettings() != null) {
             configuration.getSettings().forEach((key, value) -> {
