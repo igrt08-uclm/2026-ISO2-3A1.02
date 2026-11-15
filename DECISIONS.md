@@ -397,15 +397,25 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Status:** Decided by David on 12/11/2026, after Ismael's answer; approved in the review of this pull request.
 
 ## D-036 · Patches of C1 for C2 and C3, and how a finished component is changed
-**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — (approved by Ignacio in the issues) · **Issues:** #40, #109, #112
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 8](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-8) · **Time in the recording:** 0:01:41–0:04:53 · **Issues:** #40, #109, #112, #116
 
 - **Context:** C2 and C3 need changes in C1, which was finished in Iteration 1 (v0.1.0): new permissions, and interfaces of C1 that other components must use. By D-032, C2 cannot depend on the module of C1, so those interfaces have to be in `common`. Section 13.6 of the theory report does not say which version goes up when a component needs a change in a finished one.
 - **Decision:**
   - **C1 1.2.1 (#109, merged with UC17):** `IAuditRecorder` moves to `common`, and the permission `CONFIGURE_SYSTEM` is given to the system administrator.
-  - **C1 1.2.2 (#112, with UC20):** `IAuthenticatorSystem` moves to `common` with a new method `ping()`; the permission `CONFIGURE_INTEGRATIONS` is given to the system administrator; and `IRoleManagementService` gets the default method `hasPermission(username, permissionCode)`, so that each component checks the permissions with it instead of writing its own check.
-  - **Next patches** of the same kind, such as `MANAGE_PATIENTS` for UC12, follow the same rule.
+  - **C1 1.2.2 (#112, pull request #116):** one patch for what UC20 (C2) and UC12 (C3) need from C1. `IAuthenticatorSystem` moves to `common` with a new method `ping()`; the permission `CONFIGURE_INTEGRATIONS` is given to the system administrator and `MANAGE_PATIENTS` to the Admissions staff; and `IRoleManagementService` gets the default method `hasPermission(username, permissionCode)`, so that each component checks the permissions with it instead of writing its own check.
+  - **Next patches** of the same kind follow the same rule.
   - **The rule:** the change is asked for in an issue and approved by the owner of the finished component. That component raises PATCH, in its own branch and pull request, and the owner approves the pull request. If contracts are added to `common` without breaking any, `common` raises MINOR; a breaking change is MAJOR and needs its own decision (section 13.6 of the report). `common` goes from 1.3.0-SNAPSHOT to 1.4.0-SNAPSHOT for the contracts added in Iteration 2.
 - **Alternatives:** C2 depending on the module of C1, which D-032 rules out; or copying the interfaces in each component, which duplicates code (Annex A, item Q).
 - **Reason:** The components only share contracts through `common`, and the owner of a finished component checks every change to it (section 14.4 of the report). A patch in its own pull request is easier to review than inside the pull request of another component, and it is not delayed if that one is.
 - **Consequences:** `common` 1.4.0-SNAPSHOT; agents/components.md and the page Traceability and releases are updated.
-- **Status:** Patches approved by Ignacio, owner of C1, in #40 (13/11/2026) and #112 (15/11/2026); written by David.
+- **Status:** Patches approved by Ignacio, owner of C1, in #40 (13/11/2026) and #112 (15/11/2026), and by the team in Meeting 8 (15/11/2026). After the meeting, 1.2.2 also included `MANAGE_PATIENTS` for UC12, and Ignacio approved it in pull request #116 (15/11/2026).
+
+## D-037 · Patient identifier
+**Date:** 15/11/2026 · **Iteration:** 3 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) (left pending) · **Time in the recording:** 0:38:07–0:40:30 · **Issues:** #46, #47
+
+- **Context:** In Meeting 5 Marcos pointed out that the national ID and the health card number are not the same, and that the team had to choose with the requirements of C3. The contract of C3 (#47) said that the identifier is "the national ID or the health card number", which does not say which one detects a duplicate, and the design of UC12 only has `patientId` and `identifier`.
+- **Decision:** The server generates the internal `patientId` (`P-0001`, `P-0002`…). The `identifier` is the health card number, it is required and unique, and it is what detects a duplicate: if it already exists, the registration is rejected and the screen shows the existing record. The national ID is an optional field, `nationalId`.
+- **Alternatives:** The national ID as the identifier, which not every patient has (for example, a minor); or accepting either of them, which gives two values to check for a duplicate.
+- **Reason:** Not every patient has a national ID, and one unique value is enough to detect a duplicate.
+- **Consequences:** Design adds `nationalId` to `Patient` (#114), and the contract of #47 is updated with it. UC12 is implemented this way (#46).
+- **Status:** Proposed by David (Requirements) in #47 on 07/11/2026 and agreed in #46 on 14/11/2026; approved in the review of this pull request.
