@@ -34,8 +34,8 @@ Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before i
   - F-10: `btnSearch` loses its mnemonic; the label keeps Alt+H.
 - [x] **4. R-02 (server).** (done in `PatientService`, not in the repository, because TC12S-60 of Adam checks `findByIdentifier`; Javier, 15/11/2026) `InMemoryPatientRepository.findByIdentifier` and the check "The identifier cannot be changed" in `PatientService` compare the identifiers ignoring case, all the spaces and `-` (`HC 0000001`, `HC-0000001` and `hc0000001` are the same patient). The identifier is saved as it was typed. Commit 14df4d6.
 - [x] **5. R-03 (server).** `InMemoryPatientRepository.search` ignores accents as well as case (`lucia` finds "Lucía"), with `Normalizer` of the JDK (no new dependency, rule 6). Commit d2cfd51.
-- [ ] **6. R-04 (server and screen).** The same rules in `PatientService` and in `IU_ManagePatients`: e-mail `name@domain.ext` with no empty part (`ana@example.test.` and `ana@example..test` rejected); date of birth not before 01/01/1900, with the message "The date of birth cannot be before 01/01/1900". The phone is checked: it already ignores the spaces and counts only the digits, so it only changes if a case fails.
-- [ ] **7. Hand over to Adam.** Update the lists of cases of `UC12-client.md` and `UC12-server.md` ("State for Adam"), add the commit hashes here and tell Adam what to test again (F-06, F-07, F-08, F-09, F-10, R-02 to R-04). **Push only when Javier asks** (rule 8).
+- [x] **6. R-04 (server and screen).** The same rules in `PatientService` and in `IU_ManagePatients`: e-mail `name@domain.ext` with no empty part (`ana@example.test.` and `ana@example..test` rejected); date of birth not before 01/01/1900, with the message "The date of birth cannot be before 01/01/1900". The phone is checked: it already ignores the spaces and counts only the digits, so it only changes if a case fails. Commit c7780fc.
+- [x] **7. Hand over to Adam.** Update the lists of cases of `UC12-client.md` and `UC12-server.md` ("State for Adam"), add the commit hashes here and tell Adam what to test again (F-06, F-07, F-08, F-09, F-10, R-02 to R-04). **Push only when Javier asks** (rule 8). Plan updated; the branch is not pushed yet (rule 8).
 
 ## Questions and answers
 - **Q1 (batch 1):** Should the search by identifier also ignore the spaces and `-` (so that `HC0000001` finds `HC-0000001`)? **Proposal:** no; the search only ignores case and accents, as David wrote in R-03. The text is also searched in the name, where the spaces matter ("Ana María"). **A:** approved as proposed (Javier, 15/11/2026)
@@ -58,4 +58,14 @@ Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before i
 - [ ] **12. Hand over to Adam and, if Javier asks, push and open the pull request** (the title and the text are shown to Javier first).
 
 ## State for Adam
-To be filled in step 7 and step 12.
+**Batch 1 (branch `feature/UC12-client`, steps 2 to 6) – what to test again:**
+- F-06: *New patient* with unsaved changes asks once; cancelling keeps the changes.
+- F-07: dragging the selection away and back to the same row keeps the changes, without asking.
+- F-08: *Back* with unsaved changes asks "Discard the unsaved changes?".
+- F-09: a long error is shown in several lines at the centre of the footer (it is a `JLabel` subclass that keeps `getText()` plain; it was not checked by eye, please look at it in the manual test).
+- F-10: Alt+H is only the *Search* button; the label *Search* has no shortcut (the test TC12C-04 of Adam checks the button).
+- R-02: `HC 0000001`, `HC-0000001` and `hc0000001` are the same patient when registering and when modifying (the check is in `PatientService`; `findByIdentifier` of the repository is unchanged because TC12S-60 checks it).
+- R-03: `lucia` finds "Lucía". R-04: `ana@example.test.` and `ana@example..test` are rejected; `01/01/1899` is rejected with "The date of birth cannot be before 01/01/1900"; the phone already counted only the digits (no change).
+- All the tests that existed pass; no test of Adam was changed.
+
+**Batch 2:** to be filled in step 12.
