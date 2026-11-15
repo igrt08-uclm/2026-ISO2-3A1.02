@@ -1,6 +1,7 @@
 package es.uclm.esi.iso2.server.patients.persistence;
 
 import es.uclm.esi.iso2.common.patients.domain.Patient;
+import java.text.Normalizer;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -28,16 +29,21 @@ public class InMemoryPatientRepository implements IPatientRepository {
 
     @Override
     public List<Patient> search(String filters) {
-        String text = normalized(filters);
+        String text = withoutAccents(normalized(filters));
         return patients.values().stream()
-                .filter(patient -> text.isEmpty() || normalized(patient.getIdentifier()).contains(text)
-                        || normalized(patient.getFullName()).contains(text))
+                .filter(patient -> text.isEmpty() || withoutAccents(normalized(patient.getIdentifier())).contains(text)
+                        || withoutAccents(normalized(patient.getFullName())).contains(text))
                 .toList();
     }
 
     @Override
     public void save(Patient patient) {
         patients.put(patient.getPatientId(), patient);
+    }
+
+    /** The text without accents ({@code Lucía} becomes {@code Lucia}), so that the search ignores them (R-03). */
+    private static String withoutAccents(String text) {
+        return Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
     }
 
     private static String normalized(String text) {

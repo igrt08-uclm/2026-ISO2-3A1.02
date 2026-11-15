@@ -16,5 +16,6 @@
   <modules>
     <module>c1-access</module>
     <module>c2-configuration</module>
+    <module>c3-patients</module>
   </modules>
 </project>

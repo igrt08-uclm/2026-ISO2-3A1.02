@@ -21,7 +21,8 @@ public class IU_Welcome extends JPanel {
     private static final String MANAGE_ROLES = "MANAGE_ROLES";
     private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
     private static final String CONFIGURE_INTEGRATIONS = "CONFIGURE_INTEGRATIONS";
-    private static final int COLUMNS = 5;
+    private static final String MANAGE_PATIENTS = "MANAGE_PATIENTS";
+    private static final int COLUMNS = 6;
 
     public IU_Welcome(UserAccount user, Runnable onLogout) {
         this(user, onLogout, null);
@@ -66,6 +67,23 @@ public class IU_Welcome extends JPanel {
      */
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
             Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, onConfigureIntegrations, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Manage patients</em> of UC12.
+     *
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructors)
+     * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em> (see the other
+     *                                constructors)
+     * @param onManagePatients is run when the user presses <em>Manage patients</em>; the button is only shown to a user
+     *                         with the permission {@code MANAGE_PATIENTS}, and not at all if this is {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
+            Runnable onManagePatients) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -103,7 +121,13 @@ public class IU_Welcome extends JPanel {
             btnConfigureIntegrations.addActionListener(event -> onConfigureIntegrations.run());
             addButton(btnConfigureIntegrations, 3);
         }
-        addButton(btnLogout, 4);
+        if (onManagePatients != null && hasPermission(permissions, MANAGE_PATIENTS)) {
+            JButton btnManagePatients = new JButton("Manage patients");
+            btnManagePatients.setMnemonic('P');
+            btnManagePatients.addActionListener(event -> onManagePatients.run());
+            addButton(btnManagePatients, 4);
+        }
+        addButton(btnLogout, 5);
     }
 
     private static boolean hasPermission(List<Permission> permissions, String code) {
