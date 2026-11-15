@@ -25,16 +25,18 @@ class InMemoryPermissionRepositoryTest {
 
     // VIEW_AUDIT_LOG was removed on 06/11/2026, so that UC18 does not change UC19.
     @Test
-    @DisplayName("findAll returns MANAGE_ROLES and CONFIGURE_SYSTEM")
-    void findAllReturnsManageRolesAndConfigureSystem() {
+    @DisplayName("findAll returns MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS and MANAGE_PATIENTS")
+    void findAllReturnsManageRolesConfigureSystemConfigureIntegrationsAndManagePatients() {
         // Act
         List<Permission> permissions = repository.findAll();
 
         // Assert
         assertAll(
-                () -> assertEquals(2, permissions.size()),
+                () -> assertEquals(4, permissions.size()),
                 () -> assertEquals("MANAGE_ROLES", permissions.get(0).getCode()),
-                () -> assertEquals("CONFIGURE_SYSTEM", permissions.get(1).getCode()));
+                () -> assertEquals("CONFIGURE_SYSTEM", permissions.get(1).getCode()),
+                () -> assertEquals("CONFIGURE_INTEGRATIONS", permissions.get(2).getCode()),
+                () -> assertEquals("MANAGE_PATIENTS", permissions.get(3).getCode()));
     }
 
     @Test

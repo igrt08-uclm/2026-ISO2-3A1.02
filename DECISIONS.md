@@ -395,3 +395,17 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** One specification per use case serves both sides. The control and entity classes of the analysis belong to the server and the boundary classes to the client. There is one design class diagram per side. In C1 the client has about 500 lines of code, and the server and `common` about 260 (JaCoCo, 09/11/2026).
 - **Consequences:** Section 8.1 of the theory report and the page Planification show the split per iteration. Updates D-019.
 - **Status:** Decided by David on 12/11/2026, after Ismael's answer; approved in the review of this pull request.
+
+## D-036 · Patches of C1 for C2 and C3, and how a finished component is changed
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — (approved by Ignacio in the issues) · **Issues:** #40, #109, #112
+
+- **Context:** C2 and C3 need changes in C1, which was finished in Iteration 1 (v0.1.0): new permissions, and interfaces of C1 that other components must use. By D-032, C2 cannot depend on the module of C1, so those interfaces have to be in `common`. Section 13.6 of the theory report does not say which version goes up when a component needs a change in a finished one.
+- **Decision:**
+  - **C1 1.2.1 (#109, merged with UC17):** `IAuditRecorder` moves to `common`, and the permission `CONFIGURE_SYSTEM` is given to the system administrator.
+  - **C1 1.2.2 (#112, with UC20):** `IAuthenticatorSystem` moves to `common` with a new method `ping()`; the permission `CONFIGURE_INTEGRATIONS` is given to the system administrator; and `IRoleManagementService` gets the default method `hasPermission(username, permissionCode)`, so that each component checks the permissions with it instead of writing its own check.
+  - **Next patches** of the same kind, such as `MANAGE_PATIENTS` for UC12, follow the same rule.
+  - **The rule:** the change is asked for in an issue and approved by the owner of the finished component. That component raises PATCH, in its own branch and pull request, and the owner approves the pull request. If contracts are added to `common` without breaking any, `common` raises MINOR; a breaking change is MAJOR and needs its own decision (section 13.6 of the report). `common` goes from 1.3.0-SNAPSHOT to 1.4.0-SNAPSHOT for the contracts added in Iteration 2.
+- **Alternatives:** C2 depending on the module of C1, which D-032 rules out; or copying the interfaces in each component, which duplicates code (Annex A, item Q).
+- **Reason:** The components only share contracts through `common`, and the owner of a finished component checks every change to it (section 14.4 of the report). A patch in its own pull request is easier to review than inside the pull request of another component, and it is not delayed if that one is.
+- **Consequences:** `common` 1.4.0-SNAPSHOT; agents/components.md and the page Traceability and releases are updated.
+- **Status:** Patches approved by Ignacio, owner of C1, in #40 (13/11/2026) and #112 (15/11/2026); written by David.
