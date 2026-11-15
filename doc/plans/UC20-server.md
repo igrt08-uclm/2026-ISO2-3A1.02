@@ -7,7 +7,7 @@
 | **Patch of C1** | #112 *Patch of C1: permission CONFIGURE_INTEGRATIONS, IAuthenticatorSystem and hasPermission in common (C1 v1.2.2)*, approved by Ignacio on 15/11/2026; by D-036 it is done in its own branch `feature/C1-patch-1.2.2` and its own pull request, with its own plan `doc/plans/C1-patch-1.2.2.md`, and this sub-issue depends on it |
 | **Specification** | use case issue #41, sub-issue #43 and the wiki page *Requirements and Use Cases* |
 | **Design** | `doc/design/C2-server-design.png` · analysis `doc/AN-C2-C3-DECISIONS.md` (D17 to D23) · contracts: section 6 of #33 *C2. Configuration and integrations* |
-| **Plan approved by** | Javier, 14/11/2026 |
+| **Plan approved by** | Javier, 14/11/2026 (reorganised on 15/11/2026 when the patch of C1 moved to its own plan) |
 
 ## Decisions already taken
 - The four integrations are SSO, electronic health record (EHR), admissions and RIS/PACS. Everything is simulated (A5); there is no real adapter.
@@ -58,7 +58,7 @@ The files of C1 (move of `IAuthenticatorSystem`, `CONFIGURE_INTEGRATIONS`, `hasP
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here). The patch of C1 (#112) is **not** a step of this plan: it is done and merged first, in its own branch and pull request. Steps 5 and 6 need it merged into `develop`; steps 2, 3 and 4 do not.
 - [x] 1. This plan (`docs(UC20): plan for the server part (#43)`) - 84209c0.
-- [ ] 2. The enums and the data classes of the integrations in `common` (Q5).
+- [x] 2. The enums and the data classes of the integrations in `common` (Q5). - 536a556. The map of settings is copied into an unmodifiable `LinkedHashMap`, which keeps the order of the lines and accepts empty values, so the validation can report them.
 - [ ] 3. The contract `IIntegrationManagementService` in `common` (Q4).
 - [ ] 4. Version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators (Q6, Q11).
 - [ ] 5. `IntegrationManagementService`: permission with `hasPermission`, `getIntegrations`, `getIntegration`, validation, `configureIntegration` and audit (Q8, Q9, Q12, Q17). Needs the patch of C1 merged and `develop` brought to this branch.
@@ -75,6 +75,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** Javier creates the branch `feature/C1-patch-1.2.2` from `develop`; its plan and the patch are done there (Q18 first). Meanwhile, steps 2, 3 and 4 of this plan can be done without the patch
+- **Next step:** step 3 (the contract `IIntegrationManagementService` in `common`)
 - **Open questions:** Q18
 - **Last update:** 15/11/2026, Javier
