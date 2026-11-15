@@ -91,6 +91,8 @@ public class IU_ManagePatients extends JPanel {
     private transient List<Patient> patients = new ArrayList<>();
     private boolean denied;
     private boolean loading;
+    private boolean restoring;
+    private int shownRow = -1;
 
     /**
      * Creates the screen and shows all the patients.
@@ -118,8 +120,8 @@ public class IU_ManagePatients extends JPanel {
         btnSave.setMnemonic('S');
         btnSave.addActionListener(event -> onSavePatient());
         btnSearch.setMnemonic('H');
-        btnSearch.addActionListener(event -> onSearch(txtSearch.getText()));
-        txtSearch.addActionListener(event -> onSearch(txtSearch.getText()));
+        btnSearch.addActionListener(event -> onSearchRequested());
+        txtSearch.addActionListener(event -> onSearchRequested());
         cmbSex.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected,
@@ -131,8 +133,8 @@ public class IU_ManagePatients extends JPanel {
         cmbSex.setSelectedIndex(-1);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getSelectionModel().addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting() && !loading) {
-                showSelected();
+            if (!event.getValueIsAdjusting() && !loading && !restoring) {
+                changeRow();
             }
         });
 
@@ -146,6 +148,13 @@ public class IU_ManagePatients extends JPanel {
             normalBorders.put(field, field.getBorder());
         }
         onSearch("");
+    }
+
+    /** The user asked for a search: if the form has unsaved changes, it asks before they are thrown away. */
+    private void onSearchRequested() {
+        if (confirmDiscard()) {
+            onSearch(txtSearch.getText());
+        }
     }
 
     /** Asks the server for the patients whose identifier or full name contains the text, and shows them. */
@@ -207,8 +216,54 @@ public class IU_ManagePatients extends JPanel {
         lblStatus.setText(ERROR_ICON + message);
     }
 
+    /**
+     * The user pressed another row. If the form has unsaved changes, it asks whether to discard them; if the user
+     * cancels, the selection goes back to the row it had, with its changes.
+     */
+    private void changeRow() {
+        if (table.getSelectedRow() != shownRow && !confirmDiscard()) {
+            restoring = true;
+            try {
+                if (shownRow >= 0) {
+                    table.setRowSelectionInterval(shownRow, shownRow);
+                } else {
+                    table.clearSelection();
+                }
+            } finally {
+                restoring = false;
+            }
+            return;
+        }
+        showSelected();
+    }
+
+    /** Tells whether it is fine to throw away what is in the form: it has no changes, or the user accepts. */
+    private boolean confirmDiscard() {
+        return !isDirty() || confirm.test("Discard the unsaved changes?");
+    }
+
+    /** Tells whether the form differs from the patient that is shown, or, for a new patient, is not empty. */
+    private boolean isDirty() {
+        Patient shown = shownRow >= 0 && shownRow < patients.size() ? patients.get(shownRow) : null;
+        return !same(txtIdentifier, shown == null ? "" : shown.getIdentifier())
+                || !same(txtNationalId, shown == null ? "" : shown.getNationalId())
+                || !same(txtFullName, shown == null ? "" : shown.getFullName())
+                || !same(txtBirth, shown == null ? "" : shown.getDateOfBirth().format(DATE_FORMAT))
+                || cmbSex.getSelectedItem() != (shown == null ? null : shown.getSex())
+                || !same(txtAddress, shown == null ? "" : shown.getAddress())
+                || !same(txtPhone, shown == null ? "" : shown.getPhone())
+                || !same(txtEmail, shown == null ? "" : shown.getEmail());
+    }
+
+    private static boolean same(JTextField field, String saved) {
+        return field.getText().strip().equals(saved == null ? "" : saved.strip());
+    }
+
     /** Starts a new patient: nothing is selected and the form is empty. */
     private void onNewPatient() {
+        if (!confirmDiscard()) {
+            return;
+        }
         table.clearSelection();
         showSelected();
         txtIdentifier.requestFocusInWindow();
@@ -338,6 +393,7 @@ public class IU_ManagePatients extends JPanel {
         txtPhone.setText(selected == null ? "" : selected.getPhone());
         txtEmail.setText(selected == null ? "" : selected.getEmail());
         clearMarks();
+        shownRow = table.getSelectedRow();
         updateControls();
     }
 
