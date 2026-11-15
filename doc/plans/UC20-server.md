@@ -60,7 +60,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 1. This plan (`docs(UC20): plan for the server part (#43)`) - 84209c0.
 - [x] 2. The enums and the data classes of the integrations in `common` (Q5). - 536a556. The map of settings is copied into an unmodifiable `LinkedHashMap`, which keeps the order of the lines and accepts empty values, so the validation can report them.
 - [x] 3. The contract `IIntegrationManagementService` in `common` (Q4). - 6d98db8. `configureIntegration` returns the saved configuration, with its status (Javier, 15/11/2026), a small difference with the diagram, which has `void`: Design has to reflect it.
-- [ ] 4. Version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators (Q6, Q11).
+- [x] 4. Version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators (Q6, Q11). - 64ede6d. The managed version of `client-c2-configuration` does not change here: it is for UC20-client.
 - [ ] 5. `IntegrationManagementService`: permission with `hasPermission`, `getIntegrations`, `getIntegration`, validation, `configureIntegration` and audit (Q8, Q9, Q12, Q17). Needs the patch of C1 merged and `develop` brought to this branch.
 - [ ] 6. `testConnection` and `loadSeedData()` (Q7, Q10). It uses `ping()` of the SSO, so it also needs the patch.
 - [ ] 7. `agents/architecture.md`.
@@ -74,7 +74,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 4 (version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators)
+- **In progress:** nothing (steps 5 and 6 wait for the patch of C1, #112, merged into `develop`)
+- **Next step:** when the patch of C1 is merged: bring `develop` to this branch (merge, Javier approves it) and do step 5 (`IntegrationManagementService`, using `hasPermission` and the `IAuthenticatorSystem` of `common`)
 - **Open questions:** Q18
 - **Last update:** 15/11/2026, Javier
