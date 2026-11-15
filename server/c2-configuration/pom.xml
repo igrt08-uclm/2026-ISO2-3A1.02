@@ -7,7 +7,7 @@
   <parent>
     <groupId>es.uclm.esi.iso2</groupId>
     <artifactId>radiodiagnostics</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 

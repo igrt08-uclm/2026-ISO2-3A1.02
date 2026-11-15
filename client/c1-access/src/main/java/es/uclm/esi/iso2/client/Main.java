@@ -6,6 +6,7 @@ import es.uclm.esi.iso2.client.access.presentation.IU_ManageRoles;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ConfigureParameters;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ManageIntegrations;
+import es.uclm.esi.iso2.client.patients.presentation.IU_ManagePatients;
 import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
 import es.uclm.esi.iso2.common.access.contracts.IRoleManagementService;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
@@ -20,6 +21,7 @@ import es.uclm.esi.iso2.server.access.service.AuthenticationService;
 import es.uclm.esi.iso2.server.access.service.RoleManagementService;
 import es.uclm.esi.iso2.server.configuration.service.IntegrationManagementService;
 import es.uclm.esi.iso2.server.configuration.service.SystemParameterService;
+import es.uclm.esi.iso2.server.patients.service.PatientService;
 import java.awt.Container;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -45,6 +47,7 @@ public final class Main {
             new SystemParameterService(roleManagementService, auditService);
     private final IntegrationManagementService integrationManagementService =
             new IntegrationManagementService(roleManagementService, auditService, authenticatorSystem);
+    private final PatientService patientService = new PatientService(roleManagementService, auditService);
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().start());
@@ -53,6 +56,7 @@ public final class Main {
     private void start() {
         systemParameterService.loadSeedData();
         integrationManagementService.loadSeedData();
+        patientService.loadSeedData();
         useNativeLookAndFeel();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
@@ -77,7 +81,7 @@ public final class Main {
         window.setTitle(APPLICATION_TITLE);
         show(new IU_Welcome(user, this::showLogin, () -> showAudit(user),
                 roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user),
-                () -> showConfigureSystem(user), () -> showManageIntegrations(user)));
+                () -> showConfigureSystem(user), () -> showManageIntegrations(user), () -> showManagePatients(user)));
     }
 
     private void showManageRoles(UserAccount user) {
@@ -89,6 +93,12 @@ public final class Main {
     private void showConfigureSystem(UserAccount user) {
         window.setTitle(APPLICATION_TITLE + " - Configure system");
         show(new IU_ConfigureParameters(systemParameterService, user.getUsername(), this::confirm,
+                () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
+    }
+
+    private void showManagePatients(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Manage patients");
+        show(new IU_ManagePatients(patientService, user.getUsername(), this::confirm,
                 () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
     }
 

@@ -1,0 +1,81 @@
+# Plan – Fixes of the findings of Testing (#122) – UC12 and C2
+
+| | |
+|---|---|
+| **Sub-issue** | #45 *UC12 – Client (C3 v1.0.0)* (batch 1, pull request #121) · batch 2 has no sub-issue: it is a patch of already merged code (D-036) |
+| **Source** | `doc/testing/defects-C1-C3.md` (#122, Adam), the review of David in #120, #121 and #122 (R-01 to R-05) |
+| **Branches** | batch 1: `feature/UC12-client` (Adam already merged `develop` into it) · batch 2: a new branch from `develop`, created by Javier (rule 7) |
+| **Plan approved by** | Javier, 15/11/2026 |
+
+## What is fixed in each batch
+**Batch 1 – today, to unblock #121 (David approves when it is pushed and the build is green):**
+F-06, F-07, F-08, F-09, F-10 (screen of the patients) and R-02, R-03, R-04 (rules of UC12, server and screen).
+
+**Batch 2 – also today (Javier, 15/11/2026: every finding of David and Adam is fixed today), done in the same branch `feature/UC12-client` (Javier, 15/11/2026):** R-05 and F-19 (C2) and the findings that Adam left to Implementation: F-11, F-12, F-14, F-16, F-17 and F-18.
+
+**Findings decided by others (Q9):** F-13 (Marcos and Denis), F-15 (David) and F-20 (Ignacio and David) are fixed in batch 2 with the proposal of Q9; D-01 to D-03 are diagrams (Design, #114). R-01 needs no change (no fixed format).
+
+## Decisions already taken
+- **Javier, 15/11/2026:** F-09 the error line goes in the centre of the footer and breaks into lines if it is long; F-10 the button *Search* keeps Alt+H and the label *Search* has no shortcut (changed by Javier because the test of Adam checks the button); two batches of commits.
+- **David (#121):** F-06 the call to `table.clearSelection()` in `onNewPatient` is done with `restoring = true`; F-08 `Back` is `if (confirmDiscard()) { onBack.run(); }`.
+- **David (#122, confirmed R-01 to R-05):** the identifier is compared ignoring case, all the spaces and `-`; the search ignores accents; e-mail with no empty part; date of birth not before 01/01/1900; phone typed with spaces but only its 9 to 15 digits count; endpoint with a host after `http://`/`https://` and the scheme ignoring case.
+- The tests are Adam's: no step writes them. Some of his tests may fix the old behaviour (for example the double question): if one fails, I tell Javier and Adam, I do not edit it.
+
+## Batch 1 – steps (branch `feature/UC12-client`)
+Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before it.
+
+- [x] **1. Plan.** This file, committed with the approval of Javier. (The branch was already updated with `git pull --ff-only`: `62095bc`.) Commit 8e9c565.
+- [x] **2. F-06, F-07, F-08 (`IU_ManagePatients`).** Commit 35acffc.
+  - F-06: in `onNewPatient`, `table.clearSelection()` runs with `restoring = true`, so the listener does not ask a second time.
+  - F-07: `changeRow` does nothing when the selected row is still the shown one (dragging away and back no longer reloads the form).
+  - F-08: *Back* asks with `confirmDiscard()` and leaves only if the user accepts.
+- [x] **3. F-09, F-10 (`IU_ManagePatients`).** Commit 8fc19fd.
+  - F-09: `lblStatus` goes in `BorderLayout.CENTER` of the footer and wraps its text in lines (HTML in the label with the width of the free space), so that a long error is read whole and does not go under *Back*.
+  - F-10: `btnSearch` loses its mnemonic; the label keeps Alt+H.
+- [x] **4. R-02 (server).** (done in `PatientService`, not in the repository, because TC12S-60 of Adam checks `findByIdentifier`; Javier, 15/11/2026) `InMemoryPatientRepository.findByIdentifier` and the check "The identifier cannot be changed" in `PatientService` compare the identifiers ignoring case, all the spaces and `-` (`HC 0000001`, `HC-0000001` and `hc0000001` are the same patient). The identifier is saved as it was typed. Commit 14df4d6.
+- [x] **5. R-03 (server).** `InMemoryPatientRepository.search` ignores accents as well as case (`lucia` finds "Lucía"), with `Normalizer` of the JDK (no new dependency, rule 6). Commit d2cfd51.
+- [x] **6. R-04 (server and screen).** The same rules in `PatientService` and in `IU_ManagePatients`: e-mail `name@domain.ext` with no empty part (`ana@example.test.` and `ana@example..test` rejected); date of birth not before 01/01/1900, with the message "The date of birth cannot be before 01/01/1900". The phone is checked: it already ignores the spaces and counts only the digits, so it only changes if a case fails. Commit c7780fc.
+- [x] **7. Hand over to Adam.** Update the lists of cases of `UC12-client.md` and `UC12-server.md` ("State for Adam"), add the commit hashes here and tell Adam what to test again (F-06, F-07, F-08, F-09, F-10, R-02 to R-04). **Push only when Javier asks** (rule 8). Plan updated; the branch is not pushed yet (rule 8).
+
+## Questions and answers
+- **Q1 (batch 1):** Should the search by identifier also ignore the spaces and `-` (so that `HC0000001` finds `HC-0000001`)? **Proposal:** no; the search only ignores case and accents, as David wrote in R-03. The text is also searched in the name, where the spaces matter ("Ana María"). **A:** approved as proposed (Javier, 15/11/2026)
+- **Q2 (batch 2):** Branch and version. **Proposal:** a branch from `develop` with a name that Javier chooses (for example `fix/testing-findings-C2-C3`); the versions do not change (`server-c2` and `client-c2` stay at 1.1.0-SNAPSHOT, they are not released yet). **A:** approved as proposed (Javier, 15/11/2026)
+- **Q3 (batch 2) – R-05:** the endpoint needs a host after `http://` or `https://`, and the scheme ignores case. **Proposal:** the endpoint is saved as it was typed (only stripped), and the message does not change: "The endpoint must start with http:// or https://" for a wrong scheme, and a new one, "The endpoint needs a host after http:// or https://". **A:** approved as proposed (Javier, 15/11/2026)
+- **Q4 (batch 2) – F-11:** the counter of the ids is in the service. **Proposal:** `IPatientRepository` gets `nextPatientId()` (the repository knows the highest id it has), and `PatientService` uses it; the ids stay `P-0001`... and a service built with a repository that has patients never overwrites one. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q5 (batch 2) – F-12:** a blank identifier in a modification gives two messages. **Proposal:** only "The identifier is required"; "cannot be changed" is added only if the identifier is not blank. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q6 (batch 2) – F-14:** with `system = null` a user without permission gets `IllegalArgumentException`. **Proposal:** the permission is checked first (as in `PatientService`): a user without the permission gets `AccessDeniedException` and it is audited; the validation comes after. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q7 (batch 2) – F-16 and F-17:** `null` settings and `null` endpoint. **Proposal:** the server saves `null` settings as an empty map; the screen treats a `null` endpoint as `""` when it compares with the form. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q8 (batch 2) – F-18 and F-19:** screen of the integrations. **Proposal:** after an access denied the table ignores the clicks (and never asks "Discard the unsaved changes?"); *Revert* also clears the message area. **A:** approved as proposed (Javier, 15/11/2026)
+
+- **Q9 (batch 2) – F-13, F-15, F-20:** F-13 audit `getPatient` and `modifyPatient` of an unknown id as `PATIENT_ACCESSED` (resource `PATIENT:<id>`); F-15 strip the keys and the values of the settings; F-20 reject a **new** test type with a deactivated priority ("The priority X is deactivated"; editing an old one keeps Q9 of UC17). **A:** approved as proposed (Javier, 15/11/2026); they are part of the patch of batch 2.
+
+## Batch 2 – steps (same branch `feature/UC12-client`; Javier: the code must pass the existing tests, no test of Adam is changed)
+- [x] **8. F-14, F-15 (`IntegrationManagementService`).** Commit 347e4d0: the permission is checked before the system is required, and the keys and values of the settings are stripped.
+- [x] **9. F-17, F-18, F-19 (`IU_ManageIntegrations`).** Commit dc3571d: *Revert* clears the message, the table is disabled and ignores the clicks after a denial, a `null` endpoint counts as empty.
+- [x] **10. F-11 (`PatientService`).** Commit e637585: The counter of the ids starts from the highest `P-nnnn` that the repository already has, so a service built with a repository with patients does not overwrite one. No change of the interface of the repository.
+- [x] **11. Findings that an existing test of Adam checked, decided by David (Requirements) on 15/11/2026:**
+  - R-05 (endpoint with a host) and F-20 (a new test type cannot use a deactivated priority): **the fix wins**. Done in the patch of C2 1.1.1, #123, branch `feature/C2-patch-1.1.1` (commits 57d150e and 3d086e0, plan `doc/plans/C2-patch-1.1.1.md`); Adam updated TC20S-17 and `deactivatedPriorityIsAccepted`. The screen of the integrations still accepts `http://` alone (TC20C-17 is not changed; the server rejects it).
+  - F-12 (two messages for a blank identifier), F-13 (an unknown id is not audited) and F-16 (`null` settings stay `null`): **the test wins**, they stay as they are.
+  - R-02 is done in `PatientService`; `findByIdentifier` of the repository keeps its rule (TC12S-60).
+  - So Q9 is only partly applied: F-15 was done in step 8, F-20 in #123, and F-13 stays as it is.
+- [x] **12. Push** of batch 2 (`50291c4`, Javier asked); #121 merged by David on 15/11/2026.
+
+## State for Adam
+**Batch 1 (branch `feature/UC12-client`, steps 2 to 6) – what to test again:**
+- F-06: *New patient* with unsaved changes asks once; cancelling keeps the changes.
+- F-07: dragging the selection away and back to the same row keeps the changes, without asking.
+- F-08: *Back* with unsaved changes asks "Discard the unsaved changes?".
+- F-09: a long error is shown in several lines at the centre of the footer (it is a `JLabel` subclass that keeps `getText()` plain; it was not checked by eye, please look at it in the manual test).
+- F-10: Alt+H is only the *Search* button; the label *Search* has no shortcut (the test TC12C-04 of Adam checks the button).
+- R-02: `HC 0000001`, `HC-0000001` and `hc0000001` are the same patient when registering and when modifying (the check is in `PatientService`; `findByIdentifier` of the repository is unchanged because TC12S-60 checks it).
+- R-03: `lucia` finds "Lucía". R-04: `ana@example.test.` and `ana@example..test` are rejected; `01/01/1899` is rejected with "The date of birth cannot be before 01/01/1900"; the phone already counted only the digits (no change).
+- All the tests that existed pass; no test of Adam was changed.
+
+**Batch 2 (same branch, steps 8 to 10) – what to test:**
+- F-14: `getIntegration` and `testConnection` with `system = null` and a user without `CONFIGURE_INTEGRATIONS` throw `AccessDeniedException` and audit `INTEGRATION_ACCESS_DENIED` on `INTEGRATION`; with the permission, `null` still throws `IllegalArgumentException`.
+- F-15: the keys and the values of the settings are saved stripped (`" 30 "` is saved as `"30"`); `null` settings stay `null` (F-16).
+- F-17: a saved `null` endpoint and an empty field do not count as unsaved changes.
+- F-18: after an access denied, the table of the integrations is disabled and pressing it asks nothing.
+- F-19: *Revert* clears the message area.
+- F-11: a `PatientService` built with a repository that already has `P-0003` registers the next one as `P-0004`.
+- Done by Adam on 15/11/2026: the tests of batch 1 and batch 2 and of the patch #123, all green.
