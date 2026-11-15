@@ -114,7 +114,10 @@ public class IU_ManageIntegrations extends JPanel {
         lblSimulated.setFont(lblSimulated.getFont().deriveFont(Font.BOLD));
         lblSimulated.setForeground(SIMULATED_COLOR);
         btnRevert.setMnemonic('R');
-        btnRevert.addActionListener(event -> showSelected());
+        btnRevert.addActionListener(event -> {
+            lblStatus.setText(" ");
+            showSelected();
+        });
         btnTest.setMnemonic('T');
         btnTest.addActionListener(event -> onTestConnection());
         btnSave.setMnemonic('S');
@@ -125,7 +128,7 @@ public class IU_ManageIntegrations extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setDefaultRenderer(Object.class, new SimulatedRenderer());
         table.getSelectionModel().addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting() && !loading && !restoring) {
+            if (!event.getValueIsAdjusting() && !loading && !restoring && !denied) {
                 changeRow();
             }
         });
@@ -223,7 +226,7 @@ public class IU_ManageIntegrations extends JPanel {
 
     /** Tells whether the form differs from the saved configuration of the integration. */
     private boolean isDirty(IntegrationConfiguration saved) {
-        return !txtEndpoint.getText().strip().equals(saved.getEndpoint())
+        return !txtEndpoint.getText().strip().equals(saved.getEndpoint() == null ? "" : saved.getEndpoint())
                 || !txtSettings.getText().strip().equals(formatSettings(saved.getSettings()).strip())
                 || chkEnabled.isSelected() != saved.isEnabled()
                 || rbReal.isSelected() != (saved.getMode() == IntegrationMode.REAL);
@@ -304,6 +307,7 @@ public class IU_ManageIntegrations extends JPanel {
 
     private void updateControls() {
         boolean editable = !denied && selectedEntry() != null;
+        table.setEnabled(!denied);
         txtEndpoint.setEnabled(editable);
         txtSettings.setEnabled(editable);
         chkEnabled.setEnabled(editable);
