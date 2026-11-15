@@ -88,7 +88,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 2. Poms: the module `client/c3-patients` and its managed version (Q1). The poms of `client-c1-access` wait for step 6. - 0f9846d.
 - [x] 3. `IU_ManagePatients`, the display: search box, table, form of the selected patient, the line with the number found, *Back* and the denied access (Q3, Q4, Q7). - 7fdfb4e.
 - [x] 4. `IU_ManagePatients`, *Save* and *New patient*: reading of the form, validation in the client, register or modify, duplicate and messages (Q5, Q6, Q7). - ed7c678.
-- [ ] 5. `IU_ManagePatients`, unsaved changes: the question before another row, *New patient* or *Search* (Q8).
+- [x] 5. `IU_ManagePatients`, unsaved changes: the question before another row, *New patient* or *Search* (Q8). - 7048310. Checked roughly with a throwaway program outside the repo that presses the buttons with the real service (open, select, new, errors, register, duplicate, modify, the questions and the denied access); no test was written.
 - [ ] 6. When the pull requests of UC20 (#118, #119) are merged into `develop`: bring `develop` to this branch (merge); `IU_Welcome` (button) and `Main` (service, seed data, navigation); the version `1.2.3-SNAPSHOT` and the dependencies of `client-c1-access` (Q1, Q9).
 - [ ] 7. `agents/architecture.md` (after step 6, so that it is written over the changes of UC20).
 - [ ] 8. Hand the branch over to Adam: the manual check of the screen with `lmartin` (`admin` and `mgarcia` do not see the button) and the tests of UC12-client, who opens the pull request (`Closes #45`); close only with his tests green and the coverage check passing.
@@ -106,6 +106,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 5 (unsaved changes: the question before another row, *New patient* or *Search*)
+- **Next step:** step 6 (waits for the pull requests of UC20 to be merged into `develop`: then bring `develop`, `IU_Welcome`, `Main` and the poms of `client-c1-access`)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
