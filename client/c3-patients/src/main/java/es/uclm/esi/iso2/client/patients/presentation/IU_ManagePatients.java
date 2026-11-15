@@ -114,7 +114,11 @@ public class IU_ManagePatients extends JPanel {
         JLabel lblTitle = new JLabel("Patients");
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
         btnBack.setMnemonic('B');
-        btnBack.addActionListener(event -> onBack.run());
+        btnBack.addActionListener(event -> {
+            if (confirmDiscard()) {
+                onBack.run();
+            }
+        });
         btnNew.setMnemonic('N');
         btnNew.addActionListener(event -> onNewPatient());
         btnSave.setMnemonic('S');
@@ -221,7 +225,10 @@ public class IU_ManagePatients extends JPanel {
      * cancels, the selection goes back to the row it had, with its changes.
      */
     private void changeRow() {
-        if (table.getSelectedRow() != shownRow && !confirmDiscard()) {
+        if (table.getSelectedRow() == shownRow) {
+            return;
+        }
+        if (!confirmDiscard()) {
             restoring = true;
             try {
                 if (shownRow >= 0) {
@@ -264,7 +271,12 @@ public class IU_ManagePatients extends JPanel {
         if (!confirmDiscard()) {
             return;
         }
-        table.clearSelection();
+        restoring = true;
+        try {
+            table.clearSelection();
+        } finally {
+            restoring = false;
+        }
         showSelected();
         txtIdentifier.requestFocusInWindow();
     }
