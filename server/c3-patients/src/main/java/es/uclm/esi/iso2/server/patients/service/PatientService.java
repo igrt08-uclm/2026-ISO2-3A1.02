@@ -94,7 +94,7 @@ public class PatientService implements IPatientService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-        Patient duplicate = patients.findByIdentifier(patient.getIdentifier());
+        Patient duplicate = findDuplicate(patient.getIdentifier());
         if (duplicate != null) {
             auditRecorder.register(requester, ACCESSED, resourceOf(duplicate.getPatientId()));
             throw new DuplicatePatientException(duplicate);
@@ -110,7 +110,7 @@ public class PatientService implements IPatientService {
         checkPermission(requester, resourceOf(patientId));
         Patient current = existing(patientId);
         List<String> errors = validate(patient);
-        if (patient != null && !normalized(current.getIdentifier()).equals(normalized(patient.getIdentifier()))) {
+        if (patient != null && !identifierKey(current.getIdentifier()).equals(identifierKey(patient.getIdentifier()))) {
             errors.add("The identifier cannot be changed");
         }
         if (!errors.isEmpty()) {
@@ -132,6 +132,22 @@ public class PatientService implements IPatientService {
                 clean(data.getAddress()), clean(data.getPhone()), clean(data.getEmail()), true);
         patients.save(saved);
         return saved;
+    }
+
+    /** The patient with the same identifier, ignoring case, every space and {@code -} (R-02), or {@code null}. */
+    private Patient findDuplicate(String identifier) {
+        String wanted = identifierKey(identifier);
+        for (Patient existing : patients.search("")) {
+            if (identifierKey(existing.getIdentifier()).equals(wanted)) {
+                return existing;
+            }
+        }
+        return null;
+    }
+
+    /** The identifier as it is compared: without case, spaces or {@code -}, so {@code HC 1} and {@code hc-1} match. */
+    private static String identifierKey(String identifier) {
+        return clean(identifier).replaceAll("[\\s-]", "").toLowerCase(Locale.ROOT);
     }
 
     /** The requester must exist, be active and have MANAGE_PATIENTS; if not, it is registered and denied. */
@@ -193,9 +209,5 @@ public class PatientService implements IPatientService {
 
     private static String clean(String text) {
         return text == null ? "" : text.strip();
-    }
-
-    private static String normalized(String text) {
-        return clean(text).toLowerCase(Locale.ROOT);
     }
 }
