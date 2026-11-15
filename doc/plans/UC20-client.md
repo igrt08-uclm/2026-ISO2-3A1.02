@@ -97,7 +97,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 3. `IU_ManageIntegrations`, the display: table of the four integrations, the form of the selected one, "SIMULATED" in bold amber and the line above the form, *Back*, and the denied access (Q7, Q9, Q10, Q12). - a966bbf.
 - [x] 4. `IU_ManageIntegrations`, *Save*: reading of the settings, validation in the client, confirmation, save and messages (Q1, Q3, Q8, Q12). - 8a3d29e.
 - [x] 5. `IU_ManageIntegrations`, *Test connection* and *Revert*: the "Unsaved changes" line, the button disabled while there are changes, and the result of the test (Q2, Q11, Q12). - 63c7f49 (checked roughly with a throwaway program outside the repo that presses the buttons with the real service: errors together, confirmations, *Revert*, the test in each state, the question when another row is pressed and the denied access; no test was written). Q15 is done here too.
-- [ ] 6. `IU_Welcome` (button) and `Main` (service, seed data, navigation) (Q13).
+- [x] 6. `IU_Welcome` (button) and `Main` (service, seed data, navigation) (Q13). - 93a758b (checked roughly with a throwaway program: only `admin` sees *Configure integrations*; the 6-argument constructor does not show it; no test was written).
 - [ ] 7. `agents/architecture.md`.
 - [ ] 8. Hand the branch over to Adam: the manual check of the screen with `admin` (and `mgarcia`, who does not see the button) and the tests of UC20-client, who opens the pull request (`Closes #42`); close only with his tests green and the coverage check passing.
 
@@ -114,6 +114,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 6 (`IU_Welcome` button and `Main`)
+- **Next step:** step 7 (`agents/architecture.md`) and step 8 (hand the branch over to Adam)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
