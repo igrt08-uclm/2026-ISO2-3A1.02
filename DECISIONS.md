@@ -16,6 +16,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Adding the coordinator to the bypass list. Rejected, because the kickoff asks for an empty bypass list.
 - **Reason:** Keep the protection the course asks for without blocking every merge.
 - **Consequences:** Nobody, including the AI agent, commits directly to `main` or `develop`. The first pull request (the *Use case* issue template) could be merged.
+- **Status:** Updated by D-038 on 15/11/2026: the coordinator may approve and merge his own pull requests.
 
 ## D-002 · Functional requirements: 21 from the specification + login
 **Date:** 11/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 1](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-1) · **Time in the recording:** 0:06:11–0:08:28, 0:18:34–0:19:57
@@ -67,6 +68,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Other agents allowed by the specification (OpenCode, Antigravity).
 - **Reason:** It is the reference environment recommended by the specification, and it is free with the UCLM student licence.
 - **Consequences:** The cost of AI models for the team is €0. *The agent suggests; we decide.*
+- **Status:** Updated by D-034 on 11/11/2026: other agents may be used when the Copilot quota runs out.
 
 ## D-007 · Iteration N = use cases with priority N
 **Date:** 13/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 2](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-2) · **Time in the recording:** 0:05:42, 0:28:21–0:34:24
@@ -151,7 +153,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** One version per component, shared by the client and the server (proposed in Meeting 3). Separate versions for the client and the server with a compatibility table between them.
 - **Reason:** Follow the course guidelines (Maven practice, Git Flow and T.2.01): the version lives in the poms and in the tags of `main`, so it can be traced and built.
 - **Consequences:** Every issue shows the version of the module it changes (for example, server 1.0.0). Tags per component, such as `C1-v1.0.0`, are not used. When the product version changes, `<parent><version>` must also change in the server and client poms.
-- **Status:** Updated by D-021 on 28/10/2026: order of the module versions within an iteration.
+- **Status:** Updated by D-021 on 28/10/2026: order of the module versions within an iteration. Updated by D-032 on 11/11/2026: each component submodule has its own version.
 
 ## D-015 · Client and server: sub-issues and development order
 **Date:** 21/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 3](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-3) (0:08:59–0:27:58, 1:23:47–1:24:55), [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:20:25)
@@ -183,7 +185,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Two repositories; a single module; one Maven module per component; Spanish names (`radiodiagnostico`, `servidor`, `cliente`), as in the Spanish version of the Maven practice; the contracts copied in both modules; real communication over the network (REST or sockets).
 - **Reason:** One `mvn verify` builds and tests everything, and the versions and libraries are set once in the parent. The names are in English, like the rest of the project and the branches. With a single copy of the contracts, the client and the server cannot get out of sync, and the build fails if they stop matching. Real network communication is outside the scope of the subject.
 - **Consequences:** The `common` module has to be added to the Maven structure, with its own version (D-014) (#35). Nobody approves a pull request with a red build. The team will check with Ismael that the `common` module is accepted (#34).
-- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated.
+- **Status:** Extended by D-023 on 28/10/2026: each component owns its data, and the interfaces of later components are simulated. Updated by D-032 on 11/11/2026: one Maven submodule per component instead of one package. Confirmed by Ismael on 12/11/2026: the `common` module for the shared interfaces is correct (#34).
 
 ## D-017 · Visual Paradigm version
 **Date:** 25/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 4](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-4) (0:34:47–0:37:16)
@@ -211,6 +213,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Keeping the table in the component issue and in every use case issue.
 - **Reason:** A single source of the numbers: two copies stop matching as soon as a member updates the hours of their discipline.
 - **Consequences:** Updates D-011. The effort table was removed from the use case template (PR #51).
+- **Status:** Updated by D-035 on 12/11/2026: the hours are also split between the server and the client.
 
 ## D-020 · One milestone per delivery date
 **Date:** 28/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:26:55–0:27:53, 0:45:28–0:46:05 · **Issues:** #52
@@ -260,7 +263,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Consequences:** The discharge is delivered in It8, after C5 (D-013). C4 and C5 reject inactive patients. The patient identifier (national ID or health card number) is not decided yet: it is decided with the requirements of C3.
 
 ## D-025 · Working method with AI agents: Spec-Driven Development
-**Date:** 29/10/2026 · **Iteration:** 1 · **Minutes:** to be confirmed in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #60, PR #61
+**Date:** 29/10/2026 · **Iteration:** 1 · **Minutes:** merged in PR #61, approved by two members; extended in [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) by D-034 · **Issues:** #60, PR #61
 
 - **Context:** The team implements the use cases with GitHub Copilot (D-006). The assignment asks to bind the artefacts of the Unified Process to development descriptors such as PLAN.md or CONTEXT.md under Spec-Driven Development, always with a person in the loop (assignment, pp. 4 and 10), and the Kickoff describes the cycle: the team designs, the agent proposes PlantUML, the team approves it in Visual Paradigm, and the agent implements what was designed (Kickoff, p. 28). Without a fixed method, an agent can start coding on its own, fill gaps with assumptions or change things outside its task.
 - **Decision:**
@@ -270,3 +273,160 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** An SDD tool such as GitHub Spec Kit or Kiro, which would make the agent write the requirements and choose the architecture, and both are human tasks here (Kickoff, p. 23; D-016). A state file per component, which would conflict between branches and double the commits. No fixed method.
 - **Reason:** The agent only works on what was specified and designed, every doubt reaches a person before the code is written, and the plans are evidence of how the team uses AI.
 - **Consequences:** Extends D-006 and D-008. The designers keep the approved diagrams in `doc/design/` in a form that agents can read, because they cannot open `.vpp` files. Each sub-issue has its plan in `doc/plans/`, committed on its branch with the code.
+- **Status:** In force since 29/10/2026. Extended by D-034 on 11/11/2026: tests, Javadoc and the professor's repository.
+
+## D-026 · Conclusions on the effect of AI on the plan
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:29:24–0:36:12 · **Issues:** #80
+
+- **Context:** The Kickoff (p. 29) asks to record five conclusions in this file, and the assignment asks to discount the optimism bias of AI and to compare the estimate with one made by an agent (pp. 5 and 6). None of them was recorded.
+- **Decision:**
+  - **Disciplines that AI reduces:** Testing (36.0 %) and Implementation (30.8 %) the most, Requirements (20.7 %) and Analysis (20.6 %) less, and Design (12.2 %) the least.
+  - **Disciplines that must not be touched:** the decisions of requirements, analysis, design, architecture and test design stay with people (assignment, p. 3; D-008). AI only helps to draft them.
+  - **Estimate in tokens:** an AI agent forecast about 34.4 million input tokens and 1.6 million output tokens, from the real size of UC22. At an illustrative price of 3 € and 15 € per million tokens that is about 128 €, 6.4 % of the human cost of Implementation and Testing. With the UCLM licence it costs 0 € (D-006).
+  - **Cost and date:** 9,080 € with AI and 10,982.50 € without AI; 29 working days of development with AI and 36 without. The final date does not change, because it is fixed by the course.
+  - **Optimism bias:** the members estimate the hours and include the review of what the agent produces; the estimate is corrected with the real hours of each component; and the plan is checked against a scenario in which AI only gives half of the saving: 281.3 hours, 10,031.25 € and 33 working days.
+- **Alternatives:** Taking the forecast of the agent as the estimate. Not applying any discount.
+- **Reason:** The forecast does not count failed sessions, and it shows that what changes the budget is the time people need to review the output, not the tokens.
+- **Consequences:** These conclusions are in sections 9.2, 9.4 and 9.6 of the theory report.
+- **Status:** Approved in Meeting 6 (08/11/2026).
+
+## D-027 · One desktop client
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:17:23–0:21:20, 0:29:24–0:31:44 · **Issues:** #80
+
+- **Context:** The assignment describes clients for desktop and mobile, and web access with DICOM image viewers (p. 1). The Kickoff (p. 11) speaks of one Maven module per type of client.
+- **Decision:** We build one client, a Java desktop application. Mobile and web clients and DICOM viewers are out of scope.
+- **Alternatives:** A web client or a mobile client as well.
+- **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients.
+- **Consequences:** It is assumption A9 of the theory report. Another client would be a new Maven module with the same contracts.
+- **Status:** Approved in Meeting 6 (08/11/2026).
+
+## D-028 · Correction of the plan totals and recovery of the delay
+**Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:09:57–0:11:15, 0:29:24–0:31:44 · **Issues:** #80, #57
+
+- **Context:** The totals of the plan counted the discharge of FR12 twice (E-15). C1 ended on 7 November instead of 28 October (E-10), with the release v0.1.0, and C2, C3 and C4 have not started. The assignment asks to explain how the deviations are recovered (p. 6, note 13).
+- **Decision:**
+  - The totals are 243.2 hours and 9,080 € with AI, and 319.3 hours and 10,982.50 € without AI.
+  - The 221.2 hours left are delivered in the same order: 09/11–15/11, C2 and C3 (32.5 h); 16/11–22/11, C4 and C5 (52.8 h); 23/11–29/11, the first part of C6, and C7 (45.1 h); 30/11–06/12, It8 and It9 (54.1 h); 07/12–09/12, C9 (36.7 h).
+  - The end of development stays on 9 December. It11 does not move, and it includes the testing plan, the test reports and the maintenance plan, within its fixed cost.
+- **Alternatives:** Keeping the dates and accepting more delays. Reducing the scope, which the assignment does not allow.
+- **Reason:** All the functional requirements have to be fulfilled, and the final date is fixed.
+- **Consequences:** It asks for 5 to 8 hours per member per week. When it is approved, the dates of the next milestones and of *Traceability and releases* are updated. The due date of Milestone 1 stays as it was, so that the delay can be seen (#57).
+- **Status:** Approved in Meeting 6 (08/11/2026).
+
+## D-029 · Critical quality characteristics
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:14:40–0:17:23 · **Issues:** #80, #54
+
+- **Context:** The professor asked the team to choose three quality attributes (Meeting 5). The practice P.01.03 asks for at least one subcharacteristic of each one and for their impact on the requirements (slide 13), and the assignment asks to identify and justify the critical characteristics for this healthcare domain (p. 9). Whatever we choose has to be fulfilled, so the proposal takes what C1 already does and what does not change the architecture.
+- **Decision:** The three critical characteristics of ISO/IEC 25010 are **Security** (non-repudiation), **Functional suitability** (functional appropriateness) and **Usability** (user error protection). The other five are kept with a lower weight.
+- **Alternatives:** Reliability instead of Usability: availability, fault tolerance and recoverability clash with having the data in memory (D-030), and C1 has no logging yet. All eight with the same weight.
+- **Reason:** A failure in any of the three has a clinical or legal consequence: nobody can prove who did what, a profile reaches functions that are not for it, or wrong data reaches the patient.
+- **Consequences:** Sections 22 and 23 of the theory report develop them, and the non-functional requirements of the wiki come from them. Each new component records its critical operations, checks the role and validates its forms, and the pull request template has the review checklist.
+- **Status:** Approved in Meeting 6 (08/11/2026).
+
+## D-030 · Swing for the client, and data in memory
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** reported in [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Issues:** #34, #80
+
+- **Context:** The client of C1 is already written in Swing, and the users and the audit log are kept in memory. Marcos recalls Ismael saying in class that persistence is not needed.
+- **Decision:** The desktop client uses Swing. The data is kept in memory while the program runs, and no database is implemented.
+- **Alternatives:** Another graphical library, such as JavaFX. A database, or saving the data in files.
+- **Reason:** Swing comes with Java, so it adds no dependency, and C1 already uses it. The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include a database.
+- **Consequences:** The data is lost when the program closes. It is assumption A10 of the theory report. A database would be a new implementation behind the same repository interfaces.
+- **Status:** Approved.
+
+## D-031 · Operational assumptions of the plan
+**Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:29:24–0:31:44 · **Issues:** #80
+
+- **Context:** The assignment requires all operational assumptions to be documented in the theory report, in the wiki and in this file (p. 3). The assumptions about requirements are in D-002 to D-005 and D-009, and those of the plan were only in the report.
+- **Decision:** The plan relies on these assumptions:
+  - **A1.** Each consultant is available 40 hours per week, and the team has seven members, but not all of them work on every discipline: R and D have two owners; A, I and T have one each. Ismael confirmed on 12/11/2026 that 8 hours per day can be assumed for simplicity, although an organisation works 43 hours per week (9 hours from Monday to Thursday and 7 on Friday) (#34). *If it is false:* The critical path of It5 and It10 (the two heaviest iterations) lengthens; the calendar of section 6 of the report is no longer feasible and the end date moves.
+  - **A2.** AI assistance is available 24 hours a day, but every AI output needs human review before it is merged; the schedule therefore books the review, not the generation. *If it is false:* A higher AI ratio does not shorten anything: the bottleneck is reviewer availability, not token throughput (E-12, E-13).
+  - **A3.** The cost of AI tooling is zero for the team: GitHub Copilot is covered by the university licence. As most members ran out of their monthly Copilot quota, the professor allowed us to use Claude Code, which most of us already had, so the members without quota left use Claude Code under the same rules (AGENTS.md). It is a personal licence of each member and is not charged to the project (D-034). *If it is false:* The budget of section 8 of the report must add a licensing line. The 9,080 € figure assumes no tooling cost.
+  - **A4.** Visual Paradigm 18.1 is available to all seven members with an academic licence (D-017). *If it is false:* Model exchange between members breaks, and the design discipline becomes a serial bottleneck.
+  - **A5.** The external systems are simulated behind interfaces, and no integration test uses a real endpoint. *If it is false:* FR20 grows from a configuration use case to an integration project; C2 and C1 both change.
+  - **A6.** The examination catalogue is seed data, not a separate requirement (D-003). *If it is false:* FR17 would not cover the catalogue: a new requirement would be needed, and FR06 and FR13 would depend on it.
+  - **A7.** Iteration 0 and Iteration 11 have fixed costs of 1,000 € and 2,000 € given by the assignment, not estimated by us. *If it is false:* The total of 9,080 € and the comparison with 10,982.50 € both become invalid.
+  - **A8.** Human work costs 25 € per hour in every discipline. The specification itself gives no rate. *If it is false:* Every cost of section 8 of the report changes. Exercise E.01.02 also considers a different rate for each profile.
+  - **A9.** We build one client, a Java desktop application. Mobile and web clients and DICOM image viewers are out of scope (D-027). The Kickoff (p. 11) speaks of one Maven module per type of client. *If it is false:* Each new type of client is a new Maven module that uses the same contracts, and FR09 needs a viewer for the images.
+  - **A10.** The client uses Swing, and the data is kept in memory while the program runs: no database is implemented (D-030). *If it is false:* The repositories get a new implementation behind the same interfaces, for example IUserAccountRepository.
+- **Alternatives:** Keep them only in the report.
+- **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
+- **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
+- **Status:** Approved in Meeting 6 (08/11/2026).
+
+## D-032 · One Maven submodule per component
+**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:02:26–0:04:07, 0:43:07 · **Issues:** #34
+
+- **Context:** The assignment says that each component must be an individual Maven submodule of the root multi-module architecture (p. 7), while the Kickoff speaks of one module per application (p. 11). Until now each component was a package inside `server` and `client` (D-016), and section 5.3 of the theory report argued for it. The reference solution that the professor shared on 9 November uses one Maven submodule per component. Only C1 is written, so this is the moment when changing the structure costs least.
+- **Decision:** Each component is a Maven submodule. `server` and `client` become aggregator modules with one submodule per component on each side (for example `server/c1-access` and `client/c1-access`), and `common` keeps the contracts of all the components, one package per component. C1 is moved to its two submodules before C2 is implemented, in a feature branch with a pull request, and every later component is created directly as a submodule. Each component submodule has its own version: MINOR per use case of that component, starting at 1.0.0.
+- **Alternatives:** Keep one package per component inside `server` and `client` (D-016). Ask Ismael and wait for his answer before changing anything.
+- **Reason:** It meets both documents: the applications stay as modules, as the Kickoff asks, and the components become submodules, as the assignment asks. Each component gets its own pom, version and declared dependencies, so a component that uses the internals of another one does not compile unless its pom declares it.
+- **Consequences:** More poms to maintain and a longer build. The hours of moving C1 are not in the estimate and are recorded as real hours of It2. The version per module of D-014 becomes a version per component, so the traceability page shows one version per component instead of one for the whole server and client. The README and sections 5.3, 13, 15, 18 and 19 of the theory report change with it. If it is approved, D-014 and D-016 get a Status line that points here.
+- **Status:** Approved in Meeting 7 (11/11/2026).
+
+## D-033 · Test coverage threshold
+**Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:29:09–0:30:28 · **Issues:** #89, #90
+
+- **Context:** The quality plan of the theory report (sections 19.8, 23 and 27.1) needs a measurable threshold for the tests. Until now coverage was not measured. C1 was measured on 9 November: 93 % of its lines and 91 % of its branches are covered.
+- **Decision:** Every module keeps at least 80 % of its lines and 70 % of its branches covered. JaCoCo checks it in `mvn verify` with a rule at BUNDLE level (#90), so the build fails below the threshold and the pull request cannot be merged (D-001). The same threshold applies to every release.
+- **Alternatives:** A threshold that rises with each release (from 60 % to 80 %). No threshold, only the coverage report.
+- **Reason:** It is below what C1 already reaches, so it works as a floor that new components must not break, and CI checks it on every pull request without anyone having to remember it.
+- **Consequences:** Each new module inherits the rule from the parent pom, including the component submodules of D-032. Modules without branches pass the check. Changing the numbers needs a new decision.
+- **Status:** Approved in Meeting 7 (11/11/2026). The check was merged in #90 on 10/11/2026.
+
+## D-034 · Rules for the agents after Meeting 7
+**Date:** 11/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:04:07–0:07:48, 0:24:36–0:25:46, 0:31:04–0:33:45
+
+- **Context:** The professor shared his own solution of the project, and the lab session on JUnit (S.04.01) explained how tests are designed and written with an agent. AGENTS.md only said that the team designs the tests and the agent writes and runs them. The report also said that only GitHub Copilot is used, and the professor said in class that other agents can be used when the Copilot quota runs out.
+- **Decision:**
+  - **The professor's repository as a reference.** When the agent has a doubt, it may read the reference repository shared by the professor, explain how he solved it and wait for the team to decide. It is only an inspiration: no code or text is copied, and our decisions win when they differ (for example, he uses a database, Spring Boot and JavaFX; we do not, D-030).
+  - **Tests as in S.04.01.** The team designs the cases in a table (equivalence classes, boundary values and error guessing, combined with each use or pairwise), and each expected result comes from a requirement. The agent writes them with JUnit 6 (`org.junit.jupiter`), one method per case, with `@DisplayName` in English and the structure arrange, act, assert, without changing the production code. When a test fails, the agent explains whether the error is in the test or in the code; a bug in the code gets an issue and a `bugfix/…` branch, and an expected value is never changed to make a test pass. The tests of a use case stay in its branch, `feature/UCxx-server` or `feature/UCxx-client` (D-015).
+  - **Javadoc.** The agent writes the Javadoc of every class and public method when it writes them, not at the end of the project.
+  - **Other agents.** When the monthly GitHub Copilot quota runs out, other AI agents may be used, with the same rules (AGENTS.md).
+- **Alternatives:** Not using the professor's repository; letting the agent design the tests; writing the Javadoc at the end of the project.
+- **Reason:** The professor's repository shows what he expects, but our decisions are different. In the assessment, the design of the cases counts for more than the coverage or the JUnit code (S.04.01, slide 19). Documenting while the code is written is easier than documenting it later.
+- **Consequences:** AGENTS.md and agents/architecture.md are updated in the same pull request. D-006 is updated by this decision.
+- **Status:** Approved.
+
+## D-035 · The estimate is split between the server and the client
+**Date:** 12/11/2026 · **Iteration:** 2 · **Minutes:** Ismael's answer to #34 (12/11/2026) · **Issues:** #34
+
+- **Context:** Ismael answered that the hours of each RADIT discipline must be separated between the client and the server, because they are two different systems. The estimate of the plan (D-019) was made per use case and per discipline, without that split, and Theory Assignment 1 is delivered on 13/11/2026.
+- **Decision:** The hours of each use case and discipline are split between the server and the client with one rule per discipline: Requirements 50 % / 50 %, Analysis 60 % server / 40 % client, Design 50 % / 50 %, Implementation 40 % server / 60 % client, Testing 50 % / 50 %. The totals do not change: of the 243.2 hours with AI, 122.51 are for the server and 120.69 for the client (160.03 and 159.27 of the 319.3 hours without AI). From C2 on, each client and server sub-issue records its real hours, and the rule is corrected with them.
+- **Alternatives:** Estimating again each use case for each side, which could not be done before the delivery of 13/11/2026.
+- **Reason:** One specification per use case serves both sides. The control and entity classes of the analysis belong to the server and the boundary classes to the client. There is one design class diagram per side. In C1 the client has about 500 lines of code, and the server and `common` about 260 (JaCoCo, 09/11/2026).
+- **Consequences:** Section 8.1 of the theory report and the page Planification show the split per iteration. Updates D-019.
+- **Status:** Decided by David on 12/11/2026, after Ismael's answer; approved in the review of this pull request.
+
+## D-036 · Patches of C1 for C2 and C3, and how a finished component is changed
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 8](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-8) · **Time in the recording:** 0:01:41–0:04:53 · **Issues:** #40, #109, #112, #116
+
+- **Context:** C2 and C3 need changes in C1, which was finished in Iteration 1 (v0.1.0): new permissions, and interfaces of C1 that other components must use. By D-032, C2 cannot depend on the module of C1, so those interfaces have to be in `common`. Section 13.6 of the theory report does not say which version goes up when a component needs a change in a finished one.
+- **Decision:**
+  - **C1 1.2.1 (#109, merged with UC17):** `IAuditRecorder` moves to `common`, and the permission `CONFIGURE_SYSTEM` is given to the system administrator.
+  - **C1 1.2.2 (#112, pull request #116):** one patch for what UC20 (C2) and UC12 (C3) need from C1. `IAuthenticatorSystem` moves to `common` with a new method `ping()`; the permission `CONFIGURE_INTEGRATIONS` is given to the system administrator and `MANAGE_PATIENTS` to the Admissions staff; and `IRoleManagementService` gets the default method `hasPermission(username, permissionCode)`, so that each component checks the permissions with it instead of writing its own check.
+  - **Next patches** of the same kind follow the same rule.
+  - **The rule:** the change is asked for in an issue and approved by the owner of the finished component. That component raises PATCH, in its own branch and pull request, and the owner approves the pull request. If contracts are added to `common` without breaking any, `common` raises MINOR; a breaking change is MAJOR and needs its own decision (section 13.6 of the report). `common` goes from 1.3.0-SNAPSHOT to 1.4.0-SNAPSHOT for the contracts added in Iteration 2.
+- **Alternatives:** C2 depending on the module of C1, which D-032 rules out; or copying the interfaces in each component, which duplicates code (Annex A, item Q).
+- **Reason:** The components only share contracts through `common`, and the owner of a finished component checks every change to it (section 14.4 of the report). A patch in its own pull request is easier to review than inside the pull request of another component, and it is not delayed if that one is.
+- **Consequences:** `common` 1.4.0-SNAPSHOT; agents/components.md and the page Traceability and releases are updated.
+- **Status:** Patches approved by Ignacio, owner of C1, in #40 (13/11/2026) and #112 (15/11/2026), and by the team in Meeting 8 (15/11/2026). After the meeting, 1.2.2 also included `MANAGE_PATIENTS` for UC12, and Ignacio approved it in pull request #116 (15/11/2026).
+
+## D-037 · Patient identifier
+**Date:** 15/11/2026 · **Iteration:** 3 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) (left pending) · **Time in the recording:** 0:38:07–0:40:30 · **Issues:** #46, #47
+
+- **Context:** In Meeting 5 Marcos pointed out that the national ID and the health card number are not the same, and that the team had to choose with the requirements of C3. The contract of C3 (#47) said that the identifier is "the national ID or the health card number", which does not say which one detects a duplicate, and the design of UC12 only has `patientId` and `identifier`.
+- **Decision:** The server generates the internal `patientId` (`P-0001`, `P-0002`…). The `identifier` is the health card number, it is required and unique, and it is what detects a duplicate: if it already exists, the registration is rejected and the screen shows the existing record. The national ID is an optional field, `nationalId`.
+- **Alternatives:** The national ID as the identifier, which not every patient has (for example, a minor); or accepting either of them, which gives two values to check for a duplicate.
+- **Reason:** Not every patient has a national ID, and one unique value is enough to detect a duplicate.
+- **Consequences:** Design adds `nationalId` to `Patient` (#114), and the contract of #47 is updated with it. UC12 is implemented this way (#46).
+- **Status:** Proposed by David (Requirements) in #47 on 07/11/2026 and agreed in #46 on 14/11/2026; approved in the review of this pull request.
+
+## D-038 · The coordinator may approve his own pull requests
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — · **Issues:** E-13
+
+- **Context:** D-001 says that a pull request is approved by someone other than its author. Ignacio, the coordinator, merged three of his own pull requests without another approval (#7, #51 and the release #86, E-13). Ignacio asked Ismael whether this is admissible, and Ismael answered that it is, because he is the coordinator, and that it depends on the rules and assumptions that the team sets.
+- **Decision:** The coordinator may approve and merge his own pull requests, with the build green. He writes in the pull request that it is merged under D-038. Every other member still needs the approval of a member who is not the author (D-001). The bypass list of the ruleset stays empty (Kickoff, pp. 12–13): the coordinator merges as the owner of the repository.
+- **Alternatives:** Keeping D-001 strict for everyone, so that the coordinator also waits for another approval; or adding the coordinator to the bypass list, which D-001 already rejected.
+- **Reason:** Ismael accepts it for the coordinator, and the coordinator is who merges most pull requests and the releases, so waiting for another member blocks them. The other members keep the review of D-001.
+- **Consequences:** Updates D-001. E-13 is closed. The README says it.
+- **Status:** Decided by David on 15/11/2026, after Ismael's answer; approved in the review of this pull request.

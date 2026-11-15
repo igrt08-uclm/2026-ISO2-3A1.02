@@ -48,12 +48,12 @@ assignees: ''
 
 - [ ] All sub-issues (use cases) of this version are closed
 - [ ] Interfaces match the contracts in section 6.
-- [ ] Git tag created: `<component>-v<version>`
+- [ ] Git tag of the product release created on `main`: `v0.x.0`
 
 ## 8. Effort estimation (hours)
 [Click to see the table that describes the effort estimation of each UC in this component.](https://url/to/excel/page)
 
-**Agent / model used:** GitHub Copilot
+**Agent / model used:** GitHub Copilot or Claude Code, and the model
 
 ## 9. Risks and assumptions
 
@@ -62,5 +62,12 @@ assignees: ''
 ## 10. Post-mortem (fill in when closing)
 
 - Planned vs actual delivery date:
+- Hours estimated vs spent, per discipline:
 - Causes of any deviation:
 - Corrective actions:
+
+## 11. Changelog (fill in at every release)
+
+| Version | Date | Added | Changed / fixed |
+| --- | --- | --- | --- |
+| | | | |
