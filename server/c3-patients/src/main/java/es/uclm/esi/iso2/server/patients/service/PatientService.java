@@ -28,7 +28,8 @@ public class PatientService implements IPatientService {
     private static final String ACCESS_DENIED = "PATIENT_ACCESS_DENIED";
     private static final String PATIENTS = "patients";
     private static final String PATIENT = "PATIENT:";
-    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+$");
+    private static final LocalDate EARLIEST_BIRTH = LocalDate.of(1900, 1, 1);
     private static final Pattern PHONE_DIGITS = Pattern.compile("\\d{9,15}");
 
     private final IPatientRepository patients;
@@ -186,6 +187,8 @@ public class PatientService implements IPatientService {
             errors.add("The date of birth is required");
         } else if (patient.getDateOfBirth().isAfter(LocalDate.now())) {
             errors.add("The date of birth cannot be in the future");
+        } else if (patient.getDateOfBirth().isBefore(EARLIEST_BIRTH)) {
+            errors.add("The date of birth cannot be before 01/01/1900");
         }
         if (patient.getSex() == null) {
             errors.add("The sex is required");

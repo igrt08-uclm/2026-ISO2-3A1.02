@@ -56,7 +56,8 @@ public class IU_ManagePatients extends JPanel {
     private static final Color SUCCESS_COLOR = new Color(0x1B5E20);
     private static final String SUCCESS_ICON = "✔ ";
     private static final Border ERROR_BORDER = BorderFactory.createLineBorder(ERROR_COLOR, 2);
-    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+$");
+    private static final LocalDate EARLIEST_BIRTH = LocalDate.of(1900, 1, 1);
     private static final Pattern PHONE_DIGITS = Pattern.compile("\\d{9,15}");
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
@@ -350,6 +351,8 @@ public class IU_ManagePatients extends JPanel {
             LocalDate birth = LocalDate.parse(text, DATE_FORMAT);
             if (birth.isAfter(LocalDate.now())) {
                 fail(errors, txtBirth, "The date of birth cannot be in the future");
+            } else if (birth.isBefore(EARLIEST_BIRTH)) {
+                fail(errors, txtBirth, "The date of birth cannot be before 01/01/1900");
             }
             return birth;
         } catch (DateTimeParseException exception) {
