@@ -24,8 +24,8 @@ F-06, F-07, F-08, F-09, F-10 (screen of the patients) and R-02, R-03, R-04 (rule
 ## Batch 1 – steps (branch `feature/UC12-client`)
 Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before it.
 
-- [ ] **1. Plan.** This file, committed with the approval of Javier. (The branch was already updated with `git pull --ff-only`: `62095bc`.)
-- [ ] **2. F-06, F-07, F-08 (`IU_ManagePatients`).**
+- [x] **1. Plan.** This file, committed with the approval of Javier. (The branch was already updated with `git pull --ff-only`: `62095bc`.) Commit 8e9c565.
+- [x] **2. F-06, F-07, F-08 (`IU_ManagePatients`).** Commit 35acffc.
   - F-06: in `onNewPatient`, `table.clearSelection()` runs with `restoring = true`, so the listener does not ask a second time.
   - F-07: `changeRow` does nothing when the selected row is still the shown one (dragging away and back no longer reloads the form).
   - F-08: *Back* asks with `confirmDiscard()` and leaves only if the user accepts.
