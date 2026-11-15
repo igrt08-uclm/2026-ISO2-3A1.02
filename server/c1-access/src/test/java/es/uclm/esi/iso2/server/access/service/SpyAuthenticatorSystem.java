@@ -1,6 +1,6 @@
 package es.uclm.esi.iso2.server.access.service;
 
-import es.uclm.esi.iso2.server.access.integration.IAuthenticatorSystem;
+import es.uclm.esi.iso2.common.access.contracts.IAuthenticatorSystem;
 
 /**
  * Test double of {@link IAuthenticatorSystem} that wraps another one. It counts the calls and remembers the last
@@ -22,6 +22,11 @@ class SpyAuthenticatorSystem implements IAuthenticatorSystem {
         lastUsername = username;
         lastPassword = password;
         return delegate.validateCredentials(username, password);
+    }
+
+    @Override
+    public boolean ping() {
+        return delegate.ping();
     }
 
     int calls() {
