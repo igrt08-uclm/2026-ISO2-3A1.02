@@ -7,7 +7,7 @@
 | **Specification** | use case issue #44, sub-issue #45 and the wiki page *Requirements and Use Cases* |
 | **Design** | `doc/design/C3-client-design.png` (`IU_ManagePatients`) · contracts: `IPatientService` (see `doc/plans/UC12-server.md`) · section 6 of #47 *C3. Patients* |
 | **Usability guide** | IPO I, as in `doc/plans/UC17-client.md` |
-| **Plan approved by** | pending (Javier) |
+| **Plan approved by** | Javier, 15/11/2026 |
 
 ## Decisions already taken
 - **Screen (Implementation, Javier; Marcos agreed in #45):** one screen with a search box and a table of results on the left and the form of the selected patient on the right; the button *New patient* clears the form; a button *Manage patients* in the welcome screen, only with `MANAGE_PATIENTS`; when modifying, the identifier cannot be changed; the date is written as `dd/MM/yyyy`; if the patient already exists the screen says so and loads the existing record in the form; the validation errors are shown together, in red, and nothing is saved.
@@ -19,17 +19,17 @@
 - The button in `IU_Welcome` and the wiring in `Main` (client of C1) go in the pull request of this sub-issue, as in UC17 and UC20 (Javier, 15/11/2026).
 
 ## Questions and answers
-Few questions, as Ignacio asked in Meeting 8 (E-19): each one has a proposal, and the screen is decided by Implementation.
-- **Q1:** Module, packages and versions. **Proposal:** a new module `client/c3-patients` (`client-c3-patients`, version `1.0.0-SNAPSHOT`, depends only on `common` and JUnit), package `es.uclm.esi.iso2.client.patients.presentation`; `client-c1-access` gets the dependencies on `server-c3-patients` and `client-c3-patients` (because its `Main` starts the program) and goes to `1.2.3-SNAPSHOT` (UC20-client, in review, takes `1.2.2`). `IU_Welcome`, `Main`, the poms and `agents/architecture.md` are also changed by UC20-client: when `develop` is brought to this branch, the second one to be merged solves the small conflicts. Creating a module and changing poms needs the approval of Javier (rule 9). **A:** …
-- **Q2:** Class. **Proposal:** one class `IU_ManagePatients` (a `JPanel`, the name of the design), which receives the `IPatientService`, the username of the requester, a `Predicate<String>` to confirm (as the other screens, so that Adam's tests do not open a window) and the action of *Back*. The methods of the diagram are kept with their names: `onSearch`, `displayPatients`, `onNewPatient`, `onSavePatient`, `showValidationErrors`, `showOperationResultSuccess`, `showOperationResultError` and `showExistingPatient`. **A:** …
-- **Q3:** The form and the table. **Proposal:** the table has *Identifier*, *Full name* and *Date of birth*; the form has the identifier, the national ID (optional), the full name, the date of birth (`dd/MM/yyyy`), the sex (a list: Female, Male, Unspecified), the address, the phone and the e-mail, each label right above its field; the buttons are *Search*, *New patient* and *Save*. When the screen opens it shows all the patients (a search with an empty text). **A:** …
-- **Q4:** Search. **Proposal:** *Search* (or the Enter key in the box) asks the server with the text, and a line says how many patients were found ("3 patients found."); an empty text lists all of them. No patient is selected after a search. **A:** …
-- **Q5:** Validation in the client. **Proposal:** the same rules and the same messages as the server (listed in `doc/plans/UC12-server.md`, Q5), plus "The date of birth must be written as dd/MM/yyyy" for a text that is not a valid date (strict: 31/02/2000 is not valid); all the errors together and nothing is sent; the field of each error found by the client gets a red border (the errors that come from the server are only in the list). **A:** …
-- **Q6:** Duplicate. **Proposal:** when the server answers `DuplicatePatientException`, the screen shows "A patient with this identifier already exists: the record is loaded so that you can modify it." (`showExistingPatient`), selects that patient in the table and loads it in the form, with the identifier locked. **A:** …
-- **Q7:** Messages. **Proposal:** after a registration "Patient P-0004 registered." and after a modification "Patient P-0004 saved." in green; errors in red with `⚠`, each one ending with a full stop; when the server says that the user does not have the permission: "You do not have permission to manage patients." and only *Back* stays enabled. **A:** …
-- **Q8:** Unsaved changes. **Proposal:** if the form has unsaved changes and the user presses another row, *New patient* or *Search*, the screen asks "Discard the unsaved changes?" (accept or cancel); if the user cancels, nothing changes. A form of a new patient that is empty is not a change. **A:** …
-- **Q9:** Welcome screen and `Main`. **Proposal:** `IU_Welcome` gets one more constructor with `Runnable onManagePatients` and the button *Manage patients* (Alt+P), shown only with `MANAGE_PATIENTS`; the other constructors stay, so the tests of C1 do not change. `Main` creates the `PatientService` with the role service and the audit service of C1, calls `loadSeedData()` and shows the screen with the title "Manage patients". **A:** …
-- **Q10:** Keyboard. **Proposal:** *Search* Alt+H, *New patient* Alt+N, *Save* Alt+S and *Back* Alt+B; the fields Alt+I (identifier), Alt+A (national ID), Alt+F (full name), Alt+D (date of birth), Alt+X (sex), Alt+R (address), Alt+O (phone) and Alt+E (e-mail). **A:** …
+Few questions, as Ignacio asked in Meeting 8 (E-19): all of them are answered, and the screen is decided by Implementation.
+- **Q1:** Module, packages and versions. **Proposal:** a new module `client/c3-patients` (`client-c3-patients`, version `1.0.0-SNAPSHOT`, depends only on `common` and JUnit), package `es.uclm.esi.iso2.client.patients.presentation`; `client-c1-access` gets the dependencies on `server-c3-patients` and `client-c3-patients` (because its `Main` starts the program) and goes to `1.2.3-SNAPSHOT` (UC20-client, in review, takes `1.2.2`). `IU_Welcome`, `Main`, the poms and `agents/architecture.md` are also changed by UC20-client: when `develop` is brought to this branch, the second one to be merged solves the small conflicts. Creating a module and changing poms needs the approval of Javier (rule 9). **A:** approved as proposed with a change: the dependencies and the version of `client-c1-access` are done in step 6, after the pull requests of UC20 are merged into `develop` (Javier chose the mixed option on 15/11/2026, to avoid the conflicts) (Javier, 15/11/2026)
+- **Q2:** Class. **Proposal:** one class `IU_ManagePatients` (a `JPanel`, the name of the design), which receives the `IPatientService`, the username of the requester, a `Predicate<String>` to confirm (as the other screens, so that Adam's tests do not open a window) and the action of *Back*. The methods of the diagram are kept with their names: `onSearch`, `displayPatients`, `onNewPatient`, `onSavePatient`, `showValidationErrors`, `showOperationResultSuccess`, `showOperationResultError` and `showExistingPatient`. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q3:** The form and the table. **Proposal:** the table has *Identifier*, *Full name* and *Date of birth*; the form has the identifier, the national ID (optional), the full name, the date of birth (`dd/MM/yyyy`), the sex (a list: Female, Male, Unspecified), the address, the phone and the e-mail, each label right above its field; the buttons are *Search*, *New patient* and *Save*. When the screen opens it shows all the patients (a search with an empty text). **A:** approved as proposed (Javier, 15/11/2026)
+- **Q4:** Search. **Proposal:** *Search* (or the Enter key in the box) asks the server with the text, and a line says how many patients were found ("3 patients found."); an empty text lists all of them. No patient is selected after a search. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q5:** Validation in the client. **Proposal:** the same rules and the same messages as the server (listed in `doc/plans/UC12-server.md`, Q5), plus "The date of birth must be written as dd/MM/yyyy" for a text that is not a valid date (strict: 31/02/2000 is not valid); all the errors together and nothing is sent; the field of each error found by the client gets a red border (the errors that come from the server are only in the list). **A:** approved as proposed (Javier, 15/11/2026)
+- **Q6:** Duplicate. **Proposal:** when the server answers `DuplicatePatientException`, the screen shows "A patient with this identifier already exists: the record is loaded so that you can modify it." (`showExistingPatient`), selects that patient in the table and loads it in the form, with the identifier locked. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q7:** Messages. **Proposal:** after a registration "Patient P-0004 registered." and after a modification "Patient P-0004 saved." in green; errors in red with `⚠`, each one ending with a full stop; when the server says that the user does not have the permission: "You do not have permission to manage patients." and only *Back* stays enabled. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q8:** Unsaved changes. **Proposal:** if the form has unsaved changes and the user presses another row, *New patient* or *Search*, the screen asks "Discard the unsaved changes?" (accept or cancel); if the user cancels, nothing changes. A form of a new patient that is empty is not a change. **A:** approved as proposed (Javier, 15/11/2026)
+- **Q9:** Welcome screen and `Main`. **Proposal:** `IU_Welcome` gets one more constructor with `Runnable onManagePatients` and the button *Manage patients* (Alt+P), shown only with `MANAGE_PATIENTS`; the other constructors stay, so the tests of C1 do not change. `Main` creates the `PatientService` with the role service and the audit service of C1, calls `loadSeedData()` and shows the screen with the title "Manage patients". **A:** approved as proposed (Javier, 15/11/2026)
+- **Q10:** Keyboard. **Proposal:** *Search* Alt+H, *New patient* Alt+N, *Save* Alt+S and *Back* Alt+B; the fields Alt+I (identifier), Alt+A (national ID), Alt+F (full name), Alt+D (date of birth), Alt+X (sex), Alt+R (address), Alt+O (phone) and Alt+E (e-mail). **A:** approved as proposed (Javier, 15/11/2026)
 - **Note:** the diagram of Design still shows `UserAccount` as `requester`, `updatePatient(requester, patient)`, a `Patient` without `nationalId` and `Date`; the code follows #47 and D-037 (`modifyPatient(requester, patientId, patient)`, `LocalDate`). Design has to reflect it (#114).
 
 ## Screen (low-fidelity prototype)
@@ -74,7 +74,7 @@ Welcome screen: a new button *Manage patients* (Alt+P), visible only with `MANAG
 | `client/pom.xml`, `pom.xml` | change | module `c3-patients`; managed versions of `server-c3-patients` (already) and `client-c3-patients` (Q1) |
 | `client/c3-patients/pom.xml` | create | `client-c3-patients` 1.0.0-SNAPSHOT, depends only on `common` and JUnit |
 | `client/c3-patients/src/main/java/es/uclm/esi/iso2/client/patients/presentation/IU_ManagePatients.java` | create | the screen of Q2 to Q8; **new Java package** |
-| `client/c1-access/pom.xml` | change | version `1.2.3-SNAPSHOT` and the dependencies on `server-c3-patients` and `client-c3-patients` (Q1) |
+| `client/c1-access/pom.xml` | change | version `1.2.3-SNAPSHOT` and the dependencies on `server-c3-patients` and `client-c3-patients` (Q1) | Done in step 6.
 | `client/c1-access/src/main/java/es/uclm/esi/iso2/client/access/presentation/IU_Welcome.java` | change | one more constructor and the button *Manage patients* (Q9) |
 | `client/c1-access/src/main/java/es/uclm/esi/iso2/client/Main.java` | change | the service, `loadSeedData()` and the navigation (Q9) |
 | `agents/architecture.md` | change | the code tree with `client/c3-patients` and the versions |
@@ -84,13 +84,13 @@ The screen is a `JPanel`, so that Adam's tests can create it without a display. 
 
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here).
-- [ ] 1. This plan (`docs(UC12): plan for the client part (#45)`).
-- [ ] 2. Poms: the module `client/c3-patients`, its managed version and the version and dependencies of `client-c1-access` (Q1).
+- [x] 1. This plan (`docs(UC12): plan for the client part (#45)`). - see `git log --oneline -- doc/plans/UC12-client.md`.
+- [ ] 2. Poms: the module `client/c3-patients` and its managed version (Q1). The poms of `client-c1-access` wait for step 6.
 - [ ] 3. `IU_ManagePatients`, the display: search box, table, form of the selected patient, the line with the number found, *Back* and the denied access (Q3, Q4, Q7).
 - [ ] 4. `IU_ManagePatients`, *Save* and *New patient*: reading of the form, validation in the client, register or modify, duplicate and messages (Q5, Q6, Q7).
 - [ ] 5. `IU_ManagePatients`, unsaved changes: the question before another row, *New patient* or *Search* (Q8).
-- [ ] 6. `IU_Welcome` (button) and `Main` (service, seed data, navigation) (Q9).
-- [ ] 7. `agents/architecture.md`.
+- [ ] 6. When the pull requests of UC20 (#118, #119) are merged into `develop`: bring `develop` to this branch (merge); `IU_Welcome` (button) and `Main` (service, seed data, navigation); the version `1.2.3-SNAPSHOT` and the dependencies of `client-c1-access` (Q1, Q9).
+- [ ] 7. `agents/architecture.md` (after step 6, so that it is written over the changes of UC20).
 - [ ] 8. Hand the branch over to Adam: the manual check of the screen with `lmartin` (`admin` and `mgarcia` do not see the button) and the tests of UC12-client, who opens the pull request (`Closes #45`); close only with his tests green and the coverage check passing.
 
 ## How to run it
@@ -105,7 +105,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing (this plan waits for the answers of Javier to Q1 to Q10 and his approval)
-- **Next step:** answer or approve Q1 to Q10 and approve the plan; then step 1 (commit of this plan)
-- **Open questions:** Q1 to Q10
+- **In progress:** nothing
+- **Next step:** step 2 (the module `client/c3-patients`)
+- **Open questions:** none
 - **Last update:** 15/11/2026, Javier
