@@ -873,4 +873,278 @@ class PatientServiceTest {
                     () -> assertFalse(repository.search("").isEmpty()));
         }
     }
+
+    @Nested
+    @DisplayName("Identifier ignoring case, spaces and - (R-02)")
+    class IdentifierKeyTests {
+
+        @BeforeEach
+        void clearAudit() {
+            audit.clear();
+        }
+
+        @ParameterizedTest(name = "identifier = \"{0}\"")
+        @ValueSource(strings = {"HC 0000001", "HC0000001", "hc0000001", "hc - 0000 001", " HC--0000001 "})
+        @DisplayName("TC12S-69: an identifier that differs only in case, spaces or - is a duplicate of the existing one")
+        void identifierWithOtherSpacesIsADuplicate(String identifier) throws Exception {
+            // Act
+            DuplicatePatientException exception = assertThrows(DuplicatePatientException.class,
+                    () -> service.registerPatient(ADMISSIONS,
+                            patient(identifier, "Otra Persona Inventada", BIRTH, Sex.MALE, "", "")));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("P-0001", exception.getExistingPatient().getPatientId()),
+                    () -> assertEquals("HC-0000001", exception.getExistingPatient().getIdentifier()),
+                    () -> assertEquals(List.of(new AuditEntry(ADMISSIONS, ACCESSED, "PATIENT:P-0001")),
+                            audit.entries()),
+                    () -> assertEquals(3, allPatients().size()));
+        }
+
+        @Test
+        @DisplayName("TC12S-69: a new identifier is saved as it was typed, only stripped")
+        void newIdentifierIsSavedAsTyped() throws Exception {
+            // Act
+            Patient saved = service.registerPatient(ADMISSIONS,
+                    patient(" hc 12-34 567 ", "Ana Prueba Inventada", BIRTH, Sex.FEMALE, "", ""));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("P-0004", saved.getPatientId()),
+                    () -> assertEquals("hc 12-34 567", saved.getIdentifier()),
+                    () -> assertEquals("hc 12-34 567", service.getPatient(ADMISSIONS, "P-0004").getIdentifier()));
+        }
+
+        @ParameterizedTest(name = "identifier = \"{0}\"")
+        @ValueSource(strings = {"HC 0000001", "HC0000001", "hc0000001", "hc - 0000 001"})
+        @DisplayName("TC12S-70: in a modification, the identifier changed only in case, spaces or - is not a change")
+        void identifierWithOtherSpacesIsNotAChange(String identifier) throws Exception {
+            // Act
+            Patient saved = service.modifyPatient(ADMISSIONS, "P-0001", luciaChanged(identifier));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("HC-0000001", saved.getIdentifier()),
+                    () -> assertEquals("Lucía Ejemplo Cambiada", saved.getFullName()),
+                    () -> assertEquals("HC-0000001", service.getPatient(ADMISSIONS, "P-0001").getIdentifier()));
+        }
+
+        @ParameterizedTest(name = "identifier = \"{0}\"")
+        @ValueSource(strings = {"HC 0000002", "HC0000011", "HC-000001"})
+        @DisplayName("TC12S-70: in a modification, a really different identifier still cannot be changed")
+        void reallyDifferentIdentifierIsRejected(String identifier) throws Exception {
+            // Act
+            assertErrors(List.of(IDENTIFIER_FIXED),
+                    () -> service.modifyPatient(ADMISSIONS, "P-0001", luciaChanged(identifier)));
+
+            // Assert
+            assertTrue(audit.entries().isEmpty());
+            assertEquals("Lucía Ejemplo Prueba", service.getPatient(ADMISSIONS, "P-0001").getFullName());
+        }
+    }
+
+    @Nested
+    @DisplayName("Searching ignoring accents (R-03)")
+    class SearchAccentTests {
+
+        @ParameterizedTest(name = "\"{0}\"")
+        @ValueSource(strings = {"lucia", "LUCIA", "Lucía", "LUCÍA", "lucía ejemplo"})
+        @DisplayName("TC12S-72: the search of the service ignores accents as well as case")
+        void searchIgnoresAccents(String text) throws Exception {
+            // Arrange
+            audit.clear();
+
+            // Act
+            List<Patient> found = service.searchPatients(ADMISSIONS, text);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of("P-0001"), idsOf(found)),
+                    () -> assertEquals(List.of(new AuditEntry(ADMISSIONS, ACCESSED, PATIENTS)), audit.entries()));
+        }
+
+        @Test
+        @DisplayName("TC12S-72: a text with an accent finds a name written without it")
+        void accentInTheTextFindsANameWithoutIt() throws Exception {
+            // Arrange
+            service.registerPatient(ADMISSIONS,
+                    patient("HC-1234567", "Lucia Sin Tilde", BIRTH, Sex.FEMALE, "", ""));
+
+            // Act
+            List<Patient> found = service.searchPatients(ADMISSIONS, "Lucía");
+
+            // Assert
+            assertEquals(List.of("P-0001", "P-0004"), idsOf(found));
+        }
+    }
+
+    @Nested
+    @DisplayName("Rules of the data (R-04)")
+    class DataRuleTests {
+        private static final String DATE_TOO_OLD = "The date of birth cannot be before 01/01/1900";
+
+        @BeforeEach
+        void clearAudit() {
+            audit.clear();
+        }
+
+        @ParameterizedTest(name = "\"{0}\"")
+        @ValueSource(strings = {"ana@example.test.", "ana@example..test", "@example.test", "ana@.test", "ana@",
+            "ana@example", "ana@example.", ".@"})
+        @DisplayName("TC12S-73: an e-mail with an empty part (name, domain or extension) is rejected")
+        void emailWithAnEmptyPartIsRejected(String email) throws Exception {
+            assertRegisterRejected(List.of(EMAIL_FORM), withEmail(email));
+        }
+
+        @Test
+        @DisplayName("TC12S-73: an e-mail with an empty part is also rejected in a modification")
+        void emailWithAnEmptyPartIsRejectedInAModification() throws Exception {
+            // Arrange
+            Patient changed = new Patient(null, "HC-0000001", "", "Lucía Ejemplo Prueba", LocalDate.of(1980, 3, 14),
+                    Sex.FEMALE, "", "", "lucia@example..test", true);
+
+            // Act
+            assertErrors(List.of(EMAIL_FORM), () -> service.modifyPatient(ADMISSIONS, "P-0001", changed));
+
+            // Assert
+            assertTrue(audit.entries().isEmpty());
+        }
+
+        @Test
+        @DisplayName("TC12S-74: the date of birth 01/01/1900 is accepted (lower limit)")
+        void firstDayOf1900IsAccepted() throws Exception {
+            // Act
+            Patient saved = service.registerPatient(ADMISSIONS,
+                    patient("HC-1234567", "Ana Prueba Inventada", LocalDate.of(1900, 1, 1), Sex.FEMALE, "", ""));
+
+            // Assert
+            assertEquals(LocalDate.of(1900, 1, 1), saved.getDateOfBirth());
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @ValueSource(strings = {"1899-12-31", "1800-06-15"})
+        @DisplayName("TC12S-74: a date of birth before 01/01/1900 is rejected with its message")
+        void dateBefore1900IsRejected(String date) throws Exception {
+            assertRegisterRejected(List.of(DATE_TOO_OLD),
+                    patient("HC-1234567", "Ana Prueba Inventada", LocalDate.parse(date), Sex.FEMALE, "", ""));
+        }
+
+        @Test
+        @DisplayName("TC12S-74: a date of birth before 01/01/1900 is also rejected in a modification")
+        void dateBefore1900IsRejectedInAModification() throws Exception {
+            // Arrange
+            Patient changed = new Patient(null, "HC-0000001", "", "Lucía Ejemplo Prueba", LocalDate.of(1899, 12, 31),
+                    Sex.FEMALE, "", "", "", true);
+
+            // Act
+            assertErrors(List.of(DATE_TOO_OLD), () -> service.modifyPatient(ADMISSIONS, "P-0001", changed));
+
+            // Assert
+            assertEquals(LocalDate.of(1980, 3, 14), service.getPatient(ADMISSIONS, "P-0001").getDateOfBirth());
+        }
+
+        @ParameterizedTest(name = "\"{0}\"")
+        @ValueSource(strings = {"600 111 222", "6 0 0 1 1 1 2 2 2", "346 001 112 223 334", "+34 600 111 222 3334"})
+        @DisplayName("TC12S-75: a phone with inner spaces counts only its digits: 9 and 15 digits are accepted")
+        void phoneWithSpacesAtTheLimitsIsAccepted(String phone) throws Exception {
+            // Act
+            Patient saved = service.registerPatient(ADMISSIONS, withPhone(phone));
+
+            // Assert
+            assertEquals(phone, saved.getPhone());
+        }
+
+        @ParameterizedTest(name = "\"{0}\"")
+        @ValueSource(strings = {"600 111 22", "6 0 0 1 1 1 2 2", "346 001 112 223 3345", "+34 600 111 222 33345"})
+        @DisplayName("TC12S-75: a phone with inner spaces of 8 or 16 digits is rejected")
+        void phoneWithSpacesOutOfTheLimitsIsRejected(String phone) throws Exception {
+            assertRegisterRejected(List.of(PHONE_DIGITS), withPhone(phone));
+        }
+    }
+
+    @Nested
+    @DisplayName("Ids with a repository that already has patients (F-11)")
+    class NextIdTests {
+
+        private Patient stored(String patientId, String identifier) {
+            return new Patient(patientId, identifier, "", "Persona Guardada Inventada", BIRTH, Sex.MALE, "", "", "",
+                    true);
+        }
+
+        @Test
+        @DisplayName("TC12S-76: the next id comes after the highest P-nnnn of the repository, and none is overwritten")
+        void nextIdAfterTheHighest() throws Exception {
+            // Arrange
+            InMemoryPatientRepository repository = new InMemoryPatientRepository();
+            Patient seventh = stored("P-0007", "HC-7000007");
+            Patient third = stored("P-0003", "HC-3000003");
+            repository.save(seventh);
+            repository.save(third);
+            PatientService own = new PatientService(repository, new FakeRoleManagementService(), audit);
+
+            // Act
+            Patient first = own.registerPatient(ADMISSIONS, ana());
+            Patient second = own.registerPatient(ADMISSIONS,
+                    patient("HC-7654321", "Otra Persona Inventada", BIRTH, Sex.MALE, "", ""));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("P-0008", first.getPatientId()),
+                    () -> assertEquals("P-0009", second.getPatientId()),
+                    () -> assertSame(seventh, repository.findById("P-0007")),
+                    () -> assertSame(third, repository.findById("P-0003")),
+                    () -> assertEquals(4, repository.search("").size()));
+        }
+
+        @Test
+        @DisplayName("TC12S-76: with an empty repository the first id is P-0001")
+        void emptyRepositoryStartsAtOne() throws Exception {
+            // Arrange
+            PatientService own = new PatientService(new InMemoryPatientRepository(), new FakeRoleManagementService(),
+                    audit);
+
+            // Act
+            Patient saved = own.registerPatient(ADMISSIONS, ana());
+
+            // Assert
+            assertEquals("P-0001", saved.getPatientId());
+        }
+
+        @Test
+        @DisplayName("TC12S-76: the ids that are not of the form P-nnnn are ignored when counting")
+        void otherIdsAreIgnored() throws Exception {
+            // Arrange
+            InMemoryPatientRepository repository = new InMemoryPatientRepository();
+            repository.save(stored("P-0002", "HC-2000002"));
+            repository.save(stored("Q-0050", "HC-5000050"));
+            repository.save(stored("P-00a9", "HC-9000009"));
+            repository.save(stored("P-", "HC-1000001"));
+            repository.save(stored("P-123456789", "HC-1234560"));
+            repository.save(stored(null, "HC-8000008"));
+            PatientService own = new PatientService(repository, new FakeRoleManagementService(), audit);
+
+            // Act
+            Patient saved = own.registerPatient(ADMISSIONS, ana());
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("P-0003", saved.getPatientId()),
+                    () -> assertEquals(7, repository.search("").size()));
+        }
+
+        @Test
+        @DisplayName("TC12S-76: the seed data is not loaded into a repository that already has patients")
+        void seedIsNotLoadedOverExistingPatients() throws Exception {
+            // Arrange
+            InMemoryPatientRepository repository = new InMemoryPatientRepository();
+            repository.save(stored("P-0005", "HC-5000005"));
+            PatientService own = new PatientService(repository, new FakeRoleManagementService(), audit);
+
+            // Act
+            own.loadSeedData();
+
+            // Assert
+            assertEquals(List.of("P-0005"), idsOf(repository.search("")));
+        }
+    }
 }

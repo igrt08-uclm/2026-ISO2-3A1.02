@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/** TC12S-59 to TC12S-63: tests of the in-memory repository of the patients of C3 (Q9, D-030). */
+/** TC12S-59 to TC12S-63 and TC12S-71: tests of the in-memory repository of the patients of C3 (Q9, D-030). */
 @DisplayName("InMemoryPatientRepository")
 class InMemoryPatientRepositoryTest {
     private InMemoryPatientRepository repository;
@@ -93,5 +93,23 @@ class InMemoryPatientRepositoryTest {
                 () -> assertTrue(repository.search("x").isEmpty()),
                 () -> assertNull(repository.findByIdentifier("x")),
                 () -> assertEquals(3, repository.search("").size()));
+    }
+
+    @Test
+    @DisplayName("TC12S-71: the search ignores accents as well as case, in the text and in the stored name")
+    void searchIgnoresAccents() {
+        // Arrange
+        Patient withoutAccent = patient("P-0003", "HC-0000003", "Lucia Sin Tilde");
+        repository.save(withoutAccent);
+
+        // Act and Assert
+        assertAll(
+                () -> assertEquals(List.of(lucia, withoutAccent), repository.search("lucia")),
+                () -> assertEquals(List.of(lucia, withoutAccent), repository.search("LUCIA")),
+                () -> assertEquals(List.of(lucia, withoutAccent), repository.search("Lucía")),
+                () -> assertEquals(List.of(lucia, withoutAccent), repository.search(" LUCÍA ")),
+                () -> assertEquals(List.of(lucia), repository.search("lucia ejemplo")),
+                () -> assertEquals(List.of(lucia), repository.search("ejémplo")),
+                () -> assertTrue(repository.search("lucio").isEmpty()));
     }
 }

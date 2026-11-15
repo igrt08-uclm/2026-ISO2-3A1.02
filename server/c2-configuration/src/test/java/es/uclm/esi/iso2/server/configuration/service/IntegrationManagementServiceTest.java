@@ -864,4 +864,96 @@ class IntegrationManagementServiceTest {
                             other.getIntegration(ADMIN, HospitalSystemType.SSO).getMode()));
         }
     }
+
+    @Nested
+    @DisplayName("Fixes after the findings of #122")
+    class FindingsOf122Tests {
+
+        @ParameterizedTest(name = "requester {0}")
+        @ValueSource(strings = {PHYSICIAN, SYSTEM_CONFIGURATOR, INACTIVE, UNKNOWN})
+        @DisplayName("TC20S-59: F-14, getIntegration with a null system and no permission is denied on INTEGRATION")
+        void getIntegrationWithNullSystemWithoutPermissionIsDenied(String requester) {
+            // Arrange
+            service.loadSeedData();
+
+            // Act
+            AccessDeniedException denied = assertThrows(AccessDeniedException.class,
+                    () -> service.getIntegration(requester, null));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(requester, denied.getRequester()),
+                    () -> assertEquals(List.of(new AuditEntry(requester, DENIED, "INTEGRATION")), audit.entries()));
+        }
+
+        @ParameterizedTest(name = "requester {0}")
+        @ValueSource(strings = {PHYSICIAN, SYSTEM_CONFIGURATOR, INACTIVE, UNKNOWN})
+        @DisplayName("TC20S-60: F-14, testConnection with a null system and no permission is denied on INTEGRATION, "
+                + "and no system is asked")
+        void testConnectionWithNullSystemWithoutPermissionIsDenied(String requester) {
+            // Arrange
+            service.loadSeedData();
+
+            // Act
+            AccessDeniedException denied = assertThrows(AccessDeniedException.class,
+                    () -> service.testConnection(requester, null));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(requester, denied.getRequester()),
+                    () -> assertEquals(List.of(new AuditEntry(requester, DENIED, "INTEGRATION")), audit.entries()),
+                    () -> assertEquals(0, totalPings()));
+        }
+
+        @Test
+        @DisplayName("TC20S-61: F-14, with the permission a null system is still \"The system is required\", "
+                + "also after a denial, and only the denial is audited")
+        void nullSystemWithPermissionStillFailsTheValidation() {
+            // Arrange
+            service.loadSeedData();
+            assertThrows(AccessDeniedException.class, () -> service.getIntegration(PHYSICIAN, null));
+
+            // Act
+            IllegalArgumentException read = assertThrows(IllegalArgumentException.class,
+                    () -> service.getIntegration(ADMIN, null));
+            IllegalArgumentException test = assertThrows(IllegalArgumentException.class,
+                    () -> service.testConnection(ADMIN, null));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("The system is required", read.getMessage()),
+                    () -> assertEquals("The system is required", test.getMessage()),
+                    () -> assertEquals(List.of(new AuditEntry(PHYSICIAN, DENIED, "INTEGRATION")), audit.entries()),
+                    () -> assertEquals(0, totalPings()));
+        }
+
+        @Test
+        @DisplayName("TC20S-62: F-15, the keys and the values of the settings are saved without the spaces around "
+                + "them, in their order")
+        void settingsAreSavedStripped() throws Exception {
+            // Arrange
+            Map<String, String> settings = new LinkedHashMap<>();
+            settings.put(" timeout ", " 30 ");
+            settings.put("application", "  RIS");
+            settings.put("\tretries\t", "2\n");
+            settings.put("facility", "HGUCR");
+            Map<String, String> expected = new LinkedHashMap<>();
+            expected.put("timeout", "30");
+            expected.put("application", "RIS");
+            expected.put("retries", "2");
+            expected.put("facility", "HGUCR");
+
+            // Act
+            IntegrationConfiguration saved = service.configureIntegration(ADMIN, withSettings(settings));
+
+            // Assert
+            IntegrationConfiguration stored = service.getIntegration(ADMIN, HospitalSystemType.EHR);
+            assertAll(
+                    () -> assertEquals(expected, saved.getSettings()),
+                    () -> assertEquals(expected, stored.getSettings()),
+                    () -> assertEquals(List.of("timeout", "application", "retries", "facility"),
+                            List.copyOf(stored.getSettings().keySet())),
+                    () -> assertEquals(List.of(new AuditEntry(ADMIN, CHANGED, "INTEGRATION:EHR")), audit.entries()));
+        }
+    }
 }
