@@ -55,7 +55,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 2. The module `server/c3-patients` (poms), empty, and its managed version (Q1). - c05e1fa.
 - [x] 3. `Sex`, `Patient`, `DuplicatePatientException` and the contract `IPatientService` in `common` (Q2, Q3, Q4). - 3841345.
 - [x] 4. `IPatientRepository` and `InMemoryPatientRepository` (Q9, Q7 search). - 61abadb.
-- [ ] 5. `PatientService`: permission, validation, `registerPatient`, `modifyPatient`, `getPatient`, `searchPatients` and the audit (Q4 to Q8).
+- [x] 5. `PatientService`: permission, validation, `registerPatient`, `modifyPatient`, `getPatient`, `searchPatients` and the audit (Q4 to Q8). - ace82a2.
 - [ ] 6. `loadSeedData()` and the three invented patients (Q10).
 - [ ] 7. `agents/architecture.md`.
 - [ ] 8. Hand the branch over to Adam (tests of UC12-server), who opens the pull request (`Closes #46`); close only with his tests green and the coverage check passing.
@@ -69,6 +69,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 5 (`PatientService`: permission, validation, register, modify, get, search and audit)
+- **Next step:** step 6 (`loadSeedData()` and the three invented patients)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
