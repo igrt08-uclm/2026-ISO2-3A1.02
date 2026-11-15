@@ -39,13 +39,13 @@ class InMemoryRoleRepositoryTest {
 
     @ParameterizedTest(name = "{0} has the permissions [{1}]")
     @CsvSource({
-        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM",
+        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS",
         "PHYSICIAN,            ''",
-        "ADMISSIONS_STAFF,     ''",
+        "ADMISSIONS_STAFF,     MANAGE_PATIENTS",
         "PATIENT,              ''"
     })
-    @DisplayName("Only the System administrator has permissions")
-    void onlyTheSystemAdministratorHasPermissions(String id, String expectedPermissions) {
+    @DisplayName("Only the System administrator and the Admissions staff have permissions")
+    void onlyTheAdministratorAndTheAdmissionsStaffHavePermissions(String id, String expectedPermissions) {
         // Act
         Role role = repository.findById(id);
 
