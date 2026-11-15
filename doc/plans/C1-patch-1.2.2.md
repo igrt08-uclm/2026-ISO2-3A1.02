@@ -50,8 +50,10 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 2. `IAuthenticatorSystem` moves to `common` with `ping()`, and the version `1.2.2-SNAPSHOT` (Q1, Q4, Q5a, Q6). - 52f08a0 (the stash of 14/11 was recovered and `ping()` changed to a `default` method; 27 + 144 + 41 + 55 + 79 existing tests pass).
 - [x] 3. Permissions `CONFIGURE_INTEGRATIONS` (administrator) and `MANAGE_PATIENTS` (Admissions staff) and the two expected lists (Q2, Q5b, Q5c, Q8). - d490dc8 (the two tests of Adam were adjusted as in Q5: size 4 and the three new names; no other test broke). The description of `CONFIGURE_INTEGRATIONS` is "Configure the integrations with the other hospital systems".
 - [x] 4. `hasPermission` as a `default` method of `IRoleManagementService` (Q3, Q7). - b1c8aed (checked roughly with a throwaway program outside the repo: admin, lmartin, mgarcia, the inactive user, an unknown user, `null` username and `null` permission; no test was written).
-- [ ] 5. `agents/architecture.md`.
+- [x] 5. `agents/architecture.md`. - 18357cd.
 - [ ] 6. Hand the branch over to Adam (tests of `hasPermission`, of `ping()` and of the lists of permissions), who opens the pull request (`Closes #112`) for Ignacio to approve (D-036); close only with his tests green and the coverage check passing in `common` and in `server-c1-access`.
+  - **State for Adam (15/11/2026):** steps 1 to 5 are done. `mvn -B verify -Djacoco.skip=true` is green with the existing tests. The full `mvn -B verify` fails only in the coverage of `common` (branches 0.16, minimum 0.70) because `hasPermission` has no test yet; it is the expected state until his tests exist.
+  - **Cases to cover (Adam designs the table, rule 17):** `hasPermission` with an active user who has the permission, an active user without it, an inactive user, an unknown user, a `null` username and a `null` permission code; `ping()` of `AuthenticatorSystemSimulator` and the default `ping()` of a lambda; the four permissions of `InMemoryPermissionRepository` and the permissions of the roles of `InMemoryRoleRepository` (administrator with three, Admissions staff with `MANAGE_PATIENTS`).
 
 ## Verification
 - [ ] Every item of the checklist of #112 is done.
@@ -61,7 +63,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green and Ignacio approved it.
 
 ## Status
-- **In progress:** nothing (this plan waits for the approval of Javier)
-- **Next step:** step 5 (`agents/architecture.md`)
+- **In progress:** step 6 (the branch is ready to be handed over to Adam; nothing is pushed yet)
+- **Next step:** Javier asks to push the branch; Adam writes the tests in it and opens the pull request (`Closes #112`) for Ignacio to approve; this plan is closed with his tests green and the coverage check passing
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
