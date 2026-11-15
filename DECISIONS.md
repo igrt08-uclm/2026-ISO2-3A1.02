@@ -297,7 +297,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** A web client or a mobile client as well.
 - **Reason:** The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include more clients.
 - **Consequences:** It is assumption A9 of the theory report. Another client would be a new Maven module with the same contracts.
-- **Status:** Approved in Meeting 6 (08/11/2026).
+- **Status:** Approved in Meeting 6 (08/11/2026). Confirmed by Ismael (answer shared on 15/11/2026): one client is enough.
 
 ## D-028 · Correction of the plan totals and recovery of the delay
 **Date:** 06/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:09:57–0:11:15, 0:29:24–0:31:44 · **Issues:** #80, #57
@@ -330,7 +330,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Another graphical library, such as JavaFX. A database, or saving the data in files.
 - **Reason:** Swing comes with Java, so it adds no dependency, and C1 already uses it. The project assesses the process and the design, not the functionality (Kickoff, p. 3), and the estimate does not include a database.
 - **Consequences:** The data is lost when the program closes. It is assumption A10 of the theory report. A database would be a new implementation behind the same repository interfaces.
-- **Status:** Approved.
+- **Status:** Approved. Confirmed by Ismael (answer shared on 15/11/2026): the data can be kept in memory and not made persistent, because it does not affect the functionality; making it persistent would need a persistence layer. This also applies to the audit log, so it is not written to a file (#94).
 
 ## D-031 · Operational assumptions of the plan
 **Date:** 07/11/2026 · **Iteration:** 1 · **Minutes:** [Meeting 6](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-6) · **Time in the recording:** 0:29:24–0:31:44 · **Issues:** #80
@@ -360,7 +360,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Keep one package per component inside `server` and `client` (D-016). Ask Ismael and wait for his answer before changing anything.
 - **Reason:** It meets both documents: the applications stay as modules, as the Kickoff asks, and the components become submodules, as the assignment asks. Each component gets its own pom, version and declared dependencies, so a component that uses the internals of another one does not compile unless its pom declares it.
 - **Consequences:** More poms to maintain and a longer build. The hours of moving C1 are not in the estimate and are recorded as real hours of It2. The version per module of D-014 becomes a version per component, so the traceability page shows one version per component instead of one for the whole server and client. The README and sections 5.3, 13, 15, 18 and 19 of the theory report change with it. If it is approved, D-014 and D-016 get a Status line that points here.
-- **Status:** Approved in Meeting 7 (11/11/2026).
+- **Status:** Approved in Meeting 7 (11/11/2026). Confirmed by Ismael (answer shared on 15/11/2026): each component of the project is a Maven submodule.
 
 ## D-033 · Test coverage threshold
 **Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:29:09–0:30:28 · **Issues:** #89, #90
