@@ -49,7 +49,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 1. This plan (`docs(C1): plan of the patch 1.2.2 (#112)`). - see `git log --oneline -- doc/plans/C1-patch-1.2.2.md`.
 - [x] 2. `IAuthenticatorSystem` moves to `common` with `ping()`, and the version `1.2.2-SNAPSHOT` (Q1, Q4, Q5a, Q6). - 52f08a0 (the stash of 14/11 was recovered and `ping()` changed to a `default` method; 27 + 144 + 41 + 55 + 79 existing tests pass).
 - [x] 3. Permissions `CONFIGURE_INTEGRATIONS` (administrator) and `MANAGE_PATIENTS` (Admissions staff) and the two expected lists (Q2, Q5b, Q5c, Q8). - d490dc8 (the two tests of Adam were adjusted as in Q5: size 4 and the three new names; no other test broke). The description of `CONFIGURE_INTEGRATIONS` is "Configure the integrations with the other hospital systems".
-- [ ] 4. `hasPermission` as a `default` method of `IRoleManagementService` (Q3, Q7).
+- [x] 4. `hasPermission` as a `default` method of `IRoleManagementService` (Q3, Q7). - b1c8aed (checked roughly with a throwaway program outside the repo: admin, lmartin, mgarcia, the inactive user, an unknown user, `null` username and `null` permission; no test was written).
 - [ ] 5. `agents/architecture.md`.
 - [ ] 6. Hand the branch over to Adam (tests of `hasPermission`, of `ping()` and of the lists of permissions), who opens the pull request (`Closes #112`) for Ignacio to approve (D-036); close only with his tests green and the coverage check passing in `common` and in `server-c1-access`.
 
@@ -62,6 +62,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing (this plan waits for the approval of Javier)
-- **Next step:** step 4 (`hasPermission` as a `default` method of `IRoleManagementService`, in `common`)
+- **Next step:** step 5 (`agents/architecture.md`)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
