@@ -422,7 +422,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Status:** Proposed by David (Requirements) in #47 on 07/11/2026 and agreed in #46 on 14/11/2026; approved in the review of this pull request.
 
 ## D-038 · The coordinator may approve his own pull requests
-**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — · **Issues:** #34
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — · **Issues:** E-13
 
 - **Context:** D-001 says that a pull request is approved by someone other than its author. Ignacio, the coordinator, merged three of his own pull requests without another approval (#7, #51 and the release #86, E-13). Ignacio asked Ismael whether this is admissible, and Ismael answered that it is, because he is the coordinator, and that it depends on the rules and assumptions that the team sets.
 - **Decision:** The coordinator may approve and merge his own pull requests, with the build green. He writes in the pull request that it is merged under D-038. Every other member still needs the approval of a member who is not the author (D-001). The bypass list of the ruleset stays empty (Kickoff, pp. 12–13): the coordinator merges as the owner of the repository.
