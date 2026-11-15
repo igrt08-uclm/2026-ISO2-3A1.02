@@ -7,7 +7,7 @@
 | **Patch of C1** | permission `CONFIGURE_INTEGRATIONS`, `IAuthenticatorSystem` in `common` and `hasPermission` in `IRoleManagementService` (steps 2, 3 and 7), in its own patch issue #112 *Patch of C1: permission CONFIGURE_INTEGRATIONS, IAuthenticatorSystem and hasPermission in common (C1 v1.2.2)*, C1 `1.2.2-SNAPSHOT` (Q14) |
 | **Specification** | use case issue #41, sub-issue #43 and the wiki page *Requirements and Use Cases* |
 | **Design** | `doc/design/C2-server-design.png` · analysis `doc/AN-C2-C3-DECISIONS.md` (D17 to D23) · contracts: section 6 of #33 *C2. Configuration and integrations* |
-| **Plan approved by** | pending (Javier) |
+| **Plan approved by** | Javier, 14/11/2026 |
 
 ## Decisions already taken
 - The four integrations are SSO, electronic health record (EHR), admissions and RIS/PACS. Everything is simulated (A5); there is no real adapter.
@@ -36,6 +36,7 @@ Each one has a proposal and all of them are answered.
 - **Q15:** Two tests of C1 of Adam check the exact list of permissions of the administrator and will fail when `CONFIGURE_INTEGRATIONS` is added: `InMemoryPermissionRepositoryTest` ("findAll returns MANAGE_ROLES and CONFIGURE_SYSTEM") and `InMemoryRoleRepositoryTest` (the row `SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM`). Changing an expected value is a decision (rule 17). **Proposal:** I update only those expected values to add the new permission (as in step 3 of UC17), and nothing else; I tell Adam. **A:** approved as proposed (Javier, 14/11/2026)
 - **Q16:** The test double `SpyAuthenticatorSystem` (Adam) must implement `ping()` once the interface has it. Javier approved only the import and the new method. **Proposal:** `ping()` returns what the wrapped system returns (`delegate.ping()`, `true` with the simulator), without counting calls. **A:** approved as proposed (Javier, 14/11/2026)
 - **Q17:** Repository. The design has its own `IIntegrationConfigurationRepository`. **Proposal:** reuse the generic `IConfigurationRepository<T>` and `InMemoryConfigurationRepository<T>` of UC17 (key `system`), as it was done for the five parameter groups, and sort by `HospitalSystemType` in the service. **A:** approved as proposed (Javier, 14/11/2026)
+- **Q18 (open, found in step 2 on 14/11/2026):** adding the abstract method `ping()` to `IAuthenticatorSystem` stops compiling 3 tests of Adam in `AuthenticationServiceTest` (lines about 147, 167 and 187), which use lambdas `(u, p) -> true`: with two abstract methods the interface is not functional any more. **Option 1 (proposal):** `ping()` is a `default` method that returns `true`; the 3 tests compile with no change, and the simulator and the test double `SpyAuthenticatorSystem` override it. Risk: a future real adapter could forget to override it and always answer OK; today everything is simulated (A5) and the Javadoc says it. **Option 2:** `ping()` stays abstract and the 3 tests are changed to build the double in another way (for example an anonymous class), with no expected value changed and with Javier's approval. **A:** Javier asks in Meeting 8 (15/11/2026)
 
 ## Files
 | File | Action | What |
@@ -61,7 +62,7 @@ Each one has a proposal and all of them are answered.
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here).
 - [x] 1. This plan (`docs(UC20): plan for the server part (#43)`) - 84209c0.
-- [ ] 2. Version `1.2.2-SNAPSHOT` of `server-c1-access` (Q14); move `IAuthenticatorSystem` to `common` with `ping()` and update the imports, the simulator and the test double (Q3, Q16). The 233 tests of C1 and the ones of Adam pass.
+- [ ] 2. Version `1.2.2-SNAPSHOT` of `server-c1-access` (Q14); move `IAuthenticatorSystem` to `common` with `ping()` and update the imports, the simulator and the test double (Q3, Q16). The 233 tests of C1 and the ones of Adam pass. **Started and parked on 14/11/2026 (Q18):** the move of the interface, the imports, `ping()` in the simulator and the test double and the two versions are in the working tree, **not committed**, and the build does not compile until Q18 is answered.
 - [ ] 3. Permission `CONFIGURE_INTEGRATIONS` for the administrator and the two expected lists of the tests (Q2, Q15).
 - [ ] 4. The enums and the data classes of the integrations in `common` (Q5).
 - [ ] 5. The contract `IIntegrationManagementService` in `common` (Q4).
@@ -80,7 +81,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing (this plan waits for the approval of Javier)
-- **Next step:** Javier approves the plan; then step 2 (version `1.2.2-SNAPSHOT` of `server-c1-access` and `IAuthenticatorSystem` to `common`)
-- **Open questions:** none
-- **Last update:** 14/11/2026, Javier
+- **In progress:** step 2 (parked, uncommitted, waits for Q18)
+- **Next step:** answer Q18 (Javier asks in Meeting 8); then finish step 2 (`IAuthenticatorSystem` with `ping()` as decided, build green, commit citing #112 and #43)
+- **Open questions:** Q18
+- **Last update:** 15/11/2026, Javier
