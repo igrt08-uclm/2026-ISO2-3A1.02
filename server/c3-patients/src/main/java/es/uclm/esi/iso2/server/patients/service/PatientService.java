@@ -49,6 +49,20 @@ public class PatientService implements IPatientService {
         this.patients = patients;
         this.roleManagementService = roleManagementService;
         this.auditRecorder = auditRecorder;
+        this.lastNumber = highestNumber(patients);
+    }
+
+    /** The highest number of the ids {@code P-0001}... that the repository already has, or 0 if there are none. */
+    private static int highestNumber(IPatientRepository repository) {
+        int highest = 0;
+        for (Patient existing : repository.search("")) {
+            String id = existing.getPatientId();
+            if (id != null && id.startsWith("P-") && id.substring(2).chars().allMatch(Character::isDigit)
+                    && id.length() > 2 && id.length() <= 10) {
+                highest = Math.max(highest, Integer.parseInt(id.substring(2)));
+            }
+        }
+        return highest;
     }
 
     /**
