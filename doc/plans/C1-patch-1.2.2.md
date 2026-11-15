@@ -47,7 +47,7 @@ No file of C2 or of the client changes in this patch. The code of steps 2 to 4 w
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true`, with the same tests; no test is written).
 - [x] 1. This plan (`docs(C1): plan of the patch 1.2.2 (#112)`). - see `git log --oneline -- doc/plans/C1-patch-1.2.2.md`.
-- [ ] 2. `IAuthenticatorSystem` moves to `common` with `ping()`, and the version `1.2.2-SNAPSHOT` (Q1, Q4, Q5a, Q6).
+- [x] 2. `IAuthenticatorSystem` moves to `common` with `ping()`, and the version `1.2.2-SNAPSHOT` (Q1, Q4, Q5a, Q6). - 52f08a0 (the stash of 14/11 was recovered and `ping()` changed to a `default` method; 27 + 144 + 41 + 55 + 79 existing tests pass).
 - [ ] 3. Permissions `CONFIGURE_INTEGRATIONS` (administrator) and `MANAGE_PATIENTS` (Admissions staff) and the two expected lists (Q2, Q5b, Q5c, Q8).
 - [ ] 4. `hasPermission` as a `default` method of `IRoleManagementService` (Q3, Q7).
 - [ ] 5. `agents/architecture.md`.
@@ -62,6 +62,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing (this plan waits for the approval of Javier)
-- **Next step:** Javier approves the plan (with Q7 and the renames of Q5); then `git stash pop --index` and step 2, adjusting `ping()` to a `default` method
+- **Next step:** step 3 (permissions `CONFIGURE_INTEGRATIONS` and `MANAGE_PATIENTS`, in `InMemoryPermissionRepository` and `InMemoryRoleRepository`, and the two expected lists of Adam)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
