@@ -12,6 +12,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -37,6 +38,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
@@ -82,7 +84,7 @@ public class IU_ManagePatients extends JPanel {
     private final JTextField txtAddress = new JTextField(20);
     private final JTextField txtPhone = new JTextField(20);
     private final JTextField txtEmail = new JTextField(20);
-    private final JLabel lblStatus = new JLabel(" ");
+    private final JLabel lblStatus = new WrappedLabel();
     private final JButton btnNew = new JButton("New patient");
     private final JButton btnSave = new JButton("Save");
     private final JButton btnBack = new JButton("Back");
@@ -113,6 +115,7 @@ public class IU_ManagePatients extends JPanel {
 
         JLabel lblTitle = new JLabel("Patients");
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
+        btnSearch.setMnemonic('H');
         btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> {
             if (confirmDiscard()) {
@@ -123,7 +126,6 @@ public class IU_ManagePatients extends JPanel {
         btnNew.addActionListener(event -> onNewPatient());
         btnSave.setMnemonic('S');
         btnSave.addActionListener(event -> onSavePatient());
-        btnSearch.setMnemonic('H');
         btnSearch.addActionListener(event -> onSearchRequested());
         txtSearch.addActionListener(event -> onSearchRequested());
         cmbSex.setRenderer(new DefaultListCellRenderer() {
@@ -442,7 +444,6 @@ public class IU_ManagePatients extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(0, 12));
         JPanel search = new JPanel(new FlowLayout(FlowLayout.LEADING, 8, 0));
         JLabel lblSearch = new JLabel("Search");
-        lblSearch.setDisplayedMnemonic('H');
         lblSearch.setLabelFor(txtSearch);
         search.add(lblSearch);
         search.add(txtSearch);
@@ -499,8 +500,53 @@ public class IU_ManagePatients extends JPanel {
 
     private JPanel buildFooter() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(lblStatus, BorderLayout.WEST);
+        panel.add(lblStatus, BorderLayout.CENTER);
         panel.add(btnBack, BorderLayout.EAST);
         return panel;
+    }
+
+    /**
+     * A label for the messages: its text stays plain (so {@code getText()} is the message), but it is drawn in as
+     * many lines as it needs for the width it has, so that a long message is never cut.
+     */
+    private static final class WrappedLabel extends JLabel {
+        private static final int PREFERRED_WIDTH = 240;
+        private final transient JTextArea area = new JTextArea();
+
+        WrappedLabel() {
+            super(" ");
+            area.setLineWrap(true);
+            area.setWrapStyleWord(true);
+            area.setOpaque(false);
+            area.setBorder(null);
+            area.setText(getText());
+        }
+
+        @Override
+        public void setText(String text) {
+            super.setText(text);
+            if (area != null) {
+                area.setText(text);
+                revalidate();
+            }
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            area.setFont(getFont());
+            area.setSize(getWidth() > 0 ? getWidth() : PREFERRED_WIDTH, Short.MAX_VALUE);
+            return new Dimension(PREFERRED_WIDTH, area.getPreferredSize().height);
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            area.setFont(getFont());
+            area.setForeground(getForeground());
+            area.setSize(getWidth(), getHeight());
+            area.paint(graphics);
+            if (getPreferredSize().height != getHeight()) {
+                revalidate();
+            }
+        }
     }
 }
