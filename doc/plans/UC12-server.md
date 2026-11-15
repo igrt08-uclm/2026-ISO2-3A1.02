@@ -57,8 +57,10 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 4. `IPatientRepository` and `InMemoryPatientRepository` (Q9, Q7 search). - 61abadb.
 - [x] 5. `PatientService`: permission, validation, `registerPatient`, `modifyPatient`, `getPatient`, `searchPatients` and the audit (Q4 to Q8). - ace82a2.
 - [x] 6. `loadSeedData()` and the three invented patients (Q10). - 4b5448e. Checked roughly with a throwaway program outside the repo (seed, search, register, duplicate, validation, modify, permission and audit); no test was written.
-- [ ] 7. `agents/architecture.md`.
+- [x] 7. `agents/architecture.md`. - 88c8f25.
 - [ ] 8. Hand the branch over to Adam (tests of UC12-server), who opens the pull request (`Closes #46`); close only with his tests green and the coverage check passing.
+  - **State for Adam (15/11/2026):** steps 1 to 7 are done. `mvn -B verify -Djacoco.skip=true` is green with the existing tests; the full `mvn -B verify` is expected to fail in the coverage of `server-c3-patients` and `common` until his tests exist. Note: the administrator does not have `MANAGE_PATIENTS` (only the Admissions staff, `lmartin`), as decided in #46.
+  - **Cases to cover (Adam designs the table, rule 17):** (1) permission: `lmartin` is accepted, and `admin`, `mgarcia`, `jfernandez`, the inactive user, an unknown user and a `null` requester are denied in each of the four operations, with `PATIENT_ACCESS_DENIED` and the resource `patients` or `PATIENT:<id>`; (2) seed data: three patients `P-0001` to `P-0003` with the identifiers `HC-0000001` to `HC-0000003`, `loadSeedData()` twice does not duplicate, the next id is `P-0004`, nothing is audited; (3) `registerPatient` valid: the id given by the server (the one sent is ignored), active, the texts without the spaces at the ends, the national ID optional, `PATIENT_REGISTERED`; (4) `registerPatient` invalid: `null` patient, empty identifier, empty full name, `null` date of birth, a date of birth tomorrow (and today, which is valid), `null` sex, e-mails with and without `@` and dot, phones of 8, 9, 15 and 16 digits, with spaces, with a leading `+`, with letters and `+` alone, all the errors together, nothing saved and nothing audited; (5) duplicate: the same identifier with other case or spaces gives `DuplicatePatientException` with the existing patient, nothing is saved and `PATIENT_ACCESSED` is registered; (6) `modifyPatient`: valid change (the id and the identifier stay, the national ID can change), another identifier is "The identifier cannot be changed", an unknown id, invalid data with all the errors, `null` patient, `PATIENT_MODIFIED`; (7) `getPatient`: found and `PATIENT_ACCESSED`, unknown id and `null` id; (8) `searchPatients`: by a part of the identifier and of the full name, ignoring case and the spaces at the ends, empty and `null` text return all, no match returns none, the order of saving, one audit entry per search; (9) `Patient`, `Sex`, `DuplicatePatientException` and `InMemoryPatientRepository` (`findById`, `findByIdentifier` ignoring case and spaces, `search`, `save` replaces).
 
 ## Verification
 - [ ] Every acceptance criterion of #46 is checked: a patient with an identifier that already exists is rejected and the existing one is returned; the modifications are validated before they are saved; every access and change needs `MANAGE_PATIENTS` and is registered in the audit log; the interfaces match #47 as changed in Q2.
@@ -68,7 +70,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 7 (`agents/architecture.md`)
+- **In progress:** step 8 (the branch is ready to be handed over to Adam)
+- **Next step:** Adam writes the tests of UC12-server in this branch and opens the pull request (`Closes #46`); this plan is closed with his tests green and the coverage check passing
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
