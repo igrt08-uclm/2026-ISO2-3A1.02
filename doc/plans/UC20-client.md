@@ -98,8 +98,11 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 4. `IU_ManageIntegrations`, *Save*: reading of the settings, validation in the client, confirmation, save and messages (Q1, Q3, Q8, Q12). - 8a3d29e.
 - [x] 5. `IU_ManageIntegrations`, *Test connection* and *Revert*: the "Unsaved changes" line, the button disabled while there are changes, and the result of the test (Q2, Q11, Q12). - 63c7f49 (checked roughly with a throwaway program outside the repo that presses the buttons with the real service: errors together, confirmations, *Revert*, the test in each state, the question when another row is pressed and the denied access; no test was written). Q15 is done here too.
 - [x] 6. `IU_Welcome` (button) and `Main` (service, seed data, navigation) (Q13). - 93a758b (checked roughly with a throwaway program: only `admin` sees *Configure integrations*; the 6-argument constructor does not show it; no test was written).
-- [ ] 7. `agents/architecture.md`.
+- [x] 7. `agents/architecture.md`. - eaf21f9.
 - [ ] 8. Hand the branch over to Adam: the manual check of the screen with `admin` (and `mgarcia`, who does not see the button) and the tests of UC20-client, who opens the pull request (`Closes #42`); close only with his tests green and the coverage check passing.
+  - **State for Adam (15/11/2026):** steps 1 to 7 are done. `mvn -B verify -Djacoco.skip=true` is green with the existing tests; the full `mvn -B verify` is expected to fail in the coverage of `client-c2-configuration` until his tests exist.
+  - **Manual check (Adam), with `admin` and with `mgarcia`:** the four integrations are listed in the order SSO, EHR, admissions, RIS/PACS; SIMULATED is in bold amber in the table and the line above the form appears only in simulated mode; editing a field shows "Unsaved changes", disables *Test connection* and enables *Revert*; *Save* with errors shows them all together and sends nothing; switching to real mode or disabling asks first; *Test connection* gives OK with the time, "integration disabled" or "real mode not available in this version"; pressing another row with unsaved changes asks "Discard the unsaved changes?"; `mgarcia` does not see *Configure integrations*.
+  - **Cases to cover (Adam designs the table, rule 17):** the display (rows, order, names, the amber word, the line above the form, the first row selected); the form of the selected row (endpoint, settings text, enabled, mode); the reading of the settings (blank lines, spaces, first `=`, a line without `=`, an empty key or value, a repeated key, order kept); the validation of the endpoint (empty in simulated, empty in real, `http://`, `https://`, `ftp://`, a bad endpoint in simulated mode) with all the errors together and nothing sent; the confirmations (disable, real, both, neither; cancel sends nothing); *Save* ok and the messages; *Test connection* in each state and its messages; the unsaved changes (line, *Test connection* disabled, *Revert*); the question when another row is pressed (accept and cancel); the denied access (message and only *Back* enabled); the button of `IU_Welcome` (only with `CONFIGURE_INTEGRATIONS` and the action) and its old constructors. He needs a fake `IIntegrationManagementService`, as the fake of UC17.
 
 ## How to run it
 `mvn -B -ntp install -DskipTests` and then `mvn -B -pl client/c1-access exec:java -Dexec.mainClass=es.uclm.esi.iso2.client.Main`; log in with `admin` and press *Configure integrations*.
@@ -113,7 +116,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 7 (`agents/architecture.md`) and step 8 (hand the branch over to Adam)
+- **In progress:** step 8 (the branch is ready to be handed over to Adam)
+- **Next step:** Adam checks the screen by hand, writes the tests of UC20-client in this branch and opens the pull request (`Closes #42`); this plan is closed with his tests green and the coverage check passing
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
