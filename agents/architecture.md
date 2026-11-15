@@ -7,7 +7,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 ├── common/              shared contracts (interfaces and data classes), with its own version
 ├── server/              aggregator of the server submodules (one per component)
 │   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.2-SNAPSHOT), depends on common
-│   └── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.0.0-SNAPSHOT), depends only on common
+│   └── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.1.0-SNAPSHOT), depends only on common
 └── client/              aggregator of the client submodules (one per component)
     ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.1-SNAPSHOT), depends on common, server-c1-access and,
     │                    because its `Main` starts the whole program, on server-c2-configuration and client-c2-configuration
@@ -20,7 +20,9 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
   `common` is set once in the `<dependencyManagement>` of the parent pom.
 - The client starts the whole program: only `es.uclm.esi.iso2.client.Main` imports `server`, to create the services.
   The screens (`IU_` classes, Swing, D-030) only use `common`.
-- External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces.
+- External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces. The SSO is `IAuthenticatorSystem`,
+  in `common`, because C1 uses it to log in and C2 to test the connection; the gateways of the EHR, the admissions
+  system and the RIS/PACS are in `server-c2-configuration` (package `integration`), each with its simulator.
 - Each component is the only one that writes its data; the others use it through its interfaces. An operation of a
   component that is delivered later is declared as an interface now and has a simulated implementation (D-023).
 - No use case deletes a record: records are deactivated or cancelled (D-022).
