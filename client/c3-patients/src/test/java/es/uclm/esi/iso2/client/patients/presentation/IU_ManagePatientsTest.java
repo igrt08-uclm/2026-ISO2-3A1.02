@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import es.uclm.esi.iso2.common.patients.domain.Patient;
 import es.uclm.esi.iso2.common.patients.domain.Sex;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -1196,6 +1198,253 @@ class IU_ManagePatientsTest {
                     () -> assertEquals("Changed", addressWhileDragging),
                     () -> assertEquals(List.of(DISCARD), questions),
                     () -> assertEquals("HC-0000003", text(screen, IDENTIFIER)));
+        }
+    }
+
+    @Nested
+    @DisplayName("10. Fixes after the findings of #122")
+    class FindingsFixes {
+        @Test
+        @DisplayName("TC12C-36 New patient with unsaved changes asks once; cancel keeps the changes and the patient")
+        void newPatientAsksOnceCancel() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            select(screen, MARIO);
+            type(screen, ADDRESS, "Calle Cambiada 9");
+            answer = false;
+
+            // Act
+            newPatient(screen);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(DISCARD), questions),
+                    () -> assertEquals(MARIO, selectedRow(screen)),
+                    () -> assertEquals("HC-0000002", text(screen, IDENTIFIER)),
+                    () -> assertEquals("Calle Cambiada 9", text(screen, ADDRESS)),
+                    () -> assertFalse(field(screen, IDENTIFIER).isEnabled()));
+        }
+
+        @Test
+        @DisplayName("TC12C-36 New patient with unsaved changes asks once; accept empties the form")
+        void newPatientAsksOnceAccept() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            select(screen, MARIO);
+            type(screen, ADDRESS, "Calle Cambiada 9");
+
+            // Act
+            newPatient(screen);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(DISCARD), questions),
+                    () -> assertEquals(-1, selectedRow(screen)),
+                    () -> assertEquals(List.of("", "", "", "", "", "", "", "null"), form(screen)),
+                    () -> assertTrue(field(screen, IDENTIFIER).isEnabled()),
+                    () -> assertEquals(0, service.changes()));
+        }
+
+        @Test
+        @DisplayName("TC12C-37 Dragging the selection away and back to the same row keeps the changes, without asking")
+        void dragAwayAndBackKeepsChanges() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            select(screen, LUCIA);
+            type(screen, FULL_NAME, "Lucía Cambiada");
+            javax.swing.ListSelectionModel selection = Screen.table(screen).getSelectionModel();
+
+            // Act
+            selection.setValueIsAdjusting(true);
+            select(screen, MARIO);
+            select(screen, ELENA);
+            select(screen, LUCIA);
+            selection.setValueIsAdjusting(false);
+
+            // Assert
+            assertAll(
+                    () -> assertTrue(questions.isEmpty()),
+                    () -> assertEquals(LUCIA, selectedRow(screen)),
+                    () -> assertEquals("HC-0000001", text(screen, IDENTIFIER)),
+                    () -> assertEquals("Lucía Cambiada", text(screen, FULL_NAME)),
+                    () -> assertEquals(0, service.changes()));
+        }
+
+        @Test
+        @DisplayName("TC12C-37 Another row, cancel, and the same row again: one question and the changes are kept")
+        void anotherRowCancelThenSameRowKeepsChanges() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            select(screen, LUCIA);
+            type(screen, PHONE, "699999999");
+            answer = false;
+
+            // Act
+            select(screen, ELENA);
+            select(screen, LUCIA);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(DISCARD), questions),
+                    () -> assertEquals(LUCIA, selectedRow(screen)),
+                    () -> assertEquals("699999999", text(screen, PHONE)),
+                    () -> assertEquals("HC-0000001", text(screen, IDENTIFIER)));
+        }
+
+        @Test
+        @DisplayName("TC12C-38 Back with unsaved changes asks once; cancel does not go back and keeps the changes")
+        void backWithChangesCancel() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            select(screen, ELENA);
+            type(screen, EMAIL, "elena.cambiada@example.test");
+            answer = false;
+
+            // Act
+            Screen.button(screen, "Back").doClick();
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(DISCARD), questions),
+                    () -> assertEquals(0, backs),
+                    () -> assertEquals(ELENA, selectedRow(screen)),
+                    () -> assertEquals("elena.cambiada@example.test", text(screen, EMAIL)),
+                    () -> assertEquals(0, service.changes()));
+        }
+
+        @Test
+        @DisplayName("TC12C-38 Back with unsaved changes asks once; accept goes back and sends nothing")
+        void backWithChangesAccept() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            fillValid(screen);
+
+            // Act
+            Screen.button(screen, "Back").doClick();
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(DISCARD), questions),
+                    () -> assertEquals(1, backs),
+                    () -> assertEquals(0, service.changes()));
+        }
+
+        @Test
+        @DisplayName("TC12C-38 Back without changes goes back without asking")
+        void backWithoutChanges() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            select(screen, LUCIA);
+
+            // Act
+            Screen.button(screen, "Back").doClick();
+
+            // Assert
+            assertAll(
+                    () -> assertTrue(questions.isEmpty()),
+                    () -> assertEquals(1, backs));
+        }
+
+        @Test
+        @DisplayName("TC12C-39 The message area is at the centre of the footer and a long error keeps its whole plain text")
+        void longErrorInTheCentreOfTheFooter() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            JLabel status = Screen.statusLabel(screen);
+            java.awt.Container footer = status.getParent();
+            screen.showOperationResultError("Short.");
+            Dimension shortSize = status.getPreferredSize();
+            String longError = "The identifier is required. The full name is required. The date of birth is"
+                    + " required. The sex is required. The e-mail must have the form name@domain.ext. The phone must"
+                    + " have 9 to 15 digits.";
+
+            // Act
+            screen.showOperationResultError(longError);
+            Dimension longSize = status.getPreferredSize();
+
+            // Assert
+            assertAll(
+                    () -> assertTrue(footer.getLayout() instanceof BorderLayout),
+                    () -> assertEquals(BorderLayout.CENTER,
+                            ((BorderLayout) footer.getLayout()).getConstraints(status)),
+                    () -> assertEquals(BorderLayout.EAST, ((BorderLayout) footer.getLayout())
+                            .getConstraints(Screen.button(screen, "Back"))),
+                    () -> assertEquals("⚠ " + longError, Screen.status(screen)),
+                    () -> assertFalse(Screen.status(screen).contains("<html")),
+                    () -> assertEquals(shortSize.width, longSize.width),
+                    () -> assertTrue(longSize.height > shortSize.height));
+        }
+
+        @Test
+        @DisplayName("TC12C-40 Alt+H is only the Search button: the label Search and the other labels have no Alt+H")
+        void onlyOneAltH() {
+            // Act
+            IU_ManagePatients screen = open();
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(KeyEvent.VK_H, Screen.button(screen, SEARCH).getMnemonic()),
+                    () -> assertEquals(0, Screen.labelOf(screen, SEARCH).getDisplayedMnemonic()),
+                    () -> assertEquals(1, Screen.all(screen, javax.swing.AbstractButton.class).stream()
+                            .filter(button -> button.getMnemonic() == KeyEvent.VK_H).count()),
+                    () -> assertTrue(Screen.all(screen, JLabel.class).stream()
+                            .noneMatch(label -> label.getDisplayedMnemonic() == KeyEvent.VK_H)));
+        }
+
+        @ParameterizedTest(name = "\"{0}\"")
+        @ValueSource(strings = {"ana@example.test.", "ana@example..test"})
+        @DisplayName("TC12C-41 E-mails with an empty part after a dot are rejected and nothing is sent")
+        void emailWithAnEmptyPart(String email) {
+            // Arrange
+            IU_ManagePatients screen = open();
+            fillValid(screen);
+            type(screen, EMAIL, email);
+
+            // Act
+            save(screen);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(BAD_EMAIL, Screen.status(screen)),
+                    () -> assertEquals(List.of(EMAIL), markedFields(screen)),
+                    () -> assertEquals(0, service.changes()));
+        }
+
+        @Test
+        @DisplayName("TC12C-42 The date of birth 01/01/1900 is accepted")
+        void earliestBirthIsAccepted() {
+            // Arrange
+            IU_ManagePatients screen = open();
+            fillValid(screen);
+            type(screen, BIRTH, "01/01/1900");
+
+            // Act
+            save(screen);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(1, service.registrations().size()),
+                    () -> assertEquals(LocalDate.of(1900, 1, 1), service.registrations().get(0).getDateOfBirth()),
+                    () -> assertEquals("✔ Patient P-0004 registered.", Screen.status(screen)));
+        }
+
+        @ParameterizedTest(name = "\"{0}\"")
+        @ValueSource(strings = {"31/12/1899", "01/01/1899"})
+        @DisplayName("TC12C-42 A date of birth before 01/01/1900 is rejected and nothing is sent")
+        void birthBefore1900IsRejected(String date) {
+            // Arrange
+            IU_ManagePatients screen = open();
+            fillValid(screen);
+            type(screen, BIRTH, date);
+
+            // Act
+            save(screen);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("⚠ The date of birth cannot be before 01/01/1900.", Screen.status(screen)),
+                    () -> assertEquals(List.of(BIRTH), markedFields(screen)),
+                    () -> assertEquals(0, service.changes()));
         }
     }
 

@@ -1071,4 +1071,101 @@ class IU_ManageIntegrationsTest {
                     () -> assertTrue(service.tested().isEmpty()));
         }
     }
+
+    @Nested
+    @DisplayName("Fixes after the findings of #122")
+    class FindingsOf122 {
+        @Test
+        @DisplayName("TC20C-42 F-17 A configuration with a null endpoint is shown with an empty endpoint and no unsaved changes")
+        void nullEndpointIsNotAnUnsavedChange() {
+            // Arrange
+            service.add(FakeIntegrationManagementService.integration(HospitalSystemType.SSO, null,
+                    Map.of("timeout", "30"), true, IntegrationMode.SIMULATED));
+            IU_ManageIntegrations screen = open();
+            boolean dirtyWhenOpened = shows(screen, UNSAVED_LINE);
+
+            // Act
+            select(screen, EHR_ROW);
+            select(screen, SSO_ROW);
+
+            // Assert
+            assertAll(
+                    () -> assertFalse(dirtyWhenOpened),
+                    () -> assertEquals(SSO_ROW, Screen.table(screen).getSelectedRow()),
+                    () -> assertEquals("", endpoint(screen).getText()),
+                    () -> assertFalse(shows(screen, UNSAVED_LINE)),
+                    () -> assertTrue(Screen.enabled(screen, "Test connection")),
+                    () -> assertFalse(Screen.enabled(screen, "Revert")),
+                    () -> assertTrue(questions.isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC20C-43 F-18 After a denial the table is disabled and pressing a row does nothing and never asks")
+        void afterADenialTheTableIgnoresTheRows() {
+            // Arrange
+            IU_ManageIntegrations screen = open();
+            settings(screen).setText("timeout=45");
+            service.denyAll();
+            save(screen);
+            JTable table = Screen.table(screen);
+
+            // Act
+            select(screen, ADMISSIONS_ROW);
+            select(screen, RIS_PACS_ROW);
+
+            // Assert
+            assertAll(
+                    () -> assertFalse(table.isEnabled()),
+                    () -> assertEquals(0, questions.size()),
+                    () -> assertEquals("timeout=45", settings(screen).getText()),
+                    () -> assertEquals("", endpoint(screen).getText()),
+                    () -> assertEquals(DENIED, Screen.status(screen)),
+                    () -> assertFalse(Screen.enabled(screen, "Save")),
+                    () -> assertFalse(Screen.enabled(screen, "Test connection")),
+                    () -> assertTrue(service.requests().isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC20C-44 F-19 Revert clears the message area, so an old error disappears")
+        void revertClearsTheMessage() {
+            // Arrange
+            IU_ManageIntegrations screen = open();
+            select(screen, ADMISSIONS_ROW);
+            endpoint(screen).setText("ftp://x");
+            save(screen);
+            String error = Screen.status(screen);
+
+            // Act
+            Screen.button(screen, "Revert").doClick();
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("⚠ The endpoint must start with http:// or https://.", error),
+                    () -> assertEquals(" ", Screen.status(screen)),
+                    () -> assertEquals("http://admissions.hospital.test", endpoint(screen).getText()),
+                    () -> assertFalse(shows(screen, UNSAVED_LINE)),
+                    () -> assertTrue(service.requests().isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC20C-44 F-19 Revert also clears an error of the server")
+        void revertClearsAnErrorOfTheServer() {
+            // Arrange
+            IU_ManageIntegrations screen = open();
+            settings(screen).setText("timeout=0");
+            service.rejectNextChange("The setting timeout is not valid");
+            save(screen);
+            String error = Screen.status(screen);
+
+            // Act
+            Screen.button(screen, "Revert").doClick();
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("⚠ The setting timeout is not valid.", error),
+                    () -> assertEquals(" ", Screen.status(screen)),
+                    () -> assertEquals("timeout=30", settings(screen).getText()),
+                    () -> assertEquals(1, service.requests().size()));
+        }
+    }
 }
