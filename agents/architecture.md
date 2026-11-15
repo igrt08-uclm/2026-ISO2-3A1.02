@@ -13,7 +13,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
     ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.3-SNAPSHOT), depends on common, server-c1-access and,
     │                    because its `Main` starts the whole program, on server-c2-configuration, client-c2-configuration,
     │                    server-c3-patients and client-c3-patients
-    ├── c2-configuration/ client of C2 (artifactId `client-c2-configuration`, version 1.1.0-SNAPSHOT), depends only on common
+    ├── c2-configuration/ client of C2 (artifactId `client-c2-configuration`, version 1.1.2-SNAPSHOT), depends only on common
     └── c3-patients/     client of C3 (artifactId `client-c3-patients`, version 1.0.0-SNAPSHOT), depends only on common
 ```
 - One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1. A component's package

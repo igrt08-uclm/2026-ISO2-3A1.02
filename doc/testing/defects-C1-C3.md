@@ -31,7 +31,7 @@ current behaviour is right. The fixes are in `doc/plans/UC12-testing-fixes.md` (
 | F-17 | UC20 client | If the server returned a `null` endpoint, the form would always show "Unsaved changes" (today the server always stores `""`) | Fixed (dc3571d) · tested by TC20C-42 | — |
 | F-18 | UC20 client | After an access denied, the table can still be clicked and can ask "Discard the unsaved changes?" | Fixed (dc3571d) · tested by TC20C-43 | — |
 | F-19 | UC20 client | *Revert* does not clear the message area, so an old error stays visible | Fixed (dc3571d) · tested by TC20C-44 | — |
-| F-20 | UC17 server | A **new** test type can be created with a **deactivated** priority (Q9 only thought of editing old ones) | Fixing in the patch of C2 1.1.1 (#123) · tested by TC17S-34 and TC17S-35 | David |
+| F-20 | UC17 server | A **new** test type can be created with a **deactivated** priority (Q9 only thought of editing old ones) | Fixed (3d086e0, patch C2 1.1.1, #125) · tested by TC17S-34 and TC17S-35 | David |
 
 ## Requirements (Ignacio Romero and David Calzado) – rules that are not defined
 
@@ -43,12 +43,12 @@ David proposed an answer for each one in #122 and confirmed them as Requirements
 | R-02 | UC12 | The duplicate check ignores case but only the spaces at the ends (`HC 0000001` ≠ `HC0000001`), while Q4 says "ignoring case and spaces" | Confirmed · Fixed (14df4d6) · tested by TC12S-69 and TC12S-70 | **Defect against #46 (Javier):** compare ignoring case, spaces and `-`, so `HC 0000001`, `HC-0000001` and `HC0000001` are the same patient |
 | R-03 | UC12 | The search does not ignore accents: `lucia` does not find "Lucía" | Confirmed · Fixed (d2cfd51) · tested by TC12S-71 and TC12S-72 | The search ignores accents as well as case, so `lucia` finds "Lucía" |
 | R-04 | UC12 | The e-mail rule accepts `ana@example.test.` and `ana@example..test`; the date of birth has no lower limit (`01/01/1800`); the phone keeps inner spaces | Confirmed · Fixed (c7780fc) · tested by TC12S-73 to TC12S-75, TC12C-41 and TC12C-42 | E-mail `a@b.c` with no empty part (both examples rejected); date of birth not in the future and not before 01/01/1900; phone may be typed with spaces, but only the 9 to 15 digits count |
-| R-05 | UC20 | The endpoint rule accepts `http://` alone (no host) and is case sensitive (`HTTPS://…` is rejected) | Confirmed · Fixing in the patch of C2 1.1.1 (#123) · tested by TC20S-17 | `http://` or `https://` followed by a host (`http://` alone rejected); the scheme ignores case (`HTTPS://…` accepted) |
+| R-05 | UC20 | The endpoint rule accepts `http://` alone (no host) and is case sensitive (`HTTPS://…` is rejected) | Confirmed · Fixed in the server (57d150e, patch C2 1.1.1, #125) and in the screen (patch C2 1.1.2, #124) · tested by TC20S-17, TC20C-17 and TC20C-18 | `http://` or `https://` followed by a host (`http://` alone rejected); the scheme ignores case (`HTTPS://…` accepted) |
 
 ## Design (Marcos Loro and Denis Ionescu) – diagrams that do not match the code
 
 | Id | Use case | Finding | Status |
 |---|---|---|---|
 | D-01 | UC22 | The communication diagram of the login shows the SSO check first; the agreed order (#13) is user → SSO → active | Not a defect (David, 15/11/2026): the diagram of Rodrigo already does user → SSO → active, as agreed in #13 |
-| D-02 | UC17 | `C2-client-design.png` still shows `SystemParameter`, `ParameterGroup` and `getParameters(group)`; the code uses one class and one operation per group (#40) | Open · Marcos and Denis update it in #114 |
-| D-03 | UC20 | `configureIntegration` returns the saved configuration; the diagram has `void` | Open · Marcos and Denis update it in #114 |
+| D-02 | UC17 | `C2-client-design.png` still shows `SystemParameter`, `ParameterGroup` and `getParameters(group)`; the code uses one class and one operation per group (#40) | Kept in the diagram on purpose (agreed with Design in #114): the difference is written in `doc/design/README.md` (#128) |
+| D-03 | UC20 | `configureIntegration` returns the saved configuration; the diagram has `void` | Fixed (7fdb582, #127) |
