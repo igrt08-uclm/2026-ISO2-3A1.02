@@ -1,9 +1,11 @@
 package es.uclm.esi.iso2.client.patients.presentation;
 
 import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
+import es.uclm.esi.iso2.common.patients.contracts.DuplicatePatientException;
 import es.uclm.esi.iso2.common.patients.contracts.IPatientService;
 import es.uclm.esi.iso2.common.patients.domain.Patient;
 import es.uclm.esi.iso2.common.patients.domain.Sex;
+import es.uclm.esi.iso2.common.shared.ValidationException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -13,23 +15,31 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -43,6 +53,9 @@ public class IU_ManagePatients extends JPanel {
     private static final String ERROR_ICON = "⚠ ";
     private static final Color SUCCESS_COLOR = new Color(0x1B5E20);
     private static final String SUCCESS_ICON = "✔ ";
+    private static final Border ERROR_BORDER = BorderFactory.createLineBorder(ERROR_COLOR, 2);
+    private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern PHONE_DIGITS = Pattern.compile("\\d{9,15}");
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
@@ -70,7 +83,10 @@ public class IU_ManagePatients extends JPanel {
     private final JTextField txtPhone = new JTextField(20);
     private final JTextField txtEmail = new JTextField(20);
     private final JLabel lblStatus = new JLabel(" ");
+    private final JButton btnNew = new JButton("New patient");
+    private final JButton btnSave = new JButton("Save");
     private final JButton btnBack = new JButton("Back");
+    private final transient Map<JComponent, Border> normalBorders = new HashMap<>();
 
     private transient List<Patient> patients = new ArrayList<>();
     private boolean denied;
@@ -97,6 +113,10 @@ public class IU_ManagePatients extends JPanel {
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
         btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> onBack.run());
+        btnNew.setMnemonic('N');
+        btnNew.addActionListener(event -> onNewPatient());
+        btnSave.setMnemonic('S');
+        btnSave.addActionListener(event -> onSavePatient());
         btnSearch.setMnemonic('H');
         btnSearch.addActionListener(event -> onSearch(txtSearch.getText()));
         txtSearch.addActionListener(event -> onSearch(txtSearch.getText()));
@@ -122,6 +142,9 @@ public class IU_ManagePatients extends JPanel {
         add(lblTitle, BorderLayout.NORTH);
         add(center, BorderLayout.CENTER);
         add(buildFooter(), BorderLayout.SOUTH);
+        for (JComponent field : formFields()) {
+            normalBorders.put(field, field.getBorder());
+        }
         onSearch("");
     }
 
@@ -155,6 +178,23 @@ public class IU_ManagePatients extends JPanel {
         showSelected();
     }
 
+    /** Shows the errors found in the form, all together and in red; nothing was saved. */
+    public void showValidationErrors(List<String> errors) {
+        showOperationResultError(errors.stream().map(error -> error + ".").collect(Collectors.joining(" ")));
+    }
+
+    /**
+     * The patient already exists: says so and loads the existing record in the form, so that the user can modify it
+     * instead of creating a duplicate.
+     */
+    public void showExistingPatient(Patient existing) {
+        txtSearch.setText("");
+        onSearch("");
+        select(existing.getPatientId());
+        showOperationResultError("A patient with this identifier already exists: the record is loaded so that you can"
+                + " modify it.");
+    }
+
     /** Shows the message of a change that was made, in green. */
     public void showOperationResultSuccess(String message) {
         lblStatus.setForeground(SUCCESS_COLOR);
@@ -165,6 +205,117 @@ public class IU_ManagePatients extends JPanel {
     public void showOperationResultError(String message) {
         lblStatus.setForeground(ERROR_COLOR);
         lblStatus.setText(ERROR_ICON + message);
+    }
+
+    /** Starts a new patient: nothing is selected and the form is empty. */
+    private void onNewPatient() {
+        table.clearSelection();
+        showSelected();
+        txtIdentifier.requestFocusInWindow();
+    }
+
+    /**
+     * Checks the form with the same rules as the server and, if it is right, registers the patient (nothing selected) or
+     * modifies the selected one. If anything is wrong, every error is shown together and nothing is sent.
+     */
+    private void onSavePatient() {
+        clearMarks();
+        List<String> errors = new ArrayList<>();
+        Patient patient = readForm(errors);
+        if (!errors.isEmpty()) {
+            showValidationErrors(errors);
+            return;
+        }
+        Patient selected = selectedPatient();
+        try {
+            Patient saved = selected == null ? service.registerPatient(requester, patient)
+                    : service.modifyPatient(requester, selected.getPatientId(), patient);
+            txtSearch.setText("");
+            onSearch("");
+            select(saved.getPatientId());
+            showOperationResultSuccess(
+                    "Patient " + saved.getPatientId() + (selected == null ? " registered." : " saved."));
+        } catch (AccessDeniedException exception) {
+            accessDenied();
+        } catch (ValidationException exception) {
+            showValidationErrors(exception.getErrors());
+        } catch (DuplicatePatientException exception) {
+            showExistingPatient(exception.getExistingPatient());
+        }
+    }
+
+    /** Reads the form; every error found is added to {@code errors} and its field is marked with a red border. */
+    private Patient readForm(List<String> errors) {
+        String identifier = txtIdentifier.getText().strip();
+        if (identifier.isEmpty()) {
+            fail(errors, txtIdentifier, "The identifier is required");
+        }
+        String fullName = txtFullName.getText().strip();
+        if (fullName.isEmpty()) {
+            fail(errors, txtFullName, "The full name is required");
+        }
+        LocalDate birth = readBirth(errors);
+        Sex sex = (Sex) cmbSex.getSelectedItem();
+        if (sex == null) {
+            fail(errors, cmbSex, "The sex is required");
+        }
+        String email = txtEmail.getText().strip();
+        if (!email.isEmpty() && !EMAIL.matcher(email).matches()) {
+            fail(errors, txtEmail, "The e-mail must have the form name@domain.ext");
+        }
+        String phone = txtPhone.getText().strip();
+        if (!phone.isEmpty() && !PHONE_DIGITS.matcher(digitsOf(phone)).matches()) {
+            fail(errors, txtPhone, "The phone must have 9 to 15 digits");
+        }
+        return new Patient(null, identifier, txtNationalId.getText().strip(), fullName, birth, sex,
+                txtAddress.getText().strip(), phone, email, true);
+    }
+
+    private LocalDate readBirth(List<String> errors) {
+        String text = txtBirth.getText().strip();
+        if (text.isEmpty()) {
+            fail(errors, txtBirth, "The date of birth is required");
+            return null;
+        }
+        try {
+            LocalDate birth = LocalDate.parse(text, DATE_FORMAT);
+            if (birth.isAfter(LocalDate.now())) {
+                fail(errors, txtBirth, "The date of birth cannot be in the future");
+            }
+            return birth;
+        } catch (DateTimeParseException exception) {
+            fail(errors, txtBirth, "The date of birth must be written as dd/MM/yyyy");
+            return null;
+        }
+    }
+
+    /** The phone without its spaces and without a leading plus sign. */
+    private static String digitsOf(String phone) {
+        String withoutSpaces = phone.replace(" ", "");
+        return withoutSpaces.startsWith("+") ? withoutSpaces.substring(1) : withoutSpaces;
+    }
+
+    private void fail(List<String> errors, JComponent field, String message) {
+        errors.add(message);
+        field.setBorder(ERROR_BORDER);
+    }
+
+    private void clearMarks() {
+        normalBorders.forEach(JComponent::setBorder);
+    }
+
+    private List<JComponent> formFields() {
+        return List.of(txtIdentifier, txtNationalId, txtFullName, txtBirth, cmbSex, txtAddress, txtPhone, txtEmail);
+    }
+
+    /** Selects the patient with that id in the table, which loads it in the form. */
+    private void select(String patientId) {
+        for (int index = 0; index < patients.size(); index++) {
+            if (patients.get(index).getPatientId().equals(patientId)) {
+                table.setRowSelectionInterval(index, index);
+                return;
+            }
+        }
     }
 
     /** The server says that the user does not have the permission: nothing can be done but go back. */
@@ -186,6 +337,7 @@ public class IU_ManagePatients extends JPanel {
         txtAddress.setText(selected == null ? "" : selected.getAddress());
         txtPhone.setText(selected == null ? "" : selected.getPhone());
         txtEmail.setText(selected == null ? "" : selected.getEmail());
+        clearMarks();
         updateControls();
     }
 
@@ -194,6 +346,8 @@ public class IU_ManagePatients extends JPanel {
         boolean enabled = !denied;
         txtSearch.setEnabled(enabled);
         btnSearch.setEnabled(enabled);
+        btnNew.setEnabled(enabled);
+        btnSave.setEnabled(enabled);
         table.setEnabled(enabled);
         txtIdentifier.setEnabled(enabled && selectedPatient() == null);
         for (Component field : new Component[] {txtNationalId, txtFullName, txtBirth, cmbSex, txtAddress, txtPhone,
@@ -229,6 +383,7 @@ public class IU_ManagePatients extends JPanel {
         scroll.setPreferredSize(new Dimension(420, 260));
         JPanel below = new JPanel(new BorderLayout());
         below.add(lblFound, BorderLayout.WEST);
+        below.add(btnNew, BorderLayout.EAST);
         panel.add(search, BorderLayout.NORTH);
         panel.add(scroll, BorderLayout.CENTER);
         panel.add(below, BorderLayout.SOUTH);
@@ -246,6 +401,14 @@ public class IU_ManagePatients extends JPanel {
         addField(panel, "Address", txtAddress, 10, 'R');
         addField(panel, "Phone", txtPhone, 12, 'O');
         addField(panel, "E-mail", txtEmail, 14, 'E');
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.TRAILING, 0, 0));
+        buttons.add(btnSave);
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridy = 16;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 1;
+        constraints.insets = new Insets(16, 0, 0, 0);
+        panel.add(buttons, constraints);
         return panel;
     }
 
