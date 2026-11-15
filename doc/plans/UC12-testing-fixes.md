@@ -16,7 +16,7 @@ F-06, F-07, F-08, F-09, F-10 (screen of the patients) and R-02, R-03, R-04 (rule
 **Findings decided by others (Q9):** F-13 (Marcos and Denis), F-15 (David) and F-20 (Ignacio and David) are fixed in batch 2 with the proposal of Q9; D-01 to D-03 are diagrams (Design, #114). R-01 needs no change (no fixed format).
 
 ## Decisions already taken
-- **Javier, 15/11/2026:** F-09 the error line goes in the centre of the footer and breaks into lines if it is long; F-10 the label *Search* keeps Alt+H and the button *Search* has no shortcut (Enter searches); two batches of commits.
+- **Javier, 15/11/2026:** F-09 the error line goes in the centre of the footer and breaks into lines if it is long; F-10 the button *Search* keeps Alt+H and the label *Search* has no shortcut (changed by Javier because the test of Adam checks the button); two batches of commits.
 - **David (#121):** F-06 the call to `table.clearSelection()` in `onNewPatient` is done with `restoring = true`; F-08 `Back` is `if (confirmDiscard()) { onBack.run(); }`.
 - **David (#122, confirmed R-01 to R-05):** the identifier is compared ignoring case, all the spaces and `-`; the search ignores accents; e-mail with no empty part; date of birth not before 01/01/1900; phone typed with spaces but only its 9 to 15 digits count; endpoint with a host after `http://`/`https://` and the scheme ignoring case.
 - The tests are Adam's: no step writes them. Some of his tests may fix the old behaviour (for example the double question): if one fails, I tell Javier and Adam, I do not edit it.
@@ -29,7 +29,7 @@ Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before i
   - F-06: in `onNewPatient`, `table.clearSelection()` runs with `restoring = true`, so the listener does not ask a second time.
   - F-07: `changeRow` does nothing when the selected row is still the shown one (dragging away and back no longer reloads the form).
   - F-08: *Back* asks with `confirmDiscard()` and leaves only if the user accepts.
-- [ ] **3. F-09, F-10 (`IU_ManagePatients`).**
+- [x] **3. F-09, F-10 (`IU_ManagePatients`).** Commit 8fc19fd.
   - F-09: `lblStatus` goes in `BorderLayout.CENTER` of the footer and wraps its text in lines (HTML in the label with the width of the free space), so that a long error is read whole and does not go under *Back*.
   - F-10: `btnSearch` loses its mnemonic; the label keeps Alt+H.
 - [ ] **4. R-02 (server).** `InMemoryPatientRepository.findByIdentifier` and the check "The identifier cannot be changed" in `PatientService` compare the identifiers ignoring case, all the spaces and `-` (`HC 0000001`, `HC-0000001` and `hc0000001` are the same patient). The identifier is saved as it was typed.
