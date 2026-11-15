@@ -60,6 +60,16 @@ public class PatientService implements IPatientService {
         this(new InMemoryPatientRepository(), roleManagementService, auditRecorder);
     }
 
+    /**
+     * Loads three invented example patients, only if the system starts with no patients at all. It is called when the
+     * program starts, not by a user, so it does not need a permission and it is not registered in the audit log.
+     */
+    public void loadSeedData() {
+        if (patients.search("").isEmpty()) {
+            PatientSeedData.patients().forEach(this::saveNew);
+        }
+    }
+
     @Override
     public List<Patient> searchPatients(String requester, String filters) throws AccessDeniedException {
         checkPermission(requester, PATIENTS);
