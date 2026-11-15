@@ -1,5 +1,6 @@
 package es.uclm.esi.iso2.server.access.integration;
 
+import es.uclm.esi.iso2.common.access.contracts.IAuthenticatorSystem;
 import java.util.Map;
 
 /** Simulates the corporate SSO (D-016). The test users are the ones agreed in #13. */
@@ -14,5 +15,11 @@ public class AuthenticatorSystemSimulator implements IAuthenticatorSystem {
     @Override
     public boolean validateCredentials(String username, String password) {
         return username != null && password != null && password.equals(credentials.get(username));
+    }
+
+    /** The simulated SSO always answers. */
+    @Override
+    public boolean ping() {
+        return true;
     }
 }
