@@ -427,8 +427,9 @@ class IU_ManageIntegrationsTest {
         }
 
         @ParameterizedTest(name = "[{index}] {0}")
-        @ValueSource(strings = {"http://", "https://", "http://sso.hospital.test", "https://sso.hospital.test:8443/api"})
-        @DisplayName("TC20C-17 An endpoint that starts with http:// or https:// is accepted in real mode")
+        @ValueSource(strings = {"http://sso.hospital.test", "https://sso.hospital.test:8443/api",
+                "HTTP://sso.hospital.test", "Https://sso.hospital.test"})
+        @DisplayName("TC20C-17 An endpoint with http:// or https:// (any case) and a host is accepted in real mode")
         void validEndpointInRealMode(String value) {
             // Arrange
             IU_ManageIntegrations screen = open();
@@ -446,7 +447,7 @@ class IU_ManageIntegrationsTest {
         }
 
         @ParameterizedTest(name = "[{index}] {0}")
-        @ValueSource(strings = {"ftp://sso.hospital.test", "sso.hospital.test", "HTTP://sso.hospital.test",
+        @ValueSource(strings = {"ftp://sso.hospital.test", "sso.hospital.test",
                 "http:/sso.hospital.test", "https:sso.hospital.test", "httpx://sso"})
         @DisplayName("TC20C-18 Any other endpoint is an error in real mode, and nothing is asked or sent")
         void invalidEndpointInRealMode(String value) {
@@ -461,6 +462,25 @@ class IU_ManageIntegrationsTest {
             // Assert
             assertAll(
                     () -> assertEquals("⚠ The endpoint must start with http:// or https://.", Screen.status(screen)),
+                    () -> assertTrue(questions.isEmpty()),
+                    () -> assertTrue(service.requests().isEmpty()));
+        }
+
+        @ParameterizedTest(name = "[{index}] {0}")
+        @ValueSource(strings = {"http://", "https://", "HTTPS://", "http://:8443", "http:///path", "http://user@"})
+        @DisplayName("TC20C-17 An endpoint with no host after http:// or https:// is an error in real mode, and nothing is asked or sent")
+        void endpointWithoutHostInRealMode(String value) {
+            // Arrange
+            IU_ManageIntegrations screen = open();
+            endpoint(screen).setText(value);
+            Screen.radio(screen, "Real").doClick();
+
+            // Act
+            save(screen);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals("⚠ The endpoint needs a host after http:// or https://.", Screen.status(screen)),
                     () -> assertTrue(questions.isEmpty()),
                     () -> assertTrue(service.requests().isEmpty()));
         }

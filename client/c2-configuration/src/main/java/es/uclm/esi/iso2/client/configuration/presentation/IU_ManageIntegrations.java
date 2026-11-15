@@ -20,6 +20,7 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -54,6 +55,8 @@ public class IU_ManageIntegrations extends JPanel {
     /** Dark amber, readable on white: the colour of the word SIMULATED (it is always a word, not only a colour). */
     private static final Color SIMULATED_COLOR = new Color(0x8A5A00);
     private static final String SIMULATED_LINE = "SIMULATED: no real system is contacted";
+    private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
     private static final String UNSAVED_LINE = "Unsaved changes: save or revert to test the connection";
     private static final int MODE_COLUMN = 1;
 
@@ -327,8 +330,13 @@ public class IU_ManageIntegrations extends JPanel {
         List<String> errors = new ArrayList<>();
         if (endpoint.isEmpty() && mode == IntegrationMode.REAL) {
             errors.add("The endpoint is required in real mode");
-        } else if (!endpoint.isEmpty() && !endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
-            errors.add("The endpoint must start with http:// or https://");
+        } else if (!endpoint.isEmpty()) {
+            String lower = endpoint.toLowerCase(Locale.ROOT);
+            if (!lower.startsWith(HTTP) && !lower.startsWith(HTTPS)) {
+                errors.add("The endpoint must start with http:// or https://");
+            } else if (!hasHost(lower.substring(lower.startsWith(HTTP) ? HTTP.length() : HTTPS.length()))) {
+                errors.add("The endpoint needs a host after http:// or https://");
+            }
         }
         Map<String, String> settings = readSettings(errors);
         if (!errors.isEmpty()) {
@@ -392,6 +400,25 @@ public class IU_ManageIntegrations extends JPanel {
             return "Disable the integration with " + name + "?";
         }
         return toReal ? "Switch " + name + " to real mode?" : null;
+    }
+
+    /**
+     * Tells whether the text after {@code http://} or {@code https://} starts with a host: the part before the first
+     * {@code /}, {@code ?} or {@code #}, without a user ({@code user@}) and without a port ({@code :8443}), is not
+     * empty. It is the same rule as the server (R-05).
+     */
+    private static boolean hasHost(String afterScheme) {
+        int end = afterScheme.length();
+        for (char separator : new char[] {'/', '?', '#'}) {
+            int index = afterScheme.indexOf(separator);
+            if (index >= 0 && index < end) {
+                end = index;
+            }
+        }
+        String authority = afterScheme.substring(0, end);
+        authority = authority.substring(authority.lastIndexOf('@') + 1);
+        int colon = authority.indexOf(':');
+        return !(colon >= 0 ? authority.substring(0, colon) : authority).isBlank();
     }
 
     private static String joined(List<String> errors) {
