@@ -28,9 +28,9 @@
 
 ## Steps
 Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before it (or with the exception of Q1).
-- [ ] **1. Plan.** This file, committed with the approval of Javier.
+- [x] **1. Plan.** This file, committed with the approval of Javier. Commit 3542caa.
 - [ ] **2. Rule of the endpoint in the screen** (`IU_ManageIntegrations`).
-- [ ] **3. Versions** (Q2).
+- [x] **3. Versions** (Q2). Commit 9512767.
 - [ ] **4. Hand over.** State for Adam, hashes here, push only when Javier asks; pull request `Closes #124`.
 
 ## State for Adam
