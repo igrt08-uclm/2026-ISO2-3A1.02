@@ -94,7 +94,7 @@ The screen is a `JPanel`, so that Adam's tests can create it without a display. 
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here).
 - [x] 1. This plan (`docs(UC20): plan for the client part (#42)`). - 07b362d.
 - [x] 2. Poms: versions of `client-c2-configuration` and `client-c1-access` (Q5). - a1bd3d5.
-- [ ] 3. `IU_ManageIntegrations`, the display: table of the four integrations, the form of the selected one, "SIMULATED" in bold amber and the line above the form, *Back*, and the denied access (Q7, Q9, Q10, Q12).
+- [x] 3. `IU_ManageIntegrations`, the display: table of the four integrations, the form of the selected one, "SIMULATED" in bold amber and the line above the form, *Back*, and the denied access (Q7, Q9, Q10, Q12). - a966bbf.
 - [ ] 4. `IU_ManageIntegrations`, *Save*: reading of the settings, validation in the client, confirmation, save and messages (Q1, Q3, Q8, Q12).
 - [ ] 5. `IU_ManageIntegrations`, *Test connection* and *Revert*: the "Unsaved changes" line, the button disabled while there are changes, and the result of the test (Q2, Q11, Q12).
 - [ ] 6. `IU_Welcome` (button) and `Main` (service, seed data, navigation) (Q13).
@@ -114,6 +114,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3 (`IU_ManageIntegrations`, the display, in `client/c2-configuration`)
+- **Next step:** step 4 (*Save* in `IU_ManageIntegrations`: reading of the settings, validation, confirmation and messages)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
