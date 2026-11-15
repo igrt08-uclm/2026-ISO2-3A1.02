@@ -1,0 +1,65 @@
+# Plan – Patch of C1 1.2.2 (#112)
+
+| | |
+|---|---|
+| **Issue** | #112 *Patch of C1: permission CONFIGURE_INTEGRATIONS, IAuthenticatorSystem and hasPermission in common (C1 v1.2.2)* · branch `feature/C1-patch-1.2.2` (created by Javier from `develop`, 15/11/2026) |
+| **Use case** | none: it is a PATCH of C1 that UC20 needs (#43 *UC20 – Server (C2 v1.1.0)*, plan `doc/plans/UC20-server.md`) |
+| **Rule** | D-036: a finished component is changed in its own branch and pull request, approved by its owner (Ignacio). C1 `1.2.2`; `common` is already `1.4.0-SNAPSHOT` (#113) |
+| **Specification** | #112, D-036, #43 (comment of 13/11/2026 and its answers) |
+| **Design** | `doc/design/C2-server-design.png` (`IAuthenticatorSystem`, `IIntegrationManagementService`) · contracts: section 6 of #33 *C2. Configuration and integrations* and of #8 *C1. Access and security* |
+| **Plan approved by** | pending (Javier) |
+
+## Decisions already taken
+- Ignacio, owner of C1, approved the patch in #112 on 15/11/2026 (D-036). Marcos agreed in #43 with `CONFIGURE_INTEGRATIONS` and `ping()`.
+- The patch does not add a use case and does not change the behaviour of C1: it is a PATCH.
+- The tests are Adam's. This patch only adjusts, with Javier's approval, the tests that stop compiling or that check the exact list of permissions (the same as in #109).
+- The branch is kept apart from UC20 so that Ignacio reviews C1 alone; UC20-server brings it from `develop` once it is merged.
+
+## Questions and answers
+Each one has a proposal. Q1 to Q5 were decided on 14/11/2026 in the plan of UC20-server (Q3, Q2, Q13, Q11, Q15 and Q16 there); Q6 and Q7 are open.
+- **Q1:** C2 cannot depend on the module `server-c1-access`, and `IAuthenticatorSystem` is in it. **Proposal:** move it with `git mv` to `common`, package `es.uclm.esi.iso2.common.access.contracts` (as `IAuditRecorder`), and add `boolean ping()` to it and to `AuthenticatorSystemSimulator` (it returns `true`). The `import` changes in `AuthenticationService`, in the simulator and in the test double `SpyAuthenticatorSystem`. The real method of the interface is `validateCredentials`, not `authenticate` as the design says (the code wins, rule 11). **A:** approved (Javier, 14/11/2026)
+- **Q2:** New permission `CONFIGURE_INTEGRATIONS`, given to the system administrator (`InMemoryPermissionRepository`, `InMemoryRoleRepository`). **A:** approved (Javier, 14/11/2026; Ignacio, 15/11/2026)
+- **Q3:** The permission check of UC17 is private in `SystemParameterService` and Javier does not want to copy it nor to change UC17. **Proposal:** `IRoleManagementService` gets a `default` method `boolean hasPermission(String username, String permissionCode)`: true if the user is in `getUsers()`, is active and has the permission in `getPermissions(username)`, the same rule as UC17. As it is `default`, `RoleManagementService` and the two `FakeRoleManagementService` of the tests compile with no change. `SystemParameterService` is not touched. **A:** approved (Javier, 14/11/2026; Ignacio, 15/11/2026; David suggests in #112 that C2 uses it later in `SystemParameterService`)
+- **Q4:** Versions. **Proposal:** `server-c1-access` goes from `1.2.1-SNAPSHOT` to `1.2.2-SNAPSHOT` in `server/c1-access/pom.xml` and in the managed version of `pom.xml`. `client-c1-access` (`1.2.1-SNAPSHOT`) and `common` (`1.4.0-SNAPSHOT`) do not change in this patch. **A:** approved (Javier, 14/11/2026)
+- **Q5:** Tests of Adam that must be adjusted. **Proposal:** (a) `SpyAuthenticatorSystem`: the `import` and `ping()` returning what the wrapped system returns; (b) `InMemoryPermissionRepositoryTest`: the list now has 3 permissions (`MANAGE_ROLES`, `CONFIGURE_SYSTEM`, `CONFIGURE_INTEGRATIONS`), so the expected size changes from 2 to 3, the assertion of the third code is added and the name of the method and its `@DisplayName` say the three codes; (c) `InMemoryRoleRepositoryTest`: the row of `SYSTEM_ADMINISTRATOR` becomes `MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS`. Nothing else is changed and no test is written; Adam is told. **A:** approved for the values and the double (Javier, 14/11/2026); the new name of the method and of the `@DisplayName` in (b) is part of this plan and needs the approval of Javier.
+- **Q6 (open, for Meeting 8):** with the abstract `ping()`, 3 tests of Adam in `AuthenticationServiceTest` (lines about 147, 167 and 187) stop compiling: they use lambdas `(u, p) -> true`, and with two abstract methods the interface is not functional. **Option 1 (proposal):** `ping()` is a `default` method that returns `true`: the 3 tests compile with no change and the simulator and the test double override it. Risk: a future real adapter could forget to override it and always answer OK; today everything is simulated (A5) and the Javadoc says it. **Option 2:** `ping()` stays abstract and the 3 tests build the double in another way (for example an anonymous class), with no expected value changed and with the approval of Javier and Adam. **A:** Javier asks in Meeting 8 (15/11/2026)
+- **Q7 (open):** What `hasPermission` answers in the odd cases. **Proposal:** `false` (no exception) if the username is `null`, unknown or inactive, or if the user does not have the permission, as `canConfigure` does in UC17; the denied access is registered by the service that calls it, not by this method. **A:** …
+
+## Files
+| File | Action | What |
+|---|---|---|
+| `server/c1-access/.../server/access/integration/IAuthenticatorSystem.java` → `common/.../common/access/contracts/IAuthenticatorSystem.java` | move (`git mv`) | new package and `boolean ping()` (Q1, Q6), with Javadoc |
+| `server/c1-access/.../integration/AuthenticatorSystemSimulator.java` | change | the `import` and `ping()` (Q1) |
+| `server/c1-access/.../service/AuthenticationService.java` | change | only the `import` |
+| `server/c1-access/src/test/.../service/SpyAuthenticatorSystem.java` | change | the `import` and `ping()` (Q5a) |
+| `server/c1-access/.../persistence/InMemoryPermissionRepository.java` | change | the permission `CONFIGURE_INTEGRATIONS` (Q2) |
+| `server/c1-access/.../persistence/InMemoryRoleRepository.java` | change | the administrator role gets it |
+| `server/c1-access/src/test/.../InMemoryPermissionRepositoryTest.java`, `InMemoryRoleRepositoryTest.java` | change | the expected permissions (Q5b, Q5c) |
+| `common/.../common/access/contracts/IRoleManagementService.java` | change | the `default` method `hasPermission`, with Javadoc (Q3, Q7) |
+| `server/c1-access/pom.xml`, `pom.xml` | change | `server-c1-access` `1.2.2-SNAPSHOT` (Q4) |
+| `agents/architecture.md` | change | the version of `server-c1-access` and `IAuthenticatorSystem` in `common` |
+| `doc/plans/C1-patch-1.2.2.md` | create/update | this plan |
+
+No file of C2 or of the client changes in this patch. The code of steps 2 to 4 was already started in `feature/UC20-server` and was saved with `git stash` ("UC20 step 2 parked", `stash@{0}`); it is recovered here with `git stash pop --index` only after this plan is approved.
+
+## Steps
+Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true`, with the same tests; no test is written).
+- [ ] 1. This plan (`docs(C1): plan of the patch 1.2.2 (#112)`).
+- [ ] 2. `IAuthenticatorSystem` moves to `common` with `ping()`, and the version `1.2.2-SNAPSHOT` (Q1, Q4, Q5a, Q6). Needs Q6 answered.
+- [ ] 3. Permission `CONFIGURE_INTEGRATIONS` for the administrator and the two expected lists (Q2, Q5b, Q5c).
+- [ ] 4. `hasPermission` as a `default` method of `IRoleManagementService` (Q3, Q7).
+- [ ] 5. `agents/architecture.md`.
+- [ ] 6. Hand the branch over to Adam (tests of `hasPermission`, of `ping()` and of the lists of permissions), who opens the pull request (`Closes #112`) for Ignacio to approve (D-036); close only with his tests green and the coverage check passing in `common` and in `server-c1-access`.
+
+## Verification
+- [ ] Every item of the checklist of #112 is done.
+- [ ] No class of C2 and no class of the client changes; `SystemParameterService` is not touched.
+- [ ] The login keeps working with the simulated SSO (the tests of `AuthenticationService` pass).
+- [ ] `mvn -B verify` is green with Adam's tests (the coverage check included).
+- [ ] The CI of the pull request is green and Ignacio approved it.
+
+## Status
+- **In progress:** nothing (this plan waits for the approval of Javier and for the answer to Q6)
+- **Next step:** Javier approves the plan and answers Q6 in Meeting 8; then `git stash pop --index` and step 2
+- **Open questions:** Q6, Q7
+- **Last update:** 15/11/2026, Javier
