@@ -61,10 +61,11 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 2. The enums and the data classes of the integrations in `common` (Q5). - 536a556. The map of settings is copied into an unmodifiable `LinkedHashMap`, which keeps the order of the lines and accepts empty values, so the validation can report them.
 - [x] 3. The contract `IIntegrationManagementService` in `common` (Q4). - 6d98db8. `configureIntegration` returns the saved configuration, with its status (Javier, 15/11/2026), a small difference with the diagram, which has `void`: Design has to reflect it.
 - [x] 4. Version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators (Q6, Q11). - 64ede6d. The managed version of `client-c2-configuration` does not change here: it is for UC20-client.
-- [ ] 5. `IntegrationManagementService`: permission with `hasPermission`, `getIntegrations`, `getIntegration`, validation, `configureIntegration` and audit (Q8, Q9, Q12, Q17). Needs the patch of C1 merged and `develop` brought to this branch.
-- [ ] 6. `testConnection` and `loadSeedData()` (Q7, Q10). It uses `ping()` of the SSO, so it also needs the patch.
-- [ ] 7. `agents/architecture.md`.
-- [ ] 8. Hand the branch over to Adam (tests of UC20-server), who opens the pull request (`Closes #43`); close only with his tests green and the coverage check passing.
+- [x] 5. `IntegrationManagementService`: permission with `hasPermission`, `getIntegrations`, `getIntegration`, validation, `configureIntegration`, audit, `testConnection` and `loadSeedData()` (Q7 to Q10, Q12, Q17) - 8b11d74. Steps 5 and 6 of the first plan are one step, as Javier decided on 15/11/2026, so that no temporary `testConnection` is needed. `develop` with the patch of C1 was brought to this branch in `a096583` (see the note below). Decisions of Javier on 15/11/2026: `system = null` in `getIntegration` and `testConnection` throws `IllegalArgumentException("The system is required")`; an integration that is not in the store gives `null` and the test says "integration not configured"; and the texts of the validation errors are the ones listed in the commit. The endpoint is stripped of spaces before it is checked and saved (a detail of the implementation). Checked roughly with a throwaway program outside the repo; no test was written.
+- [ ] 6. `agents/architecture.md`.
+- [ ] 7. Hand the branch over to Adam (tests of UC20-server), who opens the pull request (`Closes #43`); close only with his tests green and the coverage check passing.
+
+**Note on the merge of `develop` (15/11/2026):** the commit `7b7ea7c` ("plan approved, step 2 parked") took with it, by mistake, the move of `IAuthenticatorSystem` that was staged at that moment, so this branch had that file in `common` with the old package. When `develop` was merged (`a096583`) it conflicted with the good version of the patch; the conflict was resolved by keeping the file of `develop`, which is now identical to it. History was not rewritten.
 
 ## Verification
 - [ ] Every acceptance criterion of #43 is checked: each external system is accessed through its own interface with a simulated implementation; changing the settings or the mode is checked against the permissions, validated and registered in the audit log; the interfaces match #33 as changed in Q4.
@@ -75,6 +76,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing (steps 5 and 6 wait for the patch of C1, #112, merged into `develop`)
-- **Next step:** when the patch of C1 is merged: bring `develop` to this branch (merge, Javier approves it) and do step 5 (`IntegrationManagementService`, using `hasPermission` and the `IAuthenticatorSystem` of `common`)
+- **Next step:** step 6 (`agents/architecture.md`) and then step 7 (hand the branch over to Adam; push when Javier asks)
 - **Open questions:** Q18
 - **Last update:** 15/11/2026, Javier
