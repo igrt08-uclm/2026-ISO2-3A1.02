@@ -287,8 +287,12 @@ public class SystemParameterService implements ISystemParameterService {
         requireText(errors, testType.getModality(), "The modality");
         requireText(errors, testType.getRoom(), "The room");
         requireText(errors, testType.getPriority(), "The priority");
-        if (!blank(testType.getPriority()) && priorities.findById(testType.getPriority()) == null) {
+        Priority priority = blank(testType.getPriority()) ? null : priorities.findById(testType.getPriority());
+        if (!blank(testType.getPriority()) && priority == null) {
             errors.add("The priority " + testType.getPriority() + " does not exist");
+        } else if (priority != null && !priority.isActive() && !blank(testType.getId())
+                && testTypes.findById(testType.getId()) == null) {
+            errors.add("The priority " + testType.getPriority() + " is deactivated");
         }
         if (testType.getDurationMinutes() <= 0) {
             errors.add("The duration must be greater than zero");
