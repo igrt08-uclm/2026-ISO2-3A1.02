@@ -34,10 +34,10 @@
 Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before it. **The build is only green after Adam pushes his updated tests to this branch**: until then, steps 2 and 3 are written and checked with the tests of Adam that do not change, and they are committed when his tests are in the branch (`git pull --ff-only` first).
 
 - [x] **1. Plan.** This file, committed with the approval of Javier. Commit fa3a2c3.
-- [ ] **2. R-05 in the server** (`IntegrationManagementService`).
-- [ ] **3. F-20** (`SystemParameterService`).
+- [x] **2. R-05 in the server** (`IntegrationManagementService`). Commit 57d150e.
+- [x] **3. F-20** (`SystemParameterService`). Commit 3d086e0.
 - [x] **4. Versions** (poms and `agents/architecture.md`, Q4). Commit d7c93bf.
 - [ ] **5. Hand over.** State for Adam below, the hash of each step here, and the push only when Javier asks (rule 8). The pull request (`Closes #123`) is opened by whoever Javier says.
 
 ## State for Adam
-**In progress (15/11/2026):** the code of steps 2 (R-05) and 3 (F-20) is written and checked: with it, the only tests that fail are TC20S-17 (`endpointThatIsOnlyThePrefix`, 2 cases) and `deactivatedPriorityIsAccepted`, the two that Adam updates. It is kept outside the repository (as two patch files of the agent) and is committed as soon as Adam pushes his tests to this branch (`git pull --ff-only`, apply, build, commit). Step 4 (versions) was done first because it does not depend on the tests.
+**Done by Implementation (15/11/2026):** R-05 (57d150e) and F-20 (3d086e0) are pushed. **Exception approved by Javier:** they were pushed before the tests of Adam, so the build is red only in TC20S-17 (`endpointThatIsOnlyThePrefix`, 2 cases) and `deactivatedPriorityIsAccepted` (checked: every other module and test passes). **Adam:** update those two tests to the new rules (#123), push to this branch and open the pull request to `develop` with `Closes #123`. TC20C-17 of the screen is not changed (Q1).
