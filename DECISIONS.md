@@ -397,7 +397,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Status:** Decided by David on 12/11/2026, after Ismael's answer; approved in the review of this pull request.
 
 ## D-036 · Patches of C1 for C2 and C3, and how a finished component is changed
-**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — (approved by Ignacio in the issues) · **Issues:** #40, #109, #112
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 8](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-8) · **Time in the recording:** 0:01:41–0:04:53 · **Issues:** #40, #109, #112
 
 - **Context:** C2 and C3 need changes in C1, which was finished in Iteration 1 (v0.1.0): new permissions, and interfaces of C1 that other components must use. By D-032, C2 cannot depend on the module of C1, so those interfaces have to be in `common`. Section 13.6 of the theory report does not say which version goes up when a component needs a change in a finished one.
 - **Decision:**
@@ -408,4 +408,4 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** C2 depending on the module of C1, which D-032 rules out; or copying the interfaces in each component, which duplicates code (Annex A, item Q).
 - **Reason:** The components only share contracts through `common`, and the owner of a finished component checks every change to it (section 14.4 of the report). A patch in its own pull request is easier to review than inside the pull request of another component, and it is not delayed if that one is.
 - **Consequences:** `common` 1.4.0-SNAPSHOT; agents/components.md and the page Traceability and releases are updated.
-- **Status:** Patches approved by Ignacio, owner of C1, in #40 (13/11/2026) and #112 (15/11/2026); written by David.
+- **Status:** Patches approved by Ignacio, owner of C1, in #40 (13/11/2026) and #112 (15/11/2026), and by the team in Meeting 8 (15/11/2026).
