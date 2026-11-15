@@ -74,7 +74,7 @@ Inside each module, every component has its own package, for example `es.uclm.es
   - Use cases: `feature/UCxx-server` and `feature/UCxx-client`
   - Other tasks: `feature/short-description`
   - Fixes: `bugfix/…`; releases: `release/x.y.z`; urgent fixes: `hotfix/x.y.z`
-- **Pull requests** need a green build and the approval of a member who is not the author (D-001). The build fails below 80 % of line coverage or 70 % of branch coverage (JaCoCo, D-033). The review checklist is in the [pull request template](.github/pull_request_template.md).
+- **Pull requests** need a green build and the approval of a member who is not the author (D-001); the coordinator may approve his own (D-038). The build fails below 80 % of line coverage or 70 % of branch coverage (JaCoCo, D-033). The review checklist is in the [pull request template](.github/pull_request_template.md).
 - **Versions** follow [Semantic Versioning 2.0.0](https://semver.org/). The product goes from 0.1.0 to 1.0.0, one MINOR per iteration, and every release is an annotated tag on `main` (D-014). Each component has its own version, starting at 1.0.0 (D-032).
 - **Tasks** are GitHub issues: one per component, one per use case and one sub-issue per RADIT discipline, grouped in one milestone per iteration.
 - **Meetings** are recorded, and their minutes and decisions are published on the wiki.

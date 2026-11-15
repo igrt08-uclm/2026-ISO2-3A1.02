@@ -16,6 +16,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Adding the coordinator to the bypass list. Rejected, because the kickoff asks for an empty bypass list.
 - **Reason:** Keep the protection the course asks for without blocking every merge.
 - **Consequences:** Nobody, including the AI agent, commits directly to `main` or `develop`. The first pull request (the *Use case* issue template) could be merged.
+- **Status:** Updated by D-038 on 15/11/2026: the coordinator may approve and merge his own pull requests.
 
 ## D-002 · Functional requirements: 21 from the specification + login
 **Date:** 11/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 1](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-1) · **Time in the recording:** 0:06:11–0:08:28, 0:18:34–0:19:57
@@ -419,3 +420,13 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** Not every patient has a national ID, and one unique value is enough to detect a duplicate.
 - **Consequences:** Design adds `nationalId` to `Patient` (#114), and the contract of #47 is updated with it. UC12 is implemented this way (#46).
 - **Status:** Proposed by David (Requirements) in #47 on 07/11/2026 and agreed in #46 on 14/11/2026; approved in the review of this pull request.
+
+## D-038 · The coordinator may approve his own pull requests
+**Date:** 15/11/2026 · **Iteration:** 2 · **Minutes:** — · **Issues:** #34
+
+- **Context:** D-001 says that a pull request is approved by someone other than its author. Ignacio, the coordinator, merged three of his own pull requests without another approval (#7, #51 and the release #86, E-13). Ignacio asked Ismael whether this is admissible, and Ismael answered that it is, because he is the coordinator, and that it depends on the rules and assumptions that the team sets.
+- **Decision:** The coordinator may approve and merge his own pull requests, with the build green. He writes in the pull request that it is merged under D-038. Every other member still needs the approval of a member who is not the author (D-001). The bypass list of the ruleset stays empty (Kickoff, pp. 12–13): the coordinator merges as the owner of the repository.
+- **Alternatives:** Keeping D-001 strict for everyone, so that the coordinator also waits for another approval; or adding the coordinator to the bypass list, which D-001 already rejected.
+- **Reason:** Ismael accepts it for the coordinator, and the coordinator is who merges most pull requests and the releases, so waiting for another member blocks them. The other members keep the review of D-001.
+- **Consequences:** Updates D-001. E-13 is closed. The README says it.
+- **Status:** Decided by David on 15/11/2026, after Ismael's answer; approved in the review of this pull request.
