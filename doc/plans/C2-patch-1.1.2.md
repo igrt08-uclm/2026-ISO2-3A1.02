@@ -29,9 +29,9 @@
 ## Steps
 Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before it (or with the exception of Q1).
 - [x] **1. Plan.** This file, committed with the approval of Javier. Commit 3542caa.
-- [ ] **2. Rule of the endpoint in the screen** (`IU_ManageIntegrations`).
+- [x] **2. Rule of the endpoint in the screen** (`IU_ManageIntegrations`). Commit 763c436.
 - [x] **3. Versions** (Q2). Commit 9512767.
-- [ ] **4. Hand over.** State for Adam, hashes here, push only when Javier asks; pull request `Closes #124`.
+- [x] **4. Hand over.** Plan updated; the push and the pull request (`Closes #124`) wait for Javier. State for Adam, hashes here, push only when Javier asks; pull request `Closes #124`.
 
 ## State for Adam
-To be filled in step 4.
+Adam pushed TC20C-17 (with the new `endpointWithoutHostInRealMode`) and TC20C-18 in `f959112`, and the updated `doc/testing/defects-C1-C3.md`. The code of the screen is 763c436: the same rule and messages as `IntegrationManagementService` of #123. The whole build is green (checked on 15/11/2026). Nothing else to test by hand except: in real mode, `http://`, `https://`, `http://:8443`, `http:///path` and `http://user@` show "The endpoint needs a host after http:// or https://.", and `HTTP://sso.hospital.test` is accepted.
