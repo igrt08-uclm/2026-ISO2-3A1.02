@@ -6,6 +6,7 @@ import es.uclm.esi.iso2.common.configuration.domain.HospitalSystemType;
 import es.uclm.esi.iso2.common.configuration.domain.IntegrationConfiguration;
 import es.uclm.esi.iso2.common.configuration.domain.IntegrationMode;
 import es.uclm.esi.iso2.common.configuration.domain.IntegrationStatus;
+import es.uclm.esi.iso2.common.shared.ValidationException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -16,6 +17,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -70,7 +72,9 @@ public class IU_ManageIntegrations extends JPanel {
     private final JRadioButton rbReal = new JRadioButton("Real");
     private final JLabel lblSimulated = new JLabel(" ");
     private final JLabel lblStatus = new JLabel(" ");
+    private final JButton btnSave = new JButton("Save");
     private final JButton btnBack = new JButton("Back");
+    private final JPanel buttons = new JPanel(new FlowLayout(FlowLayout.TRAILING, 8, 0));
 
     private transient List<IntegrationConfiguration> entries = new ArrayList<>();
     private boolean denied;
@@ -96,6 +100,8 @@ public class IU_ManageIntegrations extends JPanel {
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
         lblSimulated.setFont(lblSimulated.getFont().deriveFont(Font.BOLD));
         lblSimulated.setForeground(SIMULATED_COLOR);
+        btnSave.setMnemonic('S');
+        btnSave.addActionListener(event -> onSaveConfiguration());
         btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> onBack.run());
 
@@ -200,6 +206,92 @@ public class IU_ManageIntegrations extends JPanel {
         chkEnabled.setEnabled(editable);
         rbSimulated.setEnabled(editable);
         rbReal.setEnabled(editable);
+        btnSave.setEnabled(editable);
+    }
+
+    /**
+     * Checks the form with the same rules as the server, asks to confirm a delicate change and saves the configuration of
+     * the selected integration. If anything is wrong, every error is shown together and nothing is sent.
+     */
+    private void onSaveConfiguration() {
+        IntegrationConfiguration selected = selectedEntry();
+        if (selected == null) {
+            return;
+        }
+        String endpoint = txtEndpoint.getText().strip();
+        IntegrationMode mode = rbReal.isSelected() ? IntegrationMode.REAL : IntegrationMode.SIMULATED;
+        List<String> errors = new ArrayList<>();
+        if (endpoint.isEmpty() && mode == IntegrationMode.REAL) {
+            errors.add("The endpoint is required in real mode");
+        } else if (!endpoint.isEmpty() && !endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+            errors.add("The endpoint must start with http:// or https://");
+        }
+        Map<String, String> settings = readSettings(errors);
+        if (!errors.isEmpty()) {
+            showOperationResultError(joined(errors));
+            return;
+        }
+        String question = confirmationQuestion(selected, mode, chkEnabled.isSelected());
+        if (question != null && !confirm.test(question)) {
+            lblStatus.setText(" ");
+            return;
+        }
+        try {
+            service.configureIntegration(requester, new IntegrationConfiguration(selected.getSystem(), endpoint,
+                    settings, chkEnabled.isSelected(), mode, selected.getStatus()));
+            showOperationResultSuccess("Integration " + systemName(selected.getSystem()) + " saved.");
+            load(selected.getSystem());
+        } catch (AccessDeniedException exception) {
+            accessDenied();
+        } catch (ValidationException exception) {
+            showOperationResultError(joined(exception.getErrors()));
+        }
+    }
+
+    /**
+     * Reads the text of the settings: one {@code key=value} per line, blank lines are ignored, and the key and the
+     * value lose their spaces. A line without {@code =}, with an empty key or with an empty value, and a key that is
+     * repeated, are added to {@code errors}. The order of the lines is kept.
+     */
+    private Map<String, String> readSettings(List<String> errors) {
+        Map<String, String> settings = new LinkedHashMap<>();
+        String[] lines = txtSettings.getText().split("\\R", -1);
+        for (int index = 0; index < lines.length; index++) {
+            String line = lines[index].strip();
+            if (line.isEmpty()) {
+                continue;
+            }
+            int separator = line.indexOf('=');
+            String key = separator < 0 ? "" : line.substring(0, separator).strip();
+            String value = separator < 0 ? "" : line.substring(separator + 1).strip();
+            if (key.isEmpty() || value.isEmpty()) {
+                errors.add("Line " + (index + 1) + ": use key=value");
+            } else if (settings.containsKey(key)) {
+                errors.add("The setting " + key + " is repeated");
+            } else {
+                settings.put(key, value);
+            }
+        }
+        return settings;
+    }
+
+    /** The question to accept before disabling an integration or switching it to real mode, or {@code null}. */
+    private static String confirmationQuestion(IntegrationConfiguration saved, IntegrationMode newMode,
+            boolean newEnabled) {
+        String name = systemName(saved.getSystem());
+        boolean disabling = saved.isEnabled() && !newEnabled;
+        boolean toReal = saved.getMode() != IntegrationMode.REAL && newMode == IntegrationMode.REAL;
+        if (disabling && toReal) {
+            return "Disable the integration with " + name + " and switch it to real mode?";
+        }
+        if (disabling) {
+            return "Disable the integration with " + name + "?";
+        }
+        return toReal ? "Switch " + name + " to real mode?" : null;
+    }
+
+    private static String joined(List<String> errors) {
+        return errors.stream().map(error -> error + ".").collect(Collectors.joining(" "));
     }
 
     private IntegrationConfiguration selectedEntry() {
@@ -256,6 +348,8 @@ public class IU_ManageIntegrations extends JPanel {
         addAt(panel, chkEnabled, 0, 5, 1, 12);
         addLabel(panel, "Settings (key=value, one per line)", txtSettings, 'G', 1, 1);
         addAt(panel, new JScrollPane(txtSettings), 1, 2, 1, 4, 3);
+        buttons.add(btnSave);
+        addAt(panel, buttons, 1, 5, 1, 12);
         return panel;
     }
 
