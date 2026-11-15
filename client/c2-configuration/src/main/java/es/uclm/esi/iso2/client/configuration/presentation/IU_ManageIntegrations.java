@@ -2,6 +2,7 @@ package es.uclm.esi.iso2.client.configuration.presentation;
 
 import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
 import es.uclm.esi.iso2.common.configuration.contracts.IIntegrationManagementService;
+import es.uclm.esi.iso2.common.configuration.domain.ConnectionTestResult;
 import es.uclm.esi.iso2.common.configuration.domain.HospitalSystemType;
 import es.uclm.esi.iso2.common.configuration.domain.IntegrationConfiguration;
 import es.uclm.esi.iso2.common.configuration.domain.IntegrationMode;
@@ -34,6 +35,8 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -51,6 +54,7 @@ public class IU_ManageIntegrations extends JPanel {
     /** Dark amber, readable on white: the colour of the word SIMULATED (it is always a word, not only a colour). */
     private static final Color SIMULATED_COLOR = new Color(0x8A5A00);
     private static final String SIMULATED_LINE = "SIMULATED: no real system is contacted";
+    private static final String UNSAVED_LINE = "Unsaved changes: save or revert to test the connection";
     private static final int MODE_COLUMN = 1;
 
     private final transient IIntegrationManagementService service;
@@ -71,13 +75,19 @@ public class IU_ManageIntegrations extends JPanel {
     private final JRadioButton rbSimulated = new JRadioButton("Simulated");
     private final JRadioButton rbReal = new JRadioButton("Real");
     private final JLabel lblSimulated = new JLabel(" ");
+    private final JLabel lblUnsaved = new JLabel(" ");
     private final JLabel lblStatus = new JLabel(" ");
+    private final JButton btnRevert = new JButton("Revert");
+    private final JButton btnTest = new JButton("Test connection");
     private final JButton btnSave = new JButton("Save");
     private final JButton btnBack = new JButton("Back");
     private final JPanel buttons = new JPanel(new FlowLayout(FlowLayout.TRAILING, 8, 0));
 
     private transient List<IntegrationConfiguration> entries = new ArrayList<>();
     private boolean denied;
+    private boolean loading;
+    private boolean restoring;
+    private int shownRow = -1;
 
     /**
      * Creates the screen and reads the integrations from the server.
@@ -100,6 +110,10 @@ public class IU_ManageIntegrations extends JPanel {
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
         lblSimulated.setFont(lblSimulated.getFont().deriveFont(Font.BOLD));
         lblSimulated.setForeground(SIMULATED_COLOR);
+        btnRevert.setMnemonic('R');
+        btnRevert.addActionListener(event -> showSelected());
+        btnTest.setMnemonic('T');
+        btnTest.addActionListener(event -> onTestConnection());
         btnSave.setMnemonic('S');
         btnSave.addActionListener(event -> onSaveConfiguration());
         btnBack.setMnemonic('B');
@@ -108,15 +122,18 @@ public class IU_ManageIntegrations extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setDefaultRenderer(Object.class, new SimulatedRenderer());
         table.getSelectionModel().addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting()) {
-                showSelected();
+            if (!event.getValueIsAdjusting() && !loading && !restoring) {
+                changeRow();
             }
         });
         ButtonGroup modes = new ButtonGroup();
         modes.add(rbSimulated);
         modes.add(rbReal);
-        rbSimulated.addActionListener(event -> updateSimulatedLine());
-        rbReal.addActionListener(event -> updateSimulatedLine());
+        rbSimulated.addActionListener(event -> formChanged());
+        rbReal.addActionListener(event -> formChanged());
+        chkEnabled.addActionListener(event -> updateControls());
+        txtEndpoint.getDocument().addDocumentListener(onChange(this::updateControls));
+        txtSettings.getDocument().addDocumentListener(onChange(this::updateControls));
         chkEnabled.setMnemonic('N');
         txtSettings.setLineWrap(false);
 
@@ -162,17 +179,100 @@ public class IU_ManageIntegrations extends JPanel {
             accessDenied();
             return;
         }
-        displayIntegrations(integrations);
-        int row = indexOf(toSelect);
-        if (row < 0 && !entries.isEmpty()) {
-            row = 0;
+        loading = true;
+        try {
+            displayIntegrations(integrations);
+            int row = indexOf(toSelect);
+            if (row < 0 && !entries.isEmpty()) {
+                row = 0;
+            }
+            if (row >= 0) {
+                table.setRowSelectionInterval(row, row);
+            } else {
+                table.clearSelection();
+            }
+        } finally {
+            loading = false;
         }
-        if (row >= 0) {
-            table.setRowSelectionInterval(row, row);
-        } else {
-            table.clearSelection();
-        }
+        shownRow = table.getSelectedRow();
         showSelected();
+    }
+
+    /**
+     * The user pressed another row. If the form has unsaved changes, it asks whether to discard them; if not, the
+     * selection goes back to the row it had, with its changes.
+     */
+    private void changeRow() {
+        int newRow = table.getSelectedRow();
+        if (newRow != shownRow && shownRow >= 0 && shownRow < entries.size()
+                && isDirty(entries.get(shownRow)) && !confirm.test("Discard the unsaved changes?")) {
+            restoring = true;
+            try {
+                table.setRowSelectionInterval(shownRow, shownRow);
+            } finally {
+                restoring = false;
+            }
+            return;
+        }
+        shownRow = newRow;
+        showSelected();
+    }
+
+    /** Tells whether the form differs from the saved configuration of the integration. */
+    private boolean isDirty(IntegrationConfiguration saved) {
+        return !txtEndpoint.getText().strip().equals(saved.getEndpoint())
+                || !txtSettings.getText().strip().equals(formatSettings(saved.getSettings()).strip())
+                || chkEnabled.isSelected() != saved.isEnabled()
+                || rbReal.isSelected() != (saved.getMode() == IntegrationMode.REAL);
+    }
+
+    private void formChanged() {
+        updateSimulatedLine();
+        updateControls();
+    }
+
+    private static DocumentListener onChange(Runnable action) {
+        return new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent event) {
+                action.run();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent event) {
+                action.run();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent event) {
+                action.run();
+            }
+        };
+    }
+
+    /** Tests the connection of the selected integration, as it is saved, and shows the result. */
+    private void onTestConnection() {
+        IntegrationConfiguration selected = selectedEntry();
+        if (selected == null) {
+            return;
+        }
+        try {
+            showTestResult(service.testConnection(requester, selected.getSystem()));
+        } catch (AccessDeniedException exception) {
+            accessDenied();
+        }
+    }
+
+    /** Shows the result of the connection test of the selected integration: green if it answered, red if not. */
+    public void showTestResult(ConnectionTestResult result) {
+        IntegrationConfiguration selected = selectedEntry();
+        String prefix = "Connection test of " + (selected == null ? "the system" : systemName(selected.getSystem()))
+                + ": ";
+        if (result.isSuccess()) {
+            showOperationResultSuccess(prefix + result.getMessage() + " (" + result.getResponseTimeMs() + " ms).");
+        } else {
+            showOperationResultError(prefix + result.getMessage() + ".");
+        }
     }
 
     /** The server says that the user does not have the permission: nothing can be done but go back. */
@@ -207,6 +307,10 @@ public class IU_ManageIntegrations extends JPanel {
         rbSimulated.setEnabled(editable);
         rbReal.setEnabled(editable);
         btnSave.setEnabled(editable);
+        boolean changed = editable && isDirty(selectedEntry());
+        btnTest.setEnabled(editable && !changed);
+        btnRevert.setEnabled(changed);
+        lblUnsaved.setText(changed ? UNSAVED_LINE : " ");
     }
 
     /**
@@ -348,7 +452,10 @@ public class IU_ManageIntegrations extends JPanel {
         addAt(panel, chkEnabled, 0, 5, 1, 12);
         addLabel(panel, "Settings (key=value, one per line)", txtSettings, 'G', 1, 1);
         addAt(panel, new JScrollPane(txtSettings), 1, 2, 1, 4, 3);
+        buttons.add(btnRevert);
+        buttons.add(btnTest);
         buttons.add(btnSave);
+        addAt(panel, lblUnsaved, 0, 6, 1, 12);
         addAt(panel, buttons, 1, 5, 1, 12);
         return panel;
     }
