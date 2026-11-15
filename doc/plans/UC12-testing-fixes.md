@@ -11,7 +11,7 @@
 **Batch 1 – today, to unblock #121 (David approves when it is pushed and the build is green):**
 F-06, F-07, F-08, F-09, F-10 (screen of the patients) and R-02, R-03, R-04 (rules of UC12, server and screen).
 
-**Batch 2 – also today (Javier, 15/11/2026: every finding of David and Adam is fixed today), a patch in its own branch:** R-05 and F-19 (C2) and the findings that Adam left to Implementation: F-11, F-12, F-14, F-16, F-17 and F-18.
+**Batch 2 – also today (Javier, 15/11/2026: every finding of David and Adam is fixed today), done in the same branch `feature/UC12-client` (Javier, 15/11/2026):** R-05 and F-19 (C2) and the findings that Adam left to Implementation: F-11, F-12, F-14, F-16, F-17 and F-18.
 
 **Findings decided by others (Q9):** F-13 (Marcos and Denis), F-15 (David) and F-20 (Ignacio and David) are fixed in batch 2 with the proposal of Q9; D-01 to D-03 are diagrams (Design, #114). R-01 needs no change (no fixed format).
 
@@ -49,13 +49,18 @@ Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before i
 
 - **Q9 (batch 2) – F-13, F-15, F-20:** F-13 audit `getPatient` and `modifyPatient` of an unknown id as `PATIENT_ACCESSED` (resource `PATIENT:<id>`); F-15 strip the keys and the values of the settings; F-20 reject a **new** test type with a deactivated priority ("The priority X is deactivated"; editing an old one keeps Q9 of UC17). **A:** approved as proposed (Javier, 15/11/2026); they are part of the patch of batch 2.
 
-## Batch 2 – steps (a new branch from `develop`, created by Javier)
-- [ ] **8.** Plan of this batch approved (the answers of Q2 to Q8) and the branch created by Javier.
-- [ ] **9. R-05, F-14, F-15 is not mine, F-16 (`IntegrationManagementService`).**
-- [ ] **10. F-17, F-18, F-19 (`IU_ManageIntegrations`).**
-- [ ] **11. F-11, F-12 (`PatientService`, `IPatientRepository`, `InMemoryPatientRepository`).**
-- [ ] **11b. F-13, F-15, F-20** as in Q9 (F-13 in `PatientService`, F-15 in `IntegrationManagementService`, F-20 in `SystemParameterService`).
-- [ ] **12. Hand over to Adam and, if Javier asks, push and open the pull request** (the title and the text are shown to Javier first).
+## Batch 2 – steps (same branch `feature/UC12-client`; Javier: the code must pass the existing tests, no test of Adam is changed)
+- [x] **8. F-14, F-15 (`IntegrationManagementService`).** Commit 347e4d0: the permission is checked before the system is required, and the keys and values of the settings are stripped.
+- [x] **9. F-17, F-18, F-19 (`IU_ManageIntegrations`).** Commit dc3571d: *Revert* clears the message, the table is disabled and ignores the clicks after a denial, a `null` endpoint counts as empty.
+- [x] **10. F-11 (`PatientService`).** The counter of the ids starts from the highest `P-nnnn` that the repository already has, so a service built with a repository with patients does not overwrite one. No change of the interface of the repository.
+- [ ] **11. Not done because an existing test of Adam requires the old behaviour** (nothing is changed; they stay open for the member who decides):
+  - R-05 (endpoint with host): TC20S-17 requires that `http://` alone is accepted.
+  - F-16 (`null` settings as an empty map): TC20S-22 requires `null`.
+  - F-20 (new test type with a deactivated priority): `deactivatedPriorityIsAccepted` requires that it is accepted.
+  - F-12 (one message for a blank identifier): TC12S-47 requires both messages.
+  - F-13 (audit of an unknown id): TC12S-44 and TC12S-50 require that nothing is audited.
+  - R-02 in the repository: TC12S-60 requires `findByIdentifier("HC 0000001")` to be `null` (done in the service instead).
+- [ ] **12. Push** (Javier asks) and the answer to David and Adam with the list of step 11.
 
 ## State for Adam
 **Batch 1 (branch `feature/UC12-client`, steps 2 to 6) – what to test again:**
