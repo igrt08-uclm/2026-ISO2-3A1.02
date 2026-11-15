@@ -20,7 +20,8 @@ public class IU_Welcome extends JPanel {
     private static final String ADMINISTRATOR_ROLE = "SYSTEM_ADMINISTRATOR";
     private static final String MANAGE_ROLES = "MANAGE_ROLES";
     private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
-    private static final int COLUMNS = 4;
+    private static final String CONFIGURE_INTEGRATIONS = "CONFIGURE_INTEGRATIONS";
+    private static final int COLUMNS = 5;
 
     public IU_Welcome(UserAccount user, Runnable onLogout) {
         this(user, onLogout, null);
@@ -50,6 +51,21 @@ public class IU_Welcome extends JPanel {
      */
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
             Runnable onManageRoles, Runnable onConfigureSystem) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Configure integrations</em> of UC20.
+     *
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructor)
+     * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em>; the button is only
+     *                                shown to a user with the permission {@code CONFIGURE_INTEGRATIONS}, and not at
+     *                                all if this is {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -81,7 +97,13 @@ public class IU_Welcome extends JPanel {
             btnConfigureSystem.addActionListener(event -> onConfigureSystem.run());
             addButton(btnConfigureSystem, 2);
         }
-        addButton(btnLogout, 3);
+        if (onConfigureIntegrations != null && hasPermission(permissions, CONFIGURE_INTEGRATIONS)) {
+            JButton btnConfigureIntegrations = new JButton("Configure integrations");
+            btnConfigureIntegrations.setMnemonic('I');
+            btnConfigureIntegrations.addActionListener(event -> onConfigureIntegrations.run());
+            addButton(btnConfigureIntegrations, 3);
+        }
+        addButton(btnLogout, 4);
     }
 
     private static boolean hasPermission(List<Permission> permissions, String code) {
