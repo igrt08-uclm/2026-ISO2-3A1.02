@@ -59,7 +59,7 @@ The files of C1 (move of `IAuthenticatorSystem`, `CONFIGURE_INTEGRATIONS`, `hasP
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here). The patch of C1 (#112) is **not** a step of this plan: it is done and merged first, in its own branch and pull request. Steps 5 and 6 need it merged into `develop`; steps 2, 3 and 4 do not.
 - [x] 1. This plan (`docs(UC20): plan for the server part (#43)`) - 84209c0.
 - [x] 2. The enums and the data classes of the integrations in `common` (Q5). - 536a556. The map of settings is copied into an unmodifiable `LinkedHashMap`, which keeps the order of the lines and accepts empty values, so the validation can report them.
-- [ ] 3. The contract `IIntegrationManagementService` in `common` (Q4).
+- [x] 3. The contract `IIntegrationManagementService` in `common` (Q4). - 6d98db8. `configureIntegration` returns the saved configuration, with its status (Javier, 15/11/2026), a small difference with the diagram, which has `void`: Design has to reflect it.
 - [ ] 4. Version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators (Q6, Q11).
 - [ ] 5. `IntegrationManagementService`: permission with `hasPermission`, `getIntegrations`, `getIntegration`, validation, `configureIntegration` and audit (Q8, Q9, Q12, Q17). Needs the patch of C1 merged and `develop` brought to this branch.
 - [ ] 6. `testConnection` and `loadSeedData()` (Q7, Q10). It uses `ping()` of the SSO, so it also needs the patch.
@@ -75,6 +75,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3 (the contract `IIntegrationManagementService` in `common`)
+- **Next step:** step 4 (version `1.1.0-SNAPSHOT` of `server-c2-configuration` and the gateways with their simulators)
 - **Open questions:** Q18
 - **Last update:** 15/11/2026, Javier
