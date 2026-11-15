@@ -53,7 +53,7 @@ Few questions, as Ignacio asked in Meeting 8 (E-19): all of them are answered, a
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here).
 - [x] 1. This plan (`docs(UC12): plan for the server part (#46)`). - 3cd2139.
 - [x] 2. The module `server/c3-patients` (poms), empty, and its managed version (Q1). - c05e1fa.
-- [ ] 3. `Sex`, `Patient`, `DuplicatePatientException` and the contract `IPatientService` in `common` (Q2, Q3, Q4).
+- [x] 3. `Sex`, `Patient`, `DuplicatePatientException` and the contract `IPatientService` in `common` (Q2, Q3, Q4). - 3841345.
 - [ ] 4. `IPatientRepository` and `InMemoryPatientRepository` (Q9, Q7 search).
 - [ ] 5. `PatientService`: permission, validation, `registerPatient`, `modifyPatient`, `getPatient`, `searchPatients` and the audit (Q4 to Q8).
 - [ ] 6. `loadSeedData()` and the three invented patients (Q10).
@@ -69,6 +69,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3 (`Sex`, `Patient`, `DuplicatePatientException` and `IPatientService` in `common`)
+- **Next step:** step 4 (`IPatientRepository` and `InMemoryPatientRepository`)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
