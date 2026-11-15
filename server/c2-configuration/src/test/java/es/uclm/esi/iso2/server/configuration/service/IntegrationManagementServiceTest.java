@@ -46,6 +46,7 @@ class IntegrationManagementServiceTest {
     private static final String CHANGED = "INTEGRATION_CHANGED";
     private static final String ENDPOINT_REQUIRED = "The endpoint is required in real mode";
     private static final String ENDPOINT_PREFIX = "The endpoint must start with http:// or https://";
+    private static final String ENDPOINT_HOST = "The endpoint needs a host after http:// or https://";
 
     private RecordingAuditRecorder audit;
     private FakeHospitalSystem sso;
@@ -371,9 +372,9 @@ class IntegrationManagementServiceTest {
         }
 
         @ParameterizedTest(name = "\"{0}\"")
-        @ValueSource(strings = {"http://", "https://"})
-        @DisplayName("TC20S-17: BV, an endpoint that is only the prefix is accepted, in real and in simulated mode")
-        void endpointThatIsOnlyThePrefix(String endpoint) throws Exception {
+        @ValueSource(strings = {"HTTPS://ehr.hospital.test", "Http://ehr.hospital.test", "http://ehr.hospital.test:8443/api"})
+        @DisplayName("TC20S-17: the scheme ignores case and a host with a port and a path is accepted, saved as written")
+        void endpointWithHostIsAccepted(String endpoint) throws Exception {
             // Act
             IntegrationConfiguration realSaved = service.configureIntegration(ADMIN,
                     withEndpoint(endpoint, IntegrationMode.REAL));
@@ -383,7 +384,8 @@ class IntegrationManagementServiceTest {
             // Assert
             assertAll(
                     () -> assertEquals(endpoint, realSaved.getEndpoint()),
-                    () -> assertEquals(endpoint, simulatedSaved.getEndpoint()));
+                    () -> assertEquals(endpoint, simulatedSaved.getEndpoint()),
+                    () -> assertEquals(endpoint, service.getIntegration(ADMIN, HospitalSystemType.EHR).getEndpoint()));
         }
 
         @Test
@@ -547,6 +549,18 @@ class IntegrationManagementServiceTest {
                     () -> assertEquals(List.of(ENDPOINT_PREFIX),
                             errorsOf(withEndpoint(endpoint, IntegrationMode.REAL))),
                     () -> assertEquals(List.of(ENDPOINT_PREFIX),
+                            errorsOf(withEndpoint(endpoint, IntegrationMode.SIMULATED))));
+        }
+
+        @ParameterizedTest(name = "endpoint \"{0}\"")
+        @ValueSource(strings = {"http://", "https://", "HTTPS://", "http://:8443", "http:///path", "http://user@",
+                "  https://  "})
+        @DisplayName("TC20S-17: BV, an endpoint with no host after http:// or https:// is rejected in both modes")
+        void endpointWithoutHostIsRejected(String endpoint) {
+            assertAll(
+                    () -> assertEquals(List.of(ENDPOINT_HOST),
+                            errorsOf(withEndpoint(endpoint, IntegrationMode.REAL))),
+                    () -> assertEquals(List.of(ENDPOINT_HOST),
                             errorsOf(withEndpoint(endpoint, IntegrationMode.SIMULATED))));
         }
 

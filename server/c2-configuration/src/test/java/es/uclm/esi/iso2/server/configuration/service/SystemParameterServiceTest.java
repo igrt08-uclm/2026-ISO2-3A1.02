@@ -395,7 +395,7 @@ class SystemParameterServiceTest {
         }
 
         @Test
-        @DisplayName("TC17S-34: a priority that exists but is deactivated is still accepted in create and in update")
+        @DisplayName("TC17S-34: an existing test type can still be updated with its deactivated priority (Q9)")
         void deactivatedPriorityIsAccepted() throws Exception {
             // Arrange
             saveUrgentPriority();
@@ -404,13 +404,46 @@ class SystemParameterServiceTest {
 
             // Act
             service.updateTestType(ADMIN, "CT-HEAD", testType("CT-HEAD", 30));
-            service.createTestType(ADMIN, testType("CT-NECK", 25));
 
             // Assert
             assertAll(
                     () -> assertEquals(30, service.getTestType(ADMIN, "CT-HEAD").getDurationMinutes()),
-                    () -> assertEquals("URGENT", service.getTestType(ADMIN, "CT-NECK").getPriority()),
+                    () -> assertEquals("URGENT", service.getTestType(ADMIN, "CT-HEAD").getPriority()),
                     () -> assertFalse(service.getPriorities(ADMIN).get(0).isActive()));
+        }
+
+        @Test
+        @DisplayName("TC17S-35: a new test type with a deactivated priority is rejected and nothing is saved (F-20)")
+        void newTestTypeWithDeactivatedPriorityIsRejected() throws Exception {
+            // Arrange
+            saveUrgentPriority();
+            service.deactivatePriority(ADMIN, "URGENT");
+            int auditEntriesBefore = audit.entries().size();
+
+            // Act
+            ValidationException error = assertThrows(ValidationException.class,
+                    () -> service.createTestType(ADMIN, testType("CT-NECK", 25)));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of("The priority URGENT is deactivated"), error.getErrors()),
+                    () -> assertTrue(service.getTestTypes(ADMIN).isEmpty()),
+                    () -> assertEquals(auditEntriesBefore, audit.entries().size()));
+        }
+
+        @Test
+        @DisplayName("TC17S-35: a new test type with another active priority is still accepted")
+        void newTestTypeWithActivePriorityIsAccepted() throws Exception {
+            // Arrange
+            saveUrgentPriority();
+            service.savePriority(ADMIN, new Priority("ROUTINE", "Routine", "", true));
+            service.deactivatePriority(ADMIN, "URGENT");
+
+            // Act
+            service.createTestType(ADMIN, testType("CT-NECK", 25, "ROUTINE"));
+
+            // Assert
+            assertEquals("ROUTINE", service.getTestType(ADMIN, "CT-NECK").getPriority());
         }
 
         @Test
