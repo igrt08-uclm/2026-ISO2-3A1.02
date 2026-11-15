@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>client-c2-configuration</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.2-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
