@@ -33,11 +33,11 @@
 ## Steps
 Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before it. **The build is only green after Adam pushes his updated tests to this branch**: until then, steps 2 and 3 are written and checked with the tests of Adam that do not change, and they are committed when his tests are in the branch (`git pull --ff-only` first).
 
-- [ ] **1. Plan.** This file, committed with the approval of Javier.
+- [x] **1. Plan.** This file, committed with the approval of Javier. Commit fa3a2c3.
 - [ ] **2. R-05 in the server** (`IntegrationManagementService`).
 - [ ] **3. F-20** (`SystemParameterService`).
-- [ ] **4. Versions** (poms and `agents/architecture.md`, Q4).
+- [x] **4. Versions** (poms and `agents/architecture.md`, Q4). Commit d7c93bf.
 - [ ] **5. Hand over.** State for Adam below, the hash of each step here, and the push only when Javier asks (rule 8). The pull request (`Closes #123`) is opened by whoever Javier says.
 
 ## State for Adam
-To be filled in step 5.
+**In progress (15/11/2026):** the code of steps 2 (R-05) and 3 (F-20) is written and checked: with it, the only tests that fail are TC20S-17 (`endpointThatIsOnlyThePrefix`, 2 cases) and `deactivatedPriorityIsAccepted`, the two that Adam updates. It is kept outside the repository (as two patch files of the agent) and is committed as soon as Adam pushes his tests to this branch (`git pull --ff-only`, apply, build, commit). Step 4 (versions) was done first because it does not depend on the tests.
