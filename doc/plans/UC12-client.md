@@ -84,8 +84,8 @@ The screen is a `JPanel`, so that Adam's tests can create it without a display. 
 
 ## Steps
 Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=true` until Adam's tests exist; no test is written here).
-- [x] 1. This plan (`docs(UC12): plan for the client part (#45)`). - see `git log --oneline -- doc/plans/UC12-client.md`.
-- [ ] 2. Poms: the module `client/c3-patients` and its managed version (Q1). The poms of `client-c1-access` wait for step 6.
+- [x] 1. This plan (`docs(UC12): plan for the client part (#45)`). - 3b23aa8.
+- [x] 2. Poms: the module `client/c3-patients` and its managed version (Q1). The poms of `client-c1-access` wait for step 6. - 0f9846d.
 - [ ] 3. `IU_ManagePatients`, the display: search box, table, form of the selected patient, the line with the number found, *Back* and the denied access (Q3, Q4, Q7).
 - [ ] 4. `IU_ManagePatients`, *Save* and *New patient*: reading of the form, validation in the client, register or modify, duplicate and messages (Q5, Q6, Q7).
 - [ ] 5. `IU_ManagePatients`, unsaved changes: the question before another row, *New patient* or *Search* (Q8).
@@ -106,6 +106,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 2 (the module `client/c3-patients`)
+- **Next step:** step 3 (`IU_ManagePatients`, the display)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
