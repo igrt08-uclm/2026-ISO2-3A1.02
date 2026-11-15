@@ -90,7 +90,7 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 - [x] 4. `IU_ManagePatients`, *Save* and *New patient*: reading of the form, validation in the client, register or modify, duplicate and messages (Q5, Q6, Q7). - ed7c678.
 - [x] 5. `IU_ManagePatients`, unsaved changes: the question before another row, *New patient* or *Search* (Q8). - 7048310. Checked roughly with a throwaway program outside the repo that presses the buttons with the real service (open, select, new, errors, register, duplicate, modify, the questions and the denied access); no test was written.
 - [x] 6. When the pull requests of UC20 (#118, #119) are merged into `develop`: bring `develop` to this branch (merge); `IU_Welcome` (button) and `Main` (service, seed data, navigation); the version `1.2.3-SNAPSHOT` and the dependencies of `client-c1-access` (Q1, Q9). - 1061a87. develop with UC20 was brought in 0601380 (one conflict, in architecture.md, solved keeping both lines). Checked roughly with a throwaway program: only the Admissions staff sees *Manage patients*; the 7-argument constructor does not show it; no test was written.
-- [ ] 7. `agents/architecture.md` (after step 6, so that it is written over the changes of UC20).
+- [x] 7. `agents/architecture.md` (after step 6, so that it is written over the changes of UC20). - 0b3b34d.
 - [ ] 8. Hand the branch over to Adam: the manual check of the screen with `lmartin` (`admin` and `mgarcia` do not see the button) and the tests of UC12-client, who opens the pull request (`Closes #45`); close only with his tests green and the coverage check passing.
 
 ## How to run it
@@ -106,6 +106,6 @@ Tick each step with the hash of its commit (green `mvn -B verify -Djacoco.skip=t
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 7 (`agents/architecture.md`)
+- **Next step:** step 8 (hand the branch over to Adam and push the whole branch)
 - **Open questions:** none
 - **Last update:** 15/11/2026, Javier
