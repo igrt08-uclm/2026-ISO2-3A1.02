@@ -5,6 +5,7 @@ import es.uclm.esi.iso2.client.access.presentation.IU_Login;
 import es.uclm.esi.iso2.client.access.presentation.IU_ManageRoles;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ConfigureParameters;
+import es.uclm.esi.iso2.client.configuration.presentation.IU_ManageIntegrations;
 import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
 import es.uclm.esi.iso2.common.access.contracts.IRoleManagementService;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
@@ -17,6 +18,7 @@ import es.uclm.esi.iso2.server.access.persistence.InMemoryUserAccountRepository;
 import es.uclm.esi.iso2.server.access.service.AuditService;
 import es.uclm.esi.iso2.server.access.service.AuthenticationService;
 import es.uclm.esi.iso2.server.access.service.RoleManagementService;
+import es.uclm.esi.iso2.server.configuration.service.IntegrationManagementService;
 import es.uclm.esi.iso2.server.configuration.service.SystemParameterService;
 import java.awt.Container;
 import javax.swing.JFrame;
@@ -33,12 +35,16 @@ public final class Main {
     private final IUserAccountRepository userAccountRepository = new InMemoryUserAccountRepository();
     private final AuditService auditService =
             new AuditService(new InMemoryAuditLogRepository(), userAccountRepository);
+    /** The single sign-on is shared: the login uses it, and the integration of UC20 tests it. */
+    private final AuthenticatorSystemSimulator authenticatorSystem = new AuthenticatorSystemSimulator();
     private final IAuthenticationService authenticationService =
-            new AuthenticationService(new AuthenticatorSystemSimulator(), userAccountRepository, auditService);
+            new AuthenticationService(authenticatorSystem, userAccountRepository, auditService);
     private final IRoleManagementService roleManagementService = new RoleManagementService(new InMemoryRoleRepository(),
             new InMemoryPermissionRepository(), userAccountRepository, auditService);
     private final SystemParameterService systemParameterService =
             new SystemParameterService(roleManagementService, auditService);
+    private final IntegrationManagementService integrationManagementService =
+            new IntegrationManagementService(roleManagementService, auditService, authenticatorSystem);
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().start());
@@ -46,6 +52,7 @@ public final class Main {
 
     private void start() {
         systemParameterService.loadSeedData();
+        integrationManagementService.loadSeedData();
         useNativeLookAndFeel();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
@@ -70,7 +77,7 @@ public final class Main {
         window.setTitle(APPLICATION_TITLE);
         show(new IU_Welcome(user, this::showLogin, () -> showAudit(user),
                 roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user),
-                () -> showConfigureSystem(user)));
+                () -> showConfigureSystem(user), () -> showManageIntegrations(user)));
     }
 
     private void showManageRoles(UserAccount user) {
@@ -82,6 +89,12 @@ public final class Main {
     private void showConfigureSystem(UserAccount user) {
         window.setTitle(APPLICATION_TITLE + " - Configure system");
         show(new IU_ConfigureParameters(systemParameterService, user.getUsername(), this::confirm,
+                () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
+    }
+
+    private void showManageIntegrations(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Manage integrations");
+        show(new IU_ManageIntegrations(integrationManagementService, user.getUsername(), this::confirm,
                 () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
     }
 

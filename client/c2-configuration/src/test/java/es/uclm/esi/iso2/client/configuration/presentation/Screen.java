@@ -4,13 +4,16 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
@@ -38,6 +41,10 @@ final class Screen {
         return (JTextField) labelled(root, label);
     }
 
+    static JTextArea area(Container root, String label) {
+        return (JTextArea) labelled(root, label);
+    }
+
     @SuppressWarnings("unchecked")
     static <T> JComboBox<T> combo(Container root, String label) {
         return (JComboBox<T>) labelled(root, label);
@@ -57,6 +64,16 @@ final class Screen {
     static JCheckBox check(Container root, String text) {
         return all(root, JCheckBox.class).stream().filter(c -> text.equals(c.getText())).findFirst()
                 .orElseThrow(() -> new AssertionError("No check box " + text));
+    }
+
+    static JRadioButton radio(Container root, String text) {
+        return all(root, JRadioButton.class).stream().filter(r -> text.equals(r.getText())).findFirst()
+                .orElseThrow(() -> new AssertionError("No radio button " + text));
+    }
+
+    /** The label that shows exactly this text, if there is one. */
+    static Optional<JLabel> label(Container root, String text) {
+        return all(root, JLabel.class).stream().filter(l -> text.equals(l.getText())).findFirst();
     }
 
     static JTable table(Container root) {
