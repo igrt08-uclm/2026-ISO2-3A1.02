@@ -22,7 +22,7 @@ public interface IPatientRepository {
     Patient findByIdentifier(String identifier);
 
     /**
-     * Searches the patients whose identifier or full name contains the text, ignoring case.
+     * Searches the patients whose identifier or full name contains the text, ignoring case and accents.
      *
      * @param filters the text to look for; an empty or {@code null} text matches every patient
      * @return the patients found, in the order in which they were saved
