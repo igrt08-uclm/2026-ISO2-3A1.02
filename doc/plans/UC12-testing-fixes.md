@@ -52,15 +52,13 @@ Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before i
 ## Batch 2 – steps (same branch `feature/UC12-client`; Javier: the code must pass the existing tests, no test of Adam is changed)
 - [x] **8. F-14, F-15 (`IntegrationManagementService`).** Commit 347e4d0: the permission is checked before the system is required, and the keys and values of the settings are stripped.
 - [x] **9. F-17, F-18, F-19 (`IU_ManageIntegrations`).** Commit dc3571d: *Revert* clears the message, the table is disabled and ignores the clicks after a denial, a `null` endpoint counts as empty.
-- [x] **10. F-11 (`PatientService`).** The counter of the ids starts from the highest `P-nnnn` that the repository already has, so a service built with a repository with patients does not overwrite one. No change of the interface of the repository.
-- [ ] **11. Not done because an existing test of Adam requires the old behaviour** (nothing is changed; they stay open for the member who decides):
-  - R-05 (endpoint with host): TC20S-17 requires that `http://` alone is accepted.
-  - F-16 (`null` settings as an empty map): TC20S-22 requires `null`.
-  - F-20 (new test type with a deactivated priority): `deactivatedPriorityIsAccepted` requires that it is accepted.
-  - F-12 (one message for a blank identifier): TC12S-47 requires both messages.
-  - F-13 (audit of an unknown id): TC12S-44 and TC12S-50 require that nothing is audited.
-  - R-02 in the repository: TC12S-60 requires `findByIdentifier("HC 0000001")` to be `null` (done in the service instead).
-- [ ] **12. Push** (Javier asks) and the answer to David and Adam with the list of step 11.
+- [x] **10. F-11 (`PatientService`).** Commit e637585: The counter of the ids starts from the highest `P-nnnn` that the repository already has, so a service built with a repository with patients does not overwrite one. No change of the interface of the repository.
+- [x] **11. Findings that an existing test of Adam checked, decided by David (Requirements) on 15/11/2026:**
+  - R-05 (endpoint with a host) and F-20 (a new test type cannot use a deactivated priority): **the fix wins**. Done in the patch of C2 1.1.1, #123, branch `feature/C2-patch-1.1.1` (commits 57d150e and 3d086e0, plan `doc/plans/C2-patch-1.1.1.md`); Adam updated TC20S-17 and `deactivatedPriorityIsAccepted`. The screen of the integrations still accepts `http://` alone (TC20C-17 is not changed; the server rejects it).
+  - F-12 (two messages for a blank identifier), F-13 (an unknown id is not audited) and F-16 (`null` settings stay `null`): **the test wins**, they stay as they are.
+  - R-02 is done in `PatientService`; `findByIdentifier` of the repository keeps its rule (TC12S-60).
+  - So Q9 is only partly applied: F-15 was done in step 8, F-20 in #123, and F-13 stays as it is.
+- [x] **12. Push** of batch 2 (`50291c4`, Javier asked); #121 merged by David on 15/11/2026.
 
 ## State for Adam
 **Batch 1 (branch `feature/UC12-client`, steps 2 to 6) – what to test again:**
@@ -73,4 +71,11 @@ Each step is one commit and `mvn -B verify -Djacoco.skip=true` is green before i
 - R-03: `lucia` finds "Lucía". R-04: `ana@example.test.` and `ana@example..test` are rejected; `01/01/1899` is rejected with "The date of birth cannot be before 01/01/1900"; the phone already counted only the digits (no change).
 - All the tests that existed pass; no test of Adam was changed.
 
-**Batch 2:** to be filled in step 12.
+**Batch 2 (same branch, steps 8 to 10) – what to test:**
+- F-14: `getIntegration` and `testConnection` with `system = null` and a user without `CONFIGURE_INTEGRATIONS` throw `AccessDeniedException` and audit `INTEGRATION_ACCESS_DENIED` on `INTEGRATION`; with the permission, `null` still throws `IllegalArgumentException`.
+- F-15: the keys and the values of the settings are saved stripped (`" 30 "` is saved as `"30"`); `null` settings stay `null` (F-16).
+- F-17: a saved `null` endpoint and an empty field do not count as unsaved changes.
+- F-18: after an access denied, the table of the integrations is disabled and pressing it asks nothing.
+- F-19: *Revert* clears the message area.
+- F-11: a `PatientService` built with a repository that already has `P-0003` registers the next one as `P-0004`.
+- Done by Adam on 15/11/2026: the tests of batch 1 and batch 2 and of the patch #123, all green.
