@@ -45,8 +45,8 @@
 
 ## Steps
 Tick each step with the hash of its commit (`mvn -B verify` green).
-- [ ] 1. Create and commit this plan (`docs(design): plan for Visual Paradigm model cleanup (#144)`).
-- [ ] 2. Update `.gitignore` to ignore `*.bak_*` and `*.lck`, and delete `doc/ISO-Project.vpp.bak_000f`.
+- [x] 1. Create and commit this plan (`docs(design): plan for Visual Paradigm model cleanup (#144)`). - 1a71ca7.
+- [x] 2. Update `.gitignore` to ignore `*.bak_*` and `*.lck`, and delete `doc/ISO-Project.vpp.bak_000f`. - be2ede2.
 - [ ] 3. Transform `doc/xml_export/project.xml` (untracked local export) to clean `<Models>` and `<Diagrams>` across Analysis and C1–C3, and run Python structural/reference integrity checks.
 - [ ] 4. **Manual VP 18.1 round-trip (Marcos):** import `doc/xml_export/project.xml` into a new blank Visual Paradigm 18.1 project, visually check all diagrams, save `doc/ISO-Project.vpp`, re-export the 6 design PNGs into `doc/design/`, and remove/move `doc/xml_export/` outside the repo.
 - [ ] 5. Update `doc/design/README.md` with the aligned skipped-details notes, commit `doc/ISO-Project.vpp`, `doc/design/*.png`, and `doc/design/README.md`, and run final `mvn -B verify`.
@@ -58,7 +58,7 @@ Tick each step with the hash of its commit (`mvn -B verify` green).
 - [ ] `mvn -B verify` is green across all modules.
 
 ## Status
-- **In progress:** Step 1
-- **Next step:** Commit `doc/plans/vpp-model-cleanup.md` and proceed to Step 2 (`.gitignore` and `.bak_000f` cleanup)
+- **In progress:** Step 3
+- **Next step:** Transform `doc/xml_export/project.xml` to clean `<Models>` and `<Diagrams>` across Analysis and C1–C3, and run Python structural/reference integrity checks
 - **Open questions:** none
 - **Last update:** 17/11/2026, Marcos Loro
