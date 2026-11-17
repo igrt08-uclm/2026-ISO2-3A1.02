@@ -48,17 +48,17 @@ Tick each step with the hash of its commit (`mvn -B verify` green).
 - [x] 1. Create and commit this plan (`docs(design): plan for Visual Paradigm model cleanup (#144)`). - 1a71ca7.
 - [x] 2. Update `.gitignore` to ignore `*.bak_*` and `*.lck`, and delete `doc/ISO-Project.vpp.bak_000f`. - be2ede2.
 - [x] 3. Transform `doc/xml_export/project.xml` (untracked local export) to clean `<Models>` and `<Diagrams>` across Analysis and C1–C3, and run Python structural/reference integrity checks. - verified locally (untracked XML export).
-- [ ] 4. **Manual VP 18.1 round-trip (Marcos):** import `doc/xml_export/project.xml` into a new blank Visual Paradigm 18.1 project, visually check all diagrams, save `doc/ISO-Project.vpp`, re-export the 6 design PNGs into `doc/design/`, and remove/move `doc/xml_export/` outside the repo.
-- [ ] 5. Update `doc/design/README.md` with the aligned skipped-details notes, commit `doc/ISO-Project.vpp`, `doc/design/*.png`, and `doc/design/README.md`, and run final `mvn -B verify`.
+- [x] 4. **Manual VP 18.1 round-trip (Marcos):** import `doc/xml_export/project.xml` into a new blank Visual Paradigm 18.1 project, visually check all diagrams, save `doc/ISO-Project.vpp`, re-export the 6 design PNGs into `doc/design/`, and remove/move `doc/xml_export/` outside the repo. - verified locally (VP 18.1 round-trip + 6 PNGs exported + `doc/xml_export/` removed).
+- [x] 5. Update `doc/design/README.md` with the aligned skipped-details notes, commit `doc/ISO-Project.vpp`, `doc/design/*.png`, and `doc/design/README.md`, and run final `mvn -B verify`. - 6f7acc6.
 
 ## Verification
 - [x] Python integrity check passes on `doc/xml_export/project.xml` (0 `_renamed_on_import_`, 62 unique Design classes with 0 duplicate names in design packages, 0 non-viewpoint dangling IDs, 17/17 realization arrows `From = Interface, To = Impl`, all 37 non-design diagrams preserved, 0 box overlaps across all 6 design diagrams).
-- [ ] `doc/ISO-Project.vpp` opens cleanly in Visual Paradigm 18.1 with all 43 diagrams intact and legible PNGs exported to `doc/design/`.
-- [ ] `doc/xml_export/` and `doc/ISO-Project.vpp.bak_000f` are absent from Git and working tree.
-- [ ] `mvn -B verify` is green across all modules.
+- [x] `doc/ISO-Project.vpp` opens cleanly in Visual Paradigm 18.1 with all 43 diagrams intact and legible PNGs exported to `doc/design/`.
+- [x] `doc/xml_export/` and `doc/ISO-Project.vpp.bak_000f` are absent from Git and working tree.
+- [x] `mvn -B verify` is green across all modules.
 
 ## Status
-- **In progress:** Step 4 (manual Visual Paradigm 18.1 import and PNG export by Marcos)
-- **Next step:** Import `doc/xml_export/project.xml` into a new blank Visual Paradigm 18.1 project, inspect all diagrams, save `doc/ISO-Project.vpp`, export the 6 design PNGs into `doc/design/`, and move/delete `doc/xml_export/` outside the repository before running Step 5
+- **In progress:** none
+- **Next step:** Review and merge pull request into `develop` (#144)
 - **Open questions:** none
 - **Last update:** 17/11/2026, Marcos Loro
