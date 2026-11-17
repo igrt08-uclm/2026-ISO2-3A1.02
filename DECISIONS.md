@@ -450,3 +450,42 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** It is simple and predictable: all the needs exist from the moment the order is created, and no process has to run in the background.
 - **Consequences:** UC07 creates the needs of the next 12 months, and UC13 and UC15 (C5) read them as pending needs. Section 9 of #65 is closed.
 - **Status:** Proposed by David in #65 on 07/11/2026 and agreed by Ignacio on 15/11/2026.
+
+## D-041 · Issues in progress, and one agent per use case at a time
+**Date:** 17/11/2026 · **Iteration:** 4 · **Minutes:** — (lab session of 17/11/2026)
+
+- **Context:** In the lab session of 17/11/2026 the professor asked us to move the issues to *In progress* when we start them, and to make sure that two agents never work on the same use case at the same time, so that one does not overwrite the work of the other. Rule 15 of AGENTS.md already forbids two agents on the same branch or folder, but nothing showed who was working on each use case.
+- **Decision:**
+  - Before starting a sub-issue, the member assigns it to themself and moves it to *In progress* on the project board. It stays there until the pull request that closes it is merged.
+  - A use case issue or sub-issue that is *In progress* belongs to its assignee: nobody else, and no other agent, works on it. Only one agent works on each sub-issue at a time, and the server and the client of the same use case can be done at the same time only on their own branches (rule 15).
+  - In step 1 of the cycle, the agent checks that the sub-issue is assigned to the member who asked for the work and is not being worked on by someone else. If it is not, it stops and tells the member.
+- **Alternatives:** Telling each other in WhatsApp who is working on what, which is not recorded and is easy to miss.
+- **Reason:** The board shows at any moment who is working on each use case, and an agent cannot start on work that is someone else's.
+- **Consequences:** Extends rule 15 of AGENTS.md and D-010. Step 1 of the cycle in AGENTS.md is updated in this pull request.
+- **Status:** Proposed by David on 17/11/2026, after the professor's comments in class; approved in the review of this pull request.
+
+## D-042 · Every member keeps write access, and the feature branches cannot be deleted or rewritten
+**Date:** 17/11/2026 · **Iteration:** 4 · **Minutes:** — (lab session of 17/11/2026)
+
+- **Context:** In the lab session of 17/11/2026 the professor asked why every member has access to every branch. All members have the *write* role in the repository. The only ruleset (*Restrictions branch*) protects `main` and `develop` (no deletion, no force push, no creation and a pull request to change them, D-001), but the `feature/*` branches have no protection, so anyone could delete or rewrite the branch of another member.
+- **Decision:**
+  - Every member keeps the *write* role, because each one works on one branch per sub-issue (D-015), and GitHub needs that role to push to a branch of the repository. A member cannot be limited to their own branches without adding bypass lists per branch, and the bypass list must stay empty (D-001, D-038).
+  - What protects the work of each member is the process, not the permissions: `main` and `develop` only change through an approved pull request (D-001), and each sub-issue has its assignee and only one agent (D-041).
+  - The coordinator adds a second ruleset for `feature/**`, `docs/**`, `ci/**` and `release/**` that blocks deleting them and force-pushing to them, with an empty bypass list. It does not stop anyone from pushing, so it does not block the work.
+- **Alternatives:** Each member working on their own fork and opening pull requests from it, so nobody needs write access. Rejected, because the issue branches are created from the issue on GitHub (D-015), the CI and the plans of `doc/plans/` would be split between forks, and two members often work on the same component. Giving the *read* role to the members who only review. Rejected, because every member also implements.
+- **Reason:** Write access is needed with one branch per sub-issue, and the new ruleset stops the only real risk of that access: losing someone else's branch.
+- **Consequences:** Rule 10 of AGENTS.md (no force push) is now also enforced by GitHub on the work branches. Branches are not deleted after merging, as rule 7 already says.
+- **Status:** Proposed by David on 17/11/2026, after the professor's question in class; approved in the review of this pull request. The coordinator creates the ruleset, because only the owner of the repository can.
+
+## D-043 · Recording the tokens used by the agents
+**Date:** 17/11/2026 · **Iteration:** 4 · **Minutes:** — (lab session of 17/11/2026)
+
+- **Context:** In the lab session of 17/11/2026 the professor asked us to keep track of the tokens we use. D-026 estimated about 34.4 million input tokens and 1.6 million output tokens, but we never recorded the real use, so the estimate cannot be checked.
+- **Decision:**
+  - At the end of each session with an agent, the member writes one row in the *Tokens* table of the plan of the sub-issue (`doc/plans/`): the date, the member, the tool and model, and the use shown by the tool (input and output tokens, or premium requests in GitHub Copilot).
+  - At the end of each iteration, the totals of its plans are added to the page *Planification* of the wiki, next to the hours, and compared with the estimate of D-026.
+  - In step 8 of the cycle, the agent reminds the member to fill in the row.
+- **Alternatives:** Not recording it, as until now; recording it in the hours spreadsheet, which has no place for each tool and model.
+- **Reason:** It shows the real cost of using AI in each use case, and it lets us check the estimate of D-026, as the assignment asks.
+- **Consequences:** The template `doc/plans/TEMPLATE.md` gets a *Tokens* table, and step 8 of AGENTS.md is updated in this pull request. The use of the iterations before this decision was not recorded and is not estimated afterwards.
+- **Status:** Proposed by David on 17/11/2026, after the professor's comments in class; approved in the review of this pull request.

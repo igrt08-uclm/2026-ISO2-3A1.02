@@ -20,6 +20,9 @@ Every task that changes files follows this cycle. Do not skip steps, and do not 
 1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. Then read the sub-issue and its
    use case issue (`gh issue view <n>`), the contracts (section 6 of the component issue), the approved design
    (`doc/design/`), the decisions they cite and, if it exists, the plan of the sub-issue in `doc/plans/`.
+   Check that the sub-issue is assigned to the member who asked for the work. If it is assigned to someone else, or
+   its plan shows a step *In progress* by another member, stop and tell the member (D-041). Remind the member to move
+   it to *In progress* on the project board.
 2. **Ask.** Write every doubt, ambiguity or missing piece in one message and wait for the answers. Never fill a gap
    with an assumption. If the design or a contract is missing or looks wrong, say so.
 3. **Plan.** Write or update `doc/plans/UCxx-server.md` or `doc/plans/UCxx-client.md` from
@@ -35,7 +38,7 @@ Every task that changes files follows this cycle. Do not skip steps, and do not 
    Never mark something as done because it "looks right".
 8. **Leave it ready for the next session.** Before you stop, the plan says what is done, what was in progress and
    the exact next step (file, class or method), so that another session or another member can continue without
-   asking.
+   asking. Remind the member to add the row of this session to the *Tokens* table of the plan (D-043).
 
 A question that does not change any file does not need a plan.
 
