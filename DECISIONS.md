@@ -88,6 +88,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Adopting AI-generated diagrams directly as the official ones.
 - **Reason:** Requirements and use cases are a human task in this course ("do it yourselves, not the AI agent"), and each discipline has a responsible member.
 - **Consequences:** AI output is always reviewed by the team before it becomes official. So far, PlantUML code has to be copied into Visual Paradigm by hand.
+- **Status:** Updated by D-039 on 17/11/2026: the official diagrams are PlantUML files in the repository, not Visual Paradigm; AI output is still only a proposal.
 
 ## D-009 · Login scope
 **Date:** 13/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 2](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-2) · **Time in the recording:** 0:17:34, 0:23:20–0:24:19
@@ -195,6 +196,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Each member keeps their own version.
 - **Reason:** Everyone must be able to open and edit the same project files.
 - **Consequences:** Every member updates to Visual Paradigm 18.1 before working on the diagrams.
+- **Status:** Replaced by D-039 on 17/11/2026: Visual Paradigm is no longer mandatory.
 
 ## D-018 · Use case issues can be created in advance
 **Date:** 27/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:25:45–0:26:55
@@ -352,6 +354,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
 - **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
 - **Status:** Approved in Meeting 6 (08/11/2026).
+- **Status:** A4 no longer applies since D-039 (17/11/2026): Visual Paradigm is no longer used for new diagrams.
 
 ## D-032 · One Maven submodule per component
 **Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:02:26–0:04:07, 0:43:07 · **Issues:** #34
@@ -430,3 +433,13 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** Ismael accepts it for the coordinator, and the coordinator is who merges most pull requests and the releases, so waiting for another member blocks them. The other members keep the review of D-001.
 - **Consequences:** Updates D-001. E-13 is closed. The README says it.
 - **Status:** Decided by David on 15/11/2026, after Ismael's answer; approved in the review of this pull request.
+
+## D-039 · Diagrams in PlantUML instead of Visual Paradigm
+**Date:** 17/11/2026 · **Iteration:** 4 · **Minutes:** — · **Issues:** #143, #145, E-20
+
+- **Context:** D-008 and D-017 made Visual Paradigm 18.1 the tool for the official diagrams, and the PlantUML proposals of the agent were brought into it. In practice it gave more problems than solutions. Every change had to be made by hand in the `.vpp`. The file is binary, so it cannot be merged, and it had to be passed from one member to another, one at a time. Importing PlantUML renamed elements (`_renamed_on_import_`), duplicated packages (`common2`, `server2`) and broke some signatures, so the names looked wrong and the diagrams had to be fixed by hand (#145). On 16/11/2026 the team asked Ismael in class, and he answered that using Visual Paradigm or not is the decision of the team, as long as the diagrams are clear.
+- **Decision:** Visual Paradigm is no longer mandatory. The new diagrams, from Iteration 4 (C4 and C5), are PlantUML text files (`.puml`) in `doc/`, reviewed and approved in their pull request like the code. `doc/ISO-Project.vpp` is kept as the record of the diagrams already made with Visual Paradigm (C1 to C3, and the use cases of C4), cleaned in #145. The details (which old diagrams are moved to PlantUML, how the communication diagrams are drawn, and whether exported images are kept) are proposed by Marcos in #143 and closed in Meeting 9.
+- **Alternatives:** Keeping Visual Paradigm for every diagram; keeping it only for some diagrams (part of #143).
+- **Reason:** Text files can be merged and reviewed line by line, several members can work on diagrams at the same time, the agents can read them (they cannot open the `.vpp`, D-025), and nothing is lost in an import. The diagrams are still made and approved by the members of each discipline: what the agent generates is only a proposal (D-008).
+- **Consequences:** Replaces D-017, and the part of D-008 that says that the official diagrams are made in Visual Paradigm. Assumption A4 of D-031 no longer applies. `AGENTS.md`, the README and the wiki are updated.
+- **Status:** Decided by David on 17/11/2026, after the answer of Ismael; the points of #143 are confirmed in Meeting 9.

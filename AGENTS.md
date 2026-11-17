@@ -100,7 +100,7 @@ choose on your own: tell the member.
 | Issues | Component issue → use case issue → client and server sub-issues, using the templates in `.github/ISSUE_TEMPLATE/`; the title of a use case issue carries its component and version, e.g. `UC20 – Server (C2 v1.1.0)` | D-015, D-018, D-032 |
 | Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); each component submodule (`server/cN`, `client/cN`) has its own version: MINOR per use case of that component, PATCH per fix. Always write the component with its version (`C2 1.1.0`); names and versions are in [agents/components.md](agents/components.md) | D-014, D-021, D-032, Maven practice p. 19 |
 | Releases | `release/0.x.0` from `develop`, merged into `main` and `develop`, annotated tag `v0.x.0` on `main` | Kickoff p. 9, Git practice p. 19 |
-| Diagrams | Propose them as PlantUML text, never as images; the team imports and approves them in Visual Paradigm 18.1 | D-008, D-017, assignment p. 5, note 9 |
+| Diagrams | Propose them as PlantUML text (`.puml`) in `doc/`, never as images; the team reviews and approves them in the pull request. Visual Paradigm is no longer used for new diagrams | D-008, D-039 |
 | Language | Code, comments, commits, issues and documents in English | D-016 |
 | Tests | Test class `<Class>Test` in `src/test/java`, same package; one method per case of the member's table; `@DisplayName` in English; arrange, act, assert | D-034, S.04.01 |
 | Javadoc | Every class and public method, in English, written together with the code | D-034 |

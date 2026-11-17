@@ -58,8 +58,8 @@ server/          Aggregator of the server submodules, one per component
   c1-access/       C1: services, in-memory repositories and simulations of the external systems
 client/          Aggregator of the client submodules, one per component
   c1-access/       C1: Swing windows (IU_ classes) and Main, which starts the application
-doc/             Visual Paradigm project, approved designs and implementation plans
-  ISO-Project.vpp  Official model with all the diagrams
+doc/             Diagrams (PlantUML), approved designs and implementation plans
+  ISO-Project.vpp  Visual Paradigm model of the diagrams made before D-039 (C1 to C3, use cases of C4)
   design/          Exported diagrams of each iteration
   plans/           Plan of each use case, written before implementing it
 DECISIONS.md     Every decision of the team, with its reason (D-001, D-002…)
