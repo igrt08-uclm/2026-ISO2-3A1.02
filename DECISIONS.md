@@ -477,15 +477,27 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Consequences:** Rule 10 of AGENTS.md (no force push) is now also enforced by GitHub on the work branches. Branches are not deleted after merging, as rule 7 already says.
 - **Status:** Proposed by David on 17/11/2026, after the professor's question in class; approved in the review of this pull request. The coordinator creates the ruleset, because only the owner of the repository can.
 
-## D-043 · Recording the tokens used by the agents
+## D-043 · Recording the tokens used by the agents, per iteration
 **Date:** 17/11/2026 · **Iteration:** 4 · **Minutes:** — (lab session of 17/11/2026)
 
 - **Context:** In the lab session of 17/11/2026 the professor asked us to keep track of the tokens we use. D-026 estimated about 34.4 million input tokens and 1.6 million output tokens, but we never recorded the real use, so the estimate cannot be checked.
 - **Decision:**
-  - At the end of each session with an agent, the member writes one row in the *Tokens* table of the plan of the sub-issue (`doc/plans/`): the date, the member, the tool and model, and the use shown by the tool (input and output tokens, or premium requests in GitHub Copilot).
-  - At the end of each iteration, the totals of its plans are added to the page *Planification* of the wiki, next to the hours, and compared with the estimate of D-026.
-  - In step 8 of the cycle, the agent reminds the member to fill in the row.
-- **Alternatives:** Not recording it, as until now; recording it in the hours spreadsheet, which has no place for each tool and model.
-- **Reason:** It shows the real cost of using AI in each use case, and it lets us check the estimate of D-026, as the assignment asks.
-- **Consequences:** The template `doc/plans/TEMPLATE.md` gets a *Tokens* table, and step 8 of AGENTS.md is updated in this pull request. The use of the iterations before this decision was not recorded and is not estimated afterwards.
+  - The wiki page *Token usage* has one section per member, with one row per iteration: the models used, the calls, the new input, the cached input and the output tokens (or the premium requests in GitHub Copilot, which keeps no local logs).
+  - It is a rule of the agent (rule 19 of AGENTS.md): when an iteration ends, or when the member asks, the agent counts the tokens of that iteration from the logs of its tool, shows the row to the member and, after a "yes", adds it to the member's section. The iterations that share dates (It2 and It3, It4 and It5) share one row.
+  - The totals are compared with the estimate of D-026 on the page *Planification*.
+- **Alternatives:** Not recording it, as until now; one row per session in each plan of `doc/plans/`, which is more work and is spread over many files; recording it in the hours spreadsheet, which has no place for each tool and model.
+- **Reason:** It shows the real cost of using AI in each iteration, and it lets us check the estimate of D-026, as the assignment asks. The agent can count it from its own logs, so it costs the member almost nothing.
+- **Consequences:** Rule 19 is added to AGENTS.md in this pull request. The page *Token usage* was created with David's section on 17/11/2026, and each member adds their own section for the iterations already done.
+- **Status:** Proposed by David on 17/11/2026, after the professor's comments in class; approved in the review of this pull request.
+
+## D-044 · Requirements traceability matrix
+**Date:** 17/11/2026 · **Iteration:** 4 · **Minutes:** — (lab session of 17/11/2026)
+
+- **Context:** In the lab session of 17/11/2026 the professor asked for a requirements traceability matrix. The wiki page *Requirements and Use Cases* only says in which iteration and component each requirement is built, not which analysis, design, code, tests and release come from it.
+- **Decision:**
+  - The wiki page *Requirements traceability matrix* has one row per functional requirement already worked on: its use case and issue, the component, the analysis, the design, the server and client sub-issues with the pull requests that closed them, the control class and the screen with their tests, and the release.
+  - It is a rule of the agent (rule 20 of AGENTS.md): when the pull request of a sub-issue is merged, or when the member asks, the agent fills in its cells (pull request, classes and tests), shows the change to the member and, after a "yes", updates the page. The coordinator fills in the release when the iteration is released.
+- **Alternatives:** Keeping only the table of *Requirements and Use Cases*, which stops at the component; a matrix in a spreadsheet, which is not linked to the issues, the pull requests and the code.
+- **Reason:** A requirement can be followed down to the code and the tests that prove it, and every class or test can be traced back to its requirement, with links that can be checked.
+- **Consequences:** The page was created on 17/11/2026 with the six use cases of C1, C2 and C3, and the five of C4 and C5 in progress. Rule 20 is added to AGENTS.md in this pull request.
 - **Status:** Proposed by David on 17/11/2026, after the professor's comments in class; approved in the review of this pull request.

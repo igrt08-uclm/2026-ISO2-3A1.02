@@ -31,13 +31,6 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [ ] Every acceptance criterion of the sub-issue is checked, with the test that proves it.
 - [ ] `mvn -B verify` is green.
 
-## Tokens
-One row per session with an agent, written by the member at the end of the session (D-043).
-
-| Date | Member | Tool and model | Input tokens | Output tokens | Premium requests (Copilot) |
-|---|---|---|---:|---:|---:|
-| dd/mm/yyyy | … | … | … | … | … |
-
 ## Status
 - **In progress:** nothing (the step being done right now; rule 14 in AGENTS.md)
 - **Next step:** … (file, class or method)

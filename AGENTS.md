@@ -38,7 +38,7 @@ Every task that changes files follows this cycle. Do not skip steps, and do not 
    Never mark something as done because it "looks right".
 8. **Leave it ready for the next session.** Before you stop, the plan says what is done, what was in progress and
    the exact next step (file, class or method), so that another session or another member can continue without
-   asking. Remind the member to add the row of this session to the *Tokens* table of the plan (D-043).
+   asking.
 
 A question that does not change any file does not need a plan.
 
@@ -89,6 +89,15 @@ A question that does not change any file does not need a plan.
     the production code. When a test fails, explain whether the error is in the test or in the code, and never change
     an expected value to make a test pass. The build fails below 80 % of lines or 70 % of branches (D-033).
 18. **Javadoc as you write** (D-034). Every class and public method you create or change has its Javadoc in English.
+19. **Tokens of each iteration** (D-043). When an iteration ends, or when the member asks, count the tokens that the
+    member used with you in that iteration from the logs of your tool (models with their % of output, calls, new
+    input, cached input and output; premium requests if you are GitHub Copilot and have no local logs). Show the row
+    to the member and, after a "yes", add it to their section of the wiki page *Token usage*, in the same format as
+    the other rows. Never show paths, prompts or contents of the logs: only the counts.
+20. **Traceability matrix** (D-044). When the pull request of a sub-issue is merged, or when the member asks, fill in
+    its row of the wiki page *Requirements traceability matrix*: the pull request, the control class or the screen,
+    and its test classes, with links to `develop`. Show the change to the member and update the page only after a
+    "yes". Do not fill in cells you cannot cite (rule 12).
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
