@@ -501,3 +501,31 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** A requirement can be followed down to the code and the tests that prove it, and every class or test can be traced back to its requirement, with links that can be checked.
 - **Consequences:** The page was created on 17/11/2026 with the six use cases of C1, C2 and C3, and the five of C4 and C5 in progress. Rule 20 is added to AGENTS.md in this pull request.
 - **Status:** Proposed by David on 17/11/2026, after the professor's comments in class; approved in the review of this pull request.
+
+## D-045 · Spending tokens without losing quality
+**Date:** 18/11/2026 · **Iteration:** 4 · **Minutes:** — · **Issues:** —
+
+- **Context:** D-043 records the tokens of the agents. The page *Token usage* (17/11/2026) shows that 96.9 % of the
+  1,949 million tokens counted for five members are cached input: the conversation that the model reads again in
+  every call, about 370,000 tokens per call on average (David 411,000, Adam 361,000, Javier 339,000, Denis 332,000,
+  Rodrigo 188,000). Most of it comes from conversations that last days or weeks. AGENTS.md has no rule on the size of
+  the context: a green `mvn -B verify` prints about 16,500 tokens, and DECISIONS.md is about 18,600, and both are read
+  again in every later call of the same conversation.
+- **Decision:**
+  - Rule 21 of AGENTS.md: one task per conversation (a new one after each committed step, with the plan as the
+    hand-over), read only what the task needs, and filter long output without hiding failures.
+  - The file `agents/token-efficiency.md` has the practices for every agent, those only for Claude Code, and how to
+    count the tokens of rule 19. AGENTS.md sends the agent there before its first build, before it delegates to a
+    subagent and when it counts tokens, so it is not read in every session.
+  - Quality wins: no practice skips a rule of AGENTS.md. `mvn -q` is not used, because it hides which coverage rule
+    failed and the number of tests run (E-14).
+- **Alternatives:** Everything in AGENTS.md, which adds about 1,900 tokens to every session. A Claude Code skill, which
+  only Claude reads and which would put rules outside AGENTS.md (D-025). No rule, as until now.
+- **Reason:** What costs most is the length of the conversations, not the files. With Spec-Driven Development the plan
+  already carries the state between sessions (step 8), so a new conversation per step loses nothing that was written
+  down.
+- **Consequences:** AGENTS.md grows by about 250 tokens. D-025 says that rules are only written in AGENTS.md: the file
+  in `agents/` holds practices that rule 21 points to, and if it disagrees with AGENTS.md, AGENTS.md wins. Its effect
+  is checked by repeating a similar sub-issue before and after and comparing the rows of *Token usage* and the quality
+  of the result. Extends D-025 and D-043.
+- **Status:** Proposed by Adam on 18/11/2026, after the research of the page *Token usage*; approved in the review of this pull request.

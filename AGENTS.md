@@ -98,6 +98,16 @@ A question that does not change any file does not need a plan.
     its row of the wiki page *Requirements traceability matrix*: the pull request, the control class or the screen,
     and its test classes, with links to `develop`. Show the change to the member and update the page only after a
     "yes". Do not fill in cells you cannot cite (rule 12).
+21. **Spend tokens where they add quality** (D-045). Every call re-reads the whole conversation:
+    our calls re-read about 370,000 tokens each (wiki *Token usage*). Saving tokens never skips a rule above.
+    - One task per conversation: when a step is committed and the plan updated (step 8), start a new conversation
+      from AGENTS.md and the plan. Write first in the plan or the issue anything agreed only in the chat.
+    - Read only what the task needs: the decisions cited (`grep -n "^## D-0" DECISIONS.md`, then only those
+      entries), the *Status* of the plan first, and no file twice unless it changed.
+    - Filter long output without hiding failures: the build as in
+      [agents/token-efficiency.md](agents/token-efficiency.md), never `mvn -q`.
+    - Read [agents/token-efficiency.md](agents/token-efficiency.md) before your first build, before you delegate to a
+      subagent and when you count tokens (rule 19).
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
@@ -130,6 +140,7 @@ choose on your own: tell the member.
 | Iterations, dates and versions | Wiki: *Traceability and releases* |
 | Meeting minutes and assigned tasks | Wiki: *Minutes of meetings* and the issues |
 | Errors already made | Wiki: *Errors and lessons learned* |
+| How to spend fewer tokens without losing quality | [agents/token-efficiency.md](agents/token-efficiency.md) |
 | How the professor solved a similar problem (inspiration only, rule 16) | https://github.com/IsmaelCaballero/PrISO2-25-26 |
 
 The wiki is at https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki. The course guidelines (assignment, Kickoff, Git
