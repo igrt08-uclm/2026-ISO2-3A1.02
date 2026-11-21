@@ -154,7 +154,7 @@ Before step 1, this plan is committed alone: `docs(C1): plan of the Javadoc of C
 - [x] 4. server service and integration – `docs(C1): Javadoc of the server services (#150)` (1ff5964)
 - [x] 5. `IU_Login` and `IU_Welcome` – `docs(C1): Javadoc of IU_Login and IU_Welcome (#150)` (90bbe47)
 - [x] 6. `IU_Audit` – `docs(C1): Javadoc of IU_Audit (#150)` (342984f)
-- [ ] 7. `IU_ManageRoles` – `docs(C1): Javadoc of IU_ManageRoles (#150)`
+- [x] 7. `IU_ManageRoles` – `docs(C1): Javadoc of IU_ManageRoles (#150)` (fb0dd90)
 - [ ] 8. Final check – C1 against the whole branch (replace `HEAD` with `origin/develop...HEAD` in C1); C3 prints
   nothing; build green; fix any line C3 still shows (comments only); update *Status*.
   `docs(C1): final Javadoc check and plan status (#150)`
@@ -190,7 +190,7 @@ N/A: comments only; existing tests must pass unchanged.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 7 (`client/c1-access/.../presentation/IU_ManageRoles.java`)
+- **Next step:** step 8 (final check)
 - **Open questions:**
   - `// Temporary: with UC18 this check uses the permissions of the role.` in `AuditService.java:17` and
     `IU_Welcome.java:19`: the code still checks the role name `SYSTEM_ADMINISTRATOR` (`AuditService.java:47`,
