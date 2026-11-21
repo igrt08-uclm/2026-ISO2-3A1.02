@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>server-c1-access</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.3-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
