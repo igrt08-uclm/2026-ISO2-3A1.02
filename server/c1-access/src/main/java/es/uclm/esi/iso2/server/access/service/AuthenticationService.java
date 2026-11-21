@@ -8,6 +8,9 @@ import es.uclm.esi.iso2.common.access.contracts.IAuthenticatorSystem;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import es.uclm.esi.iso2.server.access.persistence.IUserAccountRepository;
 
+/**
+ * Authenticates users and records login attempts (UC22).
+ */
 public class AuthenticationService implements IAuthenticationService {
     private static final String LOGIN_OK = "LOGIN_OK";
     private static final String LOGIN_FAILED = "LOGIN_FAILED";
@@ -17,6 +20,13 @@ public class AuthenticationService implements IAuthenticationService {
     private final IUserAccountRepository userAccountRepository;
     private final IAuditRecorder auditRecorder;
 
+    /**
+     * Creates the service with the given authenticator system, user account repository and audit recorder.
+     *
+     * @param authenticatorSystem the authenticator system to validate credentials
+     * @param userAccountRepository the repository for user accounts
+     * @param auditRecorder the audit recorder to register login attempts
+     */
     public AuthenticationService(IAuthenticatorSystem authenticatorSystem,
             IUserAccountRepository userAccountRepository, IAuditRecorder auditRecorder) {
         this.authenticatorSystem = authenticatorSystem;

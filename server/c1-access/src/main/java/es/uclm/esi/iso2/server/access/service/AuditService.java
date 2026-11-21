@@ -10,6 +10,9 @@ import es.uclm.esi.iso2.server.access.persistence.IUserAccountRepository;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Records and consults audit log entries (UC19).
+ */
 public class AuditService implements IAuditService, IAuditRecorder {
     private static final String AUDIT_CONSULTED = "AUDIT_CONSULTED";
     private static final String AUDIT_ACCESS_DENIED = "AUDIT_ACCESS_DENIED";
@@ -20,6 +23,12 @@ public class AuditService implements IAuditService, IAuditRecorder {
     private final IAuditLogRepository auditLogRepository;
     private final IUserAccountRepository userAccountRepository;
 
+    /**
+     * Creates the audit service with the given repositories.
+     *
+     * @param auditLogRepository the repository for audit log entries
+     * @param userAccountRepository the repository for user accounts
+     */
     public AuditService(IAuditLogRepository auditLogRepository, IUserAccountRepository userAccountRepository) {
         this.auditLogRepository = auditLogRepository;
         this.userAccountRepository = userAccountRepository;
