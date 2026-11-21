@@ -161,8 +161,8 @@ flowchart LR
   - `agents/components.md` line 56: `C1 is at 1.2.2 (#109, #116)` → `C1 is at 1.2.3 in the server and 1.2.4 in the client (#109, #116, #172)`. The rest of the line is not changed.
   - No build (documents only).
   - Commit: `git commit -m "docs(C1): versions of the patch 1.2.3 in agents (#172)"`
-- [ ] **6. Hand over to Adam.** Tick steps 1-5 with their hashes, fill in *State for Adam* (date and hashes) and **Status**, then
-  `git commit -m "docs(C1): state of the patch 1.2.3 for Adam (#172)"`. **No push**: Javier pushes and tells Adam.
+- [x] **6. Hand over to Adam.** Tick steps 1-5 with their hashes, fill in *State for Adam* (date and hashes) and **Status**, then
+  `git commit -m "docs(C1): state of the patch 1.2.3 for Adam (#172)"`. **No push**: Javier pushes and tells Adam. `200a32c`
 
 ## State for Adam
 State of 21/11/2026, at the end of step 5. The code of the patch is in `de4f6ce` (permission and role), `cb52259`
@@ -192,11 +192,11 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 - [ ] The pull request (`Closes #172`) is approved by Ignacio (D-036).
 
 ## Status
-- **In progress:** step 6 (hand over to Adam): *State for Adam* and this **Status** are written; only the tick of
-  step 6 and its commit are left.
-- **Next step:** tick step 6 of the plan with its hash, set *In progress* back to nothing and commit
-  `docs(C1): tick step 6 of the plan (#172)`. Then Javier pushes the branch and tells Adam, who adapts the tests of
-  *State for Adam* in this branch. Steps 1-5 are done in `de4f6ce`, `cb52259`, `26ac269`, `96f692c` and `ee27ab3`.
+- **In progress:** nothing
+- **Next step:** the six steps of the plan are done. Javier pushes `feature/C1-patch-1.2.3` and tells Adam, who adapts
+  the tests of *State for Adam* in this branch. Then `mvn -B verify` must be green (coverage included) and the pull
+  request (`Closes #172`) is opened and approved by Ignacio (D-036). Steps 1-6 are done in `de4f6ce`, `cb52259`,
+  `26ac269`, `96f692c`, `ee27ab3` and `200a32c`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
