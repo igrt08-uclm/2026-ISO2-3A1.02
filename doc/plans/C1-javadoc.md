@@ -148,7 +148,7 @@ this plan alone (`docs(C1): tick step N of the Javadoc plan (#150)`). If C1 or C
 (`git checkout -- <file>` only for the file you are editing) and redo it; if the build fails, stop and report.
 Before step 1, this plan is committed alone: `docs(C1): plan of the Javadoc of C1 (#150)`.
 
-- [ ] 1. `common.access.domain` – `docs(C1): Javadoc of common.access.domain (#150)`
+- [x] 1. `common.access.domain` – `docs(C1): Javadoc of common.access.domain (#150)` (a8efa25)
 - [ ] 2. `common.access.contracts` – `docs(C1): Javadoc of common.access.contracts (#150)`
 - [ ] 3. server persistence – `docs(C1): Javadoc of the server persistence (#150)`
 - [ ] 4. server service and integration – `docs(C1): Javadoc of the server services (#150)`
@@ -190,7 +190,7 @@ N/A: comments only; existing tests must pass unchanged.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** after approval, commit this plan; then step 1 (`common/.../common/access/domain/AuditLog.java`)
+- **Next step:** step 2 (`common/.../common/access/contracts/AccessDeniedException.java`)
 - **Open questions:**
   - `// Temporary: with UC18 this check uses the permissions of the role.` in `AuditService.java:17` and
     `IU_Welcome.java:19`: the code still checks the role name `SYSTEM_ADMINISTRATOR` (`AuditService.java:47`,
