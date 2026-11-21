@@ -8,6 +8,7 @@ import java.util.List;
  * CONFIGURE_INTEGRATIONS of UC20 and MANAGE_PATIENTS of UC12).
  */
 public class InMemoryPermissionRepository implements IPermissionRepository {
+    /** Permission of UC18 to assign roles to users and permissions to roles. */
     public static final Permission MANAGE_ROLES =
             new Permission("MANAGE_ROLES", "Assign roles to users and permissions to roles");
 

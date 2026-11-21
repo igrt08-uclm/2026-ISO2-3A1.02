@@ -31,6 +31,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 
+/**
+ * Presents the screen for managing roles and permissions (UC18).
+ */
 public class IU_ManageRoles extends JPanel {
     private static final Color ERROR_COLOR = new Color(0xB00020);
     private static final String ERROR_ICON = "⚠ ";
@@ -63,8 +66,14 @@ public class IU_ManageRoles extends JPanel {
     private final JButton btnBack = new JButton("Back");
 
     /**
+     * Creates the role and permission management screen with the given role service, requester, confirmation predicate
+     * and back callback.
+     *
+     * @param roleService the service used to manage roles and permissions
+     * @param requester the username of the user managing roles and permissions
      * @param confirm asks the question of a change and returns {@code true} if the user accepts it; the tests pass an
      *                answer, so that they do not open a window
+     * @param onBack the callback executed when returning to the previous screen
      */
     public IU_ManageRoles(IRoleManagementService roleService, String requester, Predicate<String> confirm,
             Runnable onBack) {
@@ -118,12 +127,22 @@ public class IU_ManageRoles extends JPanel {
         loadRolePermissions(null);
     }
 
+    /**
+     * Selects the given role and displays its permissions.
+     *
+     * @param role the role to select and display permissions for; it may be {@code null}
+     */
     public void selectRole(Role role) {
         if (role != null) {
             selectPermissions(role.getPermissions());
         }
     }
 
+    /**
+     * Displays the given permissions in the role permissions list.
+     *
+     * @param permissions the list of permissions to display
+     */
     public void selectPermissions(List<Permission> permissions) {
         rolePermissionsModel.clear();
         rolePermissionsModel.addAll(permissions);
@@ -174,12 +193,22 @@ public class IU_ManageRoles extends JPanel {
         }
     }
 
+    /**
+     * Selects the given user and displays their assigned roles.
+     *
+     * @param user the user whose roles to display; it may be {@code null}
+     */
     public void selectUser(UserAccount user) {
         if (user != null) {
             displayRoles(roleService.getRoles(user.getUsername()));
         }
     }
 
+    /**
+     * Displays the given roles in the user roles list.
+     *
+     * @param roles the list of roles to display
+     */
     public void displayRoles(List<Role> roles) {
         userRolesModel.clear();
         userRolesModel.addAll(roles);
@@ -258,6 +287,11 @@ public class IU_ManageRoles extends JPanel {
         refresh.run();
     }
 
+    /**
+     * Displays a success message in the status bar.
+     *
+     * @param message the success message to display
+     */
     public void showOperationResultSuccess(String message) {
         lblStatus.setForeground(SUCCESS_COLOR);
         lblStatus.setText(SUCCESS_ICON + message);

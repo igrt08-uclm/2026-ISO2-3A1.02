@@ -22,6 +22,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * Presents the login screen for user authentication (UC22).
+ */
 public class IU_Login extends JPanel {
     private static final int FIELD_COLUMNS = 30;
     private static final Color ERROR_COLOR = new Color(0xB00020);
@@ -36,6 +39,12 @@ public class IU_Login extends JPanel {
     private final JLabel lblError = new JLabel(" ");
     private final JButton btnLogin = new JButton("Log in");
 
+    /**
+     * Creates the login screen with the given authentication service and success callback.
+     *
+     * @param authenticationService the service used to authenticate users
+     * @param onSuccess the callback executed upon successful authentication
+     */
     public IU_Login(IAuthenticationService authenticationService, Consumer<UserAccount> onSuccess) {
         super(new GridBagLayout());
         this.authenticationService = authenticationService;
@@ -51,6 +60,12 @@ public class IU_Login extends JPanel {
         SwingUtilities.invokeLater(txtUsername::requestFocusInWindow);
     }
 
+    /**
+     * Submits credentials to authenticate the user.
+     *
+     * @param username the username to authenticate
+     * @param password the password of the user
+     */
     public void enterCredentials(String username, String password) {
         try {
             authenticatedUser = authenticationService.login(username, password);
@@ -60,6 +75,11 @@ public class IU_Login extends JPanel {
         }
     }
 
+    /**
+     * Displays the error message for the given authentication failure reason.
+     *
+     * @param reason the reason why authentication failed
+     */
     public void showLoginError(AuthenticationFailureReason reason) {
         switch (reason) {
             case UNKNOWN_USER -> focusUsername();
