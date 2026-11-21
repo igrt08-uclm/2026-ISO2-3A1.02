@@ -165,7 +165,12 @@ flowchart LR
   `git commit -m "docs(C1): state of the patch 1.2.3 for Adam (#172)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
-To be completed in step 6. The code of the patch is in steps 1-3 (hashes above). Tests that need to be adapted in this branch (nothing else should fail):
+State of 21/11/2026, at the end of step 5. The code of the patch is in `de4f6ce` (permission and role), `cb52259`
+(`AuditService` and `Main`) and `26ac269` (`IU_Welcome`); the versions are in `96f692c` (poms) and `ee27ab3`
+(`agents/`). The main code compiles (`mvn -B -ntp -Dmaven.test.skip=true -Djacoco.skip=true verify`: `BUILD SUCCESS`).
+The build with the tests fails only when compiling the tests of `server/c1-access`, at the four call sites below, and
+`client/c1-access` is skipped; the other modules pass (52, 154, 143, 124 and 112 tests).
+Tests that need to be adapted in this branch (nothing else should fail):
 - Do not compile (old 2-argument constructor of `AuditService`; the new one is `AuditService(IAuditLogRepository, IUserAccountRepository, IRoleRepository)`): `AuditServiceTest` (lines 42 and 166), `AuditServiceIntegrationTest` (line 29), `RoleManagementServiceIntegrationTest` (line 35).
 - Expect the old list of permissions: `InMemoryPermissionRepositoryTest` (lines 35-39: now 5 permissions, `CONSULT_AUDIT` last), `InMemoryRoleRepositoryTest` (line 42: the administrator has `MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS;CONSULT_AUDIT`).
 - Expect *View audit log* for an administrator by role (now it needs `CONSULT_AUDIT` in the list of permissions passed to `IU_Welcome`; the 2- and 3-argument constructors never show it): `IU_WelcomeTest` (about lines 67-100, 124-130, 158-164), `IU_WelcomeConfigureSystemTest` (61, 114), `IU_WelcomeConfigureIntegrationsTest` (68, 131-133), `IU_WelcomeManagePatientsTest` (74, 111, 139-143).
@@ -187,9 +192,11 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 - [ ] The pull request (`Closes #172`) is approved by Ignacio (D-036).
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 6 (hand over to Adam: tick steps 1-5, fill in *State for Adam* and commit; no push). Steps 1-5 are
-  done in `de4f6ce`, `cb52259`, `26ac269`, `96f692c` and `ee27ab3`.
+- **In progress:** step 6 (hand over to Adam): *State for Adam* and this **Status** are written; only the tick of
+  step 6 and its commit are left.
+- **Next step:** tick step 6 of the plan with its hash, set *In progress* back to nothing and commit
+  `docs(C1): tick step 6 of the plan (#172)`. Then Javier pushes the branch and tells Adam, who adapts the tests of
+  *State for Adam* in this branch. Steps 1-5 are done in `de4f6ce`, `cb52259`, `26ac269`, `96f692c` and `ee27ab3`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
