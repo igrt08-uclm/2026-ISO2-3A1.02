@@ -93,7 +93,7 @@ flowchart LR
   - Checks: A (green) and B. **Expected in B:** `BUILD SUCCESS`; failures only in methods of `InMemoryPermissionRepositoryTest` (the list now has 5 permissions) and `InMemoryRoleRepositoryTest` (the row of `SYSTEM_ADMINISTRATOR`); every other module `Failures: 0, Errors: 0`.
   - Commit: `git add` the two files, then
     `git commit -m "fix(C1): permission CONSULT_AUDIT for the system administrator (#172)" -m "Tests pending Adam (#172)."`
-- [ ] **2. `AuditService` checks `CONSULT_AUDIT`, and `Main` shares the repository of roles** (Q2, Q3, Q4). Modules `server/c1-access` and `client/c1-access`, one commit.
+- [x] **2. `AuditService` checks `CONSULT_AUDIT`, and `Main` shares the repository of roles** (Q2, Q3, Q4). Modules `server/c1-access` and `client/c1-access`, one commit. `cb52259`
   - `AuditService.java`:
     - imports: add `es.uclm.esi.iso2.server.access.persistence.IRoleRepository` (between `IAuditLogRepository` and `IUserAccountRepository`) and `java.util.Objects` (after `java.util.List`).
     - class Javadoc becomes: `Records and consults audit log entries (UC19). Only an active user with the permission {@code CONSULT_AUDIT} in one of their roles can consult them; the permissions are read from the repository of roles, so a change made with UC18 applies at once.`
@@ -188,7 +188,8 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 2 (`AuditService.java` and `Main.java`, one commit). Step 1 is done in `de4f6ce`.
+- **Next step:** step 3 (`IU_Welcome.java`, module `client/c1-access`). Steps 1 and 2 are done in `de4f6ce` and
+  `cb52259`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
