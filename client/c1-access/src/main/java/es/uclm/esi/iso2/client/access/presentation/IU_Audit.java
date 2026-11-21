@@ -29,6 +29,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+/**
+ * Presents the audit log screen for consulting system activity (UC19).
+ */
 public class IU_Audit extends JPanel {
     private static final String ALL_ACTIONS = "All actions";
     private static final String[] ACTIONS =
@@ -57,6 +60,13 @@ public class IU_Audit extends JPanel {
     private final JButton btnClear = new JButton("Clear");
     private final JButton btnBack = new JButton("Back");
 
+    /**
+     * Creates the audit log screen with the given audit service, requester and back callback.
+     *
+     * @param auditService the service used to consult the audit log
+     * @param requester the username of the user consulting the log
+     * @param onBack the callback executed when returning to the previous screen
+     */
     public IU_Audit(IAuditService auditService, String requester, Runnable onBack) {
         super(new BorderLayout(0, 12));
         this.auditService = auditService;
@@ -83,6 +93,11 @@ public class IU_Audit extends JPanel {
         applyFilter("");
     }
 
+    /**
+     * Filters and displays the audit log entries according to the given criteria.
+     *
+     * @param filters the filter criteria separated by semicolons
+     */
     public void applyFilter(String filters) {
         try {
             displayActivity(auditService.getActivityLog(requester, filters));
@@ -94,6 +109,11 @@ public class IU_Audit extends JPanel {
         }
     }
 
+    /**
+     * Displays the given audit log entries in the table.
+     *
+     * @param logs the list of audit log entries to display
+     */
     public void displayActivity(List<AuditLog> logs) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         tableModel.setRowCount(0);
