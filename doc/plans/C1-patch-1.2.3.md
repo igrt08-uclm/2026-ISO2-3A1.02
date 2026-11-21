@@ -137,7 +137,7 @@ flowchart LR
   - Checks: A (green: it proves that `Main` compiles) and B. **Expected in B:** `BUILD FAILURE`; in `server-c1-access` only test compilation errors, and only in `AuditServiceTest.java`, `AuditServiceIntegrationTest.java` and `RoleManagementServiceIntegrationTest.java` (the old 2-argument constructor); `client-c1-access` `SKIPPED`; every other module `Failures: 0, Errors: 0`.
   - Commit: `git add` the two files, then
     `git commit -m "fix(C1): the audit log checks the permission CONSULT_AUDIT instead of the role (#172)" -m "Tests pending Adam (#172)."`
-- [ ] **3. `IU_Welcome` shows *View audit log* with `CONSULT_AUDIT`** (Q5). Module `client/c1-access`.
+- [x] **3. `IU_Welcome` shows *View audit log* with `CONSULT_AUDIT`** (Q5). Module `client/c1-access`. `26ac269`
   - `IU_Welcome.java`:
     - class Javadoc becomes: `Displays the welcome screen with the options available for the logged user. Each button is only shown to a user with its permission; for example, View audit log only to a user with {@code CONSULT_AUDIT}.`
     - delete line 22 (`// Temporary: ...`) and line 23 (`ADMINISTRATOR_ROLE`); add `private static final String CONSULT_AUDIT = "CONSULT_AUDIT";` before `MANAGE_ROLES`.
@@ -188,8 +188,8 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3 (`IU_Welcome.java`, module `client/c1-access`). Steps 1 and 2 are done in `de4f6ce` and
-  `cb52259`.
+- **Next step:** step 4 (versions in `server/c1-access/pom.xml`, `pom.xml` and `client/c1-access/pom.xml`; Javier already gave
+  the yes of rule 9 in the approval of this plan). Steps 1-3 are done in `de4f6ce`, `cb52259` and `26ac269`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
