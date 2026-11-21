@@ -76,7 +76,7 @@ flowchart LR
 - If a check gives a result different from the one written in the step (another test fails, a main class does not compile, another module fails), **stop**, do not commit, and write in **Status** what happened. Do not change a test to make it pass.
 
 ## Steps
-- [ ] **1. Permission `CONSULT_AUDIT` for the system administrator** (Q1, Q7). Module `server/c1-access`.
+- [x] **1. Permission `CONSULT_AUDIT` for the system administrator** (Q1, Q7). Module `server/c1-access`. `de4f6ce`
   - `InMemoryPermissionRepository.java`:
     - class Javadoc (lines 6-9) becomes:
       `Keeps the permissions in memory: each use case adds its own (MANAGE_ROLES of UC18, CONFIGURE_SYSTEM of UC17,`
@@ -188,7 +188,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 1 (`InMemoryPermissionRepository`). The plan was approved and committed as `docs(C1): plan for the patch 1.2.3 (#172)`.
+- **Next step:** step 2 (`AuditService.java` and `Main.java`, one commit). Step 1 is done in `de4f6ce`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
