@@ -152,7 +152,7 @@ Before step 1, this plan is committed alone: `docs(C1): plan of the Javadoc of C
 - [x] 2. `common.access.contracts` – `docs(C1): Javadoc of common.access.contracts (#150)` (08cbaa8)
 - [x] 3. server persistence – `docs(C1): Javadoc of the server persistence (#150)` (80345f3)
 - [x] 4. server service and integration – `docs(C1): Javadoc of the server services (#150)` (1ff5964)
-- [ ] 5. `IU_Login` and `IU_Welcome` – `docs(C1): Javadoc of IU_Login and IU_Welcome (#150)`
+- [x] 5. `IU_Login` and `IU_Welcome` – `docs(C1): Javadoc of IU_Login and IU_Welcome (#150)` (90bbe47)
 - [ ] 6. `IU_Audit` – `docs(C1): Javadoc of IU_Audit (#150)`
 - [ ] 7. `IU_ManageRoles` – `docs(C1): Javadoc of IU_ManageRoles (#150)`
 - [ ] 8. Final check – C1 against the whole branch (replace `HEAD` with `origin/develop...HEAD` in C1); C3 prints
@@ -190,7 +190,7 @@ N/A: comments only; existing tests must pass unchanged.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 5 (`client/c1-access/.../presentation/IU_Login.java`)
+- **Next step:** step 6 (`client/c1-access/.../presentation/IU_Audit.java`)
 - **Open questions:**
   - `// Temporary: with UC18 this check uses the permissions of the role.` in `AuditService.java:17` and
     `IU_Welcome.java:19`: the code still checks the role name `SYSTEM_ADMINISTRATOR` (`AuditService.java:47`,
