@@ -49,6 +49,12 @@ public final class Main {
             new IntegrationManagementService(roleManagementService, auditService, authenticatorSystem);
     private final PatientService patientService = new PatientService(roleManagementService, auditService);
 
+    /**
+     * Starts the application in the event dispatch thread of Swing: it loads the initial data of the components and
+     * shows the login screen.
+     *
+     * @param args the command-line arguments; they are not used
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Main().start());
     }
