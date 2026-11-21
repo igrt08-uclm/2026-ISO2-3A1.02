@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 class IU_WelcomeConfigureSystemTest {
     private static final Permission CONFIGURE_SYSTEM =
             new Permission("CONFIGURE_SYSTEM", "Configure the parameters of the system");
+    private static final Permission CONSULT_AUDIT =
+            new Permission("CONSULT_AUDIT", "Consult the audit log of the system activity");
     private static final Permission MANAGE_ROLES =
             new Permission("MANAGE_ROLES", "Assign roles to users and permissions to roles");
 
@@ -54,8 +56,8 @@ class IU_WelcomeConfigureSystemTest {
     @DisplayName("TC17C-02 An administrator with every permission sees the four buttons in order")
     void administratorSeesTheFourButtonsInOrder() {
         // Act
-        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> { }, List.of(MANAGE_ROLES, CONFIGURE_SYSTEM),
-                () -> { }, () -> { });
+        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> { },
+                List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONSULT_AUDIT), () -> { }, () -> { });
 
         // Assert
         assertEquals(List.of("View audit log", "Manage roles", "Configure system", "Log out"), buttonTexts(welcome));
@@ -107,8 +109,8 @@ class IU_WelcomeConfigureSystemTest {
     @DisplayName("TC17C-03 The constructor of UC18 does not show Configure system")
     void theConstructorOfUc18DoesNotShowTheButton() {
         // Act
-        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> { }, List.of(MANAGE_ROLES, CONFIGURE_SYSTEM),
-                () -> { });
+        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> { },
+                List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONSULT_AUDIT), () -> { });
 
         // Assert
         assertEquals(List.of("View audit log", "Manage roles", "Log out"), buttonTexts(welcome));

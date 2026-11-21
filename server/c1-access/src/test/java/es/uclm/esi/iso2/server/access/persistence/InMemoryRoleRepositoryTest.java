@@ -39,7 +39,7 @@ class InMemoryRoleRepositoryTest {
 
     @ParameterizedTest(name = "{0} has the permissions [{1}]")
     @CsvSource({
-        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS",
+        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS;CONSULT_AUDIT",
         "PHYSICIAN,            ''",
         "ADMISSIONS_STAFF,     MANAGE_PATIENTS",
         "PATIENT,              ''"
@@ -53,6 +53,21 @@ class InMemoryRoleRepositoryTest {
         assertNotNull(role);
         List<String> codes = role.getPermissions().stream().map(Permission::getCode).toList();
         assertEquals(expectedPermissions.isEmpty() ? List.of() : List.of(expectedPermissions.split(";")), codes);
+    }
+
+    @Test
+    @DisplayName("TC19S-10: only the System administrator has CONSULT_AUDIT, as its last permission")
+    void tc19s10OnlyTheAdministratorHasConsultAuditAsItsLastPermission() {
+        // Act
+        List<String> rolesWithConsultAudit = repository.findAll().stream()
+                .filter(role -> role.getPermissions().stream().anyMatch(p -> p.getCode().equals("CONSULT_AUDIT")))
+                .map(Role::getId).toList();
+
+        // Assert
+        List<Permission> administrator = repository.findById("SYSTEM_ADMINISTRATOR").getPermissions();
+        assertAll(
+                () -> assertEquals(List.of("SYSTEM_ADMINISTRATOR"), rolesWithConsultAudit),
+                () -> assertEquals("CONSULT_AUDIT", administrator.get(administrator.size() - 1).getCode()));
     }
 
     // "physician" shows that the lookup is case sensitive.
