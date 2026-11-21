@@ -149,7 +149,7 @@ flowchart LR
   - Checks: A (green) and the **full build** (last code step). **Expected in the full build:** `BUILD FAILURE` at the test compilation of `server-c1-access`, with errors only in the three test files of step 2; the modules after it are skipped. This is the expected state until Adam adapts the tests.
   - Commit: `git add` the file, then
     `git commit -m "fix(C1): the welcome screen shows View audit log with the permission CONSULT_AUDIT (#172)" -m "Tests pending Adam (#172)."`
-- [ ] **4. Versions** (Q6). **Ask Javier for a yes before changing the poms (rule 9).**
+- [x] **4. Versions** (Q6). **Ask Javier for a yes before changing the poms (rule 9).** `96f692c`
   - `server/c1-access/pom.xml` line 15: `<version>1.2.3-SNAPSHOT</version>`.
   - `pom.xml` line 34 (managed version of `server-c1-access`): `<version>1.2.3-SNAPSHOT</version>`.
   - `client/c1-access/pom.xml` line 15: `<version>1.2.4-SNAPSHOT</version>`.
@@ -188,8 +188,8 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 4 (versions in `server/c1-access/pom.xml`, `pom.xml` and `client/c1-access/pom.xml`; Javier already gave
-  the yes of rule 9 in the approval of this plan). Steps 1-3 are done in `de4f6ce`, `cb52259` and `26ac269`.
+- **Next step:** step 5 (versions in `agents/architecture.md` and `agents/components.md`; Javier already gave the yes of
+  rule 9 in the approval of this plan). Steps 1-4 are done in `de4f6ce`, `cb52259`, `26ac269` and `96f692c`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
