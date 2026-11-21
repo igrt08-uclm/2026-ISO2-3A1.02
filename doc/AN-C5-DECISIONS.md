@@ -7,10 +7,7 @@ Iteration 5 (Milestone 3) – Analysis discipline
 Each entry records the context, the decision and the rationale. The numbering continues from [AN-C4-DECISIONS.md](AN-C4-DECISIONS.md); the rules of [AN-IT1-DECISIONS.md](AN-IT1-DECISIONS.md) and [AN-C2-C3-DECISIONS.md](AN-C2-C3-DECISIONS.md) still apply (BCE pattern D07, naming D08, `AuditLog` written by every use case D10, permission check shown explicitly D16, one communication diagram per use case for its client and server parts D22). The decisions of the team are written `D-0xx`; the decisions of the analysis, `Dxx`.
 Status: **Agreed** = decided by the team · **To confirm** = proposed, pending team approval.
 
-Artefacts of this iteration (PlantUML proposals, D-008; the official versions are in `doc/ISO-Project.vpp`):
-- `doc/analysis/UC13-communication.puml`
-- `doc/analysis/UC15-communication.puml`
-- `doc/analysis/UC14-communication.puml`
+Artefacts of this iteration: the communication diagrams of UC13, UC15 and UC14, in `doc/ISO-Project.vpp` (Visual Paradigm 18.1, the official version, D-008). The PlantUML proposals are not kept in the repository.
 
 ---
 
