@@ -156,7 +156,7 @@ flowchart LR
   - Nothing else: not `common`, not the parent version `0.4.0-SNAPSHOT`.
   - Check: A (green).
   - Commit: `git commit -m "build(C1): server-c1-access 1.2.3-SNAPSHOT and client-c1-access 1.2.4-SNAPSHOT for the patch (#172)"`
-- [ ] **5. Versions in `agents/`** (Q7). **Ask Javier for a yes before changing `agents/` (rule 9).** Only the versions of C1:
+- [x] **5. Versions in `agents/`** (Q7). **Ask Javier for a yes before changing `agents/` (rule 9).** Only the versions of C1: `ee27ab3`
   - `agents/architecture.md` line 9: `version 1.2.2-SNAPSHOT` → `version 1.2.3-SNAPSHOT`; line 13: `version 1.2.3-SNAPSHOT` → `version 1.2.4-SNAPSHOT`; lines 41-42: `1.2.2-SNAPSHOT after the patches #109 and #112` → `1.2.3-SNAPSHOT after the patches #109, #112 and #172`, and `1.2.3-SNAPSHOT after UC12-client` → `1.2.4-SNAPSHOT after UC12-client and #172`.
   - `agents/components.md` line 56: `C1 is at 1.2.2 (#109, #116)` → `C1 is at 1.2.3 in the server and 1.2.4 in the client (#109, #116, #172)`. The rest of the line is not changed.
   - No build (documents only).
@@ -188,8 +188,8 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 5 (versions in `agents/architecture.md` and `agents/components.md`; Javier already gave the yes of
-  rule 9 in the approval of this plan). Steps 1-4 are done in `de4f6ce`, `cb52259`, `26ac269` and `96f692c`.
+- **Next step:** step 6 (hand over to Adam: tick steps 1-5, fill in *State for Adam* and commit; no push). Steps 1-5 are
+  done in `de4f6ce`, `cb52259`, `26ac269`, `96f692c` and `ee27ab3`.
 - **Open questions:**
   - Ignacio (versions, D-036): `doc/plans/C5-design.md` (lines 57 and 698) reserves `server-c1-access` 1.2.3 for `MANAGE_APPOINTMENTS`/`ORDER_PROCEDURES`; with this patch that one would be 1.2.4. Javier tells Ignacio, and also David if Ignacio is not available. `C5-design.md` is not changed here.
   - Marcos and Denis (design): `doc/design/C1-server-design.png` needs the dependency `AuditService` → `IRoleRepository`. No contract of `common` changes. Javier tells them; the plan does not wait.
