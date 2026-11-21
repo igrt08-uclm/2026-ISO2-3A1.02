@@ -182,7 +182,7 @@ N/A: comments only; existing tests must pass unchanged.
 
 ## Verification
 - [ ] Every class and public method of `server/c1-access`, `client/c1-access` and `common.access` has its Javadoc in
-  English (command C3 prints nothing), except the open question about `Main.main`.
+  English (command C3 prints nothing; `Main.main` was added by hand, outside C3).
 - [ ] Only comments changed: C1 against `origin/develop...HEAD` prints nothing; no file in `src/test` or `pom.xml`.
 - [ ] `mvn -B verify` is green with the same tests.
 - [ ] After the merge to `develop`: the workflow *Publish the Javadoc* (`.github/workflows/javadoc.yml`) is green and
@@ -199,7 +199,7 @@ N/A: comments only; existing tests must pass unchanged.
     `IU_Welcome.java:138`) although UC18 is done. David confirmed that it is an oversight (21/11/2026): it is fixed as
     a patch of C1 (D-036) in a separate issue; not changed here.
   - `package-info.java` for the packages of C1–C3 in `server` and `client`, if the team wants them.
-  - `Main.main` (`client/c1-access/.../client/Main.java`) has no Javadoc and Q13 leaves `Main.java` unchanged, while
-    #150 asks for every public method of `client-c1-access`.
+  - None about `Main.main`: it had no Javadoc and #150 asks for every public method of `client-c1-access`, so Javier
+    approved (21/11/2026) adding only its Javadoc, in its own commit (it changes Q13).
   - Whether this change raises the PATCH version of C1 (D-036); asked to Ignacio. This plan changes no `pom.xml`.
 - **Last update:** 21/11/2026, Javier
