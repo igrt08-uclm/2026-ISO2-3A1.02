@@ -11,6 +11,7 @@ import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
 import es.uclm.esi.iso2.common.access.contracts.IRoleManagementService;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
 import es.uclm.esi.iso2.server.access.integration.AuthenticatorSystemSimulator;
+import es.uclm.esi.iso2.server.access.persistence.IRoleRepository;
 import es.uclm.esi.iso2.server.access.persistence.IUserAccountRepository;
 import es.uclm.esi.iso2.server.access.persistence.InMemoryAuditLogRepository;
 import es.uclm.esi.iso2.server.access.persistence.InMemoryPermissionRepository;
@@ -35,13 +36,14 @@ public final class Main {
 
     private final JFrame window = new JFrame(APPLICATION_TITLE);
     private final IUserAccountRepository userAccountRepository = new InMemoryUserAccountRepository();
+    private final IRoleRepository roleRepository = new InMemoryRoleRepository();
     private final AuditService auditService =
-            new AuditService(new InMemoryAuditLogRepository(), userAccountRepository);
+            new AuditService(new InMemoryAuditLogRepository(), userAccountRepository, roleRepository);
     /** The single sign-on is shared: the login uses it, and the integration of UC20 tests it. */
     private final AuthenticatorSystemSimulator authenticatorSystem = new AuthenticatorSystemSimulator();
     private final IAuthenticationService authenticationService =
             new AuthenticationService(authenticatorSystem, userAccountRepository, auditService);
-    private final IRoleManagementService roleManagementService = new RoleManagementService(new InMemoryRoleRepository(),
+    private final IRoleManagementService roleManagementService = new RoleManagementService(roleRepository,
             new InMemoryPermissionRepository(), userAccountRepository, auditService);
     private final SystemParameterService systemParameterService =
             new SystemParameterService(roleManagementService, auditService);
