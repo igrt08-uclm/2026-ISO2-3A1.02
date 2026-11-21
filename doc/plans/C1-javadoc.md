@@ -149,7 +149,7 @@ this plan alone (`docs(C1): tick step N of the Javadoc plan (#150)`). If C1 or C
 Before step 1, this plan is committed alone: `docs(C1): plan of the Javadoc of C1 (#150)`.
 
 - [x] 1. `common.access.domain` – `docs(C1): Javadoc of common.access.domain (#150)` (a8efa25)
-- [ ] 2. `common.access.contracts` – `docs(C1): Javadoc of common.access.contracts (#150)`
+- [x] 2. `common.access.contracts` – `docs(C1): Javadoc of common.access.contracts (#150)` (08cbaa8)
 - [ ] 3. server persistence – `docs(C1): Javadoc of the server persistence (#150)`
 - [ ] 4. server service and integration – `docs(C1): Javadoc of the server services (#150)`
 - [ ] 5. `IU_Login` and `IU_Welcome` – `docs(C1): Javadoc of IU_Login and IU_Welcome (#150)`
@@ -190,7 +190,7 @@ N/A: comments only; existing tests must pass unchanged.
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 2 (`common/.../common/access/contracts/AccessDeniedException.java`)
+- **Next step:** step 3 (`server/c1-access/.../persistence/IAuditLogRepository.java`)
 - **Open questions:**
   - `// Temporary: with UC18 this check uses the permissions of the role.` in `AuditService.java:17` and
     `IU_Welcome.java:19`: the code still checks the role name `SYSTEM_ADMINISTRATOR` (`AuditService.java:47`,
