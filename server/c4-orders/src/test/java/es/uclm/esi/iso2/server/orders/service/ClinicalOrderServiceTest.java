@@ -250,10 +250,15 @@ class ClinicalOrderServiceTest {
         }
 
         @Test
-        @DisplayName("TC06S-12 a created order only registers ORDER_CREATED in C4")
+        @DisplayName("TC06S-12 C4 registers only ORDER_CREATED: it does not repeat the access to the patient")
         void createdOrderIsTheOnlyAuditEntry() throws AccessDeniedException, ValidationException {
             service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
-            assertEquals(List.of(new AuditEntry(PHYSICIAN, CREATED, "ORDER:ORD-0001")), audit.entries());
+            assertAll(
+                    () -> assertEquals(List.of(new AuditEntry(PHYSICIAN, CREATED, "ORDER:ORD-0001")),
+                            audit.entries()),
+                    () -> assertEquals(1, patients.getPatientCalls()),
+                    () -> assertTrue(audit.entries().stream()
+                            .noneMatch(entry -> entry.action().startsWith("PATIENT_"))));
         }
     }
 

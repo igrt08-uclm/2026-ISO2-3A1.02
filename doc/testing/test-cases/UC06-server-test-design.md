@@ -128,7 +128,7 @@ the next id); a repository that already has `ORD-0001` and `NEED-0001`.
 | TC06S-09 | Boundary value | `P-0001` with an order saved in a repository that already has `ORD-0001` and `NEED-0001` | `ORD-0002` and `NEED-0002` | Q6 |
 | TC06S-10 | Equivalence class | `URGENT`, `PREFERENTIAL`, `ROUTINE` | Accepted, with its `priorityId` | Q4 |
 | TC06S-11 | Boundary value | Indication and justification with spaces at the ends | Accepted; saved as sent | Q5 |
-| TC06S-12 | Equivalence class | Valid order | C3 registers `PATIENT_ACCESSED`; nothing else is audited | Q7, D34 |
+| TC06S-12 | Equivalence class | Valid order | C4 registers only `ORDER_CREATED` on `ORDER:ORD-0001`: it does not repeat the `PATIENT_ACCESSED` that C3 registers itself (the fake of C3 does not audit, so the case checks that C4 adds no `PATIENT_*` entry) | Q7, D34 |
 
 ### 5.3 Rejected orders (validation)
 
