@@ -104,7 +104,7 @@ flowchart TD
 - If a check gives a result different from the one written in the step, **stop**, do not commit, and write in **Status** what happened. If `common` falls below 80 % of lines or 70 % of branches, stop.
 
 ## Steps
-- [ ] **1. Module `server/c4-orders` (empty), its managed version, and `common` `1.6.0-SNAPSHOT`** (Q1, Q2). **Ask Javier for the yes of rule 9 before changing the poms.**
+- [x] **1. Module `server/c4-orders` (empty), its managed version, and `common` `1.6.0-SNAPSHOT`** (Q1, Q2). **Ask Javier for the yes of rule 9 before changing the poms.** Done: `69f588c`.
   - Create `server/c4-orders/pom.xml`:
     ```xml
     <?xml version="1.0" encoding="UTF-8"?>
@@ -151,7 +151,7 @@ flowchart TD
   - Checks: A, then the full build. **Expected:** `BUILD SUCCESS`, `Exit code: 0`; 11 reactor modules, with `common 1.6.0-SNAPSHOT` and `server-c4-orders 1.0.0-SNAPSHOT` (after `server-c3-patients`) `SUCCESS`; the test counts of the baseline with `Failures: 0, Errors: 0`; "All coverage checks have been met" 7 times; for `server-c4-orders` no `Tests run:` line and a `Skipping JaCoCo` line; a `WARN` "JAR will be empty" for `server-c4-orders` is expected. Write in **Status** what the build printed for `server-c4-orders`.
   - Commit: `git add server/c4-orders/pom.xml server/pom.xml pom.xml common/pom.xml`, then
     `git commit -m "build(UC06): module server-c4-orders and common 1.6.0-SNAPSHOT (#68)"`
-- [ ] **2. Domain and contract of C4 in `common`** (Q0, Q1, Q11). Module `common`. The packages are new (rule 9: covered by the approval of this plan).
+- [x] **2. Domain and contract of C4 in `common`** (Q0, Q1, Q11). Module `common`. The packages are new (rule 9: covered by the approval of this plan). Done: `7b949bb`.
   - Create `common/src/main/java/es/uclm/esi/iso2/common/orders/package-info.java`:
     ```java
     /**
@@ -374,7 +374,7 @@ flowchart TD
   - Checks: A, then the full build. **Expected:** as in step 1 (same tests, 7 coverage checks met, `server-c4-orders` skipped by JaCoCo). Then run the coverage of `common`: about 233-237 lines with 200 covered (≈ 85 %) and branches 14/14. If lines < 80 % or branches < 70 %, stop.
   - Commit: `git add common/src/main/java/es/uclm/esi/iso2/common/orders`, then
     `git commit -m "feat(UC06): clinical order domain and IClinicalOrderService in common (#68)" -m "Tests pending Adam (#68)."`
-- [ ] **3. In-memory repositories of orders and scheduling needs** (D-030). Module `server/c4-orders`.
+- [x] **3. In-memory repositories of orders and scheduling needs** (D-030). Module `server/c4-orders`. Done: `2d85d02`.
   - Create `server/c4-orders/src/main/java/es/uclm/esi/iso2/server/orders/persistence/IClinicalOrderRepository.java`:
     ```java
     package es.uclm.esi.iso2.server.orders.persistence;
@@ -508,7 +508,7 @@ flowchart TD
   - Checks: A, then the full build. **Expected:** as in step 2; `server-c4-orders` still has no `Tests run:` line and JaCoCo is skipped (`missing execution data file`).
   - Commit: `git add server/c4-orders/src/main/java/es/uclm/esi/iso2/server/orders/persistence`, then
     `git commit -m "feat(UC06): in-memory repositories of orders and scheduling needs (#68)" -m "Tests pending Adam (#68)."`
-- [ ] **4. `ClinicalOrderService`: permission, `orderDiagnosticProcedure`, `validate`, `createSchedulingNeeds` and audit** (Q4-Q7, Q12). Module `server/c4-orders`.
+- [x] **4. `ClinicalOrderService`: permission, `orderDiagnosticProcedure`, `validate`, `createSchedulingNeeds` and audit** (Q4-Q7, Q12). Module `server/c4-orders`. Done: `ef85719`.
   - Create `server/c4-orders/src/main/java/es/uclm/esi/iso2/server/orders/service/ClinicalOrderService.java`:
     ```java
     package es.uclm.esi.iso2.server.orders.service;
@@ -740,7 +740,7 @@ flowchart TD
   - Checks: A, then the full build. **Expected:** as in step 3 (same tests of the other modules; `server-c4-orders` with no `Tests run:` line and JaCoCo skipped).
   - Commit: `git add server/c4-orders/src/main/java/es/uclm/esi/iso2/server/orders/service/ClinicalOrderService.java`, then
     `git commit -m "feat(UC06): order a diagnostic procedure with validation and audit (#68)" -m "Tests pending Adam (#68)."`
-- [ ] **5. Reads and operations for C5** (Q7, Q11-Q14). Modules `common` and `server/c4-orders`.
+- [x] **5. Reads and operations for C5** (Q7, Q11-Q14). Modules `common` and `server/c4-orders`. Done: `488c9ef`.
   - `IClinicalOrderService.java`:
     - imports: add, in alphabetical order with the others, `import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;`, `import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;` and `import java.util.List;` (after the `shared` import).
     - after `orderDiagnosticProcedure`, add, in this order (the order of the design without `orderFollowUp`), with one empty line before each Javadoc:
@@ -884,7 +884,7 @@ flowchart TD
   - Checks: A, then the full build. **Expected:** as in step 4; coverage of `common` unchanged from step 2 (an interface adds no lines).
   - Commit: `git add common/src/main/java/es/uclm/esi/iso2/common/orders/contracts/IClinicalOrderService.java server/c4-orders/src/main/java/es/uclm/esi/iso2/server/orders/service/ClinicalOrderService.java`, then
     `git commit -m "feat(UC06): orders of a patient, one order and scheduling needs for C5 (#68)" -m "Tests pending Adam (#68)."`
-- [ ] **6. Versions in `agents/`** (Q9). **Ask Javier for the yes of rule 9 before changing `agents/`.** Only versions:
+- [x] **6. Versions in `agents/`** (Q9). **Ask Javier for the yes of rule 9 before changing `agents/`.** Only versions: Done: `92d38bb`.
   - `agents/architecture.md` line 11: the start `│   └── c3-patients/` becomes `│   ├── c3-patients/` (the rest of the line does not change), and after it add the line
     `│   └── c4-orders/       server of C4 (artifactId \`server-c4-orders\`, version 1.0.0-SNAPSHOT), depends only on common`
   - `agents/components.md` line 56: `` `common` is at 1.5.0-SNAPSHOT. `` → `` `common` is at 1.6.0-SNAPSHOT. `` The rest of the line does not change.
@@ -894,7 +894,7 @@ flowchart TD
 - [ ] **7. Hand over to Adam.** Tick steps 1-6 with their hashes, fill in *State for Adam* (date, hashes, what the full build printed) and **Status**, then `git add doc/plans/UC06-server.md` and `git commit -m "docs(UC06): state of UC06-server for Adam (#68)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
-To be completed in step 7 (date, hashes and the result of the full build). What is already known:
+**Ready on 23/11/2026**, branch `feature/UC06-server`, steps 1 to 6 committed: `69f588c` (module and poms), `7b949bb` (domain and contract in `common`), `2d85d02` (in-memory repositories), `ef85719` (`orderDiagnosticProcedure`), `488c9ef` (reads and operations for C5), `92d38bb` (`agents/`). `mvn -B verify` is green for `common` and `server/c4-orders` (coverage of `common` 200/235 lines, 14/14 branches); the full build has to be repeated on a machine with a desktop because the Swing tests need fonts. What is already known:
 - `server-c4-orders` has no tests: JaCoCo skips its check (`Skipping JaCoCo execution …`), so its coverage (80 % lines, 70 % branches, D-033) is only measured when your tests exist. The pull request (`Closes #68`) is opened only with your tests green and that check met.
 - **No inactive patient with the real C3:** there is no discharge in `IPatientService` (D-024, iteration 8), and the three seed patients are active (`PatientSeedData.java:20-25`). To test "patient not active", use your own `IPatientService` for the test, or `new PatientService(repository, …)` with an `InMemoryPatientRepository` that already has an inactive `Patient`.
 - A deactivated test type or priority can be made with the real C2 (`deactivateTestType`, `deactivatePriority`, they need `CONFIGURE_SYSTEM`: `admin`), or with your own `ISystemParameterService`.
@@ -923,7 +923,8 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 1 (`server/c4-orders/pom.xml`, `server/pom.xml`, `pom.xml`, `common/pom.xml`). The plan is approved by Javier (22/11/2026) and the branch is up to date with `develop` (`b8a8983`, with pull request #201).
+- **Next step:** step 7 is done: the code of steps 1 to 6 is committed and the branch is ready for the tests. Steps 2 to 6 were done by Ignacio on 23/11/2026 following this plan; the tests branch `feature/UC06-server-tests` forks from `92d38bb`, with the test design in `doc/testing/test-cases/UC06-server-test-design.md`.
+- **Build of steps 2 to 6 (23/11/2026):** `mvn -B verify` of `common` and `server/c4-orders` gives `BUILD SUCCESS`; `common` covers 200/235 lines (85 %) and 14/14 branches. The Swing tests of the `client/` modules cannot run in the environment of that session (it has no fontconfig), so the full build of the eleven modules has to be repeated on a machine with a desktop.
 - **Open questions:**
   1. Javier (with Adam): seed data of C4 (`loadSeedData()`, in the design): needed or not, and which. If they are, a step is added (Q8).
   2. Requirements (David and Ignacio): are the clinical indication and the justification required, and with a maximum length (Q5)? Which `dueDate` has the need of a diagnostic order: the date of the order, or one that depends on the priority (Q6)? Does a deactivated priority count as a "configured tier" (Q4)?
