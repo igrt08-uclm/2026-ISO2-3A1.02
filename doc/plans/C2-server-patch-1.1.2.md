@@ -72,7 +72,7 @@ flowchart LR
 - If a check gives a result different from the one written in the step (a test fails, a main class does not compile, a coverage check fails, another module fails), **stop**, do not commit, and write in **Status** what happened. Do not change a test to make it pass.
 
 ## Steps
-- [ ] **1. The five reads accept `ORDER_PROCEDURES` and `MANAGE_APPOINTMENTS`** (Q2-Q6). Module `server/c2-configuration`, file `SystemParameterService.java`.
+- [x] **1. The five reads accept `ORDER_PROCEDURES` and `MANAGE_APPOINTMENTS`** (Q2-Q6). Module `server/c2-configuration`, file `SystemParameterService.java`. Done in `d7f98cf`.
   - class Javadoc (lines 20-24) becomes:
     ```java
     /**
@@ -156,7 +156,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 1 in `SystemParameterService.java` (plan approved by Javier on 22/11/2026).
+- **Next step:** step 2, version of `server-c2-configuration` to `1.1.2-SNAPSHOT` in `server/c2-configuration/pom.xml` (line 15) and in `pom.xml` (line 39).
 - **Open questions:**
   1. `getProtocols` (`SystemParameterService.java:144`) still needs `CONFIGURE_SYSTEM`; #174 and `doc/plans/C5-design.md:58` do not ask for it. If C4 or C5 need protocols, it will be another patch.
   2. The Javadoc of `ISystemParameterService` (`common/.../configuration/contracts/ISystemParameterService.java:14`) still says that every operation checks `CONFIGURE_SYSTEM`. It is not changed here so that `common` does not enter the patch (D-036).
