@@ -125,7 +125,7 @@ flowchart LR
   - Nothing else: not `client/c2-configuration/pom.xml` nor `pom.xml:54` (stay `1.1.2-SNAPSHOT`), not `common`, not the parent version `0.4.0-SNAPSHOT`.
   - Check: A (green; without the filter the line `Building server-c2-configuration 1.1.2-SNAPSHOT` can be seen).
   - Commit: `git add` the two poms, then `git commit -m "build(C2): server-c2-configuration 1.1.2-SNAPSHOT for the patch (#174)"`
-- [ ] **3. Version in `agents/`** (Q8). **Ask Javier for a yes before changing `agents/` (rule 9).** Only the version:
+- [x] **3. Version in `agents/`** (Q8). **Ask Javier for a yes before changing `agents/` (rule 9).** Done in `a3c5bfc`. Only the version:
   - `agents/architecture.md` line 10: `version 1.1.1-SNAPSHOT` → `version 1.1.2-SNAPSHOT`. The rest of the line and line 16 (client, `1.1.2-SNAPSHOT`) do not change.
   - No build (documents only).
   - Commit: `git add agents/architecture.md`, then `git commit -m "docs(C2): version of the server patch 1.1.2 in agents (#174)"`
@@ -156,7 +156,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3, version of the server of C2 in `agents/architecture.md` (line 10) to `1.1.2-SNAPSHOT`.
+- **Next step:** step 4, hand over to Adam: fill in *State for Adam* (date, hashes of steps 1-3 and the results of the full build of step 1) and the **Status**, then commit `doc/plans/C2-server-patch-1.1.2.md` with `docs(C2): state of the server patch 1.1.2 for Adam (#174)`. No push.
 - **Open questions:**
   1. `getProtocols` (`SystemParameterService.java:144`) still needs `CONFIGURE_SYSTEM`; #174 and `doc/plans/C5-design.md:58` do not ask for it. If C4 or C5 need protocols, it will be another patch.
   2. The Javadoc of `ISystemParameterService` (`common/.../configuration/contracts/ISystemParameterService.java:14`) still says that every operation checks `CONFIGURE_SYSTEM`. It is not changed here so that `common` does not enter the patch (D-036).
