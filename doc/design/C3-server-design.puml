@@ -5,17 +5,17 @@ title C3 – Patients (Server Design)
 
 package "common" {
   package "Domain (entities)" {
-    !include common/C3-common.puml!Patient
-    !include common/C3-common.puml!Sex
+    !includesub common/C3-common.puml!Patient
+    !includesub common/C3-common.puml!Sex
   }
 
   package "Contracts (interfaces)" {
-    !include common/shared-contracts.puml!AccessDeniedException
-    !include common/C3-common.puml!DuplicatePatientException
-    !include common/shared-contracts.puml!IAuditRecorder
-    !include common/C3-common.puml!IPatientService
-    !include common/C1-common.puml!IRoleManagementService
-    !include common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C3-common.puml!DuplicatePatientException
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/shared-contracts.puml!ValidationException
   }
 
 }
@@ -77,12 +77,15 @@ end note
 N1 .. PatientService
 
 note as N2
-  every access and change is registered: PATIENT_ACCESSED, PATIENT_REGISTERED, PATIENT_MODIFIED (D26)
+  every access and change is registered:
+  PATIENT_ACCESSED, PATIENT_REGISTERED, PATIENT_MODIFIED
+  (D26)
 end note
 N2 .. PatientService
 
 note as N3
-  no delete: patients are deactivated (D-022); discharge comes in It8
+  no delete: patients are deactivated (D-022); discharge
+  comes in It8
 end note
 N3 .. InMemoryPatientRepository
 

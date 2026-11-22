@@ -4,11 +4,11 @@ left to right direction
 
 title Component 4 – Clinical Orders (Client & Server Use Cases)
 
-!include _actors.puml!User
-!include _actors.puml!Patient
-!include _actors.puml!Physician
-!include _actors.puml!Client
-!include _actors.puml!Server
+!includesub _actors.puml!User
+!includesub _actors.puml!Patient
+!includesub _actors.puml!Physician
+!includesub _actors.puml!Client
+!includesub _actors.puml!Server
 
 Patient --|> User
 Physician --|> Patient

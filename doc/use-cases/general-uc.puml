@@ -4,13 +4,13 @@ left to right direction
 
 title General Use Case Diagram (C1–C5)
 
-!include _actors.puml!User
-!include _actors.puml!SystemAdmin
-!include _actors.puml!AdmissionsStaff
-!include _actors.puml!Patient
-!include _actors.puml!Physician
-!include _actors.puml!AuthenticatorSystem
-!include _actors.puml!SSO
+!includesub _actors.puml!User
+!includesub _actors.puml!SystemAdmin
+!includesub _actors.puml!AdmissionsStaff
+!includesub _actors.puml!Patient
+!includesub _actors.puml!Physician
+!includesub _actors.puml!AuthenticatorSystem
+!includesub _actors.puml!SSO
 
 SysAdmin --|> User
 Admissions --|> User

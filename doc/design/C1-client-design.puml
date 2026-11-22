@@ -5,19 +5,19 @@ title C1 – Access and Security (Client Design)
 
 package "common" {
   package "Domain (entities)" {
-    !include common/C1-common.puml!AuditLog
-    !include common/C1-common.puml!Permission
-    !include common/C1-common.puml!Role
-    !include common/C1-common.puml!UserAccount
+    !includesub common/C1-common.puml!AuditLog
+    !includesub common/C1-common.puml!Permission
+    !includesub common/C1-common.puml!Role
+    !includesub common/C1-common.puml!UserAccount
   }
 
   package "Contracts (interfaces)" {
-    !include common/shared-contracts.puml!AccessDeniedException
-    !include common/C1-common.puml!AuthenticationException
-    !include common/C1-common.puml!AuthenticationFailureReason
-    !include common/C1-common.puml!IAuditService
-    !include common/C1-common.puml!IAuthenticationService
-    !include common/C1-common.puml!IRoleManagementService
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C1-common.puml!AuthenticationException
+    !includesub common/C1-common.puml!AuthenticationFailureReason
+    !includesub common/C1-common.puml!IAuditService
+    !includesub common/C1-common.puml!IAuthenticationService
+    !includesub common/C1-common.puml!IRoleManagementService
   }
 
 }

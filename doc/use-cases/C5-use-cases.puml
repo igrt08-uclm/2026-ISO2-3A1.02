@@ -4,10 +4,10 @@ left to right direction
 
 title Component 5 – Appointment Planning (Client & Server Use Cases)
 
-!include _actors.puml!User
-!include _actors.puml!AdmissionsStaff
-!include _actors.puml!Client
-!include _actors.puml!Server
+!includesub _actors.puml!User
+!includesub _actors.puml!AdmissionsStaff
+!includesub _actors.puml!Client
+!includesub _actors.puml!Server
 
 Admissions --|> User
 

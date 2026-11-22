@@ -4,12 +4,12 @@ left to right direction
 
 title Component 2 – Configuration and Integrations (Client & Server Use Cases)
 
-!include _actors.puml!User
-!include _actors.puml!SystemAdmin
-!include _actors.puml!AuthenticatorSystem
-!include _actors.puml!SSO
-!include _actors.puml!Client
-!include _actors.puml!Server
+!includesub _actors.puml!User
+!includesub _actors.puml!SystemAdmin
+!includesub _actors.puml!AuthenticatorSystem
+!includesub _actors.puml!SSO
+!includesub _actors.puml!Client
+!includesub _actors.puml!Server
 
 SysAdmin --|> User
 SSO --|> AuthSystem

@@ -4,7 +4,6 @@ skinparam shadowing false
 skinparam roundcorner 6
 skinparam defaultFontName SansSerif
 skinparam defaultFontSize 12
-skinparam linetype ortho
 
 skinparam class {
   BackgroundColor #F8FAFC

@@ -5,19 +5,19 @@ title C4 – Clinical Orders (Client Design)
 
 package "common" {
   package "Domain (entities)" {
-    !include common/C4-common.puml!ClinicalOrder
-    !include common/C4-common.puml!DiagnosticOrder
-    !include common/C4-common.puml!FollowUpOrder
-    !include common/C4-common.puml!SchedulingNeed
-    !include common/C4-common.puml!SchedulingNeedStatus
+    !includesub common/C4-common.puml!ClinicalOrder
+    !includesub common/C4-common.puml!DiagnosticOrder
+    !includesub common/C4-common.puml!FollowUpOrder
+    !includesub common/C4-common.puml!SchedulingNeed
+    !includesub common/C4-common.puml!SchedulingNeedStatus
   }
 
   package "Contracts (interfaces)" {
-    !include common/shared-contracts.puml!AccessDeniedException
-    !include common/C4-common.puml!IClinicalOrderService
-    !include common/C3-common.puml!IPatientService
-    !include common/C2-common.puml!ISystemParameterService
-    !include common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C4-common.puml!IClinicalOrderService
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/shared-contracts.puml!ValidationException
   }
 
 }

@@ -5,22 +5,22 @@ title C5 – Appointment Planning (Client Design)
 
 package "common" {
   package "Domain (entities)" {
-    !include common/C5-common.puml!Appointment
-    !include common/C5-common.puml!AppointmentStatus
-    !include common/C5-common.puml!PendingNeedView
-    !include common/C5-common.puml!ScheduleEntry
-    !include common/C5-common.puml!TimeSlot
-    !include common/C5-common.puml!WaitlistEntry
-    !include common/C5-common.puml!WaitlistStatus
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C5-common.puml!PendingNeedView
+    !includesub common/C5-common.puml!ScheduleEntry
+    !includesub common/C5-common.puml!TimeSlot
+    !includesub common/C5-common.puml!WaitlistEntry
+    !includesub common/C5-common.puml!WaitlistStatus
   }
 
   package "Contracts (interfaces)" {
-    !include common/shared-contracts.puml!AccessDeniedException
-    !include common/C5-common.puml!IAppointmentService
-    !include common/C5-common.puml!IDailyScheduleService
-    !include common/C2-common.puml!ISystemParameterService
-    !include common/C5-common.puml!IWaitlistService
-    !include common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C5-common.puml!IAppointmentService
+    !includesub common/C5-common.puml!IDailyScheduleService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/C5-common.puml!IWaitlistService
+    !includesub common/shared-contracts.puml!ValidationException
   }
 
 }
@@ -87,17 +87,22 @@ IU_DailySchedule ..> ValidationException : <<use>>
 
 ' ==================== Notes ====================
 note as N1
-  Realizes IU_ManageAppointments (UC13, C5 1.0.0). Asks confirmation via confirm before cancelling (D-022).
+  Realizes IU_ManageAppointments (UC13, C5 1.0.0). Asks
+  confirmation via confirm before cancelling (D-022).
 end note
 N1 .. IU_ManageAppointments
 
 note as N2
-  Realizes IU_ManageWaitlist (UC15, C5 1.1.0). Asks confirmation via confirm before removing (D-022). Shows empty-state notice when waitlist/openings are empty.
+  Realizes IU_ManageWaitlist (UC15, C5 1.1.0). Asks
+  confirmation via confirm before removing (D-022). Shows
+  empty-state notice when waitlist/openings are empty.
 end note
 N2 .. IU_ManageWaitlist
 
 note as N3
-  Realizes IU_DailySchedule (UC14, C5 1.2.0). Displays schedule per room or room/physician worklist in time order; never shows cancelled appointments.
+  Realizes IU_DailySchedule (UC14, C5 1.2.0). Displays
+  schedule per room or room/physician worklist in time
+  order; never shows cancelled appointments.
 end note
 N3 .. IU_DailySchedule
 

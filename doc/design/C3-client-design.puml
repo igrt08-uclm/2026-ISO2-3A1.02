@@ -5,15 +5,15 @@ title C3 – Patients (Client Design)
 
 package "common" {
   package "Domain (entities)" {
-    !include common/C3-common.puml!Patient
-    !include common/C3-common.puml!Sex
+    !includesub common/C3-common.puml!Patient
+    !includesub common/C3-common.puml!Sex
   }
 
   package "Contracts (interfaces)" {
-    !include common/shared-contracts.puml!AccessDeniedException
-    !include common/C3-common.puml!DuplicatePatientException
-    !include common/C3-common.puml!IPatientService
-    !include common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C3-common.puml!DuplicatePatientException
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/shared-contracts.puml!ValidationException
   }
 
 }

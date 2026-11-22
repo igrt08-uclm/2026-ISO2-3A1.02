@@ -1,5 +1,5 @@
 ' Shared common definitions: shared-contracts.puml (D-046)
-' Included via !include common/shared-contracts.puml!<TypeName> so each type has a single source of truth.
+' Included via !includesub common/shared-contracts.puml!<TypeName> so each type has a single source of truth.
 
 !startsub AccessDeniedException
 class AccessDeniedException <<Exception>> {

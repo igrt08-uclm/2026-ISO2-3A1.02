@@ -5,26 +5,26 @@ title C2 – Configuration and Integrations (Server Design)
 
 package "common" {
   package "Domain (entities)" {
-    !include common/C2-common.puml!AppointmentPolicy
-    !include common/C2-common.puml!ConnectionTestResult
-    !include common/C2-common.puml!HospitalSystemType
-    !include common/C2-common.puml!IntegrationConfiguration
-    !include common/C2-common.puml!IntegrationMode
-    !include common/C2-common.puml!IntegrationStatus
-    !include common/C2-common.puml!Priority
-    !include common/C2-common.puml!Protocol
-    !include common/C2-common.puml!Schedule
-    !include common/C2-common.puml!TestType
+    !includesub common/C2-common.puml!AppointmentPolicy
+    !includesub common/C2-common.puml!ConnectionTestResult
+    !includesub common/C2-common.puml!HospitalSystemType
+    !includesub common/C2-common.puml!IntegrationConfiguration
+    !includesub common/C2-common.puml!IntegrationMode
+    !includesub common/C2-common.puml!IntegrationStatus
+    !includesub common/C2-common.puml!Priority
+    !includesub common/C2-common.puml!Protocol
+    !includesub common/C2-common.puml!Schedule
+    !includesub common/C2-common.puml!TestType
   }
 
   package "Contracts (interfaces)" {
-    !include common/shared-contracts.puml!AccessDeniedException
-    !include common/shared-contracts.puml!IAuditRecorder
-    !include common/C1-common.puml!IAuthenticatorSystem
-    !include common/C2-common.puml!IIntegrationManagementService
-    !include common/C1-common.puml!IRoleManagementService
-    !include common/C2-common.puml!ISystemParameterService
-    !include common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C1-common.puml!IAuthenticatorSystem
+    !includesub common/C2-common.puml!IIntegrationManagementService
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/shared-contracts.puml!ValidationException
   }
 
 }
@@ -162,7 +162,8 @@ end note
 N2 .. SystemParameterService
 
 note as N3
-  examination catalogue preloaded as seed data (D-003, D13)
+  examination catalogue preloaded as seed data (D-003,
+  D13)
 end note
 N3 .. ConfigurationSeedData
 

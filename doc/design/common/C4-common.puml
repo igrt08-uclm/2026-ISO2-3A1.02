@@ -1,5 +1,5 @@
 ' Shared common definitions: C4-common.puml (D-046)
-' Included via !include common/C4-common.puml!<TypeName> so each type has a single source of truth.
+' Included via !includesub common/C4-common.puml!<TypeName> so each type has a single source of truth.
 
 !startsub ClinicalOrder
 abstract class ClinicalOrder <<entity>> {

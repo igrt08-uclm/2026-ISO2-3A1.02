@@ -1,5 +1,5 @@
 ' Shared common definitions: C2-common.puml (D-046)
-' Included via !include common/C2-common.puml!<TypeName> so each type has a single source of truth.
+' Included via !includesub common/C2-common.puml!<TypeName> so each type has a single source of truth.
 
 !startsub TestType
 class TestType <<entity>> {
