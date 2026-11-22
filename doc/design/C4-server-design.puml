@@ -28,11 +28,11 @@ package "server" {
   package "Service (control)" {
     class ClinicalOrderService <<control>> {
       +loadSeedData() : void
-      +orderDiagnosticProcedure(requester : String, order : DiagnosticOrder) : DiagnosticOrder
-      +orderFollowUp(requester : String, order : FollowUpOrder) : FollowUpOrder
-      +getOrdersOfPatient(requester : String, patientId : String) : List<ClinicalOrder>
-      +getPendingSchedulingNeeds(requester : String) : List<SchedulingNeed>
-      +markSchedulingNeedBooked(requester : String, needId : String) : void
+      +orderDiagnosticProcedure(requester : String, order : DiagnosticOrder) : DiagnosticOrder throws AccessDeniedException, ValidationException
+      +orderFollowUp(requester : String, order : FollowUpOrder) : FollowUpOrder throws AccessDeniedException, ValidationException
+      +getOrdersOfPatient(requester : String, patientId : String) : List<ClinicalOrder> throws AccessDeniedException, ValidationException
+      +getPendingSchedulingNeeds(requester : String) : List<SchedulingNeed> throws AccessDeniedException
+      +markSchedulingNeedBooked(requester : String, needId : String) : void throws AccessDeniedException, ValidationException
       +getOrder(requester : String, orderId : String) : ClinicalOrder throws AccessDeniedException, ValidationException
       +markSchedulingNeedPending(requester : String, needId : String) : void throws AccessDeniedException, ValidationException
       -checkPermission(requester : String) : void
@@ -83,8 +83,8 @@ InMemorySchedulingNeedRepository ..|> ISchedulingNeedRepository
 InMemoryClinicalOrderRepository ..|> IClinicalOrderRepository
 ClinicalOrderService ..> ISchedulingNeedRepository : <<use>>
 ClinicalOrderService ..> IClinicalOrderRepository : <<use>>
-ClinicalOrderService ..> AccessDeniedException : <<use>>
-ClinicalOrderService ..> ValidationException : <<use>>
+ClinicalOrderService ..> AccessDeniedException : <<throw>>
+ClinicalOrderService ..> ValidationException : <<throw>>
 ClinicalOrderService ..> IAuditRecorder : <<use>>
 ClinicalOrderService ..> IRoleManagementService : <<use>>
 ClinicalOrderService ..> ISystemParameterService : <<use>>
