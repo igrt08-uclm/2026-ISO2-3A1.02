@@ -1,0 +1,24 @@
+@startuml UC22_Login_Sequence
+!include ../design/common/_style.puml
+
+title UC22 – Log in (Analysis Sequence Diagram)
+
+actor "User" as User
+boundary "IU_Login" as IU
+control "Control_Login" as Ctrl
+entity "UserAccount" as UserAcc
+boundary "IU_AuthenticatorSystem" as AuthIU
+actor "SSO" as SSO
+entity "Role" as Role
+entity "AuditLog" as Audit
+
+User -> IU : 1: enterCredentials(user, password)
+IU -> Ctrl : 2: authenticate(user, password)
+Ctrl -> UserAcc : 3: obtainUser(user)
+Ctrl -> AuthIU : 4: validateCredentials(user, password)
+AuthIU -> SSO : 5: validate(user, password)
+Ctrl -> Role : 6: obtainRole(user)
+Ctrl -> Audit : 7: registerAccess(user)
+Ctrl --> IU : 8: showFunctionalities(permissions)
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml UC15_ManageWaitlist_Sequence
+!include ../design/common/_style.puml
+
+title UC15 – Manage waitlists, triage priority tiers and calendar openings (Analysis Sequence Diagram)
+
+actor "Admissions staff" as Staff
+boundary "IU_ManageWaitlist" as IU
+control "Control_ManageWaitlist" as Ctrl
+entity "UserAccount" as UserAcc
+entity "WaitlistEntry" as Entry
+entity "Priority" as Priority
+control "Control_ManageAppointments" as ApptCtrl
+entity "AuditLog" as Audit
+
+== Consult waitlist and openings ==
+Staff -> IU : 1: selectTestType(testTypeId)
+IU -> Ctrl : 2: obtainWaitlist(testTypeId)
+Ctrl -> UserAcc : 3: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Entry : 4: getEntries(testTypeId)
+Ctrl -> ApptCtrl : 5: obtainFreeSlots(testTypeId)
+Ctrl --> IU : 6: showWaitlist(entries, openings)
+
+== Add or update waitlist entry ==
+Staff -> IU : 7: saveEntry(needId, tier)
+IU -> Ctrl : 8: saveEntry(needId, tier)
+Ctrl -> UserAcc : 9: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Priority : 10: isConfiguredTier(tier)
+Ctrl -> Entry : 11: save(needId, tier, date)
+Ctrl -> Audit : 12: register(staff, WAITLIST_CHANGED, needId)
+Ctrl --> IU : 13: showConfirmation()
+
+== Propose patient and fill opening ==
+Staff -> IU : 14: selectOpening(opening)
+IU -> Ctrl : 15: proposePatient(opening)
+Ctrl -> Entry : 16: getFirstSuitable(testTypeId, opening)
+Ctrl --> IU : 17: showProposal(entry)
+
+Staff -> IU : 18: confirmBooking(entryId, opening)
+IU -> Ctrl : 19: fillOpening(entryId, opening)
+Ctrl -> UserAcc : 20: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> ApptCtrl : 21: <<include>> book(needId, opening)
+Ctrl -> Entry : 22: close(entryId)
+Ctrl -> Audit : 23: register(staff, OPENING_FILLED, entryId)
+Ctrl --> IU : 24: showConfirmation(appointment)
+
+@enduml

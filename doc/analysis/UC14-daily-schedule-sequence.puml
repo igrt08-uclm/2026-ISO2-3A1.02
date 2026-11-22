@@ -1,0 +1,35 @@
+@startuml UC14_DailySchedule_Sequence
+!include ../design/common/_style.puml
+
+title UC14 – Prepare the daily schedule and manage worklists (Analysis Sequence Diagram)
+
+actor "Admissions staff" as Staff
+boundary "IU_DailySchedule" as IU
+control "Control_DailySchedule" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Appointment" as Appt
+entity "Patient" as Patient
+entity "TestType" as TestType
+entity "AuditLog" as Audit
+
+== Daily schedule ==
+Staff -> IU : 1: selectDay(date)
+IU -> Ctrl : 2: obtainDailySchedule(date)
+Ctrl -> UserAcc : 3: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Appt : 4: getBookedAppointments(date)
+loop for each appointment
+  Ctrl -> Patient : 5: getPatient(patientId)
+  Ctrl -> TestType : 6: getTestType(testTypeId)
+end
+Ctrl -> Audit : 7: register(staff, SCHEDULE_ACCESSED, date)
+Ctrl --> IU : 8: showDailySchedule(scheduleByRoom)
+
+== Room worklist ==
+Staff -> IU : 9: selectRoom(room)
+IU -> Ctrl : 10: obtainWorklist(date, room)
+Ctrl -> UserAcc : 11: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Appt : 12: getBookedAppointments(date, room)
+Ctrl -> Audit : 13: register(staff, WORKLIST_ACCESSED, date, room)
+Ctrl --> IU : 14: showWorklist(worklist)
+
+@enduml
