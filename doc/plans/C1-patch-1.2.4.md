@@ -134,13 +134,14 @@ flowchart LR
   - `agents/components.md` line 56: `C1 is at 1.2.3 in the server and 1.2.4 in the client (#109, #116, #172); \`common\` is at 1.4.0-SNAPSHOT.` → `C1 is at 1.2.4 in the server and 1.2.4 in the client (#109, #116, #172, #173); \`common\` is at 1.5.0-SNAPSHOT.` The rest of the line is not changed.
   - No build (documents only).
   - Commit: `git add` the two files, then `git commit -m "docs(C1): versions of the patch 1.2.4 in agents (#173)"`
-- [ ] **4. Hand over to Adam.** Tick steps 1-3 with their hashes, fill in *State for Adam* (date and hashes) and **Status**, then
+- [x] **4. Hand over to Adam.** (this commit) Tick steps 1-3 with their hashes, fill in *State for Adam* (date and hashes) and **Status**, then
   `git add doc/plans/C1-patch-1.2.4.md` and `git commit -m "docs(C1): state of the patch 1.2.4 for Adam (#173)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
-To be filled in at step 4 (date and hashes of steps 1-3). Expected content: the main code compiles; with the tests,
-only the 4 failures below, in `server-c1-access`; every other module passes. Tests to adapt in this branch (nothing
-else should fail):
+State of 22/11/2026, at the end of step 3. The code of the patch is in `1c5d863` (permissions and roles); the versions
+are in `9b9105d` (poms) and `582feb0` (`agents/`). The main code compiles. The build with the tests gives
+`server-c1-access` `Tests run: 168, Failures: 4, Errors: 0`, only in the four tests below; every other module passes
+(52, 154, 143, 124, 112 and 98 tests). Tests to adapt in this branch (nothing else should fail):
 - `InMemoryPermissionRepositoryTest` (lines 28-41 and 54-65): now 7 permissions, in this order: `MANAGE_ROLES`, `CONFIGURE_SYSTEM`, `CONFIGURE_INTEGRATIONS`, `MANAGE_PATIENTS`, `CONSULT_AUDIT`, `ORDER_PROCEDURES`, `MANAGE_APPOINTMENTS`. `CONSULT_AUDIT` is no longer last (it is at index 4); the DisplayNames "five permissions" and "CONSULT_AUDIT last" no longer hold.
 - `InMemoryRoleRepositoryTest` (lines 40-56): `PHYSICIAN` has `ORDER_PROCEDURES`; `ADMISSIONS_STAFF` has `MANAGE_PATIENTS;MANAGE_APPOINTMENTS`; the DisplayName "Only the System administrator and the Admissions staff have permissions" no longer holds (only `PATIENT` has none).
 - Not affected (checked on 22/11/2026): `tc19s10` of `InMemoryRoleRepositoryTest`, `RoleManagementServiceIntegrationTest`, `RoleManagementServiceHasPermissionIntegrationTest` and the tests of `client/c1-access` (they define their own `Permission`).
@@ -161,9 +162,10 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 4, hand over to Adam: fill in *State for Adam* (date and the hashes of steps 1-3), check
-  **Status** and commit `doc/plans/C1-patch-1.2.4.md` with `docs(C1): state of the patch 1.2.4 for Adam (#173)`.
-  No push: Javier pushes and tells Adam.
+- **Next step:** the four steps of the plan are done. Javier pushes `feature/C1-patch-1.2.4` and tells Adam, who
+  adapts the tests of *State for Adam* in this branch. Then `mvn -B verify` must be green (coverage included) and the
+  pull request (`Closes #173`) is opened and approved by Ignacio (D-036). Steps 1-3 are in `1c5d863`, `9b9105d` and
+  `582feb0`.
 - **Open questions:**
   1. Ignacio (owner of C1, D-036): approved the patch on 22/11/2026 (as Javier reports). His approval of the pull request is still needed.
   2. Ignacio and David (requirements): D29 (`doc/AN-C4-DECISIONS.md:70`) and D37 (`doc/AN-C5-DECISIONS.md:93`) are still *To confirm*; Meeting 9 agreed this patch.
