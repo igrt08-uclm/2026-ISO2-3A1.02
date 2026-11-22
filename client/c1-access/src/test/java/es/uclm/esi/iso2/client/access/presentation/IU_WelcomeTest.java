@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 class IU_WelcomeTest {
     private static final Permission MANAGE_ROLES =
             new Permission("MANAGE_ROLES", "Assign roles to users and permissions to roles");
+    private static final Permission CONSULT_AUDIT =
+            new Permission("CONSULT_AUDIT", "Consult the audit log of the system activity");
 
     private UserAccount mgarcia;
 
@@ -64,13 +66,13 @@ class IU_WelcomeTest {
     }
 
     @Test
-    @DisplayName("An administrator sees View audit log, which runs onViewAudit")
+    @DisplayName("An administrator with CONSULT_AUDIT sees View audit log, which runs onViewAudit")
     void administratorSeesViewAuditLog() {
         // Arrange
         UserAccount admin = new UserAccount("admin", "Laura Sánchez Ruiz", "laura.sanchez@sescam.test", true,
                 List.of(new Role("SYSTEM_ADMINISTRATOR", "System administrator", "Configures and manages the system")));
         int[] views = {0};
-        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> views[0]++);
+        IU_Welcome welcome = new IU_Welcome(admin, () -> { }, () -> views[0]++, List.of(CONSULT_AUDIT), null);
 
         // Act
         buttonWithText(welcome, "View audit log").doClick();
@@ -124,7 +126,8 @@ class IU_WelcomeTest {
     @DisplayName("An administrator sees View audit log, Manage roles and Log out, in that order")
     void administratorSeesTheThreeButtonsInOrder() {
         // Act
-        IU_Welcome welcome = new IU_Welcome(admin(), () -> { }, () -> { }, List.of(MANAGE_ROLES), () -> { });
+        IU_Welcome welcome = new IU_Welcome(admin(), () -> { }, () -> { }, List.of(MANAGE_ROLES, CONSULT_AUDIT),
+                () -> { });
 
         // Assert
         assertEquals(List.of("View audit log", "Manage roles", "Log out"), buttonTexts(welcome));
@@ -150,7 +153,8 @@ class IU_WelcomeTest {
         assertEquals(List.of("Log out"), buttonTexts(welcome));
     }
 
-    // The constructors of UC22 and UC19 keep working as before.
+    // The constructors of UC22 and UC19 pass an empty list of permissions, so they show neither Manage roles nor
+    // View audit log (patch 1.2.3, #172).
     @Test
     @DisplayName("The constructors of UC22 and UC19 do not show Manage roles")
     void theOlderConstructorsDoNotShowManageRoles() {
@@ -161,7 +165,7 @@ class IU_WelcomeTest {
         // Assert
         assertAll(
                 () -> assertEquals(List.of("Log out"), buttonTexts(login)),
-                () -> assertEquals(List.of("View audit log", "Log out"), buttonTexts(audit)));
+                () -> assertEquals(List.of("Log out"), buttonTexts(audit)));
     }
 
     private static UserAccount admin() {

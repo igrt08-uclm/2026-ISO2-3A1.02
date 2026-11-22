@@ -8,6 +8,7 @@ import es.uclm.esi.iso2.common.access.contracts.AuthenticationException;
 import es.uclm.esi.iso2.common.access.domain.AuditLog;
 import es.uclm.esi.iso2.server.access.integration.AuthenticatorSystemSimulator;
 import es.uclm.esi.iso2.server.access.persistence.InMemoryAuditLogRepository;
+import es.uclm.esi.iso2.server.access.persistence.InMemoryRoleRepository;
 import es.uclm.esi.iso2.server.access.persistence.InMemoryUserAccountRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ class AuditServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         InMemoryUserAccountRepository users = new InMemoryUserAccountRepository();
-        auditService = new AuditService(new InMemoryAuditLogRepository(), users);
+        auditService = new AuditService(new InMemoryAuditLogRepository(), users, new InMemoryRoleRepository());
         authenticationService = new AuthenticationService(new AuthenticatorSystemSimulator(), users, auditService);
     }
 
@@ -50,7 +51,7 @@ class AuditServiceIntegrationTest {
                 () -> assertEquals("authentication:UNKNOWN_USER", logins.get(0).getTargetResource()));
     }
 
-    // mgarcia is active, but not an administrator; pnavarro has the role Physician and is inactive.
+    // mgarcia is active, but none of their roles has CONSULT_AUDIT; pnavarro has the role Physician and is inactive.
     @Test
     @DisplayName("Other users are rejected, and admin sees their attempts")
     void otherUsersAreRejectedAndAdminSeesTheirAttempts() throws AccessDeniedException {

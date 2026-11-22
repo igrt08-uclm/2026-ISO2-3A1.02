@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Keeps the permissions in memory: each use case adds its own (MANAGE_ROLES of UC18, CONFIGURE_SYSTEM of UC17,
- * CONFIGURE_INTEGRATIONS of UC20 and MANAGE_PATIENTS of UC12).
+ * CONFIGURE_INTEGRATIONS of UC20, MANAGE_PATIENTS of UC12 and CONSULT_AUDIT of UC19).
  */
 public class InMemoryPermissionRepository implements IPermissionRepository {
     /** Permission of UC18 to assign roles to users and permissions to roles. */
@@ -24,8 +24,12 @@ public class InMemoryPermissionRepository implements IPermissionRepository {
     public static final Permission MANAGE_PATIENTS =
             new Permission("MANAGE_PATIENTS", "Search, register and modify patients");
 
-    private final List<Permission> permissions =
-            List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, MANAGE_PATIENTS);
+    /** Permission of UC19 to consult the audit log of the system activity. */
+    public static final Permission CONSULT_AUDIT =
+            new Permission("CONSULT_AUDIT", "Consult the audit log of the system activity");
+
+    private final List<Permission> permissions = List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS,
+            MANAGE_PATIENTS, CONSULT_AUDIT);
 
     @Override
     public Permission findByCode(String code) {

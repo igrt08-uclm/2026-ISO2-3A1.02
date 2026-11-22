@@ -16,11 +16,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * Displays the welcome screen with the options available for the logged user.
+ * Displays the welcome screen with the options available for the logged user. Each button is only shown to a user
+ * with its permission; for example, View audit log only to a user with {@code CONSULT_AUDIT}.
  */
 public class IU_Welcome extends JPanel {
-    // Temporary: with UC18 this check uses the permissions of the role.
-    private static final String ADMINISTRATOR_ROLE = "SYSTEM_ADMINISTRATOR";
+    private static final String CONSULT_AUDIT = "CONSULT_AUDIT";
     private static final String MANAGE_ROLES = "MANAGE_ROLES";
     private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
     private static final String CONFIGURE_INTEGRATIONS = "CONFIGURE_INTEGRATIONS";
@@ -28,7 +28,8 @@ public class IU_Welcome extends JPanel {
     private static final int COLUMNS = 6;
 
     /**
-     * Creates the welcome screen with the button <em>Log out</em>.
+     * Creates the welcome screen with the button <em>Log out</em>. It passes no action and an empty list of
+     * permissions, so it shows no other button.
      *
      * @param user the logged user
      * @param onLogout is run when the user presses <em>Log out</em>
@@ -42,8 +43,9 @@ public class IU_Welcome extends JPanel {
      *
      * @param user the logged user
      * @param onLogout is run when the user presses <em>Log out</em>
-     * @param onViewAudit is run when the user presses <em>View audit log</em>; the button is only shown to an
-     *                    administrator, and not at all if this is {@code null}
+     * @param onViewAudit is run when the user presses <em>View audit log</em>; the button is only shown to a user
+     *                    with the permission {@code CONSULT_AUDIT}, and not at all if this is {@code null}. This
+     *                    constructor passes an empty list of permissions, so it never shows the button.
      */
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit) {
         this(user, onLogout, onViewAudit, List.of(), null);
@@ -133,7 +135,7 @@ public class IU_Welcome extends JPanel {
         addRow(lblWelcome, 0, 0, GridBagConstraints.HORIZONTAL);
         addRow(new JLabel("You are logged in as: " + roles), 1, 12, GridBagConstraints.HORIZONTAL);
         addRow(new JLabel("The functions of your role will appear here."), 2, 12, GridBagConstraints.HORIZONTAL);
-        if (onViewAudit != null && isAdministrator(user)) {
+        if (onViewAudit != null && hasPermission(permissions, CONSULT_AUDIT)) {
             JButton btnViewAudit = new JButton("View audit log");
             btnViewAudit.setMnemonic('V');
             btnViewAudit.addActionListener(event -> onViewAudit.run());
@@ -168,10 +170,6 @@ public class IU_Welcome extends JPanel {
 
     private static boolean hasPermission(List<Permission> permissions, String code) {
         return permissions.stream().anyMatch(permission -> code.equals(permission.getCode()));
-    }
-
-    private static boolean isAdministrator(UserAccount user) {
-        return user.getRoles().stream().anyMatch(role -> ADMINISTRATOR_ROLE.equals(role.getId()));
     }
 
     private void addButton(JButton button, int column) {
