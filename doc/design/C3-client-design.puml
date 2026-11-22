@@ -1,0 +1,49 @@
+@startuml C3_client_design
+!include common/_style.puml
+
+title C3 – Patients (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !include common/C3-common.puml!Patient
+    !include common/C3-common.puml!Sex
+  }
+
+  package "Contracts (interfaces)" {
+    !include common/shared-contracts.puml!AccessDeniedException
+    !include common/C3-common.puml!DuplicatePatientException
+    !include common/C3-common.puml!IPatientService
+    !include common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "Presentation" {
+  class IU_ManagePatients <<boundary>> {
+    +IU_ManagePatients(service : IPatientService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +onSearch(filters : String) : void
+    +displayPatients(found : List<Patient>) : void
+    +showValidationErrors(errors : List<String>) : void
+    +showExistingPatient(existing : Patient) : void
+    +showOperationResultSuccess(message : String) : void
+    +showOperationResultError(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+Patient "*" -- "1" Sex : sex
+DuplicatePatientException "*" -- "1" Patient : existingPatient
+IPatientService ..> Patient : <<use>> «use»
+IU_ManagePatients ..> IPatientService : <<use>>
+IU_ManagePatients ..> DuplicatePatientException : <<throw>>
+IU_ManagePatients ..> ValidationException : <<throw>>
+IU_ManagePatients ..> AccessDeniedException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  realizes IU_ManagePatients (UC12)
+end note
+N1 .. IU_ManagePatients
+
+@enduml

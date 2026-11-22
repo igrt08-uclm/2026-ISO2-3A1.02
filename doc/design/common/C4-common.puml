@@ -1,0 +1,54 @@
+' Shared common definitions: C4-common.puml (D-046)
+' Included via !include common/C4-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub ClinicalOrder
+abstract class ClinicalOrder <<entity>> {
+  -orderId : String
+  -patientId : String
+  -testTypeId : String
+  -requester : String
+  -indication : String
+  -justification : String
+  -creationDate : LocalDate
+}
+!endsub
+
+!startsub DiagnosticOrder
+class DiagnosticOrder <<entity>> {
+  -priorityId : String
+}
+!endsub
+
+!startsub FollowUpOrder
+class FollowUpOrder <<entity>> {
+  -recurrenceIntervalMonths : int
+}
+!endsub
+
+!startsub SchedulingNeed
+class SchedulingNeed <<entity>> {
+  -needId : String
+  -orderId : String
+  -dueDate : LocalDate
+  -status : SchedulingNeedStatus
+}
+!endsub
+
+!startsub SchedulingNeedStatus
+enum SchedulingNeedStatus {
+  PENDING
+  BOOKED
+}
+!endsub
+
+!startsub IClinicalOrderService
+interface IClinicalOrderService {
+  +orderDiagnosticProcedure(requester : String, order : DiagnosticOrder) : DiagnosticOrder
+  +orderFollowUp(requester : String, order : FollowUpOrder) : FollowUpOrder
+  +getOrdersOfPatient(requester : String, patientId : String) : List<ClinicalOrder>
+  +getPendingSchedulingNeeds(requester : String) : List<SchedulingNeed>
+  +markSchedulingNeedBooked(requester : String, needId : String) : void
+  +getOrder(requester : String, orderId : String) : ClinicalOrder throws AccessDeniedException, ValidationException
+  +markSchedulingNeedPending(requester : String, needId : String) : void throws AccessDeniedException, ValidationException
+}
+!endsub

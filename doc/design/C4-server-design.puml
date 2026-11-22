@@ -1,0 +1,114 @@
+@startuml C4_server_design
+!include common/_style.puml
+
+title C4 – Clinical Orders (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !include common/C4-common.puml!ClinicalOrder
+    !include common/C4-common.puml!DiagnosticOrder
+    !include common/C4-common.puml!FollowUpOrder
+    !include common/C4-common.puml!SchedulingNeed
+    !include common/C4-common.puml!SchedulingNeedStatus
+  }
+
+  package "Contracts (interfaces)" {
+    !include common/shared-contracts.puml!AccessDeniedException
+    !include common/shared-contracts.puml!IAuditRecorder
+    !include common/C4-common.puml!IClinicalOrderService
+    !include common/C3-common.puml!IPatientService
+    !include common/C1-common.puml!IRoleManagementService
+    !include common/C2-common.puml!ISystemParameterService
+    !include common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class ClinicalOrderService <<control>> {
+      +loadSeedData() : void
+      +orderDiagnosticProcedure(requester : String, order : DiagnosticOrder) : DiagnosticOrder
+      +orderFollowUp(requester : String, order : FollowUpOrder) : FollowUpOrder
+      +getOrdersOfPatient(requester : String, patientId : String) : List<ClinicalOrder>
+      +getPendingSchedulingNeeds(requester : String) : List<SchedulingNeed>
+      +markSchedulingNeedBooked(requester : String, needId : String) : void
+      +getOrder(requester : String, orderId : String) : ClinicalOrder throws AccessDeniedException, ValidationException
+      +markSchedulingNeedPending(requester : String, needId : String) : void throws AccessDeniedException, ValidationException
+      -checkPermission(requester : String) : void
+      -validate(order : ClinicalOrder) : List<String>
+      -createSchedulingNeeds(order : ClinicalOrder) : List<SchedulingNeed>
+    }
+
+  }
+
+  package "Persistence" {
+    interface IClinicalOrderRepository {
+      +findById(orderId : String) : ClinicalOrder
+      +findByPatient(patientId : String) : List<ClinicalOrder>
+      +save(order : ClinicalOrder) : void
+    }
+
+    interface ISchedulingNeedRepository {
+      +findById(needId : String) : SchedulingNeed
+      +findPending() : List<SchedulingNeed>
+      +save(need : SchedulingNeed) : void
+    }
+
+    class InMemoryClinicalOrderRepository {
+      -orders : Map<String, ClinicalOrder>
+      +findById(orderId : String) : ClinicalOrder
+      +findByPatient(patientId : String) : List<ClinicalOrder>
+      +save(order : ClinicalOrder) : void
+    }
+
+    class InMemorySchedulingNeedRepository {
+      -needs : Map<String, SchedulingNeed>
+      +findById(needId : String) : SchedulingNeed
+      +findPending() : List<SchedulingNeed>
+      +save(need : SchedulingNeed) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+DiagnosticOrder --|> ClinicalOrder
+FollowUpOrder --|> ClinicalOrder
+ClinicalOrder "1" --> "1..*" SchedulingNeed : generates
+SchedulingNeed --> SchedulingNeedStatus : status
+ClinicalOrderService ..|> IClinicalOrderService
+InMemorySchedulingNeedRepository ..|> ISchedulingNeedRepository
+InMemoryClinicalOrderRepository ..|> IClinicalOrderRepository
+ClinicalOrderService ..> ISchedulingNeedRepository : <<use>>
+ClinicalOrderService ..> IClinicalOrderRepository : <<use>>
+ClinicalOrderService ..> AccessDeniedException : <<use>>
+ClinicalOrderService ..> ValidationException : <<use>>
+ClinicalOrderService ..> IAuditRecorder : <<use>>
+ClinicalOrderService ..> IRoleManagementService : <<use>>
+ClinicalOrderService ..> ISystemParameterService : <<use>>
+ClinicalOrderService ..> IPatientService : <<use>>
+
+' ==================== Notes ====================
+note as N1
+  realizes Control_OrderProcedure (UC06) and Control_OrderFollowUp (UC07)
+end note
+N1 .. IClinicalOrderService
+
+note as N2
+  permission ORDER_PROCEDURES (D29); C5-facing operations (getPendingSchedulingNeeds, getOrder, markSchedulingNeedBooked, markSchedulingNeedPending) also allow MANAGE_APPOINTMENTS (D37, D41); failed checks registered as ACCESS_DENIED (D30); audit ORDER_CREATED, FOLLOW_UP_ORDER_CREATED
+end note
+N2 .. IClinicalOrderService
+
+note as N3
+  follow-up: creates the needs of the next 12 months at once, no timer (D-040)
+end note
+N3 .. IClinicalOrderService
+
+note as N4
+  orders are never edited or cancelled (D-039)
+end note
+N4 .. InMemoryClinicalOrderRepository
+
+@enduml

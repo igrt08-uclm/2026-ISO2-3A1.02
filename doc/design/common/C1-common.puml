@@ -1,0 +1,86 @@
+' Shared common definitions: C1-common.puml (D-046)
+' Included via !include common/C1-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub UserAccount
+class UserAccount <<entity>> {
+  -username : String
+  -fullName : String
+  -email : String
+  -active : boolean
+  -roles : List<Role>
+}
+!endsub
+
+!startsub Role
+class Role <<entity>> {
+  -id : String
+  -name : String
+  -description : String
+  -permissions : List<Permission>
+}
+!endsub
+
+!startsub Permission
+class Permission <<entity>> {
+  -code : String
+  -description : String
+}
+!endsub
+
+!startsub AuditLog
+class AuditLog <<entity>> {
+  -id : Long
+  -timestamp : Date
+  -author : String
+  -action : String
+  -targetResource : String
+}
+!endsub
+
+!startsub IAuthenticationService
+interface IAuthenticationService {
+  +login(username : String, password : String) : UserAccount throws AuthenticationException
+}
+!endsub
+
+!startsub IRoleManagementService
+interface IRoleManagementService {
+  +getRoles(username : String) : List<Role>
+  +getPermissions(username : String) : List<Permission>
+  +getAvailablePermissions() : List<Permission>
+  +getUsers() : List<UserAccount>
+  +getAvailableRoles() : List<Role>
+  +hasPermission(username : String, permissionCode : String) : boolean
+  +assignRole(requester : String, role : Role, user : UserAccount) : void throws AccessDeniedException
+  +revokeRole(requester : String, role : Role, user : UserAccount) : void throws AccessDeniedException
+  +assignPermission(requester : String, role : Role, permission : Permission) : void throws AccessDeniedException
+  +revokePermission(requester : String, role : Role, permission : Permission) : void throws AccessDeniedException
+}
+!endsub
+
+!startsub IAuditService
+interface IAuditService {
+  +getActivityLog(requester : String, filters : String) : List<AuditLog> throws AccessDeniedException
+}
+!endsub
+
+!startsub IAuthenticatorSystem
+interface IAuthenticatorSystem {
+  +validateCredentials(username : String, password : String) : boolean
+  +ping() : boolean
+}
+!endsub
+
+!startsub AuthenticationException
+class AuthenticationException <<Exception>> {
+  -reason : AuthenticationFailureReason
+}
+!endsub
+
+!startsub AuthenticationFailureReason
+enum AuthenticationFailureReason {
+  UNKNOWN_USER
+  WRONG_PASSWORD
+  INACTIVE_USER
+}
+!endsub

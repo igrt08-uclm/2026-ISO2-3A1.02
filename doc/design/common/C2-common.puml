@@ -1,0 +1,135 @@
+' Shared common definitions: C2-common.puml (D-046)
+' Included via !include common/C2-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub TestType
+class TestType <<entity>> {
+  -id : String
+  -name : String
+  -modality : String
+  -room : String
+  -durationMinutes : int
+  -preparation : String
+  -requiresContrast : boolean
+  -requiresConsent : boolean
+  -safetyInfo : String
+  -priority : String
+  -followUpEligible : boolean
+  -active : boolean
+  +deactivated() : TestType
+}
+!endsub
+
+!startsub Protocol
+class Protocol <<entity>> {
+  -id : String
+  -name : String
+  -description : String
+  -active : boolean
+  +deactivated() : Protocol
+}
+!endsub
+
+!startsub Schedule
+class Schedule <<entity>> {
+  -resource : String
+  -daysOfWeek : Set<DayOfWeek>
+  -startTime : LocalTime
+  -endTime : LocalTime
+  -active : boolean
+  +deactivated() : Schedule
+}
+!endsub
+
+!startsub AppointmentPolicy
+class AppointmentPolicy <<entity>> {
+  -id : String
+  -name : String
+  -description : String
+  -active : boolean
+  +deactivated() : AppointmentPolicy
+}
+!endsub
+
+!startsub Priority
+class Priority <<entity>> {
+  -id : String
+  -name : String
+  -description : String
+  -active : boolean
+  +deactivated() : Priority
+}
+!endsub
+
+!startsub HospitalSystemType
+enum HospitalSystemType {
+  SSO
+  EHR
+  ADMISSIONS
+  RIS_PACS
+}
+!endsub
+
+!startsub IntegrationMode
+enum IntegrationMode {
+  SIMULATED
+  REAL
+}
+!endsub
+
+!startsub IntegrationStatus
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+!endsub
+
+!startsub IntegrationConfiguration
+class IntegrationConfiguration <<entity>> {
+  -system : HospitalSystemType
+  -endpoint : String
+  -settings : Map<String, String>
+  -enabled : boolean
+  -mode : IntegrationMode
+  -status : IntegrationStatus
+}
+!endsub
+
+!startsub ConnectionTestResult
+class ConnectionTestResult <<entity>> {
+  -success : boolean
+  -responseTimeMs : long
+  -message : String
+}
+!endsub
+
+!startsub ISystemParameterService
+interface ISystemParameterService {
+  +getTestTypes(requester : String) : List<TestType> throws AccessDeniedException
+  +getTestType(requester : String, testTypeId : String) : TestType throws AccessDeniedException, ValidationException
+  +createTestType(requester : String, testType : TestType) : TestType throws AccessDeniedException, ValidationException
+  +updateTestType(requester : String, testTypeId : String, testType : TestType) : TestType throws AccessDeniedException, ValidationException
+  +deactivateTestType(requester : String, testTypeId : String) : void throws AccessDeniedException, ValidationException
+  +getProtocols(requester : String) : List<Protocol> throws AccessDeniedException
+  +saveProtocol(requester : String, protocol : Protocol) : Protocol throws AccessDeniedException, ValidationException
+  +deactivateProtocol(requester : String, protocolId : String) : void throws AccessDeniedException, ValidationException
+  +getSchedules(requester : String) : List<Schedule> throws AccessDeniedException
+  +saveSchedule(requester : String, schedule : Schedule) : Schedule throws AccessDeniedException, ValidationException
+  +deactivateSchedule(requester : String, resource : String) : void throws AccessDeniedException, ValidationException
+  +getAppointmentPolicies(requester : String) : List<AppointmentPolicy> throws AccessDeniedException
+  +saveAppointmentPolicy(requester : String, policy : AppointmentPolicy) : AppointmentPolicy throws AccessDeniedException, ValidationException
+  +deactivateAppointmentPolicy(requester : String, policyId : String) : void throws AccessDeniedException, ValidationException
+  +getPriorities(requester : String) : List<Priority> throws AccessDeniedException
+  +savePriority(requester : String, priority : Priority) : Priority throws AccessDeniedException, ValidationException
+  +deactivatePriority(requester : String, priorityId : String) : void throws AccessDeniedException, ValidationException
+}
+!endsub
+
+!startsub IIntegrationManagementService
+interface IIntegrationManagementService {
+  +getIntegrations(requester : String) : List<IntegrationConfiguration> throws AccessDeniedException
+  +getIntegration(requester : String, system : HospitalSystemType) : IntegrationConfiguration throws AccessDeniedException
+  +configureIntegration(requester : String, configuration : IntegrationConfiguration) : IntegrationConfiguration throws AccessDeniedException, ValidationException
+  +testConnection(requester : String, system : HospitalSystemType) : ConnectionTestResult throws AccessDeniedException
+}
+!endsub

@@ -1,0 +1,40 @@
+' Shared common definitions: C3-common.puml (D-046)
+' Included via !include common/C3-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub Patient
+class Patient <<entity>> {
+  -patientId : String
+  -identifier : String
+  -nationalId : String
+  -fullName : String
+  -dateOfBirth : LocalDate
+  -sex : Sex
+  -address : String
+  -phone : String
+  -email : String
+  -active : boolean
+}
+!endsub
+
+!startsub Sex
+enum Sex {
+  FEMALE
+  MALE
+  UNSPECIFIED
+}
+!endsub
+
+!startsub IPatientService
+interface IPatientService {
+  +searchPatients(requester : String, filters : String) : List<Patient> throws AccessDeniedException
+  +getPatient(requester : String, patientId : String) : Patient throws AccessDeniedException, ValidationException
+  +registerPatient(requester : String, patient : Patient) : Patient throws AccessDeniedException, ValidationException, DuplicatePatientException
+  +modifyPatient(requester : String, patientId : String, patient : Patient) : Patient throws AccessDeniedException, ValidationException
+}
+!endsub
+
+!startsub DuplicatePatientException
+class DuplicatePatientException <<Exception>> {
+  -existingPatient : Patient
+}
+!endsub

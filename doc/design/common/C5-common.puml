@@ -1,0 +1,107 @@
+' Shared common definitions: C5-common.puml (D-046)
+' Included via !include common/C5-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub Appointment
+class Appointment <<entity>> {
+  -appointmentId : String
+  -needId : String
+  -patientId : String
+  -testTypeId : String
+  -room : String
+  -physician : String
+  -start : LocalDateTime
+  -end : LocalDateTime
+  -status : AppointmentStatus
+}
+!endsub
+
+!startsub AppointmentStatus
+enum AppointmentStatus {
+  BOOKED
+  RESCHEDULED
+  CANCELLED
+}
+!endsub
+
+!startsub WaitlistEntry
+class WaitlistEntry <<entity>> {
+  -entryId : String
+  -needId : String
+  -patientId : String
+  -testTypeId : String
+  -priorityId : String
+  -addedAt : LocalDateTime
+  -status : WaitlistStatus
+}
+!endsub
+
+!startsub WaitlistStatus
+enum WaitlistStatus {
+  WAITING
+  BOOKED
+  REMOVED
+}
+!endsub
+
+!startsub TimeSlot
+class TimeSlot <<entity>> {
+  -room : String
+  -start : LocalDateTime
+  -end : LocalDateTime
+}
+!endsub
+
+!startsub PendingNeedView
+class PendingNeedView <<entity>> {
+  -needId : String
+  -orderId : String
+  -patientId : String
+  -patientName : String
+  -testTypeId : String
+  -testTypeName : String
+  -priorityId : String
+  -orderDate : LocalDate
+  -dueDate : LocalDate
+}
+!endsub
+
+!startsub ScheduleEntry
+class ScheduleEntry <<entity>> {
+  -appointment : Appointment
+  -patientName : String
+  -testTypeName : String
+  -preparation : String
+}
+!endsub
+
+!startsub IAppointmentService
+interface IAppointmentService {
+  +getPendingSchedulingNeeds(requester : String) : List<PendingNeedView> throws AccessDeniedException, ValidationException
+  +getFreeSlots(requester : String, testTypeId : String, fromDate : LocalDate, toDate : LocalDate) : List<TimeSlot> throws AccessDeniedException, ValidationException
+  +bookAppointment(requester : String, needId : String, slot : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+  +rescheduleAppointment(requester : String, appointmentId : String, newSlot : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+  +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+  +getAppointments(requester : String) : List<Appointment> throws AccessDeniedException
+  +getAppointmentsOfPatient(requester : String, patientId : String) : List<Appointment> throws AccessDeniedException, ValidationException
+}
+!endsub
+
+!startsub IWaitlistService
+interface IWaitlistService {
+  +getWaitlist(requester : String, testTypeId : String) : List<WaitlistEntry> throws AccessDeniedException, ValidationException
+  +addToWaitlist(requester : String, needId : String, priorityId : String) : WaitlistEntry throws AccessDeniedException, ValidationException
+  +changeWaitlistPriority(requester : String, entryId : String, priorityId : String) : WaitlistEntry throws AccessDeniedException, ValidationException
+  +removeFromWaitlist(requester : String, entryId : String) : WaitlistEntry throws AccessDeniedException, ValidationException
+  +getCalendarOpenings(requester : String, testTypeId : String, fromDate : LocalDate, toDate : LocalDate) : List<TimeSlot> throws AccessDeniedException, ValidationException
+  +proposePatientForOpening(requester : String, testTypeId : String, opening : TimeSlot) : WaitlistEntry throws AccessDeniedException, ValidationException
+  +fillOpening(requester : String, entryId : String, opening : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+}
+!endsub
+
+!startsub IDailyScheduleService
+interface IDailyScheduleService {
+  +getDailySchedule(requester : String, date : LocalDate) : Map<String, List<ScheduleEntry>> throws AccessDeniedException, ValidationException
+  +getRoomWorklist(requester : String, date : LocalDate, room : String) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+  +getPhysicianWorklist(requester : String, date : LocalDate, physician : String) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+}
+!endsub

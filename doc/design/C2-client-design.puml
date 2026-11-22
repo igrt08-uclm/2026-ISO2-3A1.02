@@ -1,0 +1,65 @@
+@startuml C2_client_design
+!include common/_style.puml
+
+title C2 – Configuration and Integrations (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !include common/C2-common.puml!AppointmentPolicy
+    !include common/C2-common.puml!ConnectionTestResult
+    !include common/C2-common.puml!HospitalSystemType
+    !include common/C2-common.puml!IntegrationConfiguration
+    !include common/C2-common.puml!IntegrationMode
+    !include common/C2-common.puml!IntegrationStatus
+    !include common/C2-common.puml!Priority
+    !include common/C2-common.puml!Protocol
+    !include common/C2-common.puml!Schedule
+    !include common/C2-common.puml!TestType
+  }
+
+  package "Contracts (interfaces)" {
+    !include common/shared-contracts.puml!AccessDeniedException
+    !include common/C2-common.puml!IIntegrationManagementService
+    !include common/C2-common.puml!ISystemParameterService
+    !include common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "Presentation" {
+  class IU_ConfigureParameters <<boundary>> {
+    +IU_ConfigureParameters(service : ISystemParameterService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +showOperationResultSuccess(message : String) : void
+    +showOperationResultError(message : String) : void
+  }
+
+  class IU_ManageIntegrations <<boundary>> {
+    +IU_ManageIntegrations(service : IIntegrationManagementService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +displayIntegrations(integrations : List<IntegrationConfiguration>) : void
+    +showTestResult(result : ConnectionTestResult) : void
+    +showOperationResultSuccess(message : String) : void
+    +showOperationResultError(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+IntegrationConfiguration "*" -- "1" HospitalSystemType : system
+IntegrationConfiguration "*" -- "1" IntegrationMode : mode
+IntegrationConfiguration "*" -- "1" IntegrationStatus : status
+IU_ConfigureParameters ..> ISystemParameterService : <<use>> «use»
+IU_ConfigureParameters ..> ValidationException : <<throw>>
+IU_ConfigureParameters ..> AccessDeniedException : <<throw>>
+IU_ManageIntegrations ..> IIntegrationManagementService : <<use>> «use»
+IU_ManageIntegrations ..> ValidationException : <<throw>>
+IU_ManageIntegrations ..> AccessDeniedException : <<throw>>
+ISystemParameterService ..> TestType : <<use>> «use»
+ISystemParameterService ..> Protocol : <<use>> «use»
+ISystemParameterService ..> Schedule : <<use>> «use»
+ISystemParameterService ..> AppointmentPolicy : <<use>> «use»
+ISystemParameterService ..> Priority : <<use>> «use»
+IIntegrationManagementService ..> IntegrationConfiguration : <<use>> «use»
+IIntegrationManagementService ..> ConnectionTestResult : <<use>> «use»
+IIntegrationManagementService ..> HospitalSystemType : <<use>> «use»
+
+@enduml

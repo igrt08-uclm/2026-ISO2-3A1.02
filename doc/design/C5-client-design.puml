@@ -1,0 +1,104 @@
+@startuml C5_client_design
+!include common/_style.puml
+
+title C5 – Appointment Planning (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !include common/C5-common.puml!Appointment
+    !include common/C5-common.puml!AppointmentStatus
+    !include common/C5-common.puml!PendingNeedView
+    !include common/C5-common.puml!ScheduleEntry
+    !include common/C5-common.puml!TimeSlot
+    !include common/C5-common.puml!WaitlistEntry
+    !include common/C5-common.puml!WaitlistStatus
+  }
+
+  package "Contracts (interfaces)" {
+    !include common/shared-contracts.puml!AccessDeniedException
+    !include common/C5-common.puml!IAppointmentService
+    !include common/C5-common.puml!IDailyScheduleService
+    !include common/C2-common.puml!ISystemParameterService
+    !include common/C5-common.puml!IWaitlistService
+    !include common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "Presentation" {
+  class IU_DailySchedule <<boundary>> {
+    +IU_DailySchedule(dailyScheduleService : IDailyScheduleService, requester : String, onBack : Runnable)
+    +onSelectDay(date : LocalDate) : void
+    +onSelectRoom(date : LocalDate, room : String) : void
+    +onSelectPhysician(date : LocalDate, physician : String) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+  }
+
+  class IU_ManageAppointments <<boundary>> {
+    +IU_ManageAppointments(appointmentService : IAppointmentService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadData() : void
+    +onSelectNeed(needId : String) : void
+    +onBookSlot(needId : String, slot : TimeSlot) : void
+    +onRescheduleAppointment(appointmentId : String, newSlot : TimeSlot) : void
+    +onCancelAppointment(appointmentId : String) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+  class IU_ManageWaitlist <<boundary>> {
+    +IU_ManageWaitlist(waitlistService : IWaitlistService, appointmentService : IAppointmentService, parameterService : ISystemParameterService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadData() : void
+    +onSelectTestType(testTypeId : String) : void
+    +onAddEntry(needId : String, priorityId : String) : void
+    +onChangePriority(entryId : String, priorityId : String) : void
+    +onRemoveEntry(entryId : String) : void
+    +onSelectOpening(opening : TimeSlot) : void
+    +onConfirmFillOpening(entryId : String, opening : TimeSlot) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+WaitlistEntry "*" -- "1" WaitlistStatus : status
+ScheduleEntry "0..*" -- "1" Appointment : appointment
+IAppointmentService ..> AccessDeniedException : <<throw>>
+IAppointmentService ..> ValidationException : <<throw>>
+IWaitlistService ..> AccessDeniedException : <<throw>>
+IWaitlistService ..> ValidationException : <<throw>>
+IDailyScheduleService ..> AccessDeniedException : <<throw>>
+IDailyScheduleService ..> ValidationException : <<throw>>
+IU_ManageAppointments ..> IAppointmentService : <<use>>
+IU_ManageAppointments ..> AccessDeniedException : <<use>>
+IU_ManageAppointments ..> ValidationException : <<use>>
+IU_ManageWaitlist ..> IAppointmentService : <<use>>
+IU_ManageWaitlist ..> IWaitlistService : <<use>>
+IU_ManageWaitlist ..> ISystemParameterService : <<use>>
+IU_ManageWaitlist ..> AccessDeniedException : <<use>>
+IU_ManageWaitlist ..> ValidationException : <<use>>
+IU_DailySchedule ..> IDailyScheduleService : <<use>>
+IU_DailySchedule ..> AccessDeniedException : <<use>>
+IU_DailySchedule ..> ValidationException : <<use>>
+
+' ==================== Notes ====================
+note as N1
+  Realizes IU_ManageAppointments (UC13, C5 1.0.0). Asks confirmation via confirm before cancelling (D-022).
+end note
+N1 .. IU_ManageAppointments
+
+note as N2
+  Realizes IU_ManageWaitlist (UC15, C5 1.1.0). Asks confirmation via confirm before removing (D-022). Shows empty-state notice when waitlist/openings are empty.
+end note
+N2 .. IU_ManageWaitlist
+
+note as N3
+  Realizes IU_DailySchedule (UC14, C5 1.2.0). Displays schedule per room or room/physician worklist in time order; never shows cancelled appointments.
+end note
+N3 .. IU_DailySchedule
+
+@enduml
