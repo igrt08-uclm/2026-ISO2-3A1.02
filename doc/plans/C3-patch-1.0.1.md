@@ -128,11 +128,11 @@ flowchart LR
   - `agents/architecture.md` line 11: `version 1.0.0-SNAPSHOT` → `version 1.0.1-SNAPSHOT`. The rest of the line and line 17 (client, `1.0.0-SNAPSHOT`) do not change.
   - No build (documents only).
   - Commit: `git add agents/architecture.md`, then `git commit -m "docs(C3): version of the server patch 1.0.1 in agents (#175)"`
-- [ ] **4. Hand over to Adam.** Tick steps 1-3 with their hashes, fill in *State for Adam* (date, hashes and the results of the full build of step 1, with the coverage of C3) and **Status**, then
+- [x] **4. Hand over to Adam.** — commit `docs(C3): state of the patch 1.0.1 for Adam (#175)`.
   `git add doc/plans/C3-patch-1.0.1.md` and `git commit -m "docs(C3): state of the patch 1.0.1 for Adam (#175)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
-To be completed in step 4 (date, hashes, full build and coverage of C3). What changes for the tests:
+State of 22/11/2026, at the end of step 3. The code of the patch is in `55b30db` (`PatientService`); the versions are in `0e10bc5` (poms) and `fa80460` (`agents/`). The full build (`mvn -B -ntp verify`) is green: `BUILD SUCCESS`, no failures, all coverage checks met, `server-c3-patients` keeps its 143 tests, and its coverage is 100.0 % of lines and 97.5 % of branches. What changes for the tests:
 - `searchPatients` and `getPatient` now also let through an active user with `ORDER_PROCEDURES` or `MANAGE_APPOINTMENTS`, and audit the read with `PATIENT_ACCESSED` as today. `registerPatient` and `modifyPatient` still need `MANAGE_PATIENTS`.
 - Expected not affected: TC12S-01 to TC12S-09 and the rest of `PatientServiceTest` and `PatientSeedDataTest`. `FakeRoleManagementService` (lines 31-36) gives the new permissions to nobody: `mgarcia` and `jfernandez` still have no permission, so `assertDeniedInEveryOperation` (`PatientServiceTest.java:147-175`) still sees the four denials and TC12S-03 still passes.
 - Note: in C1 the real physician now has `ORDER_PROCEDURES` (`InMemoryRoleRepository.java:15`), so the name of TC12S-03 ("a physician is denied in every operation") no longer matches the real roles; Adam decides whether to change it.
@@ -158,7 +158,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 4, hand over to Adam: fill in *State for Adam* (date, hashes of steps 1-3 and the results of the full build of step 1, with the coverage of C3) and **Status**, then `git add doc/plans/C3-patch-1.0.1.md` and `git commit -m "docs(C3): state of the patch 1.0.1 for Adam (#175)"`. No push. Step 3 is committed as `fa80460` (`agents/architecture.md:11` at `1.0.1-SNAPSHOT`); the full build before that commit gives `BUILD SUCCESS`, `Exit code: 0`, every module `Failures: 0, Errors: 0` (`server-c3-patients` 143 tests).
+- **Next step:** the four steps of the plan are done. Javier pushes `feature/C3-patch-1.0.1` and tells Adam, who adds the cases of *Cases to cover* in this branch. Then `mvn -B verify` must be green (coverage included) and the pull request (`Closes #175`) is opened and approved by the owner of C3 (D-036). Steps 1-3 are in `55b30db`, `0e10bc5` and `fa80460`.
 - **Open questions:**
   1. The Javadoc of `IPatientService` (`common/src/main/java/es/uclm/esi/iso2/common/patients/contracts/IPatientService.java:9-11`) still says that every operation needs `MANAGE_PATIENTS`. It is not changed here so that `common` does not enter the patch (D-036).
-- **Last update:** 22/11/2026 — step 3 done (`fa80460`), `agents/architecture.md:11` at `1.0.1-SNAPSHOT`, full build green (`server-c3-patients` 143 tests); coverage of C3 from step 1: lines 100.0 %, branches 97.5 %.
+- **Last update:** 22/11/2026, Javier — step 4 (hand over to Adam) done; steps 1-3 in `55b30db`, `0e10bc5` and `fa80460`. Full build green with the tests of the baseline.
