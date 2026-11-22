@@ -1,0 +1,61 @@
+@startuml UC13_ManageAppointments_Sequence
+!include ../design/common/_style.puml
+
+title UC13 – Manage the appointment schedule (Analysis Sequence Diagram)
+
+actor "Admissions staff" as Staff
+boundary "IU_ManageAppointments" as IU
+control "Control_ManageAppointments" as Ctrl
+entity "UserAccount" as UserAcc
+entity "SchedulingNeed" as Need
+entity "TestType" as TestType
+entity "Schedule" as Schedule
+entity "Patient" as Patient
+entity "Appointment" as Appt
+entity "AuditLog" as Audit
+
+== View pending scheduling needs ==
+Staff -> IU : 1: openAppointments()
+IU -> Ctrl : 2: obtainPendingNeeds()
+Ctrl -> UserAcc : 3: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Need : 4: getPendingSchedulingNeeds()
+Ctrl --> IU : 5: showPendingNeeds()
+
+== Find free slots ==
+Staff -> IU : 6: selectNeed(needId)
+IU -> Ctrl : 7: obtainFreeSlots(needId)
+Ctrl -> TestType : 8: getTestType(testTypeId)
+Ctrl -> Schedule : 9: getSchedule(room)
+Ctrl -> Appt : 10: getAppointments(room, period)
+Ctrl --> IU : 11: showFreeSlots(slots)
+
+== Book appointment ==
+Staff -> IU : 12: bookSlot(needId, slot)
+IU -> Ctrl : 13: book(needId, slot)
+Ctrl -> UserAcc : 14: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Patient : 15: getPatient(patientId)
+Ctrl -> Appt : 16: isFree(room, start, end)
+Ctrl -> Appt : 17: create(needId, patientId, room, start, end)
+Ctrl -> Need : 18: markBooked(needId, appointmentId)
+Ctrl -> Audit : 19: register(staff, APPOINTMENT_BOOKED, appointmentId)
+Ctrl --> IU : 20: showConfirmation(appointment)
+
+== Reschedule appointment ==
+Staff -> IU : 21: rescheduleAppointment(appointmentId, newSlot)
+IU -> Ctrl : 22: reschedule(appointmentId, newSlot)
+Ctrl -> UserAcc : 23: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Appt : 24: isFree(room, newStart, newEnd)
+Ctrl -> Appt : 25: reschedule(appointmentId, newStart, newEnd)
+Ctrl -> Audit : 26: register(staff, APPOINTMENT_RESCHEDULED, appointmentId)
+Ctrl --> IU : 27: showConfirmation(appointment)
+
+== Cancel appointment ==
+Staff -> IU : 28: cancelAppointment(appointmentId)
+IU -> Ctrl : 29: cancel(appointmentId)
+Ctrl -> UserAcc : 30: hasPermission(staff, MANAGE_APPOINTMENTS)
+Ctrl -> Appt : 31: cancel(appointmentId)
+Ctrl -> Need : 32: [cancel] markPending(needId)
+Ctrl -> Audit : 33: register(staff, APPOINTMENT_CANCELLED, appointmentId)
+Ctrl --> IU : 34: showConfirmation(appointment)
+
+@enduml

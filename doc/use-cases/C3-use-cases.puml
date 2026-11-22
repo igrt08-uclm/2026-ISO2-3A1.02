@@ -1,0 +1,27 @@
+@startuml Component_3
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 3 – Patients (Client & Server Use Cases)
+
+!includesub _actors.puml!User
+!includesub _actors.puml!AdmissionsStaff
+!includesub _actors.puml!Client
+!includesub _actors.puml!Server
+
+Admissions --|> User
+
+package "Client" {
+  usecase "Manage patient demographic data (Client)" as UC12_C
+}
+
+package "Server" {
+  usecase "Manage patient demographic data (Server)" as UC12_S
+}
+
+Admissions -- UC12_C
+UC12_C -- ServerActor
+
+ClientActor -- UC12_S
+
+@enduml

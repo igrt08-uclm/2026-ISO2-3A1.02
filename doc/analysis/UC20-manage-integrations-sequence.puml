@@ -1,0 +1,36 @@
+@startuml UC20_ManageIntegrations_Sequence
+!include ../design/common/_style.puml
+
+title UC20 – Configure and manage integration with other hospital systems (Analysis Sequence Diagram)
+
+actor "System administrator" as Admin
+boundary "IU_ManageIntegrations" as IU
+control "Control_ManageIntegrations" as Ctrl
+entity "UserAccount" as UserAcc
+entity "IntegrationConfiguration" as Config
+entity "AuditLog" as Audit
+boundary "IU_HospitalSystem" as HospIU
+actor "Hospital System" as HospSys
+
+Admin -> IU : 1: openIntegrations()
+IU -> Ctrl : 2: obtainIntegrations()
+Ctrl -> UserAcc : 3: hasPermission(admin, CONFIGURE_INTEGRATIONS)
+Ctrl -> Config : 4: obtainAll()
+Ctrl --> IU : 5: showIntegrations(integrations)
+
+Admin -> IU : 6: modifyIntegration(system, settings, enabled, mode)
+IU -> Ctrl : 7: saveIntegration(system, settings, enabled, mode)
+Ctrl -> UserAcc : 8: hasPermission(admin, CONFIGURE_INTEGRATIONS)
+Ctrl -> Config : 9: validate(settings)
+Ctrl -> Config : 10: update(system, settings, enabled, mode)
+Ctrl -> Audit : 11: register(admin, INTEGRATION_CHANGED, system)
+Ctrl --> IU : 12: showConfirmation()
+
+Admin -> IU : 13: requestTest(system)
+IU -> Ctrl : 14: testConnection(system)
+Ctrl -> Config : 15: obtainConfig(system)
+Ctrl -> HospIU : 16: testConnection(system, settings, mode)
+HospIU -> HospSys : 17: ping()
+Ctrl --> IU : 18: showTestResult(result)
+
+@enduml

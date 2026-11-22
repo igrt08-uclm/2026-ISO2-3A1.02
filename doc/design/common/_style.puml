@@ -1,0 +1,56 @@
+' Shared visual styling for all SESCAM Radiodiagnostics UML diagrams (D-046)
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 12
+
+skinparam class {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  HeaderBackgroundColor #E2E8F0
+  ArrowColor #334155
+  AttributeIconSize 0
+}
+
+skinparam interface {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+}
+
+skinparam enum {
+  BackgroundColor #FEFCE8
+  BorderColor #A16207
+}
+
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+  FontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FFFBEB
+  BorderColor #D97706
+}
+
+skinparam actor {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+}
+
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+
+skinparam sequence {
+  ArrowColor #334155
+  LifeLineBorderColor #475569
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+  ActorBorderColor #1D4ED8
+  ActorBackgroundColor #EFF6FF
+  BoxBorderColor #94A3B8
+}

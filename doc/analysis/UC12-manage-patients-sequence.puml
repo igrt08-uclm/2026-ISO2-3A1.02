@@ -1,0 +1,30 @@
+@startuml UC12_ManagePatients_Sequence
+!include ../design/common/_style.puml
+
+title UC12 – Manage patient demographic data (Analysis Sequence Diagram)
+
+actor "Admissions staff" as Staff
+boundary "IU_ManagePatients" as IU
+control "Control_ManagePatients" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Patient" as Patient
+entity "AuditLog" as Audit
+
+Staff -> IU : 1: searchPatient(filters)
+IU -> Ctrl : 2: searchPatients(filters)
+Ctrl -> UserAcc : 3: hasPermission(staff, MANAGE_PATIENTS)
+Ctrl -> Patient : 4: search(filters)
+Ctrl -> Audit : 5: register(staff, PATIENT_ACCESSED, patientIds)
+Ctrl --> IU : 6: showPatients(patients)
+
+Staff -> IU : 7: enterPatientData(patientId, patientData)
+IU -> Ctrl : 8: savePatient(patientId, patientData)
+Ctrl -> UserAcc : 9: hasPermission(staff, MANAGE_PATIENTS)
+Ctrl -> Patient : 10: validate(patientData)
+Ctrl -> Patient : 11: findByIdentifier(identifier)
+Ctrl -> Patient : 12a: create(patientData)
+Ctrl -> Patient : 12b: update(patientId, patientData)
+Ctrl -> Audit : 13: register(staff, PATIENT_REGISTERED | PATIENT_MODIFIED, patientId)
+Ctrl --> IU : 14: showConfirmation(patient)
+
+@enduml

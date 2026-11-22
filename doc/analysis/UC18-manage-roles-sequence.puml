@@ -1,0 +1,27 @@
+@startuml UC18_ManageRoles_Sequence
+!include ../design/common/_style.puml
+
+title UC18 – Manage roles and permissions (Analysis Sequence Diagram)
+
+actor "System administrator" as Admin
+boundary "IU_ManageRoles" as IU
+control "Control_ManageRoles" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Role" as Role
+entity "Permission" as Perm
+entity "AuditLog" as Audit
+
+Admin -> IU : 1: selectOperation(op, id)
+IU -> Ctrl : 2: startOperation(op, id)
+Ctrl -> UserAcc : 3a: obtainRoles()
+Ctrl -> UserAcc : 3b: obtainPermissions()
+Ctrl -> Perm : 4b: obtainAvailablePermissions()
+Ctrl --> IU : 5: showData(current, available)
+
+Admin -> IU : 6: modify(changes)
+IU -> Ctrl : 7: saveChanges(changes)
+Ctrl -> UserAcc : 8a: add/removeRole(role)
+Ctrl -> Audit : 9: registerChange(admin, changes)
+Ctrl --> IU : 10: showConfirmation()
+
+@enduml

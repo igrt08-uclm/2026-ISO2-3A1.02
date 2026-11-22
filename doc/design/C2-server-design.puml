@@ -1,0 +1,180 @@
+@startuml C2_server_design
+!include common/_style.puml
+
+title C2 – Configuration and Integrations (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C2-common.puml!AppointmentPolicy
+    !includesub common/C2-common.puml!ConnectionTestResult
+    !includesub common/C2-common.puml!HospitalSystemType
+    !includesub common/C2-common.puml!IntegrationConfiguration
+    !includesub common/C2-common.puml!IntegrationMode
+    !includesub common/C2-common.puml!IntegrationStatus
+    !includesub common/C2-common.puml!Priority
+    !includesub common/C2-common.puml!Protocol
+    !includesub common/C2-common.puml!Schedule
+    !includesub common/C2-common.puml!TestType
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C1-common.puml!IAuthenticatorSystem
+    !includesub common/C2-common.puml!IIntegrationManagementService
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class ConfigurationSeedData <<auxiliary>> {
+      ~priorities() : List<Priority>
+      ~testTypes() : List<TestType>
+      ~protocols() : List<Protocol>
+      ~schedules() : List<Schedule>
+      ~policies() : List<AppointmentPolicy>
+    }
+
+    class IntegrationManagementService <<control>> {
+      +loadSeedData() : void
+      +getIntegrations(requester : String) : List<IntegrationConfiguration> throws AccessDeniedException
+      +getIntegration(requester : String, system : HospitalSystemType) : IntegrationConfiguration throws AccessDeniedException
+      +configureIntegration(requester : String, configuration : IntegrationConfiguration) : IntegrationConfiguration throws AccessDeniedException, ValidationException
+      +testConnection(requester : String, system : HospitalSystemType) : ConnectionTestResult throws AccessDeniedException
+    }
+
+    class SystemParameterService <<control>> {
+      +loadSeedData() : void
+      +getTestTypes(requester : String) : List<TestType> throws AccessDeniedException
+      +getTestType(requester : String, testTypeId : String) : TestType throws AccessDeniedException, ValidationException
+      +createTestType(requester : String, testType : TestType) : TestType throws AccessDeniedException, ValidationException
+      +updateTestType(requester : String, testTypeId : String, testType : TestType) : TestType throws AccessDeniedException, ValidationException
+      +deactivateTestType(requester : String, testTypeId : String) : void throws AccessDeniedException, ValidationException
+      +getProtocols(requester : String) : List<Protocol> throws AccessDeniedException
+      +saveProtocol(requester : String, protocol : Protocol) : Protocol throws AccessDeniedException, ValidationException
+      +deactivateProtocol(requester : String, protocolId : String) : void throws AccessDeniedException, ValidationException
+      +getSchedules(requester : String) : List<Schedule> throws AccessDeniedException
+      +saveSchedule(requester : String, schedule : Schedule) : Schedule throws AccessDeniedException, ValidationException
+      +deactivateSchedule(requester : String, resource : String) : void throws AccessDeniedException, ValidationException
+      +getAppointmentPolicies(requester : String) : List<AppointmentPolicy> throws AccessDeniedException
+      +saveAppointmentPolicy(requester : String, policy : AppointmentPolicy) : AppointmentPolicy throws AccessDeniedException, ValidationException
+      +deactivateAppointmentPolicy(requester : String, policyId : String) : void throws AccessDeniedException, ValidationException
+      +getPriorities(requester : String) : List<Priority> throws AccessDeniedException
+      +savePriority(requester : String, priority : Priority) : Priority throws AccessDeniedException, ValidationException
+      +deactivatePriority(requester : String, priorityId : String) : void throws AccessDeniedException, ValidationException
+    }
+
+  }
+
+  package "Integration (simulated gateways)" {
+    class AdmissionsGatewaySimulator <<boundary>> {
+      +ping() : boolean
+    }
+
+    class EhrGatewaySimulator <<boundary>> {
+      +ping() : boolean
+    }
+
+    interface IAdmissionsGateway {
+      +ping() : boolean
+    }
+
+    interface IEhrGateway {
+      +ping() : boolean
+    }
+
+    interface IRisPacsGateway {
+      +ping() : boolean
+    }
+
+    class RisPacsGatewaySimulator <<boundary>> {
+      +ping() : boolean
+    }
+
+  }
+
+  package "Persistence" {
+    interface "IConfigurationRepository<T>" as IConfigurationRepository {
+      +findById(id : String) : T
+      +findAll() : List<T>
+      +save(entry : T) : void
+    }
+
+    class "InMemoryConfigurationRepository<T>" as InMemoryConfigurationRepository {
+      +InMemoryConfigurationRepository(idOf : Function<T, String>)
+      +findById(id : String) : T
+      +findAll() : List<T>
+      +save(entry : T) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+IntegrationConfiguration "*" -- "1" HospitalSystemType : system
+IntegrationConfiguration "*" -- "1" IntegrationMode : mode
+IntegrationConfiguration "*" -- "1" IntegrationStatus : status
+ISystemParameterService ..> TestType : <<use>> «use»
+ISystemParameterService ..> Protocol : <<use>> «use»
+ISystemParameterService ..> Schedule : <<use>> «use»
+ISystemParameterService ..> AppointmentPolicy : <<use>> «use»
+ISystemParameterService ..> Priority : <<use>> «use»
+IIntegrationManagementService ..> IntegrationConfiguration : <<use>> «use»
+IIntegrationManagementService ..> ConnectionTestResult : <<use>> «use»
+IIntegrationManagementService ..> HospitalSystemType : <<use>> «use»
+SystemParameterService ..|> ISystemParameterService
+IntegrationManagementService ..|> IIntegrationManagementService
+InMemoryConfigurationRepository ..|> IConfigurationRepository
+EhrGatewaySimulator ..|> IEhrGateway
+AdmissionsGatewaySimulator ..|> IAdmissionsGateway
+RisPacsGatewaySimulator ..|> IRisPacsGateway
+SystemParameterService ..> IAuditRecorder : <<use>> «use»
+SystemParameterService ..> IRoleManagementService : <<use>> «use»
+SystemParameterService ..> IConfigurationRepository : <<use>> «use»
+SystemParameterService ..> ConfigurationSeedData : <<use>> «use»
+SystemParameterService ..> ValidationException : <<throw>>
+SystemParameterService ..> AccessDeniedException : <<throw>>
+IntegrationManagementService ..> IAuditRecorder : <<use>> «use»
+IntegrationManagementService ..> IRoleManagementService : <<use>> «use»
+IntegrationManagementService ..> IConfigurationRepository : <<use>> «use»
+IntegrationManagementService ..> IAuthenticatorSystem : <<use>> «use»
+IntegrationManagementService ..> IEhrGateway : <<use>> «use»
+IntegrationManagementService ..> IAdmissionsGateway : <<use>> «use»
+IntegrationManagementService ..> IRisPacsGateway : <<use>> «use»
+IntegrationManagementService ..> ConnectionTestResult : <<use>> «use»
+IntegrationManagementService ..> ValidationException : <<throw>>
+IntegrationManagementService ..> AccessDeniedException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  realizes Control_ConfigureParameters (UC17)
+end note
+N1 .. SystemParameterService
+
+note as N2
+  deactivate instead of delete (D-022, D15)
+end note
+N2 .. SystemParameterService
+
+note as N3
+  examination catalogue preloaded as seed data (D-003,
+  D13)
+end note
+N3 .. ConfigurationSeedData
+
+note as N4
+  realizes Control_ManageIntegrations (UC20)
+end note
+N4 .. IntegrationManagementService
+
+note as N5
+  connection test never alters stored configuration (D18)
+end note
+N5 .. IntegrationManagementService
+
+@enduml

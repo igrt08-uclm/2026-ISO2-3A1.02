@@ -1,0 +1,201 @@
+@startuml C5_server_design
+!include common/_style.puml
+
+title C5 – Appointment Planning (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C5-common.puml!PendingNeedView
+    !includesub common/C5-common.puml!ScheduleEntry
+    !includesub common/C5-common.puml!TimeSlot
+    !includesub common/C5-common.puml!WaitlistEntry
+    !includesub common/C5-common.puml!WaitlistStatus
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C5-common.puml!IAppointmentService
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C4-common.puml!IClinicalOrderService
+    !includesub common/C5-common.puml!IDailyScheduleService
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/C5-common.puml!IWaitlistService
+    !includesub common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class AppointmentSeedData <<auxiliary>> {
+      ~appointments() : List<Appointment>
+      ~waitlistEntries() : List<WaitlistEntry>
+    }
+
+    class AppointmentService <<control>> {
+      +getPendingSchedulingNeeds(requester : String) : List<PendingNeedView> throws AccessDeniedException, ValidationException
+      +getFreeSlots(requester : String, testTypeId : String, fromDate : LocalDate, toDate : LocalDate) : List<TimeSlot> throws AccessDeniedException, ValidationException
+      +bookAppointment(requester : String, needId : String, slot : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+      +rescheduleAppointment(requester : String, appointmentId : String, newSlot : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+      +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+      +getAppointments(requester : String) : List<Appointment> throws AccessDeniedException
+      +getAppointmentsOfPatient(requester : String, patientId : String) : List<Appointment> throws AccessDeniedException, ValidationException
+      +loadSeedData() : void
+    }
+
+    class DailyScheduleService <<control>> {
+      +getDailySchedule(requester : String, date : LocalDate) : Map<String, List<ScheduleEntry>> throws AccessDeniedException, ValidationException
+      +getRoomWorklist(requester : String, date : LocalDate, room : String) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+      +getPhysicianWorklist(requester : String, date : LocalDate, physician : String) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+    }
+
+    class WaitlistService <<control>> {
+      +getWaitlist(requester : String, testTypeId : String) : List<WaitlistEntry> throws AccessDeniedException, ValidationException
+      +addToWaitlist(requester : String, needId : String, priorityId : String) : WaitlistEntry throws AccessDeniedException, ValidationException
+      +changeWaitlistPriority(requester : String, entryId : String, priorityId : String) : WaitlistEntry throws AccessDeniedException, ValidationException
+      +removeFromWaitlist(requester : String, entryId : String) : WaitlistEntry throws AccessDeniedException, ValidationException
+      +getCalendarOpenings(requester : String, testTypeId : String, fromDate : LocalDate, toDate : LocalDate) : List<TimeSlot> throws AccessDeniedException, ValidationException
+      +proposePatientForOpening(requester : String, testTypeId : String, opening : TimeSlot) : WaitlistEntry throws AccessDeniedException, ValidationException
+      +fillOpening(requester : String, entryId : String, opening : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+      +loadSeedData() : void
+    }
+
+  }
+
+  package "Persistence" {
+    interface IAppointmentRepository {
+      +findById(appointmentId : String) : Appointment
+      +findAll() : List<Appointment>
+      +findByPatient(patientId : String) : List<Appointment>
+      +findByRoomAndDateRange(room : String, fromDate : LocalDate, toDate : LocalDate) : List<Appointment>
+      +findByDate(date : LocalDate) : List<Appointment>
+      +findByDateAndRoom(date : LocalDate, room : String) : List<Appointment>
+      +findByDateAndPhysician(date : LocalDate, physician : String) : List<Appointment>
+      +save(appointment : Appointment) : void
+    }
+
+    interface IWaitlistRepository {
+      +findById(entryId : String) : WaitlistEntry
+      +findAll() : List<WaitlistEntry>
+      +findWaitingByTestType(testTypeId : String) : List<WaitlistEntry>
+      +findWaitingByNeed(needId : String) : WaitlistEntry
+      +save(entry : WaitlistEntry) : void
+    }
+
+    class InMemoryAppointmentRepository {
+      -appointments : Map<String, Appointment>
+      +findById(appointmentId : String) : Appointment
+      +findAll() : List<Appointment>
+      +findByPatient(patientId : String) : List<Appointment>
+      +findByRoomAndDateRange(room : String, fromDate : LocalDate, toDate : LocalDate) : List<Appointment>
+      +findByDate(date : LocalDate) : List<Appointment>
+      +findByDateAndRoom(date : LocalDate, room : String) : List<Appointment>
+      +findByDateAndPhysician(date : LocalDate, physician : String) : List<Appointment>
+      +save(appointment : Appointment) : void
+    }
+
+    class InMemoryWaitlistRepository {
+      -entries : Map<String, WaitlistEntry>
+      +findById(entryId : String) : WaitlistEntry
+      +findAll() : List<WaitlistEntry>
+      +findWaitingByTestType(testTypeId : String) : List<WaitlistEntry>
+      +findWaitingByNeed(needId : String) : WaitlistEntry
+      +save(entry : WaitlistEntry) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+WaitlistEntry "*" -- "1" WaitlistStatus : status
+ScheduleEntry "0..*" -- "1" Appointment : appointment
+AppointmentService ..|> IAppointmentService
+WaitlistService ..|> IWaitlistService
+DailyScheduleService ..|> IDailyScheduleService
+InMemoryAppointmentRepository ..|> IAppointmentRepository
+InMemoryWaitlistRepository ..|> IWaitlistRepository
+WaitlistService ..> IAppointmentService : <<use>>
+AppointmentService ..> AppointmentSeedData : <<use>>
+WaitlistService ..> AppointmentSeedData : <<use>>
+AppointmentService ..> IAppointmentRepository : <<use>>
+WaitlistService ..> IWaitlistRepository : <<use>>
+DailyScheduleService ..> IAppointmentRepository : <<use>>
+AppointmentService ..> IClinicalOrderService : <<use>>
+AppointmentService ..> IPatientService : <<use>>
+AppointmentService ..> ISystemParameterService : <<use>>
+AppointmentService ..> IRoleManagementService : <<use>>
+AppointmentService ..> IAuditRecorder : <<use>>
+AppointmentService ..> AccessDeniedException : <<throw>>
+AppointmentService ..> ValidationException : <<throw>>
+WaitlistService ..> IClinicalOrderService : <<use>>
+WaitlistService ..> IPatientService : <<use>>
+WaitlistService ..> ISystemParameterService : <<use>>
+WaitlistService ..> IRoleManagementService : <<use>>
+WaitlistService ..> IAuditRecorder : <<use>>
+WaitlistService ..> AccessDeniedException : <<throw>>
+WaitlistService ..> ValidationException : <<throw>>
+DailyScheduleService ..> IPatientService : <<use>>
+DailyScheduleService ..> ISystemParameterService : <<use>>
+DailyScheduleService ..> IRoleManagementService : <<use>>
+DailyScheduleService ..> IAuditRecorder : <<use>>
+DailyScheduleService ..> AccessDeniedException : <<throw>>
+DailyScheduleService ..> ValidationException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  Computed value object, not persisted (D40, D42).
+  Derived from room Schedule, TestType.durationMinutes
+  and non-cancelled Appointments.
+end note
+N1 .. TimeSlot
+
+note as N2
+  Derived query view, not persisted. Enriches C4
+  SchedulingNeed with order, patient and test type data
+  for UC13/UC15.
+end note
+N2 .. PendingNeedView
+
+note as N3
+  Derived query view for UC14, not persisted (D43).
+  Excludes CANCELLED appointments.
+end note
+N3 .. ScheduleEntry
+
+note as N4
+  Realizes Control_ManageAppointments (UC13, C5 1.0.0).
+  Permission: MANAGE_APPOINTMENTS (D37, C1 patch D-036);
+  denied checks audited (D38). Audit:
+  APPOINTMENT_ACCESSED, APPOINTMENT_BOOKED,
+  APPOINTMENT_RESCHEDULED, APPOINTMENT_CANCELLED. Cancel
+  sets status=CANCELLED (D-022) and reverts
+  SchedulingNeed to PENDING in C4 (D41). Copies
+  ClinicalOrder.requester into Appointment.physician
+  (D44).
+end note
+N4 .. AppointmentService
+
+note as N5
+  Realizes Control_ManageWaitlist (UC15, C5 1.1.0). Uses
+  IAppointmentService (<<include>> UC13, D42). Orders
+  WAITING entries by index in C2 getPriorities() then
+  addedAt asc. Audit: WAITLIST_CHANGED,
+  WAITLIST_ENTRY_REMOVED, OPENING_FILLED.
+end note
+N5 .. WaitlistService
+
+note as N6
+  Realizes Control_DailySchedule (UC14, C5 1.2.0). Read-
+  only queries excluding CANCELLED (D43). Supports room
+  and ordering-physician worklists (D44). Every access
+  audited: SCHEDULE_ACCESSED, WORKLIST_ACCESSED.
+end note
+N6 .. DailyScheduleService
+
+@enduml

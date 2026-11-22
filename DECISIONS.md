@@ -88,6 +88,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Adopting AI-generated diagrams directly as the official ones.
 - **Reason:** Requirements and use cases are a human task in this course ("do it yourselves, not the AI agent"), and each discipline has a responsible member.
 - **Consequences:** AI output is always reviewed by the team before it becomes official. So far, PlantUML code has to be copied into Visual Paradigm by hand.
+- **Status:** Updated by D-046 on 22/11/2026: the official diagrams are PlantUML (`.puml`) files in `doc/`, reviewed and approved in their pull requests instead of Visual Paradigm; AI output is still only a proposal.
 
 ## D-009 · Login scope
 **Date:** 13/10/2026 · **Iteration:** 0 · **Minutes:** [Meeting 2](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-2) · **Time in the recording:** 0:17:34, 0:23:20–0:24:19
@@ -195,6 +196,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Each member keeps their own version.
 - **Reason:** Everyone must be able to open and edit the same project files.
 - **Consequences:** Every member updates to Visual Paradigm 18.1 before working on the diagrams.
+- **Status:** Replaced by D-046 on 22/11/2026: Visual Paradigm is retired and all official UML diagrams live as PlantUML (`.puml`) files in `doc/`.
 
 ## D-018 · Use case issues can be created in advance
 **Date:** 27/10/2026 · **Iteration:** 1 · **Minutes:** [Meeting 5](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-5) · **Time in the recording:** 0:25:45–0:26:55
@@ -351,7 +353,7 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Alternatives:** Keep them only in the report.
 - **Reason:** The agents and the team read this file, so an assumption that is not here can be broken without anyone noticing.
 - **Consequences:** They are section 2 of the theory report and the page Planification of the wiki, and the three have to say the same.
-- **Status:** Approved in Meeting 6 (08/11/2026).
+- **Status:** Approved in Meeting 6 (08/11/2026). Updated by D-046 on 22/11/2026: assumption A4 no longer applies because Visual Paradigm has been replaced by PlantUML.
 
 ## D-032 · One Maven submodule per component
 **Date:** 09/11/2026 · **Iteration:** 2 · **Minutes:** [Meeting 7](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-7) · **Time in the recording:** 0:02:26–0:04:07, 0:43:07 · **Issues:** #34
@@ -529,3 +531,18 @@ This file is also context for the AI agent: it must follow these decisions and n
   is checked by repeating a similar sub-issue before and after and comparing the rows of *Token usage* and the quality
   of the result. Extends D-025 and D-043.
 - **Status:** Proposed by Adam on 18/11/2026, after the research of the page *Token usage*; approved in the review of this pull request.
+
+## D-046 · Migration of UML diagrams from Visual Paradigm to PlantUML
+**Date:** 22/11/2026 · **Iteration:** 4–5 · **Minutes:** [Meeting 9](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Meeting-9) · **Time in the recording:** 0:21:02–0:23:15 · **Issues:** #143, #177
+
+- **Context:** D-008 and D-017 made Visual Paradigm 18.1 (`doc/ISO-Project.vpp`) the official tool for UML models. Because `.vpp` is binary, it cannot be merged and forced serial hand-offs across Requirements, Analysis and Design (#107). Round-tripping PlantUML into Visual Paradigm caused `_renamed_on_import_` collisions, duplicate packages (`common2`, `server2`) and corrupted signatures (#144, #145), and editing the XML export directly risked drifting diagram shapes from the model. On 16/11/2026 the professor confirmed in class that the team may stop using Visual Paradigm if we have good engineering reasons and the diagrams remain clear.
+- **Decision:**
+  - **Full migration to modular `.puml` files under `doc/`:** All official UML diagrams (Use Cases in `doc/use-cases/`, Analysis Class Diagram and Analysis interaction diagrams in `doc/analysis/`, and Design Class Diagrams in `doc/design/`) are maintained as plain-text PlantUML (`.puml`) files reviewed and approved in pull requests like code.
+  - **Shared definitions (`!includesub`):** Actors (`doc/use-cases/_actors.puml`), styling (`doc/design/common/_style.puml`) and shared `common` domain/contract types (`doc/design/common/*.puml`) are defined once using `!startsub`/`!endsub` and included via `!includesub` so contracts cannot drift across components.
+  - **Analysis interaction diagrams:** Migrated as native PlantUML Sequence diagrams using `actor`, `boundary`, `control` and `entity` participants.
+  - **Rendered previews:** Existing `.png` previews in `doc/design/` (`C1`–`C5` client/server and `UC22-login-communication.png`) are left as-is so Wiki links (`It1`–`It3`) stay intact. `.puml` is the single source of truth; future edits and new iterations (`C6`–`C9`) regenerate `.png` previews directly from `.puml` using PlantUML CLI (`plantuml -tpng <file>.puml`) or IDE PlantUML extensions.
+  - **Retirement of `doc/ISO-Project.vpp`:** `doc/ISO-Project.vpp` is removed from `develop` and preserved in Git history.
+- **Alternatives:** Keeping Visual Paradigm for all diagrams; migrating only Design diagrams first; keeping `.puml` with Communication diagram emulation instead of Sequence diagrams; deleting existing `.png` previews immediately.
+- **Reason:** Plain-text `.puml` files support parallel work, line-by-line PR reviews, zero round-trip corruption, direct readability by Spec-Driven Development agents (D-025), and single-source-of-truth contract reuse via `!includesub`. Human review and approval in PRs preserve the discipline ownership of D-008.
+- **Consequences:** Replaces D-017, updates D-008 (official models are PlantUML in `doc/`, AI proposals still require human approval) and retires assumption A4 of D-031. `AGENTS.md`, `README.md`, `doc/design/README.md` and the wiki (*Traceability and releases*, *Requirements and Use Cases*, *Iterations*, *Home*, *Working with AI*, *Decisions*, *Planification*) are updated.
+- **Status:** Approved in Meeting 9 (22/11/2026) and implemented in #177; pending pull request review by another member (D-001).

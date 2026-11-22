@@ -1,0 +1,52 @@
+@startuml General_UC
+!include ../design/common/_style.puml
+left to right direction
+
+title General Use Case Diagram (C1–C5)
+
+!includesub _actors.puml!User
+!includesub _actors.puml!SystemAdmin
+!includesub _actors.puml!AdmissionsStaff
+!includesub _actors.puml!Patient
+!includesub _actors.puml!Physician
+!includesub _actors.puml!AuthenticatorSystem
+!includesub _actors.puml!SSO
+
+SysAdmin --|> User
+Admissions --|> User
+Patient --|> User
+Physician --|> Patient
+SSO --|> AuthSystem
+
+usecase "Log in" as UC22
+usecase "Recover password" as UC_Recover
+usecase "Manage roles and permissions" as UC18
+usecase "Audit system activity and access to clinical data" as UC19
+usecase "Configure system parameters and exam catalogue" as UC17
+usecase "Configure and manage integration with other hospital systems" as UC20
+usecase "Manage patient demographic data" as UC12
+usecase "Order a diagnostic procedure" as UC06
+usecase "Order periodic follow-up procedures" as UC07
+usecase "Manage the appointment schedule" as UC13
+usecase "Manage waitlists, triage priority tiers and calendar openings" as UC15
+usecase "Prepare the daily schedule and manage the worklists" as UC14
+
+User -- UC22
+UC22 -- AuthSystem
+UC_Recover .> UC22 : <<extend>>
+
+SysAdmin -- UC18
+SysAdmin -- UC19
+SysAdmin -- UC17
+SysAdmin -- UC20
+
+Admissions -- UC12
+Admissions -- UC13
+Admissions -- UC15
+Admissions -- UC14
+UC15 .> UC13 : <<include>>
+
+Physician -- UC06
+Physician -- UC07
+
+@enduml

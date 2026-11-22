@@ -1,0 +1,27 @@
+@startuml UC17_ConfigureParameters_Sequence
+!include ../design/common/_style.puml
+
+title UC17 – Configure system parameters and exam catalogue (Analysis Sequence Diagram)
+
+actor "System administrator" as Admin
+boundary "IU_ConfigureParameters" as IU
+control "Control_ConfigureParameters" as Ctrl
+entity "UserAccount" as UserAcc
+entity "SystemParameter" as Param
+entity "AuditLog" as Audit
+
+Admin -> IU : 1: selectGroup(group)
+IU -> Ctrl : 2: obtainEntries(group)
+Ctrl -> UserAcc : 3: hasPermission(admin, CONFIGURE_SYSTEM)
+Ctrl -> Param : 4: obtainEntries(group)
+Ctrl --> IU : 5: showEntries(entries)
+
+Admin -> IU : 6: editEntry(operation, entryData)
+IU -> Ctrl : 7: saveEntry(group, operation, entryData)
+Ctrl -> UserAcc : 8: hasPermission(admin, CONFIGURE_SYSTEM)
+Ctrl -> Param : 9: validate(operation, entryData)
+Ctrl -> Param : 10: save(operation, entryData)
+Ctrl -> Audit : 11: register(admin, PARAMETER_CHANGED, entryData)
+Ctrl --> IU : 12: showConfirmation()
+
+@enduml

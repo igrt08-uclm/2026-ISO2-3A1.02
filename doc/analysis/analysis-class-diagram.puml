@@ -1,0 +1,146 @@
+@startuml Analysis_Class_Diagram
+!include ../design/common/_style.puml
+hide members
+
+title Analysis Class Diagram (C1–C5)
+
+' ==================== Boundaries ====================
+class IU_Login <<boundary>>
+class IU_AuthenticatorSystem <<boundary>>
+class IU_ManageRoles <<boundary>>
+class IU_Audit <<boundary>>
+class IU_ConfigureParameters <<boundary>>
+class IU_ManageIntegrations <<boundary>>
+class IU_HospitalSystem <<boundary>>
+class IU_ManagePatients <<boundary>>
+class IU_OrderProcedure <<boundary>>
+class IU_OrderFollowUp <<boundary>>
+class IU_ManageAppointments <<boundary>>
+class IU_ManageWaitlist <<boundary>>
+class IU_DailySchedule <<boundary>>
+
+' ==================== Controls ====================
+class Control_Login <<control>>
+class Control_ManageRoles <<control>>
+class Control_Audit <<control>>
+class Control_ConfigureParameters <<control>>
+class Control_ManageIntegrations <<control>>
+class Control_ManagePatients <<control>>
+class Control_OrderProcedure <<control>>
+class Control_OrderFollowUp <<control>>
+class Control_ManageAppointments <<control>>
+class Control_ManageWaitlist <<control>>
+class Control_DailySchedule <<control>>
+
+' ==================== Entities ====================
+class UserAccount <<entity>>
+class Role <<entity>>
+class Permission <<entity>>
+class AuditLog <<entity>>
+class SystemParameter <<entity>>
+class TestType <<entity>>
+class Priority <<entity>>
+class Schedule <<entity>>
+class IntegrationConfiguration <<entity>>
+class Patient <<entity>>
+abstract class ClinicalOrder <<entity>>
+class DiagnosticOrder <<entity>>
+class FollowUpOrder <<entity>>
+class SchedulingNeed <<entity>>
+class Appointment <<entity>>
+class WaitlistEntry <<entity>>
+
+' ==================== Generalizations ====================
+TestType --|> SystemParameter
+Priority --|> SystemParameter
+Schedule --|> SystemParameter
+
+' ==================== Entity Associations ====================
+AuditLog -- Patient
+Patient -- ClinicalOrder
+TestType -- ClinicalOrder
+UserAccount -- ClinicalOrder
+DiagnosticOrder -- Priority
+SchedulingNeed -- ClinicalOrder
+Appointment -- SchedulingNeed
+WaitlistEntry -- SchedulingNeed
+WaitlistEntry -- Priority
+
+' ==================== C1 Associations ====================
+Control_Login -- IU_Login
+Control_Login -- IU_AuthenticatorSystem
+Control_Login -- UserAccount
+Control_Login -- Role
+Control_Login -- AuditLog
+
+Control_ManageRoles -- IU_ManageRoles
+Control_ManageRoles -- UserAccount
+Control_ManageRoles -- Role
+Control_ManageRoles -- Permission
+Control_ManageRoles -- AuditLog
+
+Control_Audit -- IU_Audit
+Control_Audit -- AuditLog
+Control_Audit -- UserAccount
+
+' ==================== C2 Associations ====================
+Control_ConfigureParameters -- IU_ConfigureParameters
+Control_ConfigureParameters -- SystemParameter
+Control_ConfigureParameters -- UserAccount
+Control_ConfigureParameters -- AuditLog
+
+Control_ManageIntegrations -- IU_ManageIntegrations
+Control_ManageIntegrations -- IU_HospitalSystem
+Control_ManageIntegrations -- IntegrationConfiguration
+Control_ManageIntegrations -- UserAccount
+Control_ManageIntegrations -- AuditLog
+
+' ==================== C3 Associations ====================
+IU_ManagePatients -- Control_ManagePatients
+Control_ManagePatients -- Patient
+Control_ManagePatients -- UserAccount
+Control_ManagePatients -- AuditLog
+
+' ==================== C4 Associations ====================
+IU_OrderProcedure -- Control_OrderProcedure
+Control_OrderProcedure -- UserAccount
+Control_OrderProcedure -- Patient
+Control_OrderProcedure -- TestType
+Control_OrderProcedure -- Priority
+Control_OrderProcedure -- DiagnosticOrder
+Control_OrderProcedure -- SchedulingNeed
+Control_OrderProcedure -- AuditLog
+
+IU_OrderFollowUp -- Control_OrderFollowUp
+Control_OrderFollowUp -- UserAccount
+Control_OrderFollowUp -- Patient
+Control_OrderFollowUp -- TestType
+Control_OrderFollowUp -- FollowUpOrder
+Control_OrderFollowUp -- SchedulingNeed
+Control_OrderFollowUp -- AuditLog
+
+' ==================== C5 Associations ====================
+IU_ManageAppointments -- Control_ManageAppointments
+Control_ManageAppointments -- UserAccount
+Control_ManageAppointments -- SchedulingNeed
+Control_ManageAppointments -- Patient
+Control_ManageAppointments -- TestType
+Control_ManageAppointments -- Schedule
+Control_ManageAppointments -- Appointment
+Control_ManageAppointments -- AuditLog
+
+IU_ManageWaitlist -- Control_ManageWaitlist
+Control_ManageWaitlist -- Control_ManageAppointments
+Control_ManageWaitlist -- UserAccount
+Control_ManageWaitlist -- WaitlistEntry
+Control_ManageWaitlist -- Priority
+Control_ManageWaitlist -- AuditLog
+
+IU_DailySchedule -- Control_DailySchedule
+Control_DailySchedule -- UserAccount
+Control_DailySchedule -- Appointment
+Control_DailySchedule -- Patient
+Control_DailySchedule -- TestType
+Control_DailySchedule -- AuditLog
+
+@enduml

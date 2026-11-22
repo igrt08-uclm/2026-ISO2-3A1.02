@@ -1,0 +1,83 @@
+@startuml C1_client_design
+!include common/_style.puml
+
+title C1 – Access and Security (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C1-common.puml!AuditLog
+    !includesub common/C1-common.puml!Permission
+    !includesub common/C1-common.puml!Role
+    !includesub common/C1-common.puml!UserAccount
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C1-common.puml!AuthenticationException
+    !includesub common/C1-common.puml!AuthenticationFailureReason
+    !includesub common/C1-common.puml!IAuditService
+    !includesub common/C1-common.puml!IAuthenticationService
+    !includesub common/C1-common.puml!IRoleManagementService
+  }
+
+}
+
+package "Presentation" {
+  class IU_Audit <<boundary>> {
+    +IU_Audit(auditService : IAuditService, requester : String, onBack : Runnable)
+    +applyFilter(filters : String) : void
+    +displayActivity(logs : List<AuditLog>) : void
+  }
+
+  class IU_Login <<boundary>> {
+    +IU_Login(authenticationService : IAuthenticationService, onSuccess : Consumer<UserAccount>)
+    +enterCredentials(username : String, password : String) : void
+    +showLoginError(reason : AuthenticationFailureReason) : void
+  }
+
+  class IU_ManageRoles <<boundary>> {
+    +IU_ManageRoles(roleService : IRoleManagementService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +selectRole(role : Role) : void
+    +selectPermissions(permissions : List<Permission>) : void
+    +selectUser(user : UserAccount) : void
+    +displayRoles(roles : List<Role>) : void
+    +showOperationResultSuccess(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+UserAccount "*" -- "*" Role : has
+Role "*" -- "*" Permission : grants
+IAuditService ..> AuditLog : <<use>>
+IAuthenticationService ..> UserAccount : <<use>>
+IRoleManagementService ..> UserAccount : <<use>>
+IRoleManagementService ..> Role : <<use>>
+IRoleManagementService ..> Permission : <<use>>
+IU_Audit ..> IAuditService : <<use>>
+IU_Login ..> IAuthenticationService : <<use>>
+IU_ManageRoles ..> IRoleManagementService : <<use>>
+IU_Login ..> AuthenticationException : <<throw>>
+AuthenticationException ..> AuthenticationFailureReason
+IU_Audit ..> AccessDeniedException : <<throw>>
+IU_ManageRoles ..> AccessDeniedException : <<throw>>
+IAuditService ..> AccessDeniedException : <<throw>>
+IRoleManagementService ..> AccessDeniedException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  realizes IU_Audit (UC19)
+end note
+N1 .. IU_Audit
+
+note as N2
+  realizes IU_Login (UC22)
+end note
+N2 .. IU_Login
+
+note as N3
+  realizes IU_ManageRoles (UC18)
+end note
+N3 .. IU_ManageRoles
+
+@enduml
