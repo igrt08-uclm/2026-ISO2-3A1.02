@@ -74,7 +74,7 @@ flowchart LR
 - If a check gives a result different from the one written in the step (a test fails, a main class does not compile, a coverage check fails, another module fails), **stop**, do not commit, and write in **Status** what happened. Do not change a test to make it pass.
 
 ## Steps
-- [ ] **1. The two reads accept `ORDER_PROCEDURES` and `MANAGE_APPOINTMENTS`** (Q2-Q7). Module `server/c3-patients`, file `PatientService.java`.
+- [x] **1. The two reads accept `ORDER_PROCEDURES` and `MANAGE_APPOINTMENTS`** (Q2-Q7). Module `server/c3-patients`, file `PatientService.java`. (`55b30db`)
   - class Javadoc (lines 18-22) becomes:
     ```java
     /**
@@ -158,7 +158,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 1, `PatientService.java` (constants, class Javadoc, `checkReadPermission`, calls at lines 90 and 98); plan approved by Javier on 22/11/2026.
+- **Next step:** step 2, version of `server-c3-patients` (`server/c3-patients/pom.xml:15` and the managed version in `pom.xml:44`: `1.0.0-SNAPSHOT` → `1.0.1-SNAPSHOT`); needs Javier's yes (rule 9). Step 1 is committed as `55b30db`: full build `BUILD SUCCESS`, `Exit code: 0`, every module `Failures: 0, Errors: 0` (`server-c3-patients` 143 tests), "All coverage checks have been met", coverage of C3 lines 100.0 %, branches 97.5 %.
 - **Open questions:**
   1. The Javadoc of `IPatientService` (`common/src/main/java/es/uclm/esi/iso2/common/patients/contracts/IPatientService.java:9-11`) still says that every operation needs `MANAGE_PATIENTS`. It is not changed here so that `common` does not enter the patch (D-036).
-- **Last update:** 22/11/2026, Javier — plan written, pending approval.
+- **Last update:** 22/11/2026 — step 1 done (`55b30db`), full build green, coverage of C3 lines 100.0 %, branches 97.5 %.
