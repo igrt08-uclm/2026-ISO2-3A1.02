@@ -44,6 +44,10 @@ class PatientServiceTest {
     private static final String PATIENT_USER = "jfernandez";
     private static final String INACTIVE = "pnavarro";
     private static final String UNKNOWN = "nobody";
+    private static final String ORDER_PROCEDURES_USER = "rlopez";
+    private static final String APPOINTMENTS_USER = "cruiz";
+    private static final String INACTIVE_ORDER_PROCEDURES = "tgil";
+    private static final String INACTIVE_APPOINTMENTS = "evega";
 
     private static final String ACCESSED = "PATIENT_ACCESSED";
     private static final String REGISTERED = "PATIENT_REGISTERED";
@@ -264,6 +268,86 @@ class PatientServiceTest {
                     () -> assertEquals(List.of(
                             new AuditEntry(ADMIN, DENIED, PATIENTS),
                             new AuditEntry(ADMISSIONS, ACCESSED, PATIENTS)), audit.entries()));
+        }
+
+        /** Runs the two reads with the requester and checks that they give what the Admissions staff gets. */
+        private void assertReadsAllowed(String requester) throws Exception {
+            // Arrange
+            List<String> expectedIds = idsOf(service.searchPatients(ADMISSIONS, ""));
+            Patient expectedMario = service.getPatient(ADMISSIONS, "P-0002");
+            audit.clear();
+
+            // Act
+            List<Patient> found = service.searchPatients(requester, "");
+            Patient read = service.getPatient(requester, "P-0002");
+
+            // Assert
+            assertEquals(List.of("P-0001", "P-0002", "P-0003"), expectedIds);
+            assertAll(
+                    () -> assertEquals(expectedIds, idsOf(found)),
+                    () -> assertAllFieldsEqual(expectedMario, read),
+                    () -> assertEquals(List.of(
+                            new AuditEntry(requester, ACCESSED, PATIENTS),
+                            new AuditEntry(requester, ACCESSED, "PATIENT:P-0002")), audit.entries()));
+        }
+
+        @Test
+        @DisplayName("TC12S-77: a user with only ORDER_PROCEDURES can search and read patients, and each read is "
+                + "audited")
+        void orderProceduresUserReads() throws Exception {
+            assertReadsAllowed(ORDER_PROCEDURES_USER);
+        }
+
+        @Test
+        @DisplayName("TC12S-78: a user with only MANAGE_APPOINTMENTS can search and read patients, and each read is "
+                + "audited")
+        void manageAppointmentsUserReads() throws Exception {
+            assertReadsAllowed(APPOINTMENTS_USER);
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @ValueSource(strings = {ORDER_PROCEDURES_USER, APPOINTMENTS_USER})
+        @DisplayName("TC12S-79: a user with only a read permission cannot register or modify, and nothing is saved")
+        void readOnlyUserCannotWrite(String requester) throws Exception {
+            // Act
+            AccessDeniedException register = assertThrows(AccessDeniedException.class,
+                    () -> service.registerPatient(requester, ana()));
+            AccessDeniedException modify = assertThrows(AccessDeniedException.class,
+                    () -> service.modifyPatient(requester, "P-0001", luciaChanged("HC-0000001")));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(requester, register.getRequester()),
+                    () -> assertEquals(requester, modify.getRequester()),
+                    () -> assertEquals(List.of(
+                            new AuditEntry(requester, DENIED, PATIENTS),
+                            new AuditEntry(requester, DENIED, "PATIENT:P-0001")), audit.entries()));
+            // Nothing was saved or changed
+            assertAll(
+                    () -> assertEquals(List.of("P-0001", "P-0002", "P-0003"), idsOf(allPatients())),
+                    () -> assertEquals("Lucía Ejemplo Prueba",
+                            service.getPatient(ADMISSIONS, "P-0001").getFullName()));
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @ValueSource(strings = {INACTIVE_ORDER_PROCEDURES, INACTIVE_APPOINTMENTS})
+        @DisplayName("TC12S-80: an inactive user is denied in every operation even with a read permission")
+        void inactiveReadUserIsDenied(String requester) throws Exception {
+            assertDeniedInEveryOperation(requester);
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @ValueSource(strings = {ORDER_PROCEDURES_USER, APPOINTMENTS_USER})
+        @DisplayName("TC12S-81: a read user gets the same error as the Admissions staff for an unknown or null id")
+        void readUserGetsTheErrorOfAnUnknownId(String requester) {
+            // Act
+            assertErrors(List.of("There is no patient with the id P-9999"),
+                    () -> service.getPatient(requester, "P-9999"));
+            assertErrors(List.of("There is no patient with the id null"),
+                    () -> service.getPatient(requester, null));
+
+            // Assert
+            assertTrue(audit.entries().isEmpty(), "nothing audited");
         }
     }
 
