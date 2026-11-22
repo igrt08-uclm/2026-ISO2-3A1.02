@@ -58,10 +58,12 @@ server/          Aggregator of the server submodules, one per component
   c1-access/       C1: services, in-memory repositories and simulations of the external systems
 client/          Aggregator of the client submodules, one per component
   c1-access/       C1: Swing windows (IU_ classes) and Main, which starts the application
-doc/             Visual Paradigm project, approved designs and implementation plans
-  ISO-Project.vpp  Official model with all the diagrams
-  design/          Exported diagrams of each iteration
-  plans/           Plan of each use case, written before implementing it
+doc/             Official UML models (PlantUML), analysis decisions, plans and tests
+  use-cases/     Use case diagrams (General_UC and C1–C5) in PlantUML (`.puml`)
+  analysis/      Analysis class diagram and UC sequence diagrams in PlantUML (`.puml`)
+  design/        Design class diagrams (`.puml`), shared `common/` includes, and `.png` previews
+  plans/         Plan of each use case or task, written before implementing it
+  testing/       Test design tables and verification artefacts
 DECISIONS.md     Every decision of the team, with its reason (D-001, D-002…)
 AGENTS.md        Rules for the AI agents that help us implement and test
 ```

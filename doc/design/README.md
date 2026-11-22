@@ -1,9 +1,10 @@
 # Approved design
 
-The approved diagrams of each iteration in a form that the agents can read, because they cannot open
-`doc/ISO-Project.vpp`: the PlantUML text of each diagram (for example `C1-server-design.puml`) or, if a diagram was
-drawn directly in Visual Paradigm, an exported image. The Visual Paradigm project is still the official model
-(D-008, D-017): when a diagram changes there, its file here is updated in the same pull request (D-025).
+The official design class diagrams of each iteration live here as modular PlantUML (`.puml`) files (D-046; `doc/ISO-Project.vpp` was retired after Meeting 9, 22/11/2026, and is preserved in Git history):
+
+- **`doc/design/common/`** holds the single-source-of-truth definitions (`!startsub`/`!endsub`) for shared styling (`_style.puml`), cross-component contracts (`shared-contracts.puml`), and each component's `common` domain/contract types (`C1-common.puml`–`C5-common.puml`).
+- **`doc/design/Cn-{client,server}-design.puml`** includes the types it needs via `!includesub common/<file>!<TypeName>` and defines the component's `Presentation` or `server` classes, relationships, and notes.
+- **Rendered previews (`.png`):** Existing Visual Paradigm `.png` exports (`C1`–`C5` client/server and `UC22-login-communication.png`) are kept untouched for Wiki compatibility (`It1`–`It3`). `.puml` is the single source of truth; whenever a diagram changes or a new iteration (`C6`–`C9`) adds diagrams, generate/update its `.png` preview directly from `.puml` using PlantUML CLI (`plantuml -tpng <file>.puml`, with Graphviz `dot`) or the VS Code / IntelliJ PlantUML extension (*Export Current Diagram*). Every diagram change is reviewed and approved in its pull request (D-008, D-025, D-046).
 
 ## Differences from the design
 The design diagrams show the design decisions and aligned C1–C3 contracts/domain/service/repository/gateway types;
