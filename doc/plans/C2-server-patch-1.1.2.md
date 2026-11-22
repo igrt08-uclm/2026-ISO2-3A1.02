@@ -119,7 +119,7 @@ flowchart LR
   - Checks: A (green), then the full build and the coverage of C2. **Expected:** `BUILD SUCCESS`, `Exit code: 0`, every module `Failures: 0, Errors: 0` with the test counts of the baseline (`server-c2-configuration` 154), "All coverage checks have been met" in every module, and the coverage of C2 at or above 80 % of lines and 70 % of branches (some branches of the new method stay uncovered until Adam's tests). If anything else happens, stop (see *How to work*).
   - Commit: `git add` the file, then
     `git commit -m "fix(C2): reads of the parameters for ORDER_PROCEDURES and MANAGE_APPOINTMENTS (#174)" -m "Tests pending Adam (#174)."`
-- [ ] **2. Version of `server-c2-configuration`** (Q7). **Ask Javier for a yes before changing the poms (rule 9).**
+- [x] **2. Version of `server-c2-configuration`** (Q7). **Ask Javier for a yes before changing the poms (rule 9).** Done in `f5a040d`.
   - `server/c2-configuration/pom.xml` line 15: `<version>1.1.1-SNAPSHOT</version>` → `<version>1.1.2-SNAPSHOT</version>`.
   - `pom.xml` line 39 (managed version of `server-c2-configuration`, inside the `<dependency>` of lines 36-40): `<version>1.1.1-SNAPSHOT</version>` → `<version>1.1.2-SNAPSHOT</version>`.
   - Nothing else: not `client/c2-configuration/pom.xml` nor `pom.xml:54` (stay `1.1.2-SNAPSHOT`), not `common`, not the parent version `0.4.0-SNAPSHOT`.
@@ -156,7 +156,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 2, version of `server-c2-configuration` to `1.1.2-SNAPSHOT` in `server/c2-configuration/pom.xml` (line 15) and in `pom.xml` (line 39).
+- **Next step:** step 3, version of the server of C2 in `agents/architecture.md` (line 10) to `1.1.2-SNAPSHOT`.
 - **Open questions:**
   1. `getProtocols` (`SystemParameterService.java:144`) still needs `CONFIGURE_SYSTEM`; #174 and `doc/plans/C5-design.md:58` do not ask for it. If C4 or C5 need protocols, it will be another patch.
   2. The Javadoc of `ISystemParameterService` (`common/.../configuration/contracts/ISystemParameterService.java:14`) still says that every operation checks `CONFIGURE_SYSTEM`. It is not changed here so that `common` does not enter the patch (D-036).
