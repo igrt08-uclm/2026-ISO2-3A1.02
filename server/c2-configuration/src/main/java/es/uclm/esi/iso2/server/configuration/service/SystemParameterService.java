@@ -20,10 +20,14 @@ import java.util.function.Predicate;
 /**
  * Manages the examination catalogue and the other parameters of the system (UC17). Every operation checks that the
  * requester is an active user with the permission {@code CONFIGURE_SYSTEM}, validates the data, deactivates instead
- * of deleting, and registers every change in the audit log.
+ * of deleting, and registers every change in the audit log. The reads of the test types, schedules, appointment
+ * policies and priorities also accept an active user with {@code ORDER_PROCEDURES} (UC06 and UC07) or
+ * {@code MANAGE_APPOINTMENTS} (UC13, UC15 and UC14).
  */
 public class SystemParameterService implements ISystemParameterService {
     private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
+    private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
+    private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
     private static final String CREATED = "PARAMETER_CREATED";
     private static final String UPDATED = "PARAMETER_UPDATED";
     private static final String DEACTIVATED = "PARAMETER_DEACTIVATED";
@@ -99,13 +103,13 @@ public class SystemParameterService implements ISystemParameterService {
 
     @Override
     public List<TestType> getTestTypes(String requester) throws AccessDeniedException {
-        checkPermission(requester, TEST_TYPE);
+        checkReadPermission(requester, TEST_TYPE);
         return testTypes.findAll();
     }
 
     @Override
     public TestType getTestType(String requester, String testTypeId) throws AccessDeniedException, ValidationException {
-        checkPermission(requester, TEST_TYPE);
+        checkReadPermission(requester, TEST_TYPE);
         return existing(testTypes, testTypeId, "test type");
     }
 
@@ -169,7 +173,7 @@ public class SystemParameterService implements ISystemParameterService {
 
     @Override
     public List<Schedule> getSchedules(String requester) throws AccessDeniedException {
-        checkPermission(requester, SCHEDULE);
+        checkReadPermission(requester, SCHEDULE);
         return schedules.findAll();
     }
 
@@ -204,7 +208,7 @@ public class SystemParameterService implements ISystemParameterService {
 
     @Override
     public List<AppointmentPolicy> getAppointmentPolicies(String requester) throws AccessDeniedException {
-        checkPermission(requester, APPOINTMENT_POLICY);
+        checkReadPermission(requester, APPOINTMENT_POLICY);
         return policies.findAll();
     }
 
@@ -232,7 +236,7 @@ public class SystemParameterService implements ISystemParameterService {
 
     @Override
     public List<Priority> getPriorities(String requester) throws AccessDeniedException {
-        checkPermission(requester, PRIORITY);
+        checkReadPermission(requester, PRIORITY);
         return priorities.findAll();
     }
 
@@ -261,6 +265,24 @@ public class SystemParameterService implements ISystemParameterService {
     /** The requester must exist, be active and have CONFIGURE_SYSTEM; if not, it is registered and denied. */
     private void checkPermission(String requester, String group) throws AccessDeniedException {
         if (!canConfigure(requester)) {
+            auditRecorder.register(requester, ACCESS_DENIED, group);
+            throw new AccessDeniedException(requester);
+        }
+    }
+
+    /**
+     * Checks a read of the test types, schedules, appointment policies or priorities: the requester must be an active
+     * user with {@code CONFIGURE_SYSTEM}, {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS}; if not, the denial
+     * is registered with the group and the access is denied, as in {@link #checkPermission(String, String)}.
+     *
+     * @param requester the username of the user who reads; it may be {@code null}
+     * @param group the group of parameters that is read, registered if the access is denied
+     * @throws AccessDeniedException if the requester has none of the three permissions
+     */
+    private void checkReadPermission(String requester, String group) throws AccessDeniedException {
+        if (!canConfigure(requester)
+                && !roleManagementService.hasPermission(requester, ORDER_PROCEDURES)
+                && !roleManagementService.hasPermission(requester, MANAGE_APPOINTMENTS)) {
             auditRecorder.register(requester, ACCESS_DENIED, group);
             throw new AccessDeniedException(requester);
         }
