@@ -161,10 +161,10 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** Javier approves this plan; after Ignacio's yes (open question 1), step 1 in
-  `InMemoryPermissionRepository.java` and `InMemoryRoleRepository.java`.
+- **Next step:** step 1 in `InMemoryPermissionRepository.java` and `InMemoryRoleRepository.java`
+  (Ignacio approved the patch on 22/11/2026, as Javier reports).
 - **Open questions:**
-  1. Ignacio (owner of C1, D-036): approval of the patch, pending in #173. Step 1 is not committed without it.
+  1. Ignacio (owner of C1, D-036): approved the patch on 22/11/2026 (as Javier reports). His approval of the pull request is still needed.
   2. Ignacio and David (requirements): D29 (`doc/AN-C4-DECISIONS.md:70`) and D37 (`doc/AN-C5-DECISIONS.md:93`) are still *To confirm*; Meeting 9 agreed this patch.
   3. Ignacio (versions): `doc/plans/C5-design.md` (lines 57 and 698) says `server-c1-access` 1.2.3 for this patch; it is 1.2.4 because #172 used 1.2.3. `C5-design.md` is not changed here.
 - **Last update:** 22/11/2026, Javier
