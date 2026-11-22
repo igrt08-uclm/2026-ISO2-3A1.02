@@ -18,10 +18,14 @@ import java.util.regex.Pattern;
 /**
  * Manages the demographic data of the patients (UC12). Every operation checks that the requester is an active user
  * with the permission {@code MANAGE_PATIENTS}, validates the data, never deletes, and registers every access and
- * change in the audit log (D26). The server gives each patient its id ({@code P-0001}, {@code P-0002}...).
+ * change in the audit log (D26). The search and the read of a patient also accept an active user with
+ * {@code ORDER_PROCEDURES} (UC06 and UC07) or {@code MANAGE_APPOINTMENTS} (UC13, UC15 and UC14). The server gives
+ * each patient its id ({@code P-0001}, {@code P-0002}...).
  */
 public class PatientService implements IPatientService {
     private static final String MANAGE_PATIENTS = "MANAGE_PATIENTS";
+    private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
+    private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
     private static final String ACCESSED = "PATIENT_ACCESSED";
     private static final String REGISTERED = "PATIENT_REGISTERED";
     private static final String MODIFIED = "PATIENT_MODIFIED";
@@ -87,7 +91,7 @@ public class PatientService implements IPatientService {
 
     @Override
     public List<Patient> searchPatients(String requester, String filters) throws AccessDeniedException {
-        checkPermission(requester, PATIENTS);
+        checkReadPermission(requester, PATIENTS);
         List<Patient> found = patients.search(filters);
         auditRecorder.register(requester, ACCESSED, PATIENTS);
         return found;
@@ -95,7 +99,7 @@ public class PatientService implements IPatientService {
 
     @Override
     public Patient getPatient(String requester, String patientId) throws AccessDeniedException, ValidationException {
-        checkPermission(requester, resourceOf(patientId));
+        checkReadPermission(requester, resourceOf(patientId));
         Patient patient = existing(patientId);
         auditRecorder.register(requester, ACCESSED, resourceOf(patientId));
         return patient;
@@ -168,6 +172,24 @@ public class PatientService implements IPatientService {
     /** The requester must exist, be active and have MANAGE_PATIENTS; if not, it is registered and denied. */
     private void checkPermission(String requester, String resource) throws AccessDeniedException {
         if (!roleManagementService.hasPermission(requester, MANAGE_PATIENTS)) {
+            auditRecorder.register(requester, ACCESS_DENIED, resource);
+            throw new AccessDeniedException(requester);
+        }
+    }
+
+    /**
+     * Checks a search or a read of a patient: the requester must be an active user with {@code MANAGE_PATIENTS},
+     * {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS}; if not, the denial is registered with the resource and
+     * the access is denied, as in {@link #checkPermission(String, String)}.
+     *
+     * @param requester the username of the user who reads; it may be {@code null}
+     * @param resource the resource that is read, registered if the access is denied
+     * @throws AccessDeniedException if the requester has none of the three permissions
+     */
+    private void checkReadPermission(String requester, String resource) throws AccessDeniedException {
+        if (!roleManagementService.hasPermission(requester, MANAGE_PATIENTS)
+                && !roleManagementService.hasPermission(requester, ORDER_PROCEDURES)
+                && !roleManagementService.hasPermission(requester, MANAGE_APPOINTMENTS)) {
             auditRecorder.register(requester, ACCESS_DENIED, resource);
             throw new AccessDeniedException(requester);
         }
