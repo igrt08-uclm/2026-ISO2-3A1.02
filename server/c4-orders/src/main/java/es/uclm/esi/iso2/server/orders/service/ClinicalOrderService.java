@@ -22,22 +22,28 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Orders diagnostic procedures and keeps their scheduling needs for C5 (UC06, Control_OrderProcedure). Ordering
  * needs an active user with the permission {@code ORDER_PROCEDURES} (D29). The order is only created for an active
  * patient (C3) and an active test type (C2), with one of the active priorities configured in C2, and with its
- * clinical indication and justification; every error is returned together. Each created order gets one pending
+ * clinical indication and justification; every error is returned together. Reading the orders of a patient also
+ * needs {@code ORDER_PROCEDURES}; the operations that C5 uses (the pending needs, one order, and marking a need as
+ * booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D37, D41), and they are
+ * not audited. Each created order gets one pending
  * scheduling need, due on the day the order is created. A denied attempt is registered as
  * {@code ORDER_ACCESS_DENIED} (D30) and a created order as {@code ORDER_CREATED}. The server gives the ids
  * ({@code ORD-0001}, {@code NEED-0001}...). Orders are never edited, cancelled or deleted (D-039, D-022).
  */
 public class ClinicalOrderService implements IClinicalOrderService {
     private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
+    private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
     private static final String CREATED = "ORDER_CREATED";
     private static final String ACCESS_DENIED = "ORDER_ACCESS_DENIED";
     private static final String ORDERS = "orders";
     private static final String ORDER = "ORDER:";
+    private static final String SCHEDULING_NEED = "SCHEDULING_NEED:";
 
     private final IClinicalOrderRepository orders;
     private final ISchedulingNeedRepository needs;
@@ -103,9 +109,61 @@ public class ClinicalOrderService implements IClinicalOrderService {
         return created;
     }
 
+    @Override
+    public List<ClinicalOrder> getOrdersOfPatient(String requester, String patientId)
+            throws AccessDeniedException, ValidationException {
+        checkPermission(requester, ORDERS);
+        if (blank(patientId)) {
+            throw new ValidationException(List.of("The patient is required"));
+        }
+        return orders.findByPatient(patientId);
+    }
+
+    @Override
+    public List<SchedulingNeed> getPendingSchedulingNeeds(String requester) throws AccessDeniedException {
+        checkSchedulingPermission(requester, ORDERS);
+        return needs.findPending();
+    }
+
+    @Override
+    public void markSchedulingNeedBooked(String requester, String needId)
+            throws AccessDeniedException, ValidationException {
+        checkSchedulingPermission(requester, SCHEDULING_NEED + needId);
+        changeStatus(needId, SchedulingNeedStatus.BOOKED);
+    }
+
+    @Override
+    public ClinicalOrder getOrder(String requester, String orderId)
+            throws AccessDeniedException, ValidationException {
+        checkSchedulingPermission(requester, ORDER + orderId);
+        ClinicalOrder order = orders.findById(orderId);
+        if (order == null) {
+            throw new ValidationException(List.of("There is no order with the id " + orderId));
+        }
+        return order;
+    }
+
+    @Override
+    public void markSchedulingNeedPending(String requester, String needId)
+            throws AccessDeniedException, ValidationException {
+        checkSchedulingPermission(requester, SCHEDULING_NEED + needId);
+        changeStatus(needId, SchedulingNeedStatus.PENDING);
+    }
+
     /** The requester must be an active user with ORDER_PROCEDURES; if not, it is registered and denied. */
     private void checkPermission(String requester, String resource) throws AccessDeniedException {
         if (!roleManagementService.hasPermission(requester, ORDER_PROCEDURES)) {
+            deny(requester, resource);
+        }
+    }
+
+    /**
+     * Checks an operation that C5 uses: the requester must be an active user with ORDER_PROCEDURES or
+     * MANAGE_APPOINTMENTS; if not, it is registered and denied.
+     */
+    private void checkSchedulingPermission(String requester, String resource) throws AccessDeniedException {
+        if (!roleManagementService.hasPermission(requester, ORDER_PROCEDURES)
+                && !roleManagementService.hasPermission(requester, MANAGE_APPOINTMENTS)) {
             deny(requester, resource);
         }
     }
@@ -196,6 +254,22 @@ public class ClinicalOrderService implements IClinicalOrderService {
                 SchedulingNeedStatus.PENDING);
         needs.save(need);
         return List.of(need);
+    }
+
+    /**
+     * Saves the need with the new status, replacing the old one (the need has no setters). The need must exist
+     * and not have that status already.
+     */
+    private void changeStatus(String needId, SchedulingNeedStatus status) throws ValidationException {
+        SchedulingNeed need = needs.findById(needId);
+        if (need == null) {
+            throw new ValidationException(List.of("There is no scheduling need with the id " + needId));
+        }
+        if (need.getStatus() == status) {
+            throw new ValidationException(List.of("The scheduling need " + needId + " is already "
+                    + status.name().toLowerCase(Locale.ROOT)));
+        }
+        needs.save(new SchedulingNeed(need.getNeedId(), need.getOrderId(), need.getDueDate(), status));
     }
 
     /** The next free id {@code ORD-0001}, {@code ORD-0002}...; it skips the ids that the repository already has. */
