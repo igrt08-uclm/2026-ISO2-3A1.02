@@ -34,7 +34,7 @@
 
 ## Steps
 Tick each step with the hash of its commit (`mvn -B verify` green).
-- [ ] 1. Create and commit this plan (`docs(migration): plan for Visual Paradigm to PlantUML migration (#177)`).
+- [x] 1. Create and commit this plan (`docs(migration): plan for Visual Paradigm to PlantUML migration (#177)`). - `9a8ca99`.
 - [ ] 2. Migrate the 6 Use Case diagrams + `_actors.puml` to `doc/use-cases/` and verify against `project.xml`.
 - [ ] 3. Migrate the Analysis Class Diagram + 11 Interaction diagrams (as PlantUML Sequence diagrams) to `doc/analysis/` and verify against `project.xml` + `UC22-login-communication.png`.
 - [ ] 4. Migrate the 10 C1–C5 Design Class Diagrams + modular `doc/design/common/` `!include` files to `doc/design/` and verify against `project.xml`.
@@ -49,7 +49,7 @@ Tick each step with the hash of its commit (`mvn -B verify` green).
 - [ ] `mvn -B verify` is green across all modules.
 
 ## Status
-- **In progress:** Step 1 (creating and committing `doc/plans/plantuml-migration.md`)
-- **Next step:** Step 2 (`doc/use-cases/*.puml`)
+- **In progress:** Step 2 (migrating 6 Use Case diagrams to `doc/use-cases/`)
+- **Next step:** Step 3 (`doc/analysis/*.puml`)
 - **Open questions:** none
 - **Last update:** 22/11/2026, Marcos Loro

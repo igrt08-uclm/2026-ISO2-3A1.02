@@ -1,0 +1,35 @@
+@startuml Component_4
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 4 – Clinical Orders (Client & Server Use Cases)
+
+!include _actors.puml!User
+!include _actors.puml!Patient
+!include _actors.puml!Physician
+!include _actors.puml!Client
+!include _actors.puml!Server
+
+Patient --|> User
+Physician --|> Patient
+
+package "Client" {
+  usecase "Order a diagnostic procedure (Client)" as UC06_C
+  usecase "Order periodic follow-up procedures (Client)" as UC07_C
+}
+
+package "Server" {
+  usecase "Order a diagnostic procedure (Server)" as UC06_S
+  usecase "Order periodic follow-up procedures (Server)" as UC07_S
+}
+
+Physician -- UC06_C
+Physician -- UC07_C
+
+UC06_C -- ServerActor
+UC07_C -- ServerActor
+
+ClientActor -- UC06_S
+ClientActor -- UC07_S
+
+@enduml

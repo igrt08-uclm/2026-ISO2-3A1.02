@@ -1,0 +1,46 @@
+@startuml Component_1
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 1 – Access and Security (Client & Server Use Cases)
+
+!include _actors.puml!User
+!include _actors.puml!SystemAdmin
+!include _actors.puml!AuthenticatorSystem
+!include _actors.puml!SSO
+!include _actors.puml!Client
+!include _actors.puml!Server
+
+SysAdmin --|> User
+SSO --|> AuthSystem
+
+package "Client" {
+  usecase "Log in (Client)" as UC22_C
+  usecase "Recover password (Client)" as Recover_C
+  usecase "Manage roles and permissions (Client)" as UC18_C
+  usecase "Audit system activity and access to clinical data (Client)" as UC19_C
+}
+
+package "Server" {
+  usecase "Log in (Server)" as UC22_S
+  usecase "Recover password (Server)" as Recover_S
+  usecase "Manage roles and permissions (Server)" as UC18_S
+  usecase "Audit system activity and access to clinical data (Server)" as UC19_S
+}
+
+User -- UC22_C
+SysAdmin -- UC18_C
+SysAdmin -- UC19_C
+Recover_C .> UC22_C : <<extend>>
+
+UC22_C -- ServerActor
+UC18_C -- ServerActor
+UC19_C -- ServerActor
+
+ClientActor -- UC22_S
+ClientActor -- UC18_S
+ClientActor -- UC19_S
+Recover_S .> UC22_S : <<extend>>
+UC22_S -- AuthSystem
+
+@enduml

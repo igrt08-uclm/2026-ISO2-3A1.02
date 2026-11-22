@@ -1,0 +1,37 @@
+@startuml Component_2
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 2 – Configuration and Integrations (Client & Server Use Cases)
+
+!include _actors.puml!User
+!include _actors.puml!SystemAdmin
+!include _actors.puml!AuthenticatorSystem
+!include _actors.puml!SSO
+!include _actors.puml!Client
+!include _actors.puml!Server
+
+SysAdmin --|> User
+SSO --|> AuthSystem
+
+package "Client" {
+  usecase "Configure system parameters and exam catalogue (Client)" as UC17_C
+  usecase "Configure and manage integration with other hospital systems (Client)" as UC20_C
+}
+
+package "Server" {
+  usecase "Configure system parameters and exam catalogue (Server)" as UC17_S
+  usecase "Configure and manage integration with other hospital systems (Server)" as UC20_S
+}
+
+SysAdmin -- UC17_C
+SysAdmin -- UC20_C
+
+UC17_C -- ServerActor
+UC20_C -- ServerActor
+
+ClientActor -- UC17_S
+ClientActor -- UC20_S
+UC20_S -- AuthSystem
+
+@enduml

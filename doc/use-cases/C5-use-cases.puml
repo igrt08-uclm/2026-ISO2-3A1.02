@@ -1,0 +1,40 @@
+@startuml Component_5
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 5 – Appointment Planning (Client & Server Use Cases)
+
+!include _actors.puml!User
+!include _actors.puml!AdmissionsStaff
+!include _actors.puml!Client
+!include _actors.puml!Server
+
+Admissions --|> User
+
+package "C5 Client" {
+  usecase "Manage the appointment schedule (Client)" as UC13_C
+  usecase "Manage waitlists, triage priority tiers and calendar openings (Client)" as UC15_C
+  usecase "Prepare the daily schedule and manage the worklists (Client)" as UC14_C
+}
+
+package "C5 Server" {
+  usecase "Manage the appointment schedule (Server)" as UC13_S
+  usecase "Manage waitlists, triage priority tiers and calendar openings (Server)" as UC15_S
+  usecase "Prepare the daily schedule and manage the worklists (Server)" as UC14_S
+}
+
+Admissions -- UC13_C
+Admissions -- UC15_C
+Admissions -- UC14_C
+
+UC13_C -- ServerActor
+UC15_C -- ServerActor
+UC14_C -- ServerActor
+
+ClientActor -- UC13_S
+ClientActor -- UC15_S
+ClientActor -- UC14_S
+
+UC15_S .> UC13_S : <<include>>
+
+@enduml
