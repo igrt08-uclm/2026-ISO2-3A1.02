@@ -11,9 +11,7 @@ import java.util.Map;
  * Test double of {@link IRoleManagementService} with the users of the test design: {@code lmartin} (active, Admissions
  * staff, with MANAGE_PATIENTS), {@code admin} (active, without MANAGE_PATIENTS), {@code mgarcia} (active physician,
  * no permission), {@code jfernandez} (active patient, no permission), {@code pnavarro} (inactive, with MANAGE_PATIENTS)
- * and no {@code nobody}. For the patch C3 1.0.1 (#175): {@code rlopez} (active, only ORDER_PROCEDURES), {@code cruiz}
- * (active, only MANAGE_APPOINTMENTS), {@code tgil} (inactive, only ORDER_PROCEDURES) and {@code evega} (inactive, only
- * MANAGE_APPOINTMENTS). Only the two reads that {@code hasPermission} uses are implemented.
+ * and no {@code nobody}. Only the two reads that {@code hasPermission} uses are implemented.
  */
 class FakeRoleManagementService implements IRoleManagementService {
     private static final Permission MANAGE_ROLES = new Permission("MANAGE_ROLES", "Manage roles");
@@ -22,32 +20,20 @@ class FakeRoleManagementService implements IRoleManagementService {
             new Permission("CONFIGURE_INTEGRATIONS", "Configure the integrations");
     private static final Permission MANAGE_PATIENTS =
             new Permission("MANAGE_PATIENTS", "Search, register and modify patients");
-    private static final Permission ORDER_PROCEDURES =
-            new Permission("ORDER_PROCEDURES", "Order diagnostic and periodic follow-up procedures");
-    private static final Permission MANAGE_APPOINTMENTS =
-            new Permission("MANAGE_APPOINTMENTS", "Manage appointments, waitlists and daily schedules");
 
     private static final List<UserAccount> USERS = List.of(
             new UserAccount("admin", "Laura Sánchez Ruiz", "laura.sanchez@sescam.test", true, List.of()),
             new UserAccount("mgarcia", "Miguel García López", "miguel.garcia@sescam.test", true, List.of()),
             new UserAccount("lmartin", "Lucía Martín Pérez", "lucia.martin@sescam.test", true, List.of()),
             new UserAccount("jfernandez", "Juan Fernández Gómez", "juan.fernandez@sescam.test", true, List.of()),
-            new UserAccount("pnavarro", "Pedro Navarro Díaz", "pedro.navarro@sescam.test", false, List.of()),
-            new UserAccount("rlopez", "Rosa López Vidal", "rosa.lopez@sescam.test", true, List.of()),
-            new UserAccount("cruiz", "Carmen Ruiz Moreno", "carmen.ruiz@sescam.test", true, List.of()),
-            new UserAccount("tgil", "Tomás Gil Romero", "tomas.gil@sescam.test", false, List.of()),
-            new UserAccount("evega", "Elena Vega Ortiz", "elena.vega@sescam.test", false, List.of()));
+            new UserAccount("pnavarro", "Pedro Navarro Díaz", "pedro.navarro@sescam.test", false, List.of()));
 
     private static final Map<String, List<Permission>> PERMISSIONS = Map.of(
             "admin", List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS),
             "mgarcia", List.of(),
             "lmartin", List.of(MANAGE_PATIENTS),
             "jfernandez", List.of(),
-            "pnavarro", List.of(MANAGE_PATIENTS),
-            "rlopez", List.of(ORDER_PROCEDURES),
-            "cruiz", List.of(MANAGE_APPOINTMENTS),
-            "tgil", List.of(ORDER_PROCEDURES),
-            "evega", List.of(MANAGE_APPOINTMENTS));
+            "pnavarro", List.of(MANAGE_PATIENTS));
 
     @Override
     public List<UserAccount> getUsers() {
