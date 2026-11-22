@@ -37,19 +37,19 @@ Tick each step with the hash of its commit (`mvn -B verify` green).
 - [x] 1. Create and commit this plan (`docs(migration): plan for Visual Paradigm to PlantUML migration (#177)`). - `9a8ca99`.
 - [x] 2. Migrate the 6 Use Case diagrams + `_actors.puml` to `doc/use-cases/` and verify against `project.xml`. - `bccf6aa`.
 - [x] 3. Migrate the Analysis Class Diagram + 11 Interaction diagrams (as PlantUML Sequence diagrams) to `doc/analysis/` and verify against `project.xml` + `UC22-login-communication.png`. - `805b9de`.
-- [ ] 4. Migrate the 10 C1–C5 Design Class Diagrams + modular `doc/design/common/` `!include` files to `doc/design/` and verify against `project.xml`.
-- [ ] 5. Run PlantUML syntax validation across all 28 `.puml` files, run automated C1–C3 Design-vs-Code diff audit (for PR description), update governance (`DECISIONS.md` D-046, `AGENTS.md`, `README.md`, `doc/design/README.md`), retire `doc/ISO-Project.vpp`, remove local `doc/xml_export/` & `doc/ISO-Project.vpp.bak_000f`, and prepare proposed Wiki updates.
+- [x] 4. Migrate the 10 C1–C5 Design Class Diagrams + modular `doc/design/common/` `!include` files to `doc/design/` and verify against `project.xml`. - `5382ff8`.
+- [x] 5. Run PlantUML syntax validation across all 28 `.puml` files, run automated C1–C3 Design-vs-Code diff audit (for PR description), update governance (`DECISIONS.md` D-046, `AGENTS.md`, `README.md`, `doc/design/README.md`), retire `doc/ISO-Project.vpp`, remove local `doc/xml_export/` & `doc/ISO-Project.vpp.bak_000f`, and prepare proposed Wiki updates. - `e19cb97`, `48711b7`.
 
 ## Verification
-- [ ] All 28 UML diagrams from `project.xml` are present as `.puml` files and pass structural completeness verification.
-- [ ] All 28 `.puml` files pass PlantUML syntax check with 0 errors and 0 broken `!include`s.
-- [ ] Existing `doc/design/*.png` previews remain untouched.
-- [ ] `doc/ISO-Project.vpp`, `doc/ISO-Project.vpp.bak_000f`, and `doc/xml_export/` are absent from working tree and Git status.
-- [ ] Automated C1–C3 Design-vs-Code discrepancy table and XML repair log are generated for the PR description.
-- [ ] `mvn -B verify` is green across all modules.
+- [x] All 28 UML diagrams from `project.xml` are present as `.puml` files and pass structural completeness verification (6 Use Case, 1 Analysis Class, 11 Analysis Sequence, 10 C1–C5 Design Class + 8 shared include modules).
+- [x] All 28 `.puml` files pass PlantUML syntax check (`PlantUML 1.2026.10` + Graphviz `dot 16.1.1`, `-failfast2`) with 0 errors and 0 broken `!includesub`s; visually spot-checked `General_UC`, `UC22_Login_Sequence`, `Analysis_Class_Diagram`, and `C4_server_design`.
+- [x] Existing `doc/design/*.png` previews remain untouched.
+- [x] `doc/ISO-Project.vpp`, `doc/ISO-Project.vpp.bak_000f`, and `doc/xml_export/` are absent from working tree and Git status.
+- [x] Automated C1–C3 Design-vs-Code discrepancy table and XML repair log are generated for the PR description.
+- [x] `mvn -B verify` is green across all modules (`BUILD SUCCESS`, all JaCoCo coverage checks met).
 
 ## Status
-- **In progress:** Step 4 (migrating C1–C5 Design Class Diagrams and `doc/design/common/` `!include` modules)
-- **Next step:** Step 5 (PlantUML validation, Design-vs-Code diff audit, governance updates, VPP retirement)
+- **In progress:** none
+- **Next step:** Push `feature/plantuml-migration`, open pull request to `develop` (`Closes #177`) with the discrepancy table and XML repair log, and apply Wiki updates after approval (Rule 8).
 - **Open questions:** none
 - **Last update:** 22/11/2026, Marcos Loro
