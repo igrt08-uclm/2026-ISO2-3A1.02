@@ -18,8 +18,10 @@ import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.configuration.service.RecordingAuditRecorder.AuditEntry;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -630,6 +633,238 @@ class SystemParameterServiceTest {
                     () -> assertThrows(ValidationException.class,
                             () -> service.deactivateAppointmentPolicy(ADMIN, "NOPE")),
                     () -> assertThrows(ValidationException.class, () -> service.deactivatePriority(ADMIN, "NOPE")),
+                    () -> assertTrue(audit.entries().isEmpty()));
+        }
+    }
+
+    /**
+     * Cases of the patch C2 1.1.2 (#174): the reads of the test types, schedules, appointment policies and priorities
+     * also accept an active user with ORDER_PROCEDURES or MANAGE_APPOINTMENTS, while {@code getProtocols} and the
+     * writes still need CONFIGURE_SYSTEM (test design {@code C2-server-patch-1.1.2-test-design.md}).
+     */
+    @Nested
+    @DisplayName("Reads for ORDER_PROCEDURES and MANAGE_APPOINTMENTS (patch 1.1.2)")
+    class ReadPermissionTests {
+        private static final String ORDERING_PHYSICIAN = "druiz";
+        private static final String ADMISSIONS = "aortega";
+        private static final String INACTIVE_PHYSICIAN = "rmoreno";
+        private static final String INACTIVE_ADMISSIONS = "cvega";
+        private static final String CONFIGURATOR = "lmartin";
+        private static final String DENIED = "PARAMETER_ACCESS_DENIED";
+        private static final List<String> READ_GROUPS =
+                List.of("TEST_TYPE", "TEST_TYPE", "SCHEDULE", "APPOINTMENT_POLICY", "PRIORITY");
+
+        /** Saves, as the administrator, one entry of every group (five audit entries). */
+        private void saveOneEntryOfEachGroup() throws Exception {
+            saveUrgentPriority();
+            service.createTestType(ADMIN, headCt());
+            service.saveProtocol(ADMIN, new Protocol("P1", "Protocol", "Steps", true));
+            service.saveSchedule(ADMIN, schedule(LocalTime.of(8, 0), LocalTime.of(15, 0)));
+            service.saveAppointmentPolicy(ADMIN, new AppointmentPolicy("A1", "Policy", "Rule", true));
+        }
+
+        /** The five reads of the patch, in the order of {@link #READ_GROUPS}. */
+        private List<Executable> reads(String requester) {
+            return List.of(
+                    () -> service.getTestTypes(requester),
+                    () -> service.getTestType(requester, "CT-HEAD"),
+                    () -> service.getSchedules(requester),
+                    () -> service.getAppointmentPolicies(requester),
+                    () -> service.getPriorities(requester));
+        }
+
+        /** The eleven writes, which keep CONFIGURE_SYSTEM. */
+        private List<Executable> writes(String requester) {
+            return List.of(
+                    () -> service.createTestType(requester, testType("CT-NECK", 15)),
+                    () -> service.updateTestType(requester, "CT-HEAD", testType("CT-HEAD", 30)),
+                    () -> service.deactivateTestType(requester, "CT-HEAD"),
+                    () -> service.saveProtocol(requester, new Protocol("P2", "Protocol", "", true)),
+                    () -> service.deactivateProtocol(requester, "P1"),
+                    () -> service.saveSchedule(requester, new Schedule("Room MR-1", WEEKDAYS,
+                            LocalTime.of(8, 0), LocalTime.of(15, 0), true)),
+                    () -> service.deactivateSchedule(requester, "Room CT-1"),
+                    () -> service.saveAppointmentPolicy(requester, new AppointmentPolicy("A2", "Policy", "", true)),
+                    () -> service.deactivateAppointmentPolicy(requester, "A1"),
+                    () -> service.savePriority(requester, new Priority("ROUTINE", "Routine", "", true)),
+                    () -> service.deactivatePriority(requester, "URGENT"));
+        }
+
+        /** Checks that the reads of {@code requester} return what the administrator reads. */
+        private void assertReadsAsTheAdministrator(String requester) throws Exception {
+            assertAll(
+                    () -> assertEquals(service.getTestTypes(ADMIN), service.getTestTypes(requester)),
+                    () -> assertSame(service.getTestType(ADMIN, "CT-HEAD"), service.getTestType(requester, "CT-HEAD")),
+                    () -> assertEquals(service.getSchedules(ADMIN), service.getSchedules(requester)),
+                    () -> assertEquals(service.getAppointmentPolicies(ADMIN),
+                            service.getAppointmentPolicies(requester)),
+                    () -> assertEquals(service.getPriorities(ADMIN), service.getPriorities(requester)),
+                    () -> assertEquals(1, service.getTestTypes(requester).size()),
+                    () -> assertEquals(1, service.getSchedules(requester).size()),
+                    () -> assertEquals(1, service.getAppointmentPolicies(requester).size()),
+                    () -> assertEquals(1, service.getPriorities(requester).size()));
+        }
+
+        @Test
+        @DisplayName("TC17S-36: an active user with ORDER_PROCEDURES only reads the five groups, not audited")
+        void orderingPhysicianReadsWithoutAudit() throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            List<AuditEntry> before = List.copyOf(audit.entries());
+
+            // Act and assert
+            assertReadsAsTheAdministrator(ORDERING_PHYSICIAN);
+            assertEquals(before, audit.entries());
+        }
+
+        @Test
+        @DisplayName("TC17S-37: an active user with MANAGE_APPOINTMENTS only reads the five groups, not audited")
+        void admissionsStaffReadsWithoutAudit() throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            List<AuditEntry> before = List.copyOf(audit.entries());
+
+            // Act and assert
+            assertReadsAsTheAdministrator(ADMISSIONS);
+            assertEquals(before, audit.entries());
+        }
+
+        @ParameterizedTest(name = "requester {0}")
+        @ValueSource(strings = {ORDERING_PHYSICIAN, ADMISSIONS})
+        @DisplayName("TC17S-38: ORDER_PROCEDURES or MANAGE_APPOINTMENTS cannot read the protocols, audited")
+        void readPermissionCannotReadProtocols(String requester) throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            int before = audit.entries().size();
+
+            // Act
+            assertThrows(AccessDeniedException.class, () -> service.getProtocols(requester));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(before + 1, audit.entries().size()),
+                    () -> assertEquals(new AuditEntry(requester, DENIED, "PROTOCOL"), audit.entries().get(before)));
+        }
+
+        @ParameterizedTest(name = "requester {0}")
+        @ValueSource(strings = {ORDERING_PHYSICIAN, ADMISSIONS})
+        @DisplayName("TC17S-39: ORDER_PROCEDURES or MANAGE_APPOINTMENTS cannot write, audited, nothing changes")
+        void readPermissionCannotWrite(String requester) throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            int before = audit.entries().size();
+            List<Executable> calls = writes(requester);
+
+            // Act
+            for (Executable call : calls) {
+                assertThrows(AccessDeniedException.class, call);
+            }
+
+            // Assert
+            List<AuditEntry> denials = audit.entries().subList(before, audit.entries().size());
+            assertAll(
+                    () -> assertEquals(calls.size(), denials.size()),
+                    () -> assertTrue(denials.stream().allMatch(
+                            e -> e.author().equals(requester) && e.action().equals(DENIED))),
+                    () -> assertEquals(List.of("TEST_TYPE", "TEST_TYPE", "TEST_TYPE", "PROTOCOL", "PROTOCOL",
+                            "SCHEDULE", "SCHEDULE", "APPOINTMENT_POLICY", "APPOINTMENT_POLICY", "PRIORITY",
+                            "PRIORITY"), denials.stream().map(AuditEntry::targetResource).toList()),
+                    () -> assertEquals(20, service.getTestType(ADMIN, "CT-HEAD").getDurationMinutes()),
+                    () -> assertTrue(service.getTestType(ADMIN, "CT-HEAD").isActive()),
+                    () -> assertEquals(1, service.getTestTypes(ADMIN).size()),
+                    () -> assertEquals(1, service.getProtocols(ADMIN).size()),
+                    () -> assertTrue(service.getProtocols(ADMIN).get(0).isActive()),
+                    () -> assertEquals(1, service.getSchedules(ADMIN).size()),
+                    () -> assertTrue(service.getSchedules(ADMIN).get(0).isActive()),
+                    () -> assertEquals(1, service.getAppointmentPolicies(ADMIN).size()),
+                    () -> assertTrue(service.getAppointmentPolicies(ADMIN).get(0).isActive()),
+                    () -> assertEquals(1, service.getPriorities(ADMIN).size()),
+                    () -> assertTrue(service.getPriorities(ADMIN).get(0).isActive()));
+        }
+
+        @ParameterizedTest(name = "requester {0}")
+        @NullSource
+        @ValueSource(strings = {INACTIVE_PHYSICIAN, INACTIVE_ADMISSIONS, UNKNOWN})
+        @DisplayName("TC17S-40: an inactive, unknown or null requester cannot read, and each denial names the group")
+        void inactiveUnknownOrNullCannotRead(String requester) throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            int before = audit.entries().size();
+            List<Executable> calls = reads(requester);
+
+            // Act
+            for (Executable call : calls) {
+                assertThrows(AccessDeniedException.class, call);
+            }
+
+            // Assert
+            List<AuditEntry> expected = READ_GROUPS.stream()
+                    .map(group -> new AuditEntry(requester, DENIED, group)).toList();
+            assertEquals(expected, audit.entries().subList(before, audit.entries().size()));
+        }
+
+        @ParameterizedTest(name = "requester {0}")
+        @NullSource
+        @ValueSource(strings = {INACTIVE_PHYSICIAN, INACTIVE_ADMISSIONS, UNKNOWN})
+        @DisplayName("TC17S-41: an inactive, unknown or null requester cannot read the protocols nor write, audited")
+        void inactiveUnknownOrNullCannotReadProtocolsNorWrite(String requester) throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            int before = audit.entries().size();
+            List<Executable> calls = new ArrayList<>(writes(requester));
+            calls.add(() -> service.getProtocols(requester));
+
+            // Act
+            for (Executable call : calls) {
+                assertThrows(AccessDeniedException.class, call);
+            }
+
+            // Assert
+            List<AuditEntry> denials = audit.entries().subList(before, audit.entries().size());
+            assertAll(
+                    () -> assertEquals(calls.size(), denials.size()),
+                    () -> assertTrue(denials.stream().allMatch(
+                            e -> Objects.equals(e.author(), requester) && e.action().equals(DENIED))),
+                    () -> assertEquals(new AuditEntry(requester, DENIED, "PROTOCOL"), denials.get(calls.size() - 1)),
+                    () -> assertEquals(1, service.getTestTypes(ADMIN).size()),
+                    () -> assertEquals(1, service.getPriorities(ADMIN).size()));
+        }
+
+        @Test
+        @DisplayName("TC17S-42: a user with CONFIGURE_SYSTEM only still reads and writes every group as before")
+        void configuratorStillReadsAndWrites() throws Exception {
+            // Arrange
+            saveOneEntryOfEachGroup();
+            int before = audit.entries().size();
+
+            // Act
+            service.saveProtocol(CONFIGURATOR, new Protocol("P2", "Protocol", "", true));
+            service.deactivatePriority(CONFIGURATOR, "URGENT");
+
+            // Assert
+            assertReadsAsTheAdministrator(CONFIGURATOR);
+            assertAll(
+                    () -> assertEquals(2, service.getProtocols(CONFIGURATOR).size()),
+                    () -> assertFalse(service.getPriorities(CONFIGURATOR).get(0).isActive()),
+                    () -> assertEquals(List.of(
+                            new AuditEntry(CONFIGURATOR, "PARAMETER_CREATED", "PROTOCOL:P2"),
+                            new AuditEntry(CONFIGURATOR, "PARAMETER_DEACTIVATED", "PRIORITY:URGENT")),
+                            audit.entries().subList(before, audit.entries().size())));
+        }
+
+        @ParameterizedTest(name = "requester {0}")
+        @ValueSource(strings = {ORDERING_PHYSICIAN, ADMISSIONS})
+        @DisplayName("TC17S-43: a test type that does not exist gives the same error as for the administrator")
+        void unknownTestTypeGivesTheSameError(String requester) {
+            // Act
+            ValidationException error = assertThrows(ValidationException.class,
+                    () -> service.getTestType(requester, "NOPE"));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of("There is no test type with the id NOPE"), error.getErrors()),
+                    () -> assertEquals(assertThrows(ValidationException.class,
+                            () -> service.getTestType(ADMIN, "NOPE")).getErrors(), error.getErrors()),
                     () -> assertTrue(audit.entries().isEmpty()));
         }
     }
