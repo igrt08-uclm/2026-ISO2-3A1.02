@@ -135,6 +135,7 @@ RoleManagementService ..> IUserAccountRepository : <<use>>
 RoleManagementService ..> IRoleRepository : <<use>>
 RoleManagementService ..> IPermissionRepository : <<use>>
 AuditService ..> IUserAccountRepository : <<use>>
+AuditService ..> IRoleRepository : <<use>>
 AuditService ..> IAuditLogRepository : <<use>>
 AuthenticationService ..> AuthenticationException : <<throw>>
 AuthenticationException ..> AuthenticationFailureReason
