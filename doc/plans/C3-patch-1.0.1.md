@@ -124,7 +124,7 @@ flowchart LR
   - Nothing else: not `client/c3-patients/pom.xml` nor `pom.xml:49` (stay `1.0.0-SNAPSHOT`), not `common`, not the parent version `0.4.0-SNAPSHOT`.
   - Check: A (green; without the filter the line `Building server-c3-patients 1.0.1-SNAPSHOT` can be seen).
   - Commit: `git add` the two poms, then `git commit -m "build(C3): server-c3-patients 1.0.1-SNAPSHOT for the patch (#175)"`
-- [ ] **3. Version in `agents/`** (Q9). **Ask Javier for a yes before changing `agents/` (rule 9).** Only the version:
+- [x] **3. Version in `agents/`** (Q9). **Ask Javier for a yes before changing `agents/` (rule 9).** Only the version: (`fa80460`)
   - `agents/architecture.md` line 11: `version 1.0.0-SNAPSHOT` → `version 1.0.1-SNAPSHOT`. The rest of the line and line 17 (client, `1.0.0-SNAPSHOT`) do not change.
   - No build (documents only).
   - Commit: `git add agents/architecture.md`, then `git commit -m "docs(C3): version of the server patch 1.0.1 in agents (#175)"`
@@ -158,7 +158,7 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3, version in `agents/` (`agents/architecture.md:11`: `version 1.0.0-SNAPSHOT` → `version 1.0.1-SNAPSHOT`); no build (documents only). Step 2 is committed as `0e10bc5`: `mvn -B verify` gives `BUILD SUCCESS`, `Exit code: 0`, every module `Failures: 0, Errors: 0` (`server-c3-patients` 143 tests), "All coverage checks have been met".
+- **Next step:** step 4, hand over to Adam: fill in *State for Adam* (date, hashes of steps 1-3 and the results of the full build of step 1, with the coverage of C3) and **Status**, then `git add doc/plans/C3-patch-1.0.1.md` and `git commit -m "docs(C3): state of the patch 1.0.1 for Adam (#175)"`. No push. Step 3 is committed as `fa80460` (`agents/architecture.md:11` at `1.0.1-SNAPSHOT`); the full build before that commit gives `BUILD SUCCESS`, `Exit code: 0`, every module `Failures: 0, Errors: 0` (`server-c3-patients` 143 tests).
 - **Open questions:**
   1. The Javadoc of `IPatientService` (`common/src/main/java/es/uclm/esi/iso2/common/patients/contracts/IPatientService.java:9-11`) still says that every operation needs `MANAGE_PATIENTS`. It is not changed here so that `common` does not enter the patch (D-036).
-- **Last update:** 22/11/2026 — step 2 done (`0e10bc5`), `server-c3-patients` at `1.0.1-SNAPSHOT`, full build green (coverage of C3 from step 1: lines 100.0 %, branches 97.5 %).
+- **Last update:** 22/11/2026 — step 3 done (`fa80460`), `agents/architecture.md:11` at `1.0.1-SNAPSHOT`, full build green (`server-c3-patients` 143 tests); coverage of C3 from step 1: lines 100.0 %, branches 97.5 %.
