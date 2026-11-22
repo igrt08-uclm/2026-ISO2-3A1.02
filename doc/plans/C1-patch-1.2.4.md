@@ -134,7 +134,7 @@ flowchart LR
   - `agents/components.md` line 56: `C1 is at 1.2.3 in the server and 1.2.4 in the client (#109, #116, #172); \`common\` is at 1.4.0-SNAPSHOT.` → `C1 is at 1.2.4 in the server and 1.2.4 in the client (#109, #116, #172, #173); \`common\` is at 1.5.0-SNAPSHOT.` The rest of the line is not changed.
   - No build (documents only).
   - Commit: `git add` the two files, then `git commit -m "docs(C1): versions of the patch 1.2.4 in agents (#173)"`
-- [x] **4. Hand over to Adam.** (this commit) Tick steps 1-3 with their hashes, fill in *State for Adam* (date and hashes) and **Status**, then
+- [x] **4. Hand over to Adam.** — `1cbaa9c` Tick steps 1-3 with their hashes, fill in *State for Adam* (date and hashes) and **Status**, then
   `git add doc/plans/C1-patch-1.2.4.md` and `git commit -m "docs(C1): state of the patch 1.2.4 for Adam (#173)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
@@ -170,4 +170,4 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
   1. Ignacio (owner of C1, D-036): approved the patch on 22/11/2026 (as Javier reports). His approval of the pull request is still needed.
   2. Ignacio and David (requirements): D29 (`doc/AN-C4-DECISIONS.md:70`) and D37 (`doc/AN-C5-DECISIONS.md:93`) are still *To confirm*; Meeting 9 agreed this patch.
   3. Ignacio (versions): `doc/plans/C5-design.md` (lines 57 and 698) says `server-c1-access` 1.2.3 for this patch; it is 1.2.4 because #172 used 1.2.3. `C5-design.md` is not changed here.
-- **Last update:** 22/11/2026, Javier — step 3 committed in `582feb0` (versions of `server-c1-access` and `common` in `agents/architecture.md` and `agents/components.md`; main code compiles, `BUILD SUCCESS` with the tests skipped, as the step changes documents only).
+- **Last update:** 22/11/2026, Javier — step 4 (hand over to Adam) committed in `1cbaa9c`; steps 1-3 in `1c5d863`, `9b9105d` and `582feb0`. Main code compiles; with the tests, only the 4 failures of *State for Adam*.
