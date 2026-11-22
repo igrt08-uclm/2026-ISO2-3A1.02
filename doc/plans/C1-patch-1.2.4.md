@@ -122,7 +122,7 @@ flowchart LR
     Every other module `Failures: 0, Errors: 0` with the test counts of the baseline. If the number of failures is not 4, or another test fails, stop (see *How to work*).
   - Commit: `git add` the two files, then
     `git commit -m "fix(C1): permissions ORDER_PROCEDURES and MANAGE_APPOINTMENTS for C4 and C5 (#173)" -m "Tests pending Adam (#173)."`
-- [ ] **2. Version of `server-c1-access`** (Q6). **Ask Javier for a yes before changing the poms (rule 9).**
+- [x] **2. Version of `server-c1-access`** (Q6). **Ask Javier for a yes before changing the poms (rule 9).** — `9b9105d`
   - `server/c1-access/pom.xml` line 15: `<version>1.2.3-SNAPSHOT</version>` → `<version>1.2.4-SNAPSHOT</version>`.
   - `pom.xml` line 34 (managed version of `server-c1-access`, inside the `<dependency>` of lines 31-35): `<version>1.2.3-SNAPSHOT</version>` → `<version>1.2.4-SNAPSHOT</version>`.
   - Nothing else: not `client/c1-access/pom.xml` (stays `1.2.4-SNAPSHOT`), not `common`, not the parent version `0.4.0-SNAPSHOT`.
@@ -161,10 +161,11 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 2, version of `server-c1-access` in `server/c1-access/pom.xml` line 15 and `pom.xml` line 34
-  (`1.2.3-SNAPSHOT` → `1.2.4-SNAPSHOT`); needs Javier's yes (rule 9).
+- **Next step:** step 3, versions in `agents/architecture.md` lines 9 and 42 and `agents/components.md` line 56
+  (`1.2.3-SNAPSHOT` → `1.2.4-SNAPSHOT`, #173 added to the patch lists, `common` 1.5.0-SNAPSHOT);
+  needs Javier's yes (rule 9). No build (documents only).
 - **Open questions:**
   1. Ignacio (owner of C1, D-036): approved the patch on 22/11/2026 (as Javier reports). His approval of the pull request is still needed.
   2. Ignacio and David (requirements): D29 (`doc/AN-C4-DECISIONS.md:70`) and D37 (`doc/AN-C5-DECISIONS.md:93`) are still *To confirm*; Meeting 9 agreed this patch.
   3. Ignacio (versions): `doc/plans/C5-design.md` (lines 57 and 698) says `server-c1-access` 1.2.3 for this patch; it is 1.2.4 because #172 used 1.2.3. `C5-design.md` is not changed here.
-- **Last update:** 22/11/2026, Javier — step 1 committed in `1c5d863`.
+- **Last update:** 22/11/2026, Javier — step 2 committed in `9b9105d` (`server-c1-access` `1.2.4-SNAPSHOT`; check A green, check B still with the 4 tests pending of Adam).
