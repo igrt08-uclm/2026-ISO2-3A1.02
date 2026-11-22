@@ -129,11 +129,11 @@ flowchart LR
   - `agents/architecture.md` line 10: `version 1.1.1-SNAPSHOT` → `version 1.1.2-SNAPSHOT`. The rest of the line and line 16 (client, `1.1.2-SNAPSHOT`) do not change.
   - No build (documents only).
   - Commit: `git add agents/architecture.md`, then `git commit -m "docs(C2): version of the server patch 1.1.2 in agents (#174)"`
-- [ ] **4. Hand over to Adam.** Tick steps 1-3 with their hashes, fill in *State for Adam* (date, hashes and the results of the full build of step 1) and **Status**, then
+- [x] **4. Hand over to Adam.** — commit `docs(C2): state of the server patch 1.1.2 for Adam (#174)`. Tick steps 1-3 with their hashes, fill in *State for Adam* (date, hashes and the results of the full build of step 1) and **Status**, then
   `git add doc/plans/C2-server-patch-1.1.2.md` and `git commit -m "docs(C2): state of the server patch 1.1.2 for Adam (#174)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
-To be filled in at step 4. What changes for the tests:
+State of 22/11/2026, at the end of step 3. The code of the patch is in `d7f98cf` (`SystemParameterService`); the versions are in `f5a040d` (poms) and `a3c5bfc` (`agents/`). The full build (`mvn -B -ntp verify`) after step 1 is green: `BUILD SUCCESS`, no failures, all coverage checks met, and `server-c2-configuration` keeps its 154 tests. What changes for the tests:
 - The five reads (`getTestTypes`, `getTestType`, `getSchedules`, `getAppointmentPolicies`, `getPriorities`) now also let through an active user with `ORDER_PROCEDURES` or `MANAGE_APPOINTMENTS`. `getProtocols` and the twelve writes still need `CONFIGURE_SYSTEM`.
 - Expected not affected: TC17S-01 to TC17S-07 and the rest of `SystemParameterServiceTest`, because `mgarcia` has no permission in `FakeRoleManagementService` (line 31). `FakeRoleManagementService` has no user with `ORDER_PROCEDURES` or `MANAGE_APPOINTMENTS`, so new cases need new users there (Adam decides).
 
@@ -156,8 +156,8 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 4, hand over to Adam: fill in *State for Adam* (date, hashes of steps 1-3 and the results of the full build of step 1) and the **Status**, then commit `doc/plans/C2-server-patch-1.1.2.md` with `docs(C2): state of the server patch 1.1.2 for Adam (#174)`. No push.
+- **Next step:** the four steps of the plan are done. Javier pushes `feature/C2-server-patch-1.1.2` and tells Adam, who adds the cases of *Cases to cover* in this branch. Then `mvn -B verify` must be green (coverage included) and the pull request (`Closes #174`) is opened and approved by the owner of C2 (D-036). Steps 1-3 are in `d7f98cf`, `f5a040d` and `a3c5bfc`.
 - **Open questions:**
   1. `getProtocols` (`SystemParameterService.java:144`) still needs `CONFIGURE_SYSTEM`; #174 and `doc/plans/C5-design.md:58` do not ask for it. If C4 or C5 need protocols, it will be another patch.
   2. The Javadoc of `ISystemParameterService` (`common/.../configuration/contracts/ISystemParameterService.java:14`) still says that every operation checks `CONFIGURE_SYSTEM`. It is not changed here so that `common` does not enter the patch (D-036).
-- **Last update:** 22/11/2026, Javier — plan written, pending approval. Baseline measured on `ec60eb9`.
+- **Last update:** 22/11/2026, Javier — step 4 (hand over to Adam) done; steps 1-3 in `d7f98cf`, `f5a040d` and `a3c5bfc`. Full build green with the tests of the baseline.
