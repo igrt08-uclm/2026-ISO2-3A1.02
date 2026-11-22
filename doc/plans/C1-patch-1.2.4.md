@@ -76,7 +76,7 @@ flowchart LR
 - If a check gives a result different from the one written in the step (another test fails, a main class does not compile, another module fails), **stop**, do not commit, and write in **Status** what happened. Do not change a test to make it pass.
 
 ## Steps
-- [ ] **1. Permissions `ORDER_PROCEDURES` for the physician and `MANAGE_APPOINTMENTS` for the admissions staff** (Q2-Q5). Module `server/c1-access`. **Only after Ignacio's yes (Q1).**
+- [x] **1. Permissions `ORDER_PROCEDURES` for the physician and `MANAGE_APPOINTMENTS` for the admissions staff** (Q2-Q5). Module `server/c1-access`. **Only after Ignacio's yes (Q1).** — `1c5d863`
   - `InMemoryPermissionRepository.java`:
     - class Javadoc (lines 6-9) becomes:
       ```java
@@ -161,10 +161,10 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 1 in `InMemoryPermissionRepository.java` and `InMemoryRoleRepository.java`
-  (Ignacio approved the patch on 22/11/2026, as Javier reports).
+- **Next step:** step 2, version of `server-c1-access` in `server/c1-access/pom.xml` line 15 and `pom.xml` line 34
+  (`1.2.3-SNAPSHOT` → `1.2.4-SNAPSHOT`); needs Javier's yes (rule 9).
 - **Open questions:**
   1. Ignacio (owner of C1, D-036): approved the patch on 22/11/2026 (as Javier reports). His approval of the pull request is still needed.
   2. Ignacio and David (requirements): D29 (`doc/AN-C4-DECISIONS.md:70`) and D37 (`doc/AN-C5-DECISIONS.md:93`) are still *To confirm*; Meeting 9 agreed this patch.
   3. Ignacio (versions): `doc/plans/C5-design.md` (lines 57 and 698) says `server-c1-access` 1.2.3 for this patch; it is 1.2.4 because #172 used 1.2.3. `C5-design.md` is not changed here.
-- **Last update:** 22/11/2026, Javier
+- **Last update:** 22/11/2026, Javier — step 1 committed in `1c5d863`.
