@@ -128,7 +128,7 @@ flowchart LR
   - Nothing else: not `client/c1-access/pom.xml` (stays `1.2.4-SNAPSHOT`), not `common`, not the parent version `0.4.0-SNAPSHOT`.
   - Check: A (green; the line `Building server-c1-access 1.2.4-SNAPSHOT` can be seen without the filter).
   - Commit: `git add` the two poms, then `git commit -m "build(C1): server-c1-access 1.2.4-SNAPSHOT for the patch (#173)"`
-- [ ] **3. Versions in `agents/`** (Q7). **Ask Javier for a yes before changing `agents/` (rule 9).** Only versions:
+- [x] **3. Versions in `agents/`** (Q7). **Ask Javier for a yes before changing `agents/` (rule 9).** Only versions — `582feb0`:
   - `agents/architecture.md` line 9: `version 1.2.3-SNAPSHOT` → `version 1.2.4-SNAPSHOT`.
   - `agents/architecture.md` line 42: `1.2.3-SNAPSHOT after the patches #109, #112 and #172` → `1.2.4-SNAPSHOT after the patches #109, #112, #172 and #173`. The client part of the line (`1.2.4-SNAPSHOT after UC12-client and #172`) does not change.
   - `agents/components.md` line 56: `C1 is at 1.2.3 in the server and 1.2.4 in the client (#109, #116, #172); \`common\` is at 1.4.0-SNAPSHOT.` → `C1 is at 1.2.4 in the server and 1.2.4 in the client (#109, #116, #172, #173); \`common\` is at 1.5.0-SNAPSHOT.` The rest of the line is not changed.
@@ -161,11 +161,11 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Status
 - **In progress:** nothing
-- **Next step:** step 3, versions in `agents/architecture.md` lines 9 and 42 and `agents/components.md` line 56
-  (`1.2.3-SNAPSHOT` → `1.2.4-SNAPSHOT`, #173 added to the patch lists, `common` 1.5.0-SNAPSHOT);
-  needs Javier's yes (rule 9). No build (documents only).
+- **Next step:** step 4, hand over to Adam: fill in *State for Adam* (date and the hashes of steps 1-3), check
+  **Status** and commit `doc/plans/C1-patch-1.2.4.md` with `docs(C1): state of the patch 1.2.4 for Adam (#173)`.
+  No push: Javier pushes and tells Adam.
 - **Open questions:**
   1. Ignacio (owner of C1, D-036): approved the patch on 22/11/2026 (as Javier reports). His approval of the pull request is still needed.
   2. Ignacio and David (requirements): D29 (`doc/AN-C4-DECISIONS.md:70`) and D37 (`doc/AN-C5-DECISIONS.md:93`) are still *To confirm*; Meeting 9 agreed this patch.
   3. Ignacio (versions): `doc/plans/C5-design.md` (lines 57 and 698) says `server-c1-access` 1.2.3 for this patch; it is 1.2.4 because #172 used 1.2.3. `C5-design.md` is not changed here.
-- **Last update:** 22/11/2026, Javier — step 2 committed in `9b9105d` (`server-c1-access` `1.2.4-SNAPSHOT`; check A green, check B still with the 4 tests pending of Adam).
+- **Last update:** 22/11/2026, Javier — step 3 committed in `582feb0` (versions of `server-c1-access` and `common` in `agents/architecture.md` and `agents/components.md`; main code compiles, `BUILD SUCCESS` with the tests skipped, as the step changes documents only).
