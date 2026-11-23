@@ -5,14 +5,20 @@ classes, boundary values and error guessing, combination of the values, and cove
 come from #130 and #131, the *Decisions* of `doc/plans/UC13-server.md` (permission, audit, free slots, booking,
 reschedule, cancel, ids), `doc/plans/C5-design.md` (Q5, Q7, Q8, Q12, sections 2 and 5), the flow of UC13 and D37, D38,
 D40, D41 of `doc/AN-C5-DECISIONS.md`, the Javadoc of `IAppointmentService` and `IAppointmentRepository`, D-022 and
-D-040; nothing that those sources do not define is used as an expected result (section 5). The first version of the
-cases (TC13S-01 to TC13S-32) was written by Ignacio Romero Torres on 23/11/2026; their ids and expected results are
-kept.
+D-040, and, for TC13S-67 to TC13S-76, the answers of #208 (Javier: `schedulesOf` rethrows the
+`AccessDeniedException` of C2; Testing: the seed data of C5) and, for the rules of the slot (TC13S-16, TC13S-46,
+TC13S-47, TC13S-49, TC13S-77 to TC13S-88), the group decision recorded in `c775ff4` (`doc/plans/UC13-server.md`,
+Ignacio, 23/11/2026); nothing that those sources do not define is used as an expected result (section 5). The
+first version of the cases (TC13S-01 to TC13S-32) was written by Ignacio Romero Torres on 23/11/2026; their ids and
+expected results are kept, except the four changes of section 5.
 
-Code under test (`server-c5-appointments` 1.0.0-SNAPSHOT, commit `387efac` of `feature/UC13-server`): the seven
-operations of `IAppointmentService` implemented by `AppointmentService` (with the private `checkPermission`,
-`readActiveTestType`, `findPendingNeed`, `findAppointment`, `slotErrors`, `insideSchedule`, `schedulesOf`, `isFree`,
-`overlaps`, `nextAppointmentId`, `blank` and `addFreeSlotsOfTheDay`), and `InMemoryAppointmentRepository`.
+Code under test (`server-c5-appointments` 1.0.0-SNAPSHOT, `feature/UC13-server` up to `e07c83c`, merged into this
+branch: `bcb06ae`, the plan `c775ff4` and the fixes of the defects of section 5, `c5f512d` (D1), `6a56ef9` (D5),
+`6721cfd` (D2) and `53ecd94` (D6)): the seven operations of `IAppointmentService` and `loadSeedData` implemented by
+`AppointmentService` (with the private `checkPermission`, `readActiveTestType`, `findPendingNeed`, `findAppointment`,
+`slotErrors`, `startOnGrid`, `insideSchedule`, `schedulesOf`, `isFree`, `overlaps`, `nextAppointmentId`, `blank` and
+`addFreeSlotsOfTheDay`, and the package-private `nextWorkingDay`), `AppointmentSeedData`, and
+`InMemoryAppointmentRepository`.
 
 **Test data (precondition of every case).** The service is built with an empty `InMemoryAppointmentRepository`, a
 recording `IAuditRecorder` and the clock `Clock.fixed(2026-11-24T08:00:00Z, UTC)` (a Tuesday). The cases about the
@@ -27,6 +33,12 @@ past use a second service on the same doubles and repository with the clock at 2
 - **C4:** a pending need `NEED-0001` of the diagnostic order `ORD-0001` (patient `P-0001`, `TT-01`, priority `URGENT`,
   ordered by `mgarcia` on 23/11/2026, due 23/11/2026). Some cases add `NEED-0002` of `ORD-0002` (`mgarcia`, priority
   `ROUTINE`) for another patient or test type, or of an order without priority (a follow-up order of UC07, D-040).
+- **C2 that denies (TC13S-67 to TC13S-70):** the double of C2 can throw `AccessDeniedException` from `getSchedules`
+  for `lmartin` (TC13S-67 to TC13S-69) or, like the real C2 for a requester without permission, for `null`
+  (TC13S-70).
+- **Seed (TC13S-71 to TC13S-76):** `loadSeedData()` on the empty repository with the clock of every case, or with the
+  clock on Monday 23/11/2026 08:00 (TC13S-72) or Friday 27/11/2026 08:00 (TC13S-73); `nextWorkingDay` with the days
+of TC13S-89.
 - **Repository cases (TC13S-64 to TC13S-66):** five booked appointments at 09:00: `APT-0001` Room 1 `mgarcia`
   23/11/2026; `APT-0002` Room 1 `mgarcia` 24/11/2026; `APT-0003` Room 2 `jfernandez` 24/11/2026; `APT-0004` Room 1
   `mgarcia` 01/12/2026; `APT-0005` Room 1 `mgarcia` 02/12/2026.
@@ -60,13 +72,19 @@ The names, the rooms and the ids of C2 and C3 are invented test values.
 | | `slot.room` | The room of the test type | Room 1 |
 | | | Another room | Room 2 |
 | | `slot.start`, `slot.end` (same day) | Inside the schedule, free, not past | 09:00-09:15 (Limit Val.: start = schedule start); 10:45-11:00 (Limit Val.: end = schedule end) |
-| | | Before the schedule | 08:00-08:15 |
+| | | Before the schedule (also off the grid) | 08:00-08:15 |
+| | | After the schedule, on the grid | 12:00-12:15 |
 | | | Ending after the schedule | 11:00-11:15 (Limit Val.: first slot after the end) |
+| | | Start or end missing | start `null`; end `null` |
+| | | End not after start | 09:15-09:15 (Limit Val.: end = start); 09:15-09:00 |
+| | | Spanning two days | 24/11 23:55 to 25/11 00:10 |
+| | | Length different from the duration (15) | 14 minutes, 16 minutes (Limit Val.); 30 minutes; 15 (Limit Val., accepted) |
+| | | Start off the grid of the schedule | 09:01 (Limit Val.: one minute after a grid point); 09:15 (accepted) |
 | | | Day without schedule | 25/11 09:00-09:15 |
 | | | Room with an inactive schedule | Room 4 09:00-09:15 |
 | | | Past (clock 10:00) | 09:00-09:15; 09:45-10:00 (Limit Val.: last slot before now) |
 | | | Start = now (clock 10:00) | 10:00-10:15 (Limit Val., accepted: "not in the past") |
-| | | Taken | the same slot as a booked appointment; 09:10-09:25 over 09:00-09:15 (Conjeture: partial overlap) |
+| | | Taken | the same slot as a booked appointment; 09:15-09:30 over 09:10-09:25 (Conjeture: partial overlap) |
 | | | Adjacent to an appointment | 09:15 after 09:00-09:15; 09:00 before 09:15-09:30 (Limit Val. of the overlap) |
 | | | Freed by a cancellation | 09:00 after cancelling the appointment of 09:00 |
 | `rescheduleAppointment` | `appointmentId` | Booked / rescheduled | `APT-0001` `BOOKED`; `APT-0001` `RESCHEDULED` |
@@ -76,6 +94,7 @@ The names, the rooms and the ids of C2 and C3 are invented test values.
 | | `newSlot` | Free, inside the schedule | 10:00, 10:30 |
 | | | Its own slot | 09:00 (Conjeture) |
 | | | Not given / another room / past / outside the schedule / taken | `null`; Room 2; 09:00 at clock 10:00; 11:00-11:15; 10:00 of `APT-0002` |
+| | | Off the grid / longer than the duration | 10:01-10:16; 10:00-10:30 |
 | `cancelAppointment` | `appointmentId` | Booked / rescheduled | `APT-0001` |
 | | | Cancelled | `APT-0001` cancelled before |
 | | | Unknown | `APT-9999` |
@@ -86,6 +105,9 @@ The names, the rooms and the ids of C2 and C3 are invented test values.
 | | | Blank | `null`, `""`, `"   "` |
 | `getPendingSchedulingNeeds` | (state of C4) | Need of a diagnostic order / of an order without priority | `NEED-0001` (`URGENT`); `NEED-0002` of a follow-up-like order |
 | `getAppointments` | (state) | One appointment | after a booking |
+| `getFreeSlots`, `bookAppointment`, `rescheduleAppointment` | answer of C2 to `getSchedules` (state) | Schedules / `AccessDeniedException` for the requester / for `null` | normal case; `lmartin`; `null` (Conjeture) |
+| `loadSeedData` | (state of the repository) | Empty / not empty | new service; after a booking; after a first load |
+| | clock (state) | Day before a working day / Friday | Monday 23/11/2026 (D = 24/11); Friday 27/11/2026 (D = Monday 30/11) |
 | `InMemoryAppointmentRepository.findByRoomAndDateRange` | `room`, `fromDate`, `toDate` | Inside the range; limits; outside; other room; room without appointments | 24/11 and 01/12 (Limit Val., included); 23/11 and 02/12 (Limit Val., excluded); Room 2; Room 3 |
 | `findByDate` | `date` | Day with appointments in two rooms / day without | 24/11; 25/11 |
 | `findByDateAndPhysician` | `date`, `physician` | Same day, each physician / other day | `mgarcia`, `jfernandez` on 24/11; `mgarcia` on 25/11 |
@@ -108,9 +130,13 @@ is saved.
 - **Fields of a booking (each use).** Each invalid class of `needId`, `slot` and the patient alone with the rest
   valid (TC13S-12 to TC13S-19, TC13S-43 to TC13S-51); each limit value of the slot alone (TC13S-17, TC13S-42 to
   TC13S-45). The conditions of the slot are isolated: a past slot is inside the schedule and free (TC13S-17), a slot
-  outside the schedule is not past (TC13S-16, TC13S-45).
+  outside the schedule is not past and is on the grid (TC13S-16, TC13S-45), each rule of the slot decided in
+  `c775ff4` is broken alone by a slot inside the schedule and free (TC13S-77 to TC13S-84), and a partial overlap is on
+  the grid (TC13S-49). A slot before the start of the schedule, on a day without schedule or of a room without an
+  active schedule cannot be on the grid, so TC13S-46, TC13S-47 and TC13S-86 expect two messages for one input.
 - **Reschedule × new slot (each use).** Each invalid class of the new slot with a booked appointment (TC13S-24,
-  TC13S-53 to TC13S-56), and each state of the appointment with a valid slot (TC13S-21, TC13S-22, TC13S-59).
+  TC13S-53 to TC13S-56, TC13S-87, TC13S-88), and each state of the appointment with a valid slot (TC13S-21,
+  TC13S-22, TC13S-59).
 - **Test type × range.** `TT-01` with each range class; `TT-02` and `TT-04` with one day; `TT-03`, `TT-99` and blank
   with one day. The dates have no maximum number of cases: the classes of section 1 bound them.
 - **State (error guessing).** Book then cancel (TC13S-05), book then reschedule (TC13S-40, TC13S-58), reschedule then
@@ -119,11 +145,12 @@ is saved.
 
 ## 3. Coverage (white box)
 
-Measured with JaCoCo in `mvn -B verify` (D-033: 80 % of lines, 70 % of branches of the bundle):
-`AppointmentService` 167 of 172 lines and 94 of 94 branches; `InMemoryAppointmentRepository` 26 of 26 lines and 4 of 4
-branches; the bundle 193 of 198 lines (97 %) and 98 of 98 branches (100 %). The 5 missed lines are the constructor
-with the system clock (lines 94-96) and the `catch` of `AccessDeniedException` in `schedulesOf` (lines 332-333), see
-section 5.
+Measured with JaCoCo in `mvn -B -ntp clean verify` on `feature/UC13-server` up to `e07c83c` merged into this
+branch, with every case of section 4 in the suite and no disabled test (D-033: 80 % of lines, 70 % of branches of
+the bundle): `AppointmentService` 196 of 199 lines and 120 of 120 branches; `AppointmentSeedData` 7 of 7 lines;
+`InMemoryAppointmentRepository` 26 of 26 lines and 4 of 4 branches; the bundle 229 of 232 lines (98.7 %) and 124 of
+124 branches (100 %). `common`: 252 of 287 lines (87.8 %) and 14 of 14 branches. The only missed lines are the
+constructor with the system clock (lines 95-97, section 5).
 
 **Decision coverage** (each decision true and false):
 
@@ -138,10 +165,10 @@ section 5.
 | `blank(needId)` / `slot == null` in `bookAppointment` | TC13S-13 / TC13S-14 | TC13S-09 |
 | `needId.equals(need.getNeedId())` (loop of `findPendingNeed`) | first need TC13S-09; second TC13S-11, TC13S-19 | none matches: TC13S-12 |
 | `!patient.isActive()` | TC13S-19 | TC13S-09 |
-| `!errors.isEmpty()` after the slot checks | TC13S-15 to TC13S-19, TC13S-43 to TC13S-49 | TC13S-09 |
+| `!errors.isEmpty()` after the slot checks | TC13S-15 to TC13S-19, TC13S-43 to TC13S-49, TC13S-79 to TC13S-86 | TC13S-09 |
 | room of the slot is not the room of the test type | TC13S-15, TC13S-54 | TC13S-09 |
 | `slot.getStart().isBefore(now)` | TC13S-17, TC13S-43, TC13S-55 | TC13S-09; TC13S-42 (start = now) |
-| `!insideSchedule(...)` | TC13S-16, TC13S-45 to TC13S-47, TC13S-56 | TC13S-09 |
+| `!insideSchedule(...)` | TC13S-16, TC13S-45 to TC13S-47, TC13S-56, TC13S-86 | TC13S-09 |
 | `!isFree(...)` | TC13S-18, TC13S-24, TC13S-49 | TC13S-09, TC13S-48, TC13S-50 |
 | `blank(appointmentId)` in `rescheduleAppointment` / `cancelAppointment` | TC13S-23 / TC13S-60 | TC13S-21 / TC13S-25 |
 | `newSlot == null` | TC13S-53 | TC13S-21 |
@@ -152,7 +179,15 @@ section 5.
 | `order instanceof DiagnosticOrder` | TC13S-30 (`URGENT`) | TC13S-63 (`""`) |
 | `status != CANCELLED` (filter of `isFree`) | TC13S-18 | TC13S-05, TC13S-62 (cancelled, not counted) |
 | `!appointmentId.equals(ignoredAppointmentId)` (filter of `isFree`) | TC13S-24 | TC13S-57 (its own slot) |
-| `findById(id) != null` in `nextAppointmentId` | TC13S-52 | TC13S-09, TC13S-11 |
+| `findById(id) != null` in `nextAppointmentId` | TC13S-52, TC13S-76 | TC13S-09, TC13S-11 |
+| `appointments.findAll().isEmpty()` in `loadSeedData` | TC13S-71, first call of TC13S-75 | TC13S-74, second call of TC13S-75 |
+| Saturday or Sunday (loop of `nextWorkingDay`) | TC13S-89 (Friday, Saturday: 2 and 1 iterations), TC13S-73 | TC13S-89 (Monday, Thursday, Sunday), TC13S-72 |
+| `getSchedules` of C2 throws (`schedulesOf`, no `catch` since `bcb06ae`) | TC13S-67, TC13S-68, TC13S-69 | every other case that reads the schedules; TC13S-70 (C2 denies only `null`) |
+| start or end `null` in `slotErrors` | TC13S-77, TC13S-78 | TC13S-09 |
+| `!end.isAfter(start)` | TC13S-79 (end = start; end before start) | TC13S-09 |
+| start and end on different days | TC13S-80 | TC13S-09 |
+| length different from the duration | TC13S-82, TC13S-88 (longer); TC13S-81 (shorter) | TC13S-83 (= duration) |
+| `!startOnGrid(...)` | TC13S-84, TC13S-87 (09:01, 10:01); TC13S-46, TC13S-47, TC13S-86 (no grid point) | TC13S-09 (09:00), TC13S-85 (09:15) |
 
 **Condition/decision and MC/DC** of the compound decisions (Java evaluates them with short circuit; "–" = not
 evaluated):
@@ -167,15 +202,15 @@ evaluated):
 | | F, F | valid | TC13S-03 |
 | `insideSchedule`: day of the schedule `&&` `!start.isBefore(scheduleStart)` `&&` `!end.isAfter(scheduleEnd)` | T, T, T | inside | TC13S-09 (start = 09:00), TC13S-44 (end = 11:00) |
 | | F, –, – | outside | TC13S-46 (Wednesday) |
-| | T, F, – | outside | TC13S-16 (08:00) |
-| | T, T, F | outside | TC13S-45 (11:00-11:15) |
+| | T, F, – | outside | TC13S-86 (08:00) |
+| | T, T, F | outside | TC13S-45 (11:00-11:15), TC13S-16 (12:00-12:15) |
 | `schedulesOf` filter: `room.equals(resource) && isActive()` | T, T | kept | Room 1 in TC13S-03 |
 | | F, – | dropped | the schedules of Room 2 and Room 4 in every case of `TT-01` |
-| | T, F | dropped | Room 4 in TC13S-37, TC13S-47 (no schedule left: the loop of `insideSchedule` does not run) |
+| | T, F | dropped | Room 4 in TC13S-37, TC13S-47 (no schedule left: the loops of `startOnGrid` and `insideSchedule` do not run) |
 | `!start.isBefore(now) && isFree(candidate, null)` in `addFreeSlotsOfTheDay` | T, T | offered | TC13S-03; TC13S-41 at 10:00 (start = now) |
 | | F, – | not offered | TC13S-41 (09:00 to 09:45 at 10:00) |
 | | T, F | not offered | TC13S-05, TC13S-40 |
-| `overlaps`: `appointment.start < slot.end && slot.start < appointment.end` | T, T | taken | TC13S-18 (same slot), TC13S-49 (09:10 over 09:00-09:15) |
+| `overlaps`: `appointment.start < slot.end && slot.start < appointment.end` | T, T | taken | TC13S-18 (same slot), TC13S-49 (09:15-09:30 over 09:10-09:25) |
 | | T, F | free | TC13S-48 (09:15 after 09:00-09:15) |
 | | F, – | free | TC13S-50 (09:00 before 09:15-09:30) |
 | `isInRange`: `!day.isBefore(fromDate) && !day.isAfter(toDate)` (repository) | T, T | in | `APT-0002` (= from), `APT-0004` (= to) in TC13S-64 |
@@ -184,7 +219,7 @@ evaluated):
 
 MC/DC: in each row group, the case of the first row and the case where only one condition changes differ only in that
 condition and change the result (for example, TC13S-07 / TC13S-03 for `fromDate == null`, TC13S-35 / TC13S-03 for
-`toDate == null`; TC13S-46, TC13S-16 and TC13S-45 each against TC13S-09 for the three conditions of `insideSchedule`).
+`toDate == null`; TC13S-46, TC13S-86 and TC13S-45 each against TC13S-09 for the three conditions of `insideSchedule`).
 `checkPermission` has a single condition: `pnavarro` makes it true although he is a known user, because C1 answers
 `false` for an inactive user. The other decisions have a single condition, so condition/decision and MC/DC are the
 same as decision coverage.
@@ -193,9 +228,9 @@ same as decision coverage.
 
 The tests are in `server/c5-appointments/src/test/java/es/uclm/esi/iso2/server/appointments/service/
 AppointmentServiceTest.java` (nested classes `Permission`, `FreeSlots`, `Booking`, `Rescheduling`, `Cancelling`,
-`ReadsAndViews`) and, for TC13S-64 to TC13S-66, in `.../persistence/InMemoryAppointmentRepositoryTest.java`.
-EC = equivalence class, BV = boundary value, EG = error guessing. Dates are 2026 unless written; times are on
-24/11/2026 (Tuesday) unless written.
+`ReadsAndViews`, `DeniedByC2`, `SeedData`, `SlotRules`) and, for TC13S-64 to TC13S-66, in
+`.../persistence/InMemoryAppointmentRepositoryTest.java`. EC = equivalence class, BV = boundary value, EG = error
+guessing. Dates are 2026 unless written; times are on 24/11/2026 (Tuesday) unless written.
 
 | ID | Method | Input (and precondition) | Expected result | Test | Postcondition |
 |---|---|---|---|---|---|
@@ -214,7 +249,7 @@ EC = equivalence class, BV = boundary value, EG = error guessing. Dates are 2026
 | TC13S-13 | `bookAppointment` | EC/BV: need `null`, `""`, `"   "` | `The scheduling need is required` | `Booking.blankNeed` | nothing saved |
 | TC13S-14 | `bookAppointment` | BV: slot `null` | `The slot is required` | `Booking.missingSlot` | nothing saved |
 | TC13S-15 | `bookAppointment` | EC: Room 2 09:00 | `The room Room 2 is not the room of the test type TT-01` | `Booking.slotOfAnotherRoom` | nothing saved |
-| TC13S-16 | `bookAppointment` | EC: 08:00-08:15 (not past at 08:00) | `The slot 24/11/2026 08:00 is not inside the schedule of the room Room 1` | `Booking.slotOutsideSchedule` | nothing saved |
+| TC13S-16 | `bookAppointment` | EC: 12:00-12:15 (after the schedule, on the grid, not past) | `The slot 24/11/2026 12:00 is not inside the schedule of the room Room 1` (changed, section 5) | `Booking.slotOutsideSchedule` | nothing saved |
 | TC13S-17 | `bookAppointment` | EC: clock 10:00, 09:00-09:15 (inside the schedule and free) | Only `The slot 24/11/2026 09:00 is in the past` | `Booking.slotInThePast` | nothing saved |
 | TC13S-18 | `bookAppointment` | EC: 09:00 already booked, `NEED-0002` | `The slot 24/11/2026 09:00 is not free` | `Booking.slotTaken` | one appointment |
 | TC13S-19 | `bookAppointment` | EC: `NEED-0002` of `P-0004` | `The patient P-0004 is not active` | `Booking.inactivePatient` | nothing saved |
@@ -245,10 +280,10 @@ EC = equivalence class, BV = boundary value, EG = error guessing. Dates are 2026
 | TC13S-43 | `bookAppointment` | BV: clock 10:00, 09:45-10:00 | Only `The slot 24/11/2026 09:45 is in the past` | `Booking.lastSlotBeforeNow` | nothing saved |
 | TC13S-44 | `bookAppointment` | BV: 10:45-11:00 | Booked, ending 11:00 | `Booking.lastSlotOfTheSchedule` | saved |
 | TC13S-45 | `bookAppointment` | BV: 11:00-11:15 | `The slot 24/11/2026 11:00 is not inside the schedule of the room Room 1` | `Booking.slotEndingAfterTheSchedule` | nothing saved |
-| TC13S-46 | `bookAppointment` | EC: 25/11 09:00-09:15 | `The slot 25/11/2026 09:00 is not inside the schedule of the room Room 1` | `Booking.slotOnADayWithoutSchedule` | nothing saved |
-| TC13S-47 | `bookAppointment` | EC: `NEED-0002` of `TT-04`, Room 4 09:00 | `The slot 24/11/2026 09:00 is not inside the schedule of the room Room 4` | `Booking.slotOfAnInactiveSchedule` | nothing saved |
+| TC13S-46 | `bookAppointment` | EC: 25/11 09:00-09:15 | `The start of the slot must be on the grid of the schedule of the room Room 1`, `The slot 25/11/2026 09:00 is not inside the schedule of the room Room 1` (changed, section 5) | `Booking.slotOnADayWithoutSchedule` | nothing saved |
+| TC13S-47 | `bookAppointment` | EC: `NEED-0002` of `TT-04`, Room 4 09:00 | `The start of the slot must be on the grid of the schedule of the room Room 4`, `The slot 24/11/2026 09:00 is not inside the schedule of the room Room 4` (changed, section 5) | `Booking.slotOfAnInactiveSchedule` | nothing saved |
 | TC13S-48 | `bookAppointment` | BV: 09:00 booked, `NEED-0002` at 09:15 | Booked at 09:15 | `Booking.adjacentAfter` | two appointments |
-| TC13S-49 | `bookAppointment` | EG: 09:00 booked, `NEED-0002` at 09:10-09:25 | `The slot 24/11/2026 09:10 is not free` | `Booking.partialOverlap` | one appointment |
+| TC13S-49 | `bookAppointment` | EG: the repository has `APT-0009` of Room 1 at 09:10-09:25; `NEED-0001` at 09:15-09:30 | `The slot 24/11/2026 09:15 is not free` (changed, section 5) | `Booking.partialOverlap` | only `APT-0009` |
 | TC13S-50 | `bookAppointment` | BV: 09:15 booked, `NEED-0002` at 09:00 | Booked at 09:00 | `Booking.adjacentBefore` | two appointments |
 | TC13S-51 | `bookAppointment` | EC: `NEED-0002` of `TT-03` | `The test type TT-03 is not active` | `Booking.needOfAnInactiveTestType` | nothing saved, need `PENDING` |
 | TC13S-52 | `bookAppointment` | EG: the repository already has `APT-0001` (Room 2) | The new appointment is `APT-0002` (plan, *Ids*) | `Booking.idSkipsExistingIds` | two appointments |
@@ -266,23 +301,101 @@ EC = equivalence class, BV = boundary value, EG = error guessing. Dates are 2026
 | TC13S-64 | `findByRoomAndDateRange` | BV: Room 1, Room 2, Room 3, 24/11 to 01/12 | Room 1: `APT-0002`, `APT-0004` (both limits included); Room 2: `APT-0003`; Room 3: empty | `InMemoryAppointmentRepositoryTest.findByRoomAndDateRange` | unchanged |
 | TC13S-65 | `findByDate` | EC: 24/11; 25/11 | `APT-0002`, `APT-0003`; empty | `InMemoryAppointmentRepositoryTest.findByDate` | unchanged |
 | TC13S-66 | `findByDateAndPhysician` | EC: 24/11 `mgarcia`, 24/11 `jfernandez`, 25/11 `mgarcia` | `APT-0002`; `APT-0003`; empty | `InMemoryAppointmentRepositoryTest.findByDateAndPhysician` | unchanged |
+| TC13S-67 | `getFreeSlots` | EC: C2 denies `getSchedules` to `lmartin`; `TT-01`, 24/11 | `AccessDeniedException` of `lmartin` reaches the caller (Javier, #208) | `DeniedByC2.freeSlotsWhenC2DeniesTheSchedules` | — |
+| TC13S-68 | `bookAppointment` | EC: C2 denies `getSchedules` to `lmartin`; `NEED-0001`, 09:00 | `AccessDeniedException` of `lmartin` (Javier, #208) | `DeniedByC2.bookingWhenC2DeniesTheSchedules` | nothing saved, need `PENDING` |
+| TC13S-69 | `rescheduleAppointment` | EC: `APT-0001` booked at 09:00; C2 denies `lmartin`; to 10:00 | `AccessDeniedException` of `lmartin` (Javier, #208) | `DeniedByC2.rescheduleWhenC2DeniesTheSchedules` | `APT-0001` keeps 09:00, `BOOKED` |
+| TC13S-70 | `bookAppointment` | EG: C2 denies `null`, as the real C2 does for a requester without permission; `lmartin`, `NEED-0001`, 09:00 | `APT-0001` `BOOKED` (the permitted requester `lmartin` books a valid slot; TC13S-09) | `DeniedByC2.bookingWithAC2ThatDeniesANullRequester` (D1, fixed in `c5f512d`) | saved |
+| TC13S-71 | `loadSeedData` | EC: empty repository | `APT-0001`, `APT-0002`, `APT-0003` of `NEED-0001`, `NEED-0002`, `NEED-0003`, `BOOKED`, `CANCELLED`, `RESCHEDULED`, all `CT-HEAD` in Room CT-1 (Testing, #208) | `SeedData.seedIsLoadedInAnEmptySystem` | three appointments |
+| TC13S-72 | `loadSeedData` | BV: clock Monday 23/11/2026 08:00 | Every seed appointment on D = Tuesday 24/11/2026, the first working day after the start (Testing, #208) | `SeedData.seedOfAMondayIsOnTuesday` (D2, fixed in `6721cfd`) | three appointments |
+| TC13S-73 | `loadSeedData` | BV: clock Friday 27/11/2026 08:00 | Every seed appointment on D = Monday 30/11/2026 (Testing, #208) | `SeedData.seedOfAFridayIsOnMonday` (D2, fixed in `6721cfd`) | three appointments |
+| TC13S-74 | `loadSeedData` | EC: one appointment booked before | Nothing loaded: only `APT-0001` of `NEED-0001` (Testing, #208: only when the repository is empty) | `SeedData.seedIsNotLoadedWhenThereIsData` | one appointment |
+| TC13S-75 | `loadSeedData` | EG: called twice | Three appointments; no audit entry (Testing, #208; C5-design Q12) | `SeedData.seedIsLoadedOnlyOnceAndNotAudited` | three appointments |
+| TC13S-76 | `bookAppointment` | EG: after the seed, `NEED-0001`, 09:00 | `APT-0004` (Testing, #208: the ids continue; plan, *Ids*) | `SeedData.idsContinueAfterTheSeed` | four appointments |
+| TC13S-77 | `bookAppointment` | BV: start `null`, end 09:15 | `ValidationException` with `The start and the end of the slot are required` | `SlotRules.startMissing` (D5, fixed in `6a56ef9`) | nothing saved |
+| TC13S-78 | `bookAppointment` | BV: start 09:00, end `null` | `ValidationException` with `The start and the end of the slot are required` | `SlotRules.endMissing` (D5, fixed in `6a56ef9`) | nothing saved |
+| TC13S-79 | `bookAppointment` | BV: 09:15-09:15 (end = start); EC: 09:15-09:00 (end before start) | `The end of the slot must be after its start` | `SlotRules.endNotAfterStart` | nothing saved |
+| TC13S-80 | `bookAppointment` | EC: 24/11 23:55 to 25/11 00:10 (15 minutes) | `The slot must be inside a single day` | `SlotRules.slotOfTwoDays` | nothing saved |
+| TC13S-81 | `bookAppointment` | BV: 09:00-09:14 (one minute shorter) | `The duration of the slot must match the duration of the test type TT-01` | `SlotRules.slotShorterThanTheDuration` (D6, fixed in `53ecd94`) | nothing saved |
+| TC13S-82 | `bookAppointment` | BV: 09:00-09:16 (one minute longer) | `The duration of the slot must match the duration of the test type TT-01` | `SlotRules.slotLongerThanTheDuration` | nothing saved |
+| TC13S-83 | `bookAppointment` | BV: 09:00-09:15 (= duration) | Booked, 09:00-09:15 | `SlotRules.lengthEqualToTheDuration` | saved |
+| TC13S-84 | `bookAppointment` | BV: 09:01-09:16 (one minute off the grid) | `The start of the slot must be on the grid of the schedule of the room Room 1` | `SlotRules.startOffTheGrid` | nothing saved |
+| TC13S-85 | `bookAppointment` | BV: 09:15-09:30 (second grid point) | Booked at 09:15 | `SlotRules.startOnTheGrid` | saved |
+| TC13S-86 | `bookAppointment` | EC: 08:00-08:15 (before the schedule, not past at 08:00; the input of the first TC13S-16) | `The start of the slot must be on the grid of the schedule of the room Room 1`, `The slot 24/11/2026 08:00 is not inside the schedule of the room Room 1` | `SlotRules.slotBeforeTheSchedule` | nothing saved |
+| TC13S-87 | `rescheduleAppointment` | EC: `APT-0001` at 09:00 to 10:01-10:16 | `The start of the slot must be on the grid of the schedule of the room Room 1` | `SlotRules.rescheduleOffTheGrid` | keeps 09:00 |
+| TC13S-88 | `rescheduleAppointment` | EC: `APT-0001` at 09:00 to 10:00-10:30 | `The duration of the slot must match the duration of the test type TT-01` | `SlotRules.rescheduleWithAWrongDuration` | still `BOOKED` |
+| TC13S-89 | `nextWorkingDay` | BV: Monday 23/11, Thursday 26/11, Friday 27/11; EC: Saturday 28/11, Sunday 29/11/2026 | Tuesday 24/11, Friday 27/11, Monday 30/11, Monday 30/11, Monday 30/11 (the first working day after the start, Testing, #208; `6721cfd`) | `SeedData.nextWorkingDay` | — |
 
 Postcondition of every case: a denied call saves nothing and registers only `APPOINTMENT_ACCESS_DENIED`; a rejected
 call saves nothing, does not change the need in C4 and registers nothing; no appointment is ever deleted (D-022).
 
 ## 5. Not covered / Not defined
 
-- **To be tested when pushed (pending changes of Implementation, not in this branch):**
-  - `schedulesOf` will stop catching `AccessDeniedException` of C2 (Javier's decision in #208). Today lines 332-333 are
-    the only lines of the service not covered. No test of this design depends on the exception being swallowed (no
-    double of C2 throws it), so none changes when `schedulesOf` rethrows; a case for the rethrow is added then.
-  - `TimeSlot` `equals`/`hashCode`: the cases compare the start, end and room of the slots, not the objects.
-  - `loadSeedData` / `AppointmentSeedData` with the seed given by Testing in #208.
-- **Slot duration, grid and end after start, Not defined:** #131 says that the slots have the duration of the test
-  type, but the code does not check that a booked slot lasts that duration, starts on the grid of the schedule or ends
-  after it starts. No case asserts it. Every case uses slots of the duration of the test type on the grid, except
-  TC13S-49 (09:10-09:25), which is off the grid to check a partial overlap: if the grid is validated, TC13S-49 gets a
-  second message.
+- **Changed expected values after merging `bcb06ae` (#208):** none. No double of C2 threw `AccessDeniedException`
+  before, so no case depended on the `catch` that Javier's decision removed; the rethrow is now TC13S-67 to TC13S-69.
+- **Changed expected values after merging `c775ff4` (group decision on the rules of the slot).** `c775ff4` records
+  in `doc/plans/UC13-server.md` that the group decided the checks of `slotErrors` (Ignacio, 23/11/2026): a slot is
+  rejected if its start or end is `null`, its end is not after its start, it spans more than one day, its length is
+  not the duration of the test type, or its start is not on the grid of the schedule of the room (`startOnGrid`). The
+  four cases that were disabled because of the grid check are enabled again. Source of every change: group decision
+  recorded in `c775ff4`; the text of the messages is taken from the code (`slotErrors` of `bcb06ae`), because the
+  decision names the rules but not their messages.
+  - TC13S-16: input 08:00-08:15 -> 12:00-12:15; expected `The slot 24/11/2026 08:00 is not inside the schedule of the
+    room Room 1` -> `The slot 24/11/2026 12:00 is not inside the schedule of the room Room 1`. A slot before the start
+    of the schedule is never on the grid, so the case now uses a slot after the schedule on the grid to keep a single
+    reason; the old input is kept as TC13S-86 with its two messages.
+  - TC13S-46: `The slot 25/11/2026 09:00 is not inside the schedule of the room Room 1` -> `The start of the slot must
+    be on the grid of the schedule of the room Room 1`, `The slot 25/11/2026 09:00 is not inside the schedule of the
+    room Room 1`. Two messages are accepted: a day without schedule has no grid, so no input isolates it.
+  - TC13S-47: `The slot 24/11/2026 09:00 is not inside the schedule of the room Room 4` -> `The start of the slot must
+    be on the grid of the schedule of the room Room 4`, `The slot 24/11/2026 09:00 is not inside the schedule of the
+    room Room 4`. Two messages are accepted: a room without an active schedule has no grid.
+  - TC13S-49: input 09:00 booked and 09:10-09:25 -> `APT-0009` of Room 1 at 09:10-09:25 already in the repository and
+    09:15-09:30; expected `The slot 24/11/2026 09:10 is not free` -> `The slot 24/11/2026 09:15 is not free`. Two
+    slots of 15 minutes on the same grid never overlap in part, so the existing appointment is off the grid and the
+    new slot is on it, which keeps the overlap as the only reason.
+- **Changed expected values after merging the fixes up to `e07c83c` (D1, D2, D5, D6):** none. TC13S-70, TC13S-72,
+  TC13S-73, TC13S-77, TC13S-78 and TC13S-81 are back with the ids and expected values they had while out of the
+  suite; TC13S-89 (`nextWorkingDay`) is new, with the rule of #208 (D is the first working day after the start).
+- **New cases of the decided rules (TC13S-77 to TC13S-88).** One case or more per rule, alone, with a slot that is
+  inside the schedule, free and not past (section 4). Expected results: the rule from `c775ff4`, the message from the
+  code.
+- **Defect D1: the grid check reads C2 with a `null` requester.** `startOnGrid` calls `schedulesOf(room, null)`, that
+  is, `ISystemParameterService.getSchedules(null)`. The real `SystemParameterService` (C2 1.1.2) denies a `null`
+  requester (`checkReadPermission`, `canConfigure(null)` is false), registers `ACCESS_DENIED` and throws
+  `AccessDeniedException`, which `bcb06ae` now propagates: with the real C2 every booking and reschedule of a valid slot
+  by `lmartin` fails with `AccessDeniedException` of `null`. TC13S-70 shows it with a double that denies `null`; it is
+  **Fixed in `c5f512d`** (`startOnGrid` reads C2 with the requester); TC13S-70 is back in the suite and passes with its
+  expected value unchanged.
+- **Defect D2: the day of the seed.** The seed given by Testing in #208 puts the appointments on D, the first working
+  day after the start; `AppointmentService.loadSeedData` passes `LocalDate.now(clock)`, the day of the start, to
+  `AppointmentSeedData`, so a server started on a Saturday or a Sunday gets appointments on a day without schedule and
+  one started after 10:00 gets them in the past. **Fixed in `6721cfd`** (`loadSeedData` passes
+  `nextWorkingDay(LocalDate.now(clock))`); TC13S-72 and TC13S-73 are back in the suite and pass with their expected
+  values unchanged, and TC13S-89 checks `nextWorkingDay` alone. The rest of the C5 seed matches #208 (TC13S-71,
+  TC13S-74 to TC13S-76).
+- **Defect D5: a slot with a `null` start or end throws `NullPointerException`.** The decided rule rejects it with
+  `ValidationException`; `slotErrors` adds `The start and the end of the slot are required` but then reads
+  `slot.getStart()` in the check of the past and `slot.getEnd()` in `insideSchedule`. **Fixed in `6a56ef9`**
+  (`slotErrors` returns after that message); TC13S-77 and TC13S-78 are back in the suite and pass with their expected
+  list unchanged: only that message, because the other checks need a start and an end.
+- **Defect D6: a slot shorter than the duration is accepted.** The decided rule rejects a length different from the
+  duration; the two conditions of the duration check (`end - duration > start`, `start + duration < end`) are both
+  true only for a longer slot, so 09:00-09:14 is booked. **Fixed in `53ecd94`** (the end must be exactly the start
+  plus the duration); TC13S-81 is back in the suite and passes with its expected value unchanged; the longer slot is
+  still rejected (TC13S-82, TC13S-88).
+- **C4 seed (`OrderSeedData`, `ClinicalOrderService.loadSeedData`), not tested here:** this branch has no tests of
+  `server-c4-orders`, and one test there turns on its JaCoCo gate (80 % / 70 %) with the coverage of that test only.
+  Found by reading `bcb06ae`, against #208: (D3) the needs were due on `LocalDate.now()`, the clock of the system,
+  not on the clock of the service (fixed in `6ca690e`, `OrderSeedData.needs(day)`); (D4) the seed was loaded when
+  `ORD-0001` was missing, not only when the repositories were empty, so a repository with other orders got the seed
+  saved over them (fixed in `65273ef`: loaded only when none of the eight seed ids exists). C4 seed cases (D3, D4) go
+  to the C4 test branch when UC06 and UC13 meet in develop. Cases to write there:
+  - the seed needs are due on the day given by the clock of the service (fixed clock), not by the system clock (D3);
+  - the seed is not loaded if any of `ORD-0001` to `ORD-0004` or `NEED-0001` to `NEED-0004` already exists, one case
+    per kind of id (an order, a need), and it is loaded in empty repositories (D4);
+  - after the seed, the next ids are `ORD-0005` and `NEED-0005`.
+- **`TimeSlot` `equals`/`hashCode`:** decided not to add them (`4ce0879`, the plan no longer says they were added);
+  nothing to test. The cases compare the start, end and room of the slots.
 - **Reschedule of an appointment of an inactive patient, Not defined:** AN-C5 6b checks the patient in the booking, 9b
   only names the slot; the code does not check the patient when rescheduling. No case asserts it.
 - **Cancelled appointments in `findByRoomAndDateRange`, `findByDate` and `findByDateAndPhysician`, Not defined:** the
@@ -293,7 +406,11 @@ call saves nothing, does not change the need in C4 and registers nothing; no app
 - **TC13S-17 changed its input:** the first version used a slot of 23/11/2026, which was also outside the schedule
   (Monday), so it did not isolate the past. It now uses a clock at 10:00 and a slot of 09:00 inside the schedule; the
   expected result is the same rule, with the date of the new slot, and it is now the only message.
-- **Not covered here:** the constructor with the system clock (lines 94-96; a test with it would depend on the day it
-  is run); the client of UC13 (#130); UC15 (#134) and UC14 (#137); the order of the free slots of a room with two
-  schedules, which cannot happen because C2 keeps one schedule per room (its key is the resource).
-- **Defects found:** none; every expected result of section 4 passes against `387efac`.
+- **Not covered here:** the constructor with the system clock (lines 95-97; a test with it would depend on the day it
+  is run); the times of the seed appointments, which #208 does not fix in this design; the client of UC13 (#130); UC15
+  (#134) and UC14 (#137); the order of the free slots of a room with two schedules, which cannot happen because C2
+  keeps one schedule per room (its key is the resource).
+- **Defects found:** D1, D2, D5 and D6 (C5), fixed in `c5f512d`, `6721cfd`, `6a56ef9` and `53ecd94`; their cases
+  (TC13S-70, TC13S-72, TC13S-73, TC13S-77, TC13S-78, TC13S-81) are back in the suite with no expected value changed,
+  and TC13S-89 is new. D3 and D4 (C4, by reading), fixed in `6ca690e` and `65273ef`, tested in the C4 test branch.
+  Every case of section 4 passes against `feature/UC13-server` up to `e07c83c`, with no test disabled.

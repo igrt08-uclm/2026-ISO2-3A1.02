@@ -25,7 +25,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -190,6 +192,8 @@ final class TestDoubles {
                 new Schedule("Room 2", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(13, 0), true),
                 new Schedule("Room 4", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(11, 0), false));
 
+        private final Set<String> deniedRequesters = new HashSet<>();
+        private boolean deniesSchedules;
         private int calls;
 
         @Override
@@ -214,7 +218,20 @@ final class TestDoubles {
 
         @Override
         public List<Schedule> getSchedules(String requester) throws AccessDeniedException {
+            calls++;
+            if (deniesSchedules && (deniedRequesters.isEmpty() || deniedRequesters.contains(requester))) {
+                throw new AccessDeniedException(requester);
+            }
             return SCHEDULES;
+        }
+
+        /**
+         * From now on {@link #getSchedules(String)} throws {@code AccessDeniedException} for the given requesters, as
+         * C2 does for a requester without permission; with no requester it denies every one.
+         */
+        void denySchedulesTo(String... requesters) {
+            deniesSchedules = true;
+            deniedRequesters.addAll(Arrays.asList(requesters));
         }
 
         @Override

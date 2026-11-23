@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -393,10 +395,10 @@ class AppointmentServiceTest {
         }
 
         @Test
-        @DisplayName("TC13S-16 a slot outside the schedule is rejected")
+        @DisplayName("TC13S-16 a slot outside the schedule, on the grid, is rejected")
         void slotOutsideSchedule() {
-            List<String> errors = errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot(8, 0)));
-            assertEquals(List.of("The slot 24/11/2026 08:00 is not inside the schedule of the room Room 1"), errors);
+            List<String> errors = errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot(12, 0)));
+            assertEquals(List.of("The slot 24/11/2026 12:00 is not inside the schedule of the room Room 1"), errors);
         }
 
         @Test
@@ -479,7 +481,8 @@ class AppointmentServiceTest {
         void slotOnADayWithoutSchedule() {
             LocalDateTime wednesday = at(TUESDAY.plusDays(1), 9, 0);
             TimeSlot slot = new TimeSlot(ROOM, wednesday, wednesday.plusMinutes(15));
-            assertEquals(List.of("The slot 25/11/2026 09:00 is not inside the schedule of the room Room 1"),
+            assertEquals(List.of("The start of the slot must be on the grid of the schedule of the room Room 1",
+                    "The slot 25/11/2026 09:00 is not inside the schedule of the room Room 1"),
                     errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot)));
         }
 
@@ -487,7 +490,8 @@ class AppointmentServiceTest {
         @DisplayName("TC13S-47 a slot of a room whose schedule is inactive is rejected")
         void slotOfAnInactiveSchedule() {
             addSecondNeed("P-0002", "TT-04");
-            assertEquals(List.of("The slot 24/11/2026 09:00 is not inside the schedule of the room Room 4"),
+            assertEquals(List.of("The start of the slot must be on the grid of the schedule of the room Room 4",
+                    "The slot 24/11/2026 09:00 is not inside the schedule of the room Room 4"),
                     errorsOf(() -> service.bookAppointment(STAFF, "NEED-0002", slotOf("Room 4", 9, 0))));
         }
 
@@ -502,11 +506,11 @@ class AppointmentServiceTest {
 
         @Test
         @DisplayName("TC13S-49 a slot that overlaps part of another appointment is not free")
-        void partialOverlap() throws AccessDeniedException, ValidationException {
-            bookFirst();
-            addSecondNeed("P-0002", TEST_TYPE);
-            assertEquals(List.of("The slot 24/11/2026 09:10 is not free"),
-                    errorsOf(() -> service.bookAppointment(STAFF, "NEED-0002", slot(9, 10))));
+        void partialOverlap() {
+            appointments.save(new Appointment("APT-0009", "NEED-0009", "P-0002", TEST_TYPE, ROOM, PHYSICIAN,
+                    at(TUESDAY, 9, 10), at(TUESDAY, 9, 25), AppointmentStatus.BOOKED));
+            assertEquals(List.of("The slot 24/11/2026 09:15 is not free"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot(9, 15))));
         }
 
         @Test
@@ -810,6 +814,244 @@ class AppointmentServiceTest {
         @DisplayName("TC13S-32 the appointments of a patient without appointments are empty")
         void patientWithoutAppointments() throws AccessDeniedException, ValidationException {
             assertTrue(service.getAppointmentsOfPatient(STAFF, "P-0002").isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("7. Access denied by C2 (#208)")
+    class DeniedByC2 {
+
+        @Test
+        @DisplayName("TC13S-67 the AccessDeniedException of C2 reaches the caller of getFreeSlots")
+        void freeSlotsWhenC2DeniesTheSchedules() {
+            parameters.denySchedulesTo(STAFF);
+            AccessDeniedException denied = assertThrows(AccessDeniedException.class,
+                    () -> service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, TUESDAY));
+            assertEquals(STAFF, denied.getRequester());
+        }
+
+        @Test
+        @DisplayName("TC13S-68 the AccessDeniedException of C2 reaches the caller of bookAppointment")
+        void bookingWhenC2DeniesTheSchedules() {
+            parameters.denySchedulesTo(STAFF);
+            AccessDeniedException denied = assertThrows(AccessDeniedException.class, () -> bookFirst());
+            assertAll(
+                    () -> assertEquals(STAFF, denied.getRequester()),
+                    () -> assertTrue(appointments.findAll().isEmpty()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus()));
+        }
+
+        @Test
+        @DisplayName("TC13S-69 the AccessDeniedException of C2 reaches the caller of rescheduleAppointment")
+        void rescheduleWhenC2DeniesTheSchedules() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            parameters.denySchedulesTo(STAFF);
+            AccessDeniedException denied = assertThrows(AccessDeniedException.class,
+                    () -> service.rescheduleAppointment(STAFF, "APT-0001", slot(10, 0)));
+            Appointment kept = appointments.findById("APT-0001");
+            assertAll(
+                    () -> assertEquals(STAFF, denied.getRequester()),
+                    () -> assertEquals(at(TUESDAY, 9, 0), kept.getStart()),
+                    () -> assertEquals(AppointmentStatus.BOOKED, kept.getStatus()));
+        }
+        @Test
+        @DisplayName("TC13S-70 a valid booking works when C2 denies a requester without permission")
+        void bookingWithAC2ThatDeniesANullRequester() throws AccessDeniedException, ValidationException {
+            parameters.denySchedulesTo((String) null);
+            Appointment created = bookFirst();
+            assertAll(
+                    () -> assertEquals("APT-0001", created.getAppointmentId()),
+                    () -> assertEquals(AppointmentStatus.BOOKED, created.getStatus()));
+        }
+    }
+
+    @Nested
+    @DisplayName("8. Seed data (#208)")
+    class SeedData {
+
+        private List<Appointment> seed() {
+            return appointments.findAll().stream()
+                    .sorted(Comparator.comparing(Appointment::getAppointmentId))
+                    .toList();
+        }
+
+        private AppointmentService serviceAt(String instant) {
+            Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
+            return new AppointmentService(appointments, orders, patients, parameters, roles, audit, clock);
+        }
+
+        @Test
+        @DisplayName("TC13S-71 the seed is loaded in an empty system")
+        void seedIsLoadedInAnEmptySystem() {
+            service.loadSeedData();
+            List<Appointment> loaded = seed();
+            assertAll(
+                    () -> assertEquals(List.of("APT-0001", "APT-0002", "APT-0003"),
+                            loaded.stream().map(Appointment::getAppointmentId).toList()),
+                    () -> assertEquals(List.of("NEED-0001", "NEED-0002", "NEED-0003"),
+                            loaded.stream().map(Appointment::getNeedId).toList()),
+                    () -> assertEquals(List.of(AppointmentStatus.BOOKED, AppointmentStatus.CANCELLED,
+                            AppointmentStatus.RESCHEDULED), loaded.stream().map(Appointment::getStatus).toList()),
+                    () -> assertTrue(loaded.stream().allMatch(appointment ->
+                            "CT-HEAD".equals(appointment.getTestTypeId())
+                                    && "Room CT-1".equals(appointment.getRoom()))));
+        }
+
+        @Test
+        @DisplayName("TC13S-74 the seed is not loaded when there is an appointment")
+        void seedIsNotLoadedWhenThereIsData() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            service.loadSeedData();
+            assertEquals(List.of("APT-0001"), seed().stream().map(Appointment::getAppointmentId).toList());
+            assertEquals(NEEDED, appointments.findById("APT-0001").getNeedId());
+        }
+
+        @Test
+        @DisplayName("TC13S-75 loading the seed twice loads it only once, without audit entries")
+        void seedIsLoadedOnlyOnceAndNotAudited() {
+            service.loadSeedData();
+            service.loadSeedData();
+            assertAll(
+                    () -> assertEquals(3, appointments.findAll().size()),
+                    () -> assertTrue(audit.entries().isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC13S-76 after the seed, the next appointment is APT-0004")
+        void idsContinueAfterTheSeed() throws AccessDeniedException, ValidationException {
+            service.loadSeedData();
+            assertEquals("APT-0004", bookFirst().getAppointmentId());
+        }
+
+        @Test
+        @DisplayName("TC13S-72 started on a Monday, the seed is on the Tuesday after it")
+        void seedOfAMondayIsOnTuesday() {
+            serviceAt("2026-11-23T08:00:00Z").loadSeedData();
+            assertTrue(seed().stream()
+                    .allMatch(appointment -> LocalDate.of(2026, 11, 24).equals(appointment.getStart().toLocalDate())));
+        }
+
+        @Test
+        @DisplayName("TC13S-73 started on a Friday, the seed is on the Monday after it")
+        void seedOfAFridayIsOnMonday() {
+            serviceAt("2026-11-27T08:00:00Z").loadSeedData();
+            assertTrue(seed().stream()
+                    .allMatch(appointment -> LocalDate.of(2026, 11, 30).equals(appointment.getStart().toLocalDate())));
+        }
+
+        @ParameterizedTest
+        @CsvSource({"2026-11-23, 2026-11-24", "2026-11-26, 2026-11-27", "2026-11-27, 2026-11-30",
+                "2026-11-28, 2026-11-30", "2026-11-29, 2026-11-30"})
+        @DisplayName("TC13S-89 the next working day of Monday, Thursday, Friday, Saturday and Sunday")
+        void nextWorkingDay(LocalDate day, LocalDate expected) {
+            assertEquals(expected, AppointmentService.nextWorkingDay(day));
+        }
+    }
+
+    @Nested
+    @DisplayName("9. Rules of the slot (group decision, c775ff4)")
+    class SlotRules {
+        private static final String WRONG_DURATION =
+                "The duration of the slot must match the duration of the test type TT-01";
+        private static final String OFF_THE_GRID =
+                "The start of the slot must be on the grid of the schedule of the room Room 1";
+
+        private TimeSlot from(int hour, int minute, int lengthMinutes) {
+            LocalDateTime start = at(TUESDAY, hour, minute);
+            return new TimeSlot(ROOM, start, start.plusMinutes(lengthMinutes));
+        }
+
+        @Test
+        @DisplayName("TC13S-77 a slot whose start is null is rejected")
+        void startMissing() {
+            TimeSlot slot = new TimeSlot(ROOM, null, at(TUESDAY, 9, 15));
+            assertEquals(List.of("The start and the end of the slot are required"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot)));
+        }
+
+        @Test
+        @DisplayName("TC13S-78 a slot whose end is null is rejected")
+        void endMissing() {
+            TimeSlot slot = new TimeSlot(ROOM, at(TUESDAY, 9, 0), null);
+            assertEquals(List.of("The start and the end of the slot are required"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot)));
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {0, -15})
+        @DisplayName("TC13S-79 a slot whose end is equal to or before its start is rejected")
+        void endNotAfterStart(int lengthMinutes) {
+            assertEquals(List.of("The end of the slot must be after its start"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, from(9, 15, lengthMinutes))));
+        }
+
+        @Test
+        @DisplayName("TC13S-80 a slot that spans two days is rejected")
+        void slotOfTwoDays() {
+            assertEquals(List.of("The slot must be inside a single day"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, from(23, 55, 15))));
+        }
+
+        @Test
+        @DisplayName("TC13S-81 a slot one minute shorter than the test type is rejected")
+        void slotShorterThanTheDuration() {
+            assertEquals(List.of(WRONG_DURATION),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, from(9, 0, 14))));
+        }
+
+        @Test
+        @DisplayName("TC13S-82 a slot one minute longer than the test type is rejected")
+        void slotLongerThanTheDuration() {
+            assertEquals(List.of(WRONG_DURATION),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, from(9, 0, 16))));
+        }
+
+        @Test
+        @DisplayName("TC13S-83 a slot exactly as long as the test type is booked")
+        void lengthEqualToTheDuration() throws AccessDeniedException, ValidationException {
+            Appointment created = service.bookAppointment(STAFF, NEEDED, from(9, 0, 15));
+            assertAll(
+                    () -> assertEquals(at(TUESDAY, 9, 0), created.getStart()),
+                    () -> assertEquals(at(TUESDAY, 9, 15), created.getEnd()));
+        }
+
+        @Test
+        @DisplayName("TC13S-84 a slot that starts one minute off the grid is rejected")
+        void startOffTheGrid() {
+            assertEquals(List.of(OFF_THE_GRID),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, from(9, 1, 15))));
+        }
+
+        @Test
+        @DisplayName("TC13S-85 a slot that starts on the grid, after the first slot, is booked")
+        void startOnTheGrid() throws AccessDeniedException, ValidationException {
+            assertEquals(at(TUESDAY, 9, 15), service.bookAppointment(STAFF, NEEDED, from(9, 15, 15)).getStart());
+        }
+
+        @Test
+        @DisplayName("TC13S-86 a slot before the schedule is off the grid and outside the schedule")
+        void slotBeforeTheSchedule() {
+            assertEquals(List.of(OFF_THE_GRID,
+                    "The slot 24/11/2026 08:00 is not inside the schedule of the room Room 1"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, from(8, 0, 15))));
+        }
+
+        @Test
+        @DisplayName("TC13S-87 moving an appointment off the grid is rejected and it keeps its slot")
+        void rescheduleOffTheGrid() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            assertEquals(List.of(OFF_THE_GRID),
+                    errorsOf(() -> service.rescheduleAppointment(STAFF, "APT-0001", from(10, 1, 15))));
+            assertEquals(at(TUESDAY, 9, 0), appointments.findById("APT-0001").getStart());
+        }
+
+        @Test
+        @DisplayName("TC13S-88 moving an appointment to a slot longer than the test type is rejected")
+        void rescheduleWithAWrongDuration() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            assertEquals(List.of(WRONG_DURATION),
+                    errorsOf(() -> service.rescheduleAppointment(STAFF, "APT-0001", from(10, 0, 30))));
+            assertEquals(AppointmentStatus.BOOKED, appointments.findById("APT-0001").getStatus());
         }
     }
 }
