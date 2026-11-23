@@ -11,7 +11,8 @@ of `IClinicalOrderService` implemented by `ClinicalOrderService`, `InMemoryClini
 `SchedulingNeed`, `SchedulingNeedStatus`).
 
 **Test data (precondition of every case).** The service is built with empty repositories, a recording
-`IAuditRecorder` and the clock `Clock.fixed(2026-11-23T10:00:00Z, UTC)`, so every `creationDate` is 23/11/2026. The
+`IAuditRecorder` and the clock `Clock.fixed(2026-11-23T10:00:00Z, UTC)`, so every `creationDate` is 23/11/2026
+(except TC06S-55, which uses the constructor with the system clock). The
 users are the seed users of C1 1.2.4 with the permissions of #173: `mgarcia` (active, `ORDER_PROCEDURES`), `lmartin`
 (active, `MANAGE_APPOINTMENTS`), `admin` (active, `MANAGE_ROLES`, `CONFIGURE_SYSTEM`, `CONFIGURE_INTEGRATIONS`),
 `jfernandez` (active, none), `pnavarro` (**inactive**, `ORDER_PROCEDURES`); `nobody` does not exist. The fake C3 has the
@@ -93,8 +94,10 @@ accepted reads and the changes of a need are not audited (Q7).
 ## 3. Coverage (white box)
 
 Measured with JaCoCo in `mvn -B verify` (D-033: 80 % of lines, 70 % of branches of the bundle): `ClinicalOrderService`
-108 of 113 lines and 44 of 44 branches. The 5 missed lines are the constructor that uses the system clock (not called:
-the tests need the fixed clock).
+111 of 113 lines and 44 of 44 branches. The constructor that uses the system clock (3 lines, missed before) is run by
+TC06S-55. The 2 lines still missed are the calls to `deny` in `checkPermission` and `checkSchedulingPermission`: they
+run in every denial case (TC06S-02, TC06S-03…), but `deny` always throws, and JaCoCo does not mark as covered a line
+whose call never returns.
 
 **Decision coverage** (each decision true and false):
 
@@ -199,6 +202,7 @@ boundary value, EG = error guessing. Every exception case also checks that the r
 | TC06S-52 | `orderDiagnosticProcedure` | BV: indication `a`, justification `b` (smallest not blank text) | Accepted with those texts (Q5) | `oneCharacterTextsAreAccepted` |
 | TC06S-53 | `IClinicalOrderService` | EG: its methods, by reflection | The 6 operations of Q11; none starts with `update`, `edit`, `modify`, `cancel`, `delete` or `remove` (D-039, D-022) | `contractHasNoOperationToChangeAnOrder` |
 | TC06S-54 | `orderDiagnosticProcedure` | EG: the order returned as `ORD-0001` is sent again | A new order `ORD-0002`; `ORD-0001` is the same object as before; two orders of `P-0001` (Q4, D-039) | `resentOrderCreatesANewOne` |
+| TC06S-55 | constructor without `Clock`, `orderDiagnosticProcedure` | EC: service built with the system clock; `mgarcia`, valid order | `ORD-0001` dated today (the date of the system just before or just after the call, so that midnight does not make it fail); one pending need `NEED-0001` of `ORD-0001` due on that date (Q6) | `systemClockDatesTheOrderToday` |
 
 Postcondition of every case: a denied or rejected call saves nothing and registers only `ORDER_ACCESS_DENIED` (denied)
 or nothing (rejected); an order is never changed after it is created (D-039).
@@ -214,6 +218,5 @@ or nothing (rejected); an order is never changed after it is created (D-039).
 - **`""` as a requester or a need id** is not named by the plan: it is classified as an unknown user (C1 answers
   `false`) and as an unknown need (no need has that id); the message of TC06S-51 is the one of Q13 with an empty `X`.
 - **Not covered at the service level:** that C3 registers `PATIENT_ACCESSED` (Cases to cover 3) belongs to C3; the
-  fake C3 does not audit, so TC06S-12 only checks that C4 calls C3 once and adds no entry of its own. The constructor
-  with the system clock (5 lines) is not run: a test with it would depend on the day it is run.
+  fake C3 does not audit, so TC06S-12 only checks that C4 calls C3 once and adds no entry of its own.
 - **Other iterations:** `orderFollowUp` and `FollowUpOrder` (UC07, #71) and editing or cancelling an order (D-039).

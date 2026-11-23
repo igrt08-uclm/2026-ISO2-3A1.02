@@ -41,7 +41,8 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Tests of {@link ClinicalOrderService} (UC06 server, #68). Each test names the case of the test design
  * (`doc/testing/test-cases/UC06-server-test-design.md`, TC06S-xx) that it checks. The service uses empty in-memory
  * repositories, the fakes of C1, C2 and C3 of the test design and a fixed clock, so the creation date of every order
- * is 23/11/2026 and the tests do not depend on the day they are run.
+ * is 23/11/2026 and the tests do not depend on the day they are run. Only TC06S-55 uses the system clock, and it
+ * accepts the date of the day before or after the call.
  */
 @DisplayName("ClinicalOrderService")
 class ClinicalOrderServiceTest {
@@ -649,6 +650,24 @@ class ClinicalOrderServiceTest {
                     () -> assertSame(first, orders.findById("ORD-0001")),
                     () -> assertEquals("ORD-0001", first.getOrderId()),
                     () -> assertEquals(2, orders.findByPatient(PATIENT).size()));
+        }
+
+        @Test
+        @DisplayName("TC06S-55 the service with the system clock dates the order and its need today")
+        void systemClockDatesTheOrderToday() throws AccessDeniedException, ValidationException {
+            ClinicalOrderService withSystemClock = new ClinicalOrderService(roles, audit, parameters, patients);
+            LocalDate before = LocalDate.now();
+            DiagnosticOrder created = withSystemClock.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            LocalDate after = LocalDate.now();
+            List<SchedulingNeed> pending = withSystemClock.getPendingSchedulingNeeds(ADMISSIONS);
+            assertAll(
+                    () -> assertEquals("ORD-0001", created.getOrderId()),
+                    () -> assertTrue(List.of(before, after).contains(created.getCreationDate())),
+                    () -> assertEquals(1, pending.size()),
+                    () -> assertEquals("NEED-0001", pending.get(0).getNeedId()),
+                    () -> assertEquals("ORD-0001", pending.get(0).getOrderId()),
+                    () -> assertEquals(created.getCreationDate(), pending.get(0).getDueDate()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, pending.get(0).getStatus()));
         }
     }
 }
