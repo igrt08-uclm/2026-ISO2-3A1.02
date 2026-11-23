@@ -2,6 +2,7 @@ package es.uclm.esi.iso2.server.orders.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
+import es.uclm.esi.iso2.common.orders.contracts.IClinicalOrderService;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
@@ -17,11 +19,14 @@ import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.orders.persistence.InMemoryClinicalOrderRepository;
 import es.uclm.esi.iso2.server.orders.persistence.InMemorySchedulingNeedRepository;
 import es.uclm.esi.iso2.server.orders.service.RecordingAuditRecorder.AuditEntry;
+import java.lang.reflect.Method;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -519,5 +524,17 @@ class ClinicalOrderServiceTest {
             service.markSchedulingNeedPending(ADMISSIONS, "NEED-0001");
             assertTrue(audit.entries().isEmpty());
         }
+    }
+
+    @Test
+    @DisplayName("TC06S-53 the contract has no operation to update, edit, modify, cancel, delete or remove")
+    void contractHasNoOperationToChangeAnOrder() {
+        List<String> forbidden = List.of("update", "edit", "modify", "cancel", "delete", "remove");
+        List<String> names = Arrays.stream(IClinicalOrderService.class.getMethods()).map(Method::getName).toList();
+        assertAll(
+                () -> assertEquals(7, names.size(),
+                        "UC07 added orderFollowUp: C4 has seven operations and none of them changes an order"),
+                () -> assertFalse(names.stream().anyMatch(name -> forbidden.stream()
+                        .anyMatch(prefix -> name.toLowerCase(Locale.ROOT).startsWith(prefix)))));
     }
 }
