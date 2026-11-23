@@ -2,7 +2,7 @@
 !include ../design/common/_style.puml
 hide members
 
-title Analysis Class Diagram (C1–C5)
+title Analysis Class Diagram (C1–C7)
 
 ' ==================== Boundaries ====================
 class IU_Login <<boundary>>
@@ -18,6 +18,10 @@ class IU_OrderFollowUp <<boundary>>
 class IU_ManageAppointments <<boundary>>
 class IU_ManageWaitlist <<boundary>>
 class IU_DailySchedule <<boundary>>
+class IU_PatientAppointments <<boundary>>
+class IU_PatientFeedback <<boundary>>
+class IU_RecordExecution <<boundary>>
+class IU_DiagnosticReports <<boundary>>
 
 ' ==================== Controls ====================
 class Control_Login <<control>>
@@ -31,6 +35,10 @@ class Control_OrderFollowUp <<control>>
 class Control_ManageAppointments <<control>>
 class Control_ManageWaitlist <<control>>
 class Control_DailySchedule <<control>>
+class Control_PatientAppointments <<control>>
+class Control_PatientFeedback <<control>>
+class Control_RecordExecution <<control>>
+class Control_DiagnosticReports <<control>>
 
 ' ==================== Entities ====================
 class UserAccount <<entity>>
@@ -49,6 +57,12 @@ class FollowUpOrder <<entity>>
 class SchedulingNeed <<entity>>
 class Appointment <<entity>>
 class WaitlistEntry <<entity>>
+class RescheduleRequest <<entity>>
+class IncidentReport <<entity>>
+class SatisfactionSurvey <<entity>>
+class ProcedureExecution <<entity>>
+class DiagnosticReport <<entity>>
+class Addendum <<entity>>
 
 ' ==================== Generalizations ====================
 TestType --|> SystemParameter
@@ -65,6 +79,20 @@ SchedulingNeed -- ClinicalOrder
 Appointment -- SchedulingNeed
 WaitlistEntry -- SchedulingNeed
 WaitlistEntry -- Priority
+UserAccount -- Patient : linked account
+Patient -- UserAccount : assigned physician
+RescheduleRequest -- Appointment
+IncidentReport -- Appointment
+IncidentReport -- Patient
+SatisfactionSurvey -- Appointment
+SatisfactionSurvey -- Patient
+ProcedureExecution -- Appointment
+ProcedureExecution -- UserAccount
+DiagnosticReport -- ProcedureExecution
+DiagnosticReport -- UserAccount : author
+DiagnosticReport -- UserAccount : validator
+Addendum -- DiagnosticReport
+Addendum -- UserAccount
 
 ' ==================== C1 Associations ====================
 Control_Login -- IU_Login
@@ -142,5 +170,39 @@ Control_DailySchedule -- Appointment
 Control_DailySchedule -- Patient
 Control_DailySchedule -- TestType
 Control_DailySchedule -- AuditLog
+
+' ==================== C6 Associations ====================
+IU_PatientAppointments -- Control_PatientAppointments
+Control_PatientAppointments -- UserAccount
+Control_PatientAppointments -- Appointment
+Control_PatientAppointments -- TestType
+Control_PatientAppointments -- RescheduleRequest
+Control_PatientAppointments -- SchedulingNeed
+Control_PatientAppointments -- AuditLog
+
+IU_PatientFeedback -- Control_PatientFeedback
+Control_PatientFeedback -- UserAccount
+Control_PatientFeedback -- Appointment
+Control_PatientFeedback -- IncidentReport
+Control_PatientFeedback -- SatisfactionSurvey
+Control_PatientFeedback -- AuditLog
+
+' ==================== C7 Associations ====================
+IU_RecordExecution -- Control_RecordExecution
+Control_RecordExecution -- UserAccount
+Control_RecordExecution -- Patient
+Control_RecordExecution -- Appointment
+Control_RecordExecution -- TestType
+Control_RecordExecution -- ProcedureExecution
+Control_RecordExecution -- AuditLog
+
+IU_DiagnosticReports -- Control_DiagnosticReports
+Control_DiagnosticReports -- IU_HospitalSystem
+Control_DiagnosticReports -- UserAccount
+Control_DiagnosticReports -- Patient
+Control_DiagnosticReports -- ProcedureExecution
+Control_DiagnosticReports -- DiagnosticReport
+Control_DiagnosticReports -- Addendum
+Control_DiagnosticReports -- AuditLog
 
 @enduml
