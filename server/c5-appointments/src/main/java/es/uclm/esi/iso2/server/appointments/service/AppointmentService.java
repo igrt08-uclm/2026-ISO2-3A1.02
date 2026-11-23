@@ -95,6 +95,16 @@ public class AppointmentService implements IAppointmentService {
                 roleManagementService, auditRecorder, Clock.systemDefaultZone());
     }
 
+    /**
+     * Loads three invented appointments, only if the system starts with no appointments at all. It is called when
+     * the program starts, not by a user, so it does not need a permission and it is not registered in the audit log.
+     */
+    public void loadSeedData() {
+        if (appointments.findAll().isEmpty()) {
+            AppointmentSeedData.appointments(LocalDate.now(clock)).forEach(appointments::save);
+        }
+    }
+
     @Override
     public List<PendingNeedView> getPendingSchedulingNeeds(String requester)
             throws AccessDeniedException, ValidationException {
@@ -178,11 +188,11 @@ public class AppointmentService implements IAppointmentService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
+        orderService.markSchedulingNeedBooked(requester, needId);
         Appointment created = new Appointment(nextAppointmentId(), needId, order.getPatientId(),
                 order.getTestTypeId(), testType.getRoom(), order.getRequester(), slot.getStart(), slot.getEnd(),
                 AppointmentStatus.BOOKED);
         appointments.save(created);
-        orderService.markSchedulingNeedBooked(requester, needId);
         auditRecorder.register(requester, BOOKED, APPOINTMENT + created.getAppointmentId());
         return created;
     }
@@ -225,15 +235,15 @@ public class AppointmentService implements IAppointmentService {
         if (current.getStatus() == AppointmentStatus.CANCELLED) {
             throw new ValidationException(List.of("The appointment " + appointmentId + " is already cancelled"));
         }
+        try {
+            orderService.markSchedulingNeedPending(requester, current.getNeedId());
+        } catch (ValidationException alreadyPending) {
+            // The need was already pending: nothing to do.
+        }
         Appointment cancelled = new Appointment(current.getAppointmentId(), current.getNeedId(),
                 current.getPatientId(), current.getTestTypeId(), current.getRoom(), current.getPhysician(),
                 current.getStart(), current.getEnd(), AppointmentStatus.CANCELLED);
         appointments.save(cancelled);
-        try {
-            orderService.markSchedulingNeedPending(requester, current.getNeedId());
-        } catch (ValidationException alreadyPending) {
-            // The need was pending again already: this appointment had been moved before, so there is nothing to do.
-        }
         auditRecorder.register(requester, CANCELLED, APPOINTMENT + cancelled.getAppointmentId());
         return cancelled;
     }
@@ -296,8 +306,22 @@ public class AppointmentService implements IAppointmentService {
 
     /** Every reason why the slot cannot be used for that test type, ignoring the appointment that is being moved. */
     private List<String> slotErrors(TimeSlot slot, TestType testType, String ignoredAppointmentId,
-            String requester) {
+            String requester) throws AccessDeniedException {
         List<String> errors = new ArrayList<>();
+        if (slot.getStart() == null || slot.getEnd() == null) {
+            errors.add("The start and the end of the slot are required");
+        } else if (!slot.getEnd().isAfter(slot.getStart())) {
+            errors.add("The end of the slot must be after its start");
+        } else if (!slot.getStart().toLocalDate().equals(slot.getEnd().toLocalDate())) {
+            errors.add("The slot must be inside a single day");
+        } else if (slot.getEnd().minusMinutes(testType.getDurationMinutes()).isAfter(slot.getStart())
+                || slot.getStart().plusMinutes(testType.getDurationMinutes()).isBefore(slot.getEnd())) {
+            errors.add("The duration of the slot must match the duration of the test type "
+                    + testType.getId());
+        } else if (!startOnGrid(slot.getStart(), testType)) {
+            errors.add("The start of the slot must be on the grid of the schedule of the room "
+                    + testType.getRoom());
+        }
         if (!testType.getRoom().equals(slot.getRoom())) {
             errors.add("The room " + slot.getRoom() + " is not the room of the test type " + testType.getId());
         }
@@ -314,7 +338,26 @@ public class AppointmentService implements IAppointmentService {
         return errors;
     }
 
-    private boolean insideSchedule(TimeSlot slot, String room, String requester) {
+    /**
+     * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
+     * the room, for every active schedule of that room.
+     */
+    private boolean startOnGrid(LocalDateTime start, TestType testType) throws AccessDeniedException {
+        for (Schedule schedule : schedulesOf(testType.getRoom(), null)) {
+            if (schedule.getDaysOfWeek().contains(start.getDayOfWeek())) {
+                LocalDateTime gridStart = LocalDateTime.of(start.toLocalDate(), schedule.getStartTime());
+                long minutesFromGrid = start.toLocalTime().toSecondOfDay() / 60
+                        - gridStart.toLocalTime().toSecondOfDay() / 60;
+                if (minutesFromGrid >= 0
+                        && minutesFromGrid % testType.getDurationMinutes() == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean insideSchedule(TimeSlot slot, String room, String requester) throws AccessDeniedException {
         for (Schedule schedule : schedulesOf(room, requester)) {
             if (schedule.getDaysOfWeek().contains(slot.getStart().getDayOfWeek())
                     && !slot.getStart().toLocalTime().isBefore(schedule.getStartTime())
@@ -325,13 +368,8 @@ public class AppointmentService implements IAppointmentService {
         return false;
     }
 
-    private List<Schedule> schedulesOf(String room, String requester) {
-        List<Schedule> schedules;
-        try {
-            schedules = systemParameterService.getSchedules(requester);
-        } catch (AccessDeniedException deniedException) {
-            schedules = List.of();
-        }
+    private List<Schedule> schedulesOf(String room, String requester) throws AccessDeniedException {
+        List<Schedule> schedules = systemParameterService.getSchedules(requester);
         return schedules.stream()
                 .filter(schedule -> room.equals(schedule.getResource()) && schedule.isActive())
                 .toList();

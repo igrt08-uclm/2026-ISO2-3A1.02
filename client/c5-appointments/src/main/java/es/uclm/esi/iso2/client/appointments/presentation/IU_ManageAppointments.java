@@ -47,7 +47,7 @@ public class IU_ManageAppointments extends JPanel {
     private final transient Runnable onBack;
 
     private final DefaultTableModel needModel = new DefaultTableModel(
-            new Object[] { "Need", "Patient", "Test type", "Priority", "Due" }, 0) {
+            new Object[] { "Need", "Patient", "Test type", "Priority", "Order date", "Due" }, 0) {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -116,6 +116,12 @@ public class IU_ManageAppointments extends JPanel {
         JPanel left = new JPanel(new BorderLayout(4, 4));
         left.add(new JLabel("Pending scheduling needs"), BorderLayout.NORTH);
         needTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        needTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                slots.clear();
+                slotModel.setRowCount(0);
+            }
+        });
         left.add(new JScrollPane(needTable), BorderLayout.CENTER);
 
         JPanel right = new JPanel(new BorderLayout(4, 4));
@@ -145,12 +151,20 @@ public class IU_ManageAppointments extends JPanel {
 
         JPanel bottom = new JPanel(new BorderLayout(4, 4));
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        btnReschedule.setMnemonic('M');
         btnReschedule.addActionListener(event -> onReschedule());
+        btnCancel.setMnemonic('C');
         btnCancel.addActionListener(event -> onCancel());
         buttons.add(btnReschedule);
         buttons.add(btnCancel);
         bottom.add(buttons, BorderLayout.NORTH);
         appointmentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        appointmentTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                slots.clear();
+                slotModel.setRowCount(0);
+            }
+        });
         bottom.add(new JScrollPane(appointmentTable), BorderLayout.CENTER);
         right.add(bottom, BorderLayout.SOUTH);
 
@@ -164,7 +178,7 @@ public class IU_ManageAppointments extends JPanel {
         footer.add(lblStatus, BorderLayout.CENTER);
         JPanel back = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         JButton btnBack = new JButton("Back");
-        btnBack.setMnemonic('K');
+        btnBack.setMnemonic('B');
         btnBack.addActionListener(event -> onBack.run());
         back.add(btnBack);
         footer.add(back, BorderLayout.EAST);
@@ -174,25 +188,34 @@ public class IU_ManageAppointments extends JPanel {
     /** Loads the pending needs and the appointments. */
     public void loadData() {
         txtDate.setText(txtDate.getText().isEmpty() ? DAY.format(LocalDate.now()) : txtDate.getText());
+        List<PendingNeedView> readNeeds;
+        List<Appointment> readAppointments;
         try {
-            needs.clear();
-            needs.addAll(service.getPendingSchedulingNeeds(requester));
-            needModel.setRowCount(0);
-            for (PendingNeedView need : needs) {
-                needModel.addRow(new Object[] { need.getNeedId(), need.getPatientName(), need.getTestTypeName(),
-                    need.getPriorityId(), need.getDueDate() == null ? "" : DAY.format(need.getDueDate()) });
-            }
-            appointments.clear();
-            appointments.addAll(service.getAppointments(requester));
-            displayAppointments();
-            lblStatus.setText(" ");
+            readNeeds = service.getPendingSchedulingNeeds(requester);
+            readAppointments = service.getAppointments(requester);
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
+            return;
         } catch (ValidationException validationException) {
             showErrors(validationException.getErrors());
+            return;
         } catch (RuntimeException exception) {
-            showConfirmation("The data could not be read: " + exception.getMessage());
+            showErrors(List.of("The data could not be read: " + exception.getMessage()));
+            return;
         }
+        needs.clear();
+        needs.addAll(readNeeds);
+        needModel.setRowCount(0);
+        for (PendingNeedView need : needs) {
+            needModel.addRow(new Object[] { need.getNeedId(), need.getPatientName(),
+                need.getTestTypeName(), need.getPriorityId(),
+                need.getOrderDate() == null ? "" : DAY.format(need.getOrderDate()),
+                need.getDueDate() == null ? "" : DAY.format(need.getDueDate()) });
+        }
+        appointments.clear();
+        appointments.addAll(readAppointments);
+        displayAppointments();
+        lblStatus.setText(" ");
     }
 
     private void displayAppointments() {
@@ -203,12 +226,20 @@ public class IU_ManageAppointments extends JPanel {
         }
     }
 
-    /** Asks C5 for the free slots of the day and of the test type of the selected need. */
+    /** Asks C5 for the free slots of the day and of the test type of the selected need or appointment. */
     public void onFindSlots() {
+        String testTypeId = null;
+        Appointment selectedAppointment = selectedAppointment();
+        if (selectedAppointment != null) {
+            testTypeId = selectedAppointment.getTestTypeId();
+        }
         PendingNeedView need = selectedNeed();
-        if (need == null) {
-            showErrors(List.of("Select a pending need before looking for slots."));
+        if (need == null && testTypeId == null) {
+            showErrors(List.of("Select a pending need or an appointment before looking for slots."));
             return;
+        }
+        if (testTypeId == null) {
+            testTypeId = need.getTestTypeId();
         }
         LocalDate day;
         try {
@@ -219,7 +250,7 @@ public class IU_ManageAppointments extends JPanel {
         }
         try {
             slots.clear();
-            slots.addAll(service.getFreeSlots(requester, need.getTestTypeId(), day, day));
+            slots.addAll(service.getFreeSlots(requester, testTypeId, day, day));
             slotModel.setRowCount(0);
             for (TimeSlot slot : slots) {
                 slotModel.addRow(new Object[] { slot.getRoom(), MOMENT.format(slot.getStart()),
@@ -262,6 +293,8 @@ public class IU_ManageAppointments extends JPanel {
             Appointment created = service.bookAppointment(requester, needId, slot);
             showConfirmation("Appointment " + created.getAppointmentId() + " booked on "
                     + MOMENT.format(created.getStart()) + ".");
+            slots.clear();
+            slotModel.setRowCount(0);
             loadData();
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
@@ -275,6 +308,10 @@ public class IU_ManageAppointments extends JPanel {
         TimeSlot slot = selectedSlot();
         if (appointment == null || slot == null) {
             showErrors(List.of("Select an appointment and one of the free slots."));
+            return;
+        }
+        if (!confirm.test("Move the appointment " + appointment.getAppointmentId()
+                + " to " + MOMENT.format(slot.getStart()) + "?")) {
             return;
         }
         onRescheduleAppointment(appointment.getAppointmentId(), slot);
@@ -291,6 +328,8 @@ public class IU_ManageAppointments extends JPanel {
             Appointment moved = service.rescheduleAppointment(requester, appointmentId, newSlot);
             showConfirmation("Appointment " + moved.getAppointmentId() + " moved to "
                     + MOMENT.format(moved.getStart()) + ".");
+            slots.clear();
+            slotModel.setRowCount(0);
             loadData();
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
@@ -320,6 +359,8 @@ public class IU_ManageAppointments extends JPanel {
         try {
             Appointment cancelled = service.cancelAppointment(requester, appointmentId);
             showConfirmation("Appointment " + cancelled.getAppointmentId() + " cancelled.");
+            slots.clear();
+            slotModel.setRowCount(0);
             loadData();
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
