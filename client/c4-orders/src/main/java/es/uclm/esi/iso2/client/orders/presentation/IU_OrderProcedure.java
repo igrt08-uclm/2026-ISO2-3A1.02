@@ -333,9 +333,10 @@ public class IU_OrderProcedure extends JPanel {
         priorityNames.clear();
         int activePriorities = 0;
         for (Priority priority : priorities) {
-            priorityNames.put(priority.getId(), priority.getName());
+            String display = priority.getId() + " · " + priority.getName();
+            priorityNames.put(priority.getId(), display);
             if (priority.isActive()) {
-                cmbPriority.addItem(new Option(priority.getId(), priority.getName()));
+                cmbPriority.addItem(new Option(priority.getId(), display));
                 activePriorities++;
             }
         }

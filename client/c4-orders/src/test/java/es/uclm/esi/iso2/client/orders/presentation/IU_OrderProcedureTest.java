@@ -50,9 +50,9 @@ class IU_OrderProcedureTest {
     private static final int MARIO = 1;
     private static final int INES = 2;
     private static final List<String> LUCIA_ORDER_1 =
-            List.of("20/11/2026", "Chest X-ray", "Routine", "Persistent cough");
+            List.of("20/11/2026", "Chest X-ray", "ROUTINE · Routine", "Persistent cough");
     private static final List<String> LUCIA_ORDER_2 =
-            List.of("21/11/2026", "Knee MRI", "Urgent", "Knee pain after a fall");
+            List.of("21/11/2026", "Knee MRI", "URGENT · Urgent", "Knee pain after a fall");
 
     private FakeClinicalOrderService orders;
     private FakePatientService patients;
@@ -122,7 +122,7 @@ class IU_OrderProcedureTest {
     /** A filled form for Lucía that the client accepts. */
     private IU_OrderProcedure validFormOfLucia() {
         IU_OrderProcedure screen = select(open(), LUCIA);
-        fill(screen, "CT-HEAD · Head CT", "Urgent", "Headache after a fall", "Rule out bleeding");
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "Headache after a fall", "Rule out bleeding");
         return screen;
     }
 
@@ -224,7 +224,7 @@ class IU_OrderProcedureTest {
         IU_OrderProcedure screen = select(open(), LUCIA);
 
         // Assert
-        assertEquals(List.of("Urgent", "Preferential", "Routine"), Screen.items(combo(screen, PRIORITY)));
+        assertEquals(List.of("URGENT · Urgent", "PREFERENTIAL · Preferential", "ROUTINE · Routine"), Screen.items(combo(screen, PRIORITY)));
     }
 
     @Test
@@ -359,7 +359,7 @@ class IU_OrderProcedureTest {
     void tc06c13BlankIndicationAndJustification() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
-        fill(screen, "CT-HEAD · Head CT", "Urgent", "   ", " ");
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "   ", " ");
 
         // Act
         placeOrder(screen);
@@ -376,7 +376,7 @@ class IU_OrderProcedureTest {
     void tc06c14OnlyIndicationBlank() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
-        fill(screen, "CT-HEAD · Head CT", "Urgent", "  ", "Rule out bleeding");
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "  ", "Rule out bleeding");
 
         // Act
         placeOrder(screen);
@@ -393,7 +393,7 @@ class IU_OrderProcedureTest {
     void tc06c15OnlyJustificationEmpty() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
-        fill(screen, "CT-HEAD · Head CT", "Urgent", "Headache after a fall", "");
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "Headache after a fall", "");
 
         // Act
         placeOrder(screen);
@@ -429,7 +429,7 @@ class IU_OrderProcedureTest {
     void tc06c17ValidOrder() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
-        fill(screen, "CT-HEAD · Head CT", "Urgent", "  Headache after a fall ", " Rule out bleeding  ");
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "  Headache after a fall ", " Rule out bleeding  ");
         String today = DateTimeFormatter.ofPattern("dd/MM/yyyy").format(LocalDate.now());
 
         // Act
@@ -455,7 +455,7 @@ class IU_OrderProcedureTest {
                 () -> assertEquals("P-0001", screen.getSelectedPatient().getPatientId()),
                 () -> assertEquals(List.of("P-0001", "P-0001"), orders.reads()),
                 () -> assertEquals(List.of(LUCIA_ORDER_1, LUCIA_ORDER_2,
-                        List.of(today, "Head CT", "Urgent", "Headache after a fall")),
+                        List.of(today, "Head CT", "URGENT · Urgent", "Headache after a fall")),
                         Screen.rows(screen.getOrdersTable())));
     }
 
@@ -464,7 +464,7 @@ class IU_OrderProcedureTest {
     void tc06c18OneCharacterTexts() {
         // Arrange
         IU_OrderProcedure screen = select(open(), MARIO);
-        fill(screen, "XRAY-CHEST · Chest X-ray", "Routine", "a", "b");
+        fill(screen, "XRAY-CHEST · Chest X-ray", "ROUTINE · Routine", "a", "b");
 
         // Act
         placeOrder(screen);
