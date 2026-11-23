@@ -55,6 +55,11 @@
       </dependency>
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
+        <artifactId>client-c5-appointments</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>client-c3-patients</artifactId>
         <version>1.0.0-SNAPSHOT</version>
       </dependency>
