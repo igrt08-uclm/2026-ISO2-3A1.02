@@ -23,6 +23,7 @@
 - **Tests:** the tests of the screen are Adam's (rule 17) and go in `feature/UC13-client-tests`; this branch is the
   implementation. The screen exposes `getNeedsTable`, `getSlotsTable`, `getAppointmentsTable` and `getStatusMessage` for
   them.
+- **Slots emptying (N-03, N-04): decided by the group.** After a booking, a move or a cancellation the slots table is emptied, and selecting a need or an appointment empties the slots, so a slot of another test type cannot be reused. Recorded by Ignacio, 23/11/2026, in answer to Adam's comment on #210 (commit 844405d).
 
 ## Files
 | File | Action |
@@ -43,6 +44,7 @@
 ## Status
 - **In progress:** nothing; the implementation is complete in `feature/UC13-client`.
 - **Next step:** the pull request (#130) and, after it, the tests of the screen.
-- **Open questions:** none. The wiring of `Main` will have to be rebased when the clients of UC06 (#204) and UC07 (#207)
-  are merged, because all three add a button to `IU_Welcome` on the same branch point.
-- **Last update:** 23/11/2026, Ignacio.
+- **Open questions:** N-03 and N-04 are resolved (decided by the group, see *Decisions*). Still open: N-01, N-02, N-05,
+  N-06, N-07, N-08 (Adam, #210). The wiring of `Main` will have to be rebased when the clients of UC06 (#204) and
+  UC07 (#207) are merged, because all three add a button to `IU_Welcome` on the same branch point.
+- **Last update:** 23/11/2026, Ignacio (recorded the group decision for N-03/N-04 from Adam's comment on #210).
