@@ -318,7 +318,7 @@ public class AppointmentService implements IAppointmentService {
                 || slot.getStart().plusMinutes(testType.getDurationMinutes()).isBefore(slot.getEnd())) {
             errors.add("The duration of the slot must match the duration of the test type "
                     + testType.getId());
-        } else if (!startOnGrid(slot.getStart(), testType)) {
+        } else if (!startOnGrid(slot.getStart(), testType, requester)) {
             errors.add("The start of the slot must be on the grid of the schedule of the room "
                     + testType.getRoom());
         }
@@ -342,8 +342,17 @@ public class AppointmentService implements IAppointmentService {
      * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
      * the room, for every active schedule of that room.
      */
-    private boolean startOnGrid(LocalDateTime start, TestType testType) throws AccessDeniedException {
-        for (Schedule schedule : schedulesOf(testType.getRoom(), null)) {
+    /**
+     * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
+     * the room, for every active schedule of that room. The requester is used to read the schedules of C2.
+     *
+     * @param start the start of the slot
+     * @param testType the test type whose room and duration define the grid
+     * @param requester the user asking for the schedules
+     * @return {@code true} if the start is on the grid of some active schedule of the room
+     */
+    private boolean startOnGrid(LocalDateTime start, TestType testType, String requester) throws AccessDeniedException {
+        for (Schedule schedule : schedulesOf(testType.getRoom(), requester)) {
             if (schedule.getDaysOfWeek().contains(start.getDayOfWeek())) {
                 LocalDateTime gridStart = LocalDateTime.of(start.toLocalDate(), schedule.getStartTime());
                 long minutesFromGrid = start.toLocalTime().toSecondOfDay() / 60
