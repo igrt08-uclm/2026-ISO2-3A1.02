@@ -43,8 +43,11 @@
 
 ## Status
 - **In progress:** nothing; the implementation is complete in `feature/UC13-client`.
-- **Next step:** the pull request (#130) and, after it, the tests of the screen.
+- **Fixes from the review of Testing:**
+  - `89f2344`: F-01, the confirmation is kept after reloading the data.
+  - `69bed6c`: F-05, an injectable clock for the default day.
+- **Next step:** Testing adds TC13C-43, 44 and the clock cases.
 - **Open questions:** N-03 and N-04 are resolved (decided by the group, see *Decisions*). Still open: N-01, N-02, N-05,
   N-06, N-07, N-08 (Adam, #210). The wiring of `Main` will have to be rebased when the clients of UC06 (#204) and
   UC07 (#207) are merged, because all three add a button to `IU_Welcome` on the same branch point.
-- **Last update:** 23/11/2026, Ignacio (recorded the group decision for N-03/N-04 from Adam's comment on #210).
+- **Last update:** 23/11/2026, Ignacio (fixes F-01 and F-05 of the review of Testing).
