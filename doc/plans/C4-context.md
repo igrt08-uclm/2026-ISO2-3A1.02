@@ -8,7 +8,7 @@
 |---|---|
 | **Component** | C4 Clinical orders · module `c4-orders` · UC06 → 1.0.0, UC07 → 1.1.0, UC08 → 1.2.0 ([agents/components.md](../../agents/components.md)) |
 | **Iteration** | It4 · Milestone 3 · component issue #65 |
-| **Last update** | 23/11/2026, David, pull request #n (this proposal) |
+| **Last update** | 23/11/2026, David, pull request #213 (this proposal) |
 
 ## Decisions that apply
 - D-013 – Order by dependencies: UC08 goes to It9, after C5.
