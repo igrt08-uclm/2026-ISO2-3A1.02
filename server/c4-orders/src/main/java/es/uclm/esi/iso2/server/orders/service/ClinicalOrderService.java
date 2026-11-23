@@ -98,10 +98,24 @@ public class ClinicalOrderService implements IClinicalOrderService {
      * the audit log.
      */
     public void loadSeedData() {
-        if (orders.findById("ORD-0001") == null) {
-            OrderSeedData.orders(LocalDate.now(clock)).forEach(orders::save);
-            OrderSeedData.needs().forEach(needs::save);
+        if (seedIdsFree()) {
+            LocalDate day = LocalDate.now(clock);
+            OrderSeedData.orders(day).forEach(orders::save);
+            OrderSeedData.needs(day).forEach(needs::save);
         }
+    }
+
+    /**
+     * True only when none of the eight seed ids exists in the repositories. There is no {@code findAll} in the
+     * repositories (rule 2 of the task), so the seed is skipped as soon as any of its ids is already present.
+     *
+     * @return {@code true} if all of {@code ORD-0001..ORD-0004} and {@code NEED-0001..NEED-0004} are free
+     */
+    private boolean seedIdsFree() {
+        return orders.findById("ORD-0001") == null && orders.findById("ORD-0002") == null
+                && orders.findById("ORD-0003") == null && orders.findById("ORD-0004") == null
+                && needs.findById("NEED-0001") == null && needs.findById("NEED-0002") == null
+                && needs.findById("NEED-0003") == null && needs.findById("NEED-0004") == null;
     }
 
     @Override
