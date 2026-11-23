@@ -35,6 +35,11 @@
 - **Not in this plan:** the client of UC13 (#130), UC15 (#134) and UC14 (#137), the seed data of C5, the waitlists and
   the daily schedule.
 
+- **Slot validation (844405d): decided by the group.** `slotErrors` rejects a slot whose start or end is null, whose
+  end is not after its start, that spans more than one day, whose duration does not match the duration of the test type,
+  and whose start is not on the grid of the schedule of the room (`startOnGrid`). Recorded by Ignacio, 23/11/2026, in
+  answer to Adam's comment on #210.
+
 ## Files
 | File | Action | What |
 |---|---|---|
@@ -72,4 +77,4 @@
   of a booked, cancelled and unknown appointment; the cancellation and the need pending again in C4; the four audit
   actions.
 - **Next step:** the branch `feature/UC13-server-tests` and, after that, the client (#130).
-- **Last update:** 23/11/2026, Ignacio.
+- **Last update:** 23/11/2026, Ignacio (recorded the group decision for the slot validation of 844405d from Adam's comment on #210).
