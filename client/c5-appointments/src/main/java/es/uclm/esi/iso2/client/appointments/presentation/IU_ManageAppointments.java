@@ -13,6 +13,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -45,6 +46,7 @@ public class IU_ManageAppointments extends JPanel {
     private final String requester;
     private final transient Predicate<String> confirm;
     private final transient Runnable onBack;
+    private final transient Clock clock;
 
     private final DefaultTableModel needModel = new DefaultTableModel(
             new Object[] { "Need", "Patient", "Test type", "Priority", "Order date", "Due" }, 0) {
@@ -97,12 +99,35 @@ public class IU_ManageAppointments extends JPanel {
      * @param confirm asks the user a question and returns whether they accept (the tests pass a fake)
      * @param onBack what to do when the user presses <em>Back</em>
      */
+    /**
+     * Creates the screen using the system clock for the default day.
+     *
+     * @param service the contract of C5 to manage the appointments
+     * @param requester the username of the admissions staff
+     * @param confirm asks the user a question and returns whether they accept (the tests pass a fake)
+     * @param onBack what to do when the user presses <em>Back</em>
+     */
     public IU_ManageAppointments(IAppointmentService service, String requester, Predicate<String> confirm,
             Runnable onBack) {
+        this(service, requester, confirm, onBack, Clock.systemDefaultZone());
+    }
+
+    /**
+     * Creates the screen with an explicit clock for the default day.
+     *
+     * @param service the contract of C5 to manage the appointments
+     * @param requester the username of the admissions staff
+     * @param confirm asks the user a question and returns whether they accept (the tests pass a fake)
+     * @param onBack what to do when the user presses <em>Back</em>
+     * @param clock gives the default day shown when the screen opens
+     */
+    public IU_ManageAppointments(IAppointmentService service, String requester, Predicate<String> confirm,
+            Runnable onBack, Clock clock) {
         this.service = service;
         this.requester = requester;
         this.confirm = confirm;
         this.onBack = onBack;
+        this.clock = clock;
         setLayout(new BorderLayout(8, 8));
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         header.add(new JLabel("Manage appointments"));
@@ -192,7 +217,7 @@ public class IU_ManageAppointments extends JPanel {
      * @return {@code true} if the data was read successfully
      */
     public boolean loadData() {
-        txtDate.setText(txtDate.getText().isEmpty() ? DAY.format(LocalDate.now()) : txtDate.getText());
+        txtDate.setText(txtDate.getText().isEmpty() ? DAY.format(LocalDate.now(clock)) : txtDate.getText());
         List<PendingNeedView> readNeeds;
         List<Appointment> readAppointments;
         try {
