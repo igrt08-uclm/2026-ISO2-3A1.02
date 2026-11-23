@@ -21,7 +21,7 @@ Ctrl -> Patient : 4: getPatient(patientId)
 Ctrl -> TestType : 5: getActiveTestTypes()
 Ctrl -> Priority : 6: getPriorities()
 Ctrl -> Order : 7: getOrdersByPatient(patientId)
-Ctrl --> IU : 8: showOrderForm(patient, testTypeId, indication, justification, priorityId)
+Ctrl --> IU : 8: showOrderForm(patient, testTypes, priorities, orders)
 
 Physician -> IU : 9: enterOrder(testTypeId, indication, justification, priorityId)
 IU -> Ctrl : 10: createOrder(patientId, testTypeId, indication, justification, priorityId)
