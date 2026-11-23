@@ -1,0 +1,49 @@
+name: Pull request rules
+
+# Checks the two pull request rules of AGENTS.md (Conventions):
+#   - the description links its issue with "Closes #n"
+#   - the branch name follows one of the agreed formats
+# It only uses bash and the data of the event: no checkout and no third-party actions (rule 6).
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    # "edited" so that the check runs again when someone fixes the description
+    types: [ opened, edited, synchronize, reopened ]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name and description
+        # The values go through env variables, never straight into the script,
+        # so a strange title or description cannot run commands
+        env:
+          BRANCH: ${{ github.head_ref }}
+          TARGET: ${{ github.base_ref }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          errors=0
+
+          # 1. Branch name: feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z
+          if [[ "$BRANCH" =~ ^(feature|bugfix|docs|ci)/.+$ ]] || [[ "$BRANCH" =~ ^(release|hotfix)/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "OK: branch '$BRANCH' follows the naming rules"
+          else
+            echo "::error::Branch '$BRANCH' does not follow AGENTS.md: use feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z"
+            errors=1
+          fi
+
+          # 2. "Closes #n" in the description, except for release/ and hotfix/ pull requests to main
+          if [[ "$TARGET" == "main" && "$BRANCH" =~ ^(release|hotfix)/ ]]; then
+            echo "OK: release and hotfix pull requests to main do not need 'Closes #n'"
+          elif echo "$BODY" | grep -qiE 'closes #[0-9]+'; then
+            echo "OK: the description links its issue"
+          else
+            echo "::error::The description must contain 'Closes #n' with the number of its issue"
+            errors=1
+          fi
+
+          exit $errors
