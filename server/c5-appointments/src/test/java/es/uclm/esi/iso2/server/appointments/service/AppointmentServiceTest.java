@@ -1,6 +1,7 @@
 package es.uclm.esi.iso2.server.appointments.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -21,12 +22,14 @@ import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakeClinicalOrde
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakePatientService;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakeRoleManagementService;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakeSystemParameterService;
+import es.uclm.esi.iso2.server.appointments.service.TestDoubles.OrderWithoutPriority;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.RecordingAuditRecorder;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.RecordingAuditRecorder.AuditEntry;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +46,8 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Tests of {@link AppointmentService} (UC13 server, C5 1.0.0, #131). Each test names the case of the test design
  * (`doc/testing/test-cases/UC13-server-test-design.md`, TC13S-xx) that it checks. The service uses an empty in-memory
  * repository, the test doubles of C1, C2, C3 and C4, and a fixed clock at 24/11/2026 08:00, a Tuesday, so the schedule
- * of Room 1 (Tuesdays from 09:00 to 11:00) is not in the past.
+ * of Room 1 (Tuesdays from 09:00 to 11:00) is not in the past. The cases about the past use a second service on the
+ * same doubles and repository with the clock at 24/11/2026 10:00 ({@link #serviceAtTen()}).
  */
 @DisplayName("AppointmentService")
 class AppointmentServiceTest {
@@ -92,12 +96,12 @@ class AppointmentServiceTest {
     }
 
     private static TimeSlot slot(int hour, int minute) {
-        LocalDateTime start = LocalDateTime.of(TUESDAY, java.time.LocalTime.of(hour, minute));
+        LocalDateTime start = LocalDateTime.of(TUESDAY, LocalTime.of(hour, minute));
         return new TimeSlot(ROOM, start, start.plusMinutes(15));
     }
 
     private static TimeSlot slotOf(String room, int hour, int minute) {
-        LocalDateTime start = LocalDateTime.of(TUESDAY, java.time.LocalTime.of(hour, minute));
+        LocalDateTime start = LocalDateTime.of(TUESDAY, LocalTime.of(hour, minute));
         return new TimeSlot(room, start, start.plusMinutes(15));
     }
 
@@ -115,6 +119,28 @@ class AppointmentServiceTest {
         return service.bookAppointment(STAFF, NEEDED, slot(9, 0));
     }
 
+    /** A service on the same doubles and repository whose clock is 24/11/2026 10:00, in the middle of the schedule. */
+    private AppointmentService serviceAtTen() {
+        Clock ten = Clock.fixed(Instant.parse("2026-11-24T10:00:00Z"), ZoneOffset.UTC);
+        return new AppointmentService(appointments, orders, patients, parameters, roles, audit, ten);
+    }
+
+    /** Adds a pending need {@code NEED-0002} of a diagnostic order {@code ORD-0002} of mgarcia. */
+    private void addSecondNeed(String patientId, String testTypeId) {
+        orders.addOrder(new DiagnosticOrder("ORD-0002", patientId, testTypeId, PHYSICIAN, "Control", "Control",
+                LocalDate.of(2026, 11, 23), "ROUTINE"));
+        orders.addNeed(new SchedulingNeed("NEED-0002", "ORD-0002", LocalDate.of(2026, 11, 23),
+                SchedulingNeedStatus.PENDING));
+    }
+
+    private static List<LocalDateTime> startsOf(List<TimeSlot> slots) {
+        return slots.stream().map(TimeSlot::getStart).toList();
+    }
+
+    private static LocalDateTime at(LocalDate day, int hour, int minute) {
+        return LocalDateTime.of(day, LocalTime.of(hour, minute));
+    }
+
     @Nested
     @DisplayName("1. Permission")
     class Permission {
@@ -124,11 +150,19 @@ class AppointmentServiceTest {
         @ValueSource(strings = { ADMIN, PHYSICIAN, INACTIVE_USER, UNKNOWN })
         @DisplayName("TC13S-01 a user without MANAGE_APPOINTMENTS is denied in every operation")
         void userWithoutPermissionIsDenied(String requester) {
-            assertDenied(requester, () -> service.getAppointments(requester), APPOINTMENTS);
-            audit.clear();
-            assertDenied(requester, () -> service.bookAppointment(requester, NEEDED, slot(9, 0)), APPOINTMENTS);
-            audit.clear();
-            assertDenied(requester, () -> service.cancelAppointment(requester, "APT-0001"), APPOINTMENTS);
+            List<Executable> operations = List.of(
+                    () -> service.getPendingSchedulingNeeds(requester),
+                    () -> service.getFreeSlots(requester, TEST_TYPE, TUESDAY, TUESDAY),
+                    () -> service.bookAppointment(requester, NEEDED, slot(9, 0)),
+                    () -> service.rescheduleAppointment(requester, "APT-0001", slot(10, 0)),
+                    () -> service.cancelAppointment(requester, "APT-0001"),
+                    () -> service.getAppointments(requester),
+                    () -> service.getAppointmentsOfPatient(requester, PATIENT));
+            for (Executable operation : operations) {
+                audit.clear();
+                assertDenied(requester, operation, APPOINTMENTS);
+            }
+            assertTrue(appointments.findAll().isEmpty());
         }
 
         @Test
@@ -153,10 +187,12 @@ class AppointmentServiceTest {
             List<TimeSlot> free = service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, TUESDAY);
             assertAll(
                     () -> assertEquals(8, free.size()),
-                    () -> assertEquals(LocalDateTime.of(TUESDAY, java.time.LocalTime.of(9, 0)),
+                    () -> assertEquals(LocalDateTime.of(TUESDAY, LocalTime.of(9, 0)),
                             free.get(0).getStart()),
-                    () -> assertEquals(LocalDateTime.of(TUESDAY, java.time.LocalTime.of(9, 15)), free.get(1).getStart()),
-                    () -> assertEquals(LocalDateTime.of(TUESDAY, java.time.LocalTime.of(11, 0)), free.get(8 - 1).getEnd()),
+                    () -> assertEquals(LocalDateTime.of(TUESDAY, LocalTime.of(9, 15)),
+                            free.get(1).getStart()),
+                    () -> assertEquals(LocalDateTime.of(TUESDAY, LocalTime.of(11, 0)),
+                            free.get(7).getEnd()),
                     () -> assertEquals(ROOM, free.get(0).getRoom()));
         }
 
@@ -198,6 +234,89 @@ class AppointmentServiceTest {
         void inactiveTestType() {
             assertEquals(List.of("The test type TT-03 is not active"),
                     errorsOf(() -> service.getFreeSlots(STAFF, "TT-03", TUESDAY, TUESDAY)));
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = { "   " })
+        @DisplayName("TC13S-33 a blank test type is rejected")
+        void blankTestType(String testTypeId) {
+            assertEquals(List.of("The test type is required"),
+                    errorsOf(() -> service.getFreeSlots(STAFF, testTypeId, TUESDAY, TUESDAY)));
+        }
+
+        @Test
+        @DisplayName("TC13S-34 an unknown test type is rejected with the message of C2")
+        void unknownTestType() {
+            assertEquals(List.of("There is no test type with the id TT-99"),
+                    errorsOf(() -> service.getFreeSlots(STAFF, "TT-99", TUESDAY, TUESDAY)));
+        }
+
+        @Test
+        @DisplayName("TC13S-35 a missing last date is rejected")
+        void missingLastDate() {
+            assertEquals(List.of("The date range is required"),
+                    errorsOf(() -> service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, null)));
+        }
+
+        @Test
+        @DisplayName("TC13S-36 the slots of a second test type use its room and its duration")
+        void slotsOfSecondTestType() throws AccessDeniedException, ValidationException {
+            List<TimeSlot> free = service.getFreeSlots(STAFF, "TT-02", TUESDAY, TUESDAY);
+            assertAll(
+                    () -> assertEquals(8, free.size()),
+                    () -> assertEquals(List.of(at(TUESDAY, 9, 0), at(TUESDAY, 9, 30), at(TUESDAY, 10, 0),
+                            at(TUESDAY, 10, 30), at(TUESDAY, 11, 0), at(TUESDAY, 11, 30), at(TUESDAY, 12, 0),
+                            at(TUESDAY, 12, 30)), startsOf(free)),
+                    () -> assertEquals(at(TUESDAY, 13, 0), free.get(7).getEnd()),
+                    () -> assertTrue(free.stream().allMatch(slot -> "Room 2".equals(slot.getRoom()))));
+        }
+
+        @Test
+        @DisplayName("TC13S-37 a room whose only schedule is inactive has no slots")
+        void inactiveSchedule() throws AccessDeniedException, ValidationException {
+            assertTrue(service.getFreeSlots(STAFF, "TT-04", TUESDAY, TUESDAY).isEmpty());
+        }
+
+        @Test
+        @DisplayName("TC13S-38 a two-day range gives the slots of the day with schedule")
+        void twoDayRange() throws AccessDeniedException, ValidationException {
+            List<TimeSlot> free = service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, TUESDAY.plusDays(1));
+            assertAll(
+                    () -> assertEquals(8, free.size()),
+                    () -> assertTrue(free.stream().allMatch(slot -> TUESDAY.equals(slot.getStart().toLocalDate()))));
+        }
+
+        @Test
+        @DisplayName("TC13S-39 a range of two Tuesdays gives the slots of both, in chronological order")
+        void twoTuesdays() throws AccessDeniedException, ValidationException {
+            LocalDate nextTuesday = TUESDAY.plusWeeks(1);
+            List<TimeSlot> free = service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, nextTuesday);
+            assertAll(
+                    () -> assertEquals(16, free.size()),
+                    () -> assertEquals(at(TUESDAY, 10, 45), free.get(7).getStart()),
+                    () -> assertEquals(at(nextTuesday, 9, 0), free.get(8).getStart()),
+                    () -> assertEquals(at(nextTuesday, 11, 0), free.get(15).getEnd()));
+        }
+
+        @Test
+        @DisplayName("TC13S-40 the slot of a rescheduled appointment is not offered and its old slot is")
+        void rescheduledSlotIsOccupied() throws AccessDeniedException, ValidationException {
+            Appointment booked = bookFirst();
+            service.rescheduleAppointment(STAFF, booked.getAppointmentId(), slot(10, 0));
+            List<LocalDateTime> starts = startsOf(service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, TUESDAY));
+            assertAll(
+                    () -> assertEquals(7, starts.size()),
+                    () -> assertTrue(starts.contains(at(TUESDAY, 9, 0))),
+                    () -> assertTrue(!starts.contains(at(TUESDAY, 10, 0))));
+        }
+
+        @Test
+        @DisplayName("TC13S-41 the slots of the past are not offered and the one starting now is")
+        void slotsOfThePastAreSkipped() throws AccessDeniedException, ValidationException {
+            List<TimeSlot> free = serviceAtTen().getFreeSlots(STAFF, TEST_TYPE, TUESDAY, TUESDAY);
+            assertEquals(List.of(at(TUESDAY, 10, 0), at(TUESDAY, 10, 15), at(TUESDAY, 10, 30), at(TUESDAY, 10, 45)),
+                    startsOf(free));
         }
     }
 
@@ -281,12 +400,11 @@ class AppointmentServiceTest {
         }
 
         @Test
-        @DisplayName("TC13S-17 a slot in the past is rejected")
+        @DisplayName("TC13S-17 a slot in the past, inside the schedule and free, is rejected")
         void slotInThePast() {
-            TimeSlot past = new TimeSlot(ROOM, LocalDateTime.of(2026, 11, 24, 9, 0).minusDays(1),
-                    LocalDateTime.of(2026, 11, 24, 9, 15).minusDays(1));
-            List<String> errors = errorsOf(() -> service.bookAppointment(STAFF, NEEDED, past));
-            assertTrue(errors.contains("The slot 23/11/2026 09:00 is in the past"));
+            AppointmentService atTen = serviceAtTen();
+            assertEquals(List.of("The slot 24/11/2026 09:00 is in the past"),
+                    errorsOf(() -> atTen.bookAppointment(STAFF, NEEDED, slot(9, 0))));
         }
 
         @Test
@@ -320,6 +438,103 @@ class AppointmentServiceTest {
                     () -> assertTrue(appointments.findAll().isEmpty()),
                     () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus()),
                     () -> assertTrue(audit.entries().isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC13S-42 a slot that starts now is not in the past and is booked")
+        void slotStartingNow() throws AccessDeniedException, ValidationException {
+            Appointment created = serviceAtTen().bookAppointment(STAFF, NEEDED, slot(10, 0));
+            assertAll(
+                    () -> assertEquals("APT-0001", created.getAppointmentId()),
+                    () -> assertEquals(at(TUESDAY, 10, 0), created.getStart()),
+                    () -> assertEquals(AppointmentStatus.BOOKED, created.getStatus()));
+        }
+
+        @Test
+        @DisplayName("TC13S-43 the last slot before now is in the past")
+        void lastSlotBeforeNow() {
+            AppointmentService atTen = serviceAtTen();
+            assertEquals(List.of("The slot 24/11/2026 09:45 is in the past"),
+                    errorsOf(() -> atTen.bookAppointment(STAFF, NEEDED, slot(9, 45))));
+        }
+
+        @Test
+        @DisplayName("TC13S-44 the last slot of the schedule, ending when the schedule ends, is booked")
+        void lastSlotOfTheSchedule() throws AccessDeniedException, ValidationException {
+            Appointment created = service.bookAppointment(STAFF, NEEDED, slot(10, 45));
+            assertAll(
+                    () -> assertEquals(at(TUESDAY, 10, 45), created.getStart()),
+                    () -> assertEquals(at(TUESDAY, 11, 0), created.getEnd()));
+        }
+
+        @Test
+        @DisplayName("TC13S-45 a slot that ends after the schedule is rejected")
+        void slotEndingAfterTheSchedule() {
+            assertEquals(List.of("The slot 24/11/2026 11:00 is not inside the schedule of the room Room 1"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot(11, 0))));
+        }
+
+        @Test
+        @DisplayName("TC13S-46 a slot on a day without schedule is rejected")
+        void slotOnADayWithoutSchedule() {
+            LocalDateTime wednesday = at(TUESDAY.plusDays(1), 9, 0);
+            TimeSlot slot = new TimeSlot(ROOM, wednesday, wednesday.plusMinutes(15));
+            assertEquals(List.of("The slot 25/11/2026 09:00 is not inside the schedule of the room Room 1"),
+                    errorsOf(() -> service.bookAppointment(STAFF, NEEDED, slot)));
+        }
+
+        @Test
+        @DisplayName("TC13S-47 a slot of a room whose schedule is inactive is rejected")
+        void slotOfAnInactiveSchedule() {
+            addSecondNeed("P-0002", "TT-04");
+            assertEquals(List.of("The slot 24/11/2026 09:00 is not inside the schedule of the room Room 4"),
+                    errorsOf(() -> service.bookAppointment(STAFF, "NEED-0002", slotOf("Room 4", 9, 0))));
+        }
+
+        @Test
+        @DisplayName("TC13S-48 a slot that starts when another appointment ends is free")
+        void adjacentAfter() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            addSecondNeed("P-0002", TEST_TYPE);
+            assertEquals(at(TUESDAY, 9, 15),
+                    service.bookAppointment(STAFF, "NEED-0002", slot(9, 15)).getStart());
+        }
+
+        @Test
+        @DisplayName("TC13S-49 a slot that overlaps part of another appointment is not free")
+        void partialOverlap() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            addSecondNeed("P-0002", TEST_TYPE);
+            assertEquals(List.of("The slot 24/11/2026 09:10 is not free"),
+                    errorsOf(() -> service.bookAppointment(STAFF, "NEED-0002", slot(9, 10))));
+        }
+
+        @Test
+        @DisplayName("TC13S-50 a slot that ends when another appointment starts is free")
+        void adjacentBefore() throws AccessDeniedException, ValidationException {
+            service.bookAppointment(STAFF, NEEDED, slot(9, 15));
+            addSecondNeed("P-0002", TEST_TYPE);
+            assertEquals(at(TUESDAY, 9, 0),
+                    service.bookAppointment(STAFF, "NEED-0002", slot(9, 0)).getStart());
+        }
+
+        @Test
+        @DisplayName("TC13S-51 a need whose test type is inactive is rejected and nothing is saved")
+        void needOfAnInactiveTestType() {
+            addSecondNeed("P-0002", "TT-03");
+            assertEquals(List.of("The test type TT-03 is not active"),
+                    errorsOf(() -> service.bookAppointment(STAFF, "NEED-0002", slotOf("Room 3", 9, 0))));
+            assertAll(
+                    () -> assertTrue(appointments.findAll().isEmpty()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need("NEED-0002").getStatus()));
+        }
+
+        @Test
+        @DisplayName("TC13S-52 the id skips the ids that the repository already has")
+        void idSkipsExistingIds() throws AccessDeniedException, ValidationException {
+            appointments.save(new Appointment("APT-0001", "NEED-0009", "P-0002", "TT-02", "Room 2", PHYSICIAN,
+                    at(TUESDAY, 9, 0), at(TUESDAY, 9, 30), AppointmentStatus.BOOKED));
+            assertEquals("APT-0002", bookFirst().getAppointmentId());
         }
     }
 
@@ -380,6 +595,75 @@ class AppointmentServiceTest {
                     errorsOf(() -> service.rescheduleAppointment(STAFF, "APT-0001", slot(10, 0))));
             assertEquals(slot(9, 0).getStart(), appointments.findById("APT-0001").getStart());
         }
+
+        @ParameterizedTest
+        @NullSource
+        @DisplayName("TC13S-53 a missing new slot is rejected")
+        void missingNewSlot(TimeSlot newSlot) throws AccessDeniedException, ValidationException {
+            bookFirst();
+            assertEquals(List.of("The slot is required"),
+                    errorsOf(() -> service.rescheduleAppointment(STAFF, "APT-0001", newSlot)));
+        }
+
+        @Test
+        @DisplayName("TC13S-54 moving to a slot of another room is rejected")
+        void rescheduleToAnotherRoom() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            assertEquals(List.of("The room Room 2 is not the room of the test type TT-01"),
+                    errorsOf(() -> service.rescheduleAppointment(STAFF, "APT-0001", slotOf("Room 2", 10, 0))));
+            assertEquals(ROOM, appointments.findById("APT-0001").getRoom());
+        }
+
+        @Test
+        @DisplayName("TC13S-55 moving to a slot of the past is rejected")
+        void rescheduleToThePast() throws AccessDeniedException, ValidationException {
+            AppointmentService atTen = serviceAtTen();
+            atTen.bookAppointment(STAFF, NEEDED, slot(10, 30));
+            assertEquals(List.of("The slot 24/11/2026 09:00 is in the past"),
+                    errorsOf(() -> atTen.rescheduleAppointment(STAFF, "APT-0001", slot(9, 0))));
+            assertEquals(at(TUESDAY, 10, 30), appointments.findById("APT-0001").getStart());
+        }
+
+        @Test
+        @DisplayName("TC13S-56 moving outside the schedule is rejected")
+        void rescheduleOutsideTheSchedule() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            assertEquals(List.of("The slot 24/11/2026 11:00 is not inside the schedule of the room Room 1"),
+                    errorsOf(() -> service.rescheduleAppointment(STAFF, "APT-0001", slot(11, 0))));
+            assertEquals(AppointmentStatus.BOOKED, appointments.findById("APT-0001").getStatus());
+        }
+
+        @Test
+        @DisplayName("TC13S-57 moving an appointment onto its own slot is accepted")
+        void rescheduleOntoItsOwnSlot() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            Appointment moved = service.rescheduleAppointment(STAFF, "APT-0001", slot(9, 0));
+            assertAll(
+                    () -> assertEquals(at(TUESDAY, 9, 0), moved.getStart()),
+                    () -> assertEquals(AppointmentStatus.RESCHEDULED, moved.getStatus()));
+        }
+
+        @Test
+        @DisplayName("TC13S-58 after a reschedule the need is still booked in C4")
+        void needStaysBookedAfterReschedule() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            service.rescheduleAppointment(STAFF, "APT-0001", slot(10, 0));
+            assertAll(
+                    () -> assertEquals(SchedulingNeedStatus.BOOKED, orders.need(NEEDED).getStatus()),
+                    () -> assertTrue(service.getPendingSchedulingNeeds(STAFF).isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC13S-59 a rescheduled appointment can be moved again")
+        void rescheduleTwice() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            service.rescheduleAppointment(STAFF, "APT-0001", slot(10, 0));
+            Appointment again = service.rescheduleAppointment(STAFF, "APT-0001", slot(10, 30));
+            assertAll(
+                    () -> assertEquals("APT-0001", again.getAppointmentId()),
+                    () -> assertEquals(at(TUESDAY, 10, 30), again.getStart()),
+                    () -> assertEquals(AppointmentStatus.RESCHEDULED, again.getStatus()));
+        }
     }
 
     @Nested
@@ -409,15 +693,46 @@ class AppointmentServiceTest {
         }
 
         @Test
-        @DisplayName("TC13S-27 an appointment without need change does not fail the cancellation")
+        @DisplayName("TC13S-27 cancelling when C4 answers that the need is already pending does not fail")
         void cancelAlreadyPendingNeed() throws AccessDeniedException, ValidationException {
-            orders.addNeed(new SchedulingNeed("NEED-0002", "ORD-0001", LocalDate.of(2026, 11, 23),
-                    SchedulingNeedStatus.PENDING));
-            Appointment other = service.bookAppointment(STAFF, "NEED-0002",
-                    new TimeSlot(ROOM, LocalDateTime.of(TUESDAY, java.time.LocalTime.of(9, 0)),
-                            LocalDateTime.of(TUESDAY, java.time.LocalTime.of(9, 15))));
-            assertEquals(AppointmentStatus.CANCELLED,
-                    service.cancelAppointment(STAFF, other.getAppointmentId()).getStatus());
+            Appointment booked = bookFirst();
+            orders.forceStatus(NEEDED, SchedulingNeedStatus.PENDING);
+            audit.clear();
+            Appointment cancelled = assertDoesNotThrow(
+                    () -> service.cancelAppointment(STAFF, booked.getAppointmentId()));
+            assertAll(
+                    () -> assertEquals(AppointmentStatus.CANCELLED, cancelled.getStatus()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus()),
+                    () -> assertEquals(List.of(new AuditEntry(STAFF, CANCELLED, "APPOINTMENT:APT-0001")),
+                            audit.entries()));
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = { "   " })
+        @DisplayName("TC13S-60 cancelling a blank appointment is rejected")
+        void cancelBlankAppointment(String appointmentId) {
+            assertEquals(List.of("The appointment is required"),
+                    errorsOf(() -> service.cancelAppointment(STAFF, appointmentId)));
+        }
+
+        @Test
+        @DisplayName("TC13S-61 cancelling an unknown appointment is rejected")
+        void cancelUnknownAppointment() {
+            assertEquals(List.of("There is no appointment with the id APT-9999"),
+                    errorsOf(() -> service.cancelAppointment(STAFF, "APT-9999")));
+        }
+
+        @Test
+        @DisplayName("TC13S-62 cancelling a rescheduled appointment leaves its need pending and frees its slot")
+        void cancelRescheduled() throws AccessDeniedException, ValidationException {
+            bookFirst();
+            service.rescheduleAppointment(STAFF, "APT-0001", slot(10, 0));
+            Appointment cancelled = service.cancelAppointment(STAFF, "APT-0001");
+            assertAll(
+                    () -> assertEquals(AppointmentStatus.CANCELLED, cancelled.getStatus()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus()),
+                    () -> assertEquals(8, service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, TUESDAY).size()));
         }
     }
 
@@ -430,11 +745,14 @@ class AppointmentServiceTest {
         void reads() throws AccessDeniedException, ValidationException {
             Appointment booked = bookFirst();
             audit.clear();
+            List<Appointment> all = service.getAppointments(STAFF);
+            List<Appointment> ofPatient = service.getAppointmentsOfPatient(STAFF, PATIENT);
             assertAll(
-                    () -> assertEquals(1, service.getAppointments(STAFF).size()),
-                    () -> assertEquals(List.of(new AuditEntry(STAFF, ACCESSED, APPOINTMENTS)), audit.entries()),
-                    () -> assertEquals(1, service.getAppointmentsOfPatient(STAFF, PATIENT).size()),
-                    () -> assertSame(booked, service.getAppointmentsOfPatient(STAFF, PATIENT).get(0)));
+                    () -> assertEquals(List.of(booked), all),
+                    () -> assertEquals(1, ofPatient.size()),
+                    () -> assertSame(booked, ofPatient.get(0)),
+                    () -> assertEquals(List.of(new AuditEntry(STAFF, ACCESSED, APPOINTMENTS),
+                            new AuditEntry(STAFF, ACCESSED, "PATIENT:" + PATIENT)), audit.entries()));
         }
 
         @ParameterizedTest
@@ -460,6 +778,23 @@ class AppointmentServiceTest {
                     () -> assertEquals("Chest X-ray", views.get(0).getTestTypeName()),
                     () -> assertEquals("URGENT", views.get(0).getPriorityId()),
                     () -> assertEquals(LocalDate.of(2026, 11, 23), views.get(0).getDueDate()));
+        }
+
+        @Test
+        @DisplayName("TC13S-63 a need of an order without priority has an empty priority")
+        void needOfAnOrderWithoutPriority() throws AccessDeniedException, ValidationException {
+            orders.addOrder(new OrderWithoutPriority("ORD-0002", "P-0002", "TT-02", PHYSICIAN,
+                    LocalDate.of(2026, 11, 23)));
+            orders.addNeed(new SchedulingNeed("NEED-0002", "ORD-0002", LocalDate.of(2027, 5, 23),
+                    SchedulingNeedStatus.PENDING));
+            List<PendingNeedView> views = service.getPendingSchedulingNeeds(STAFF);
+            assertAll(
+                    () -> assertEquals(2, views.size()),
+                    () -> assertEquals("NEED-0002", views.get(1).getNeedId()),
+                    () -> assertEquals("Mario Demo Simulado", views.get(1).getPatientName()),
+                    () -> assertEquals("Blood test", views.get(1).getTestTypeName()),
+                    () -> assertEquals("", views.get(1).getPriorityId()),
+                    () -> assertEquals(LocalDate.of(2027, 5, 23), views.get(1).getDueDate()));
         }
 
         @Test

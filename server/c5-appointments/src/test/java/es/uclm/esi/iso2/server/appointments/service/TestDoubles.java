@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The test doubles of the tests of {@link AppointmentService} (UC13, #131): C1 (roles and audit), C2 (test types and
- * schedules), C3 (patients) and C4 (pending needs and their orders). They only implement what C5 uses and they count the
- * calls, so a test can check when a service of another component is not reached.
+ * The test doubles of the tests of {@link AppointmentService} (UC13, #131): C1 (roles and audit), C2 (test types
+ * and schedules), C3 (patients) and C4 (pending needs and their orders). They only implement what C5 uses and they
+ * count the calls, so a test can check when a service of another component is not reached.
  */
 final class TestDoubles {
     private TestDoubles() {
@@ -143,7 +143,8 @@ final class TestDoubles {
             return patients.stream()
                     .filter(patient -> patient.getPatientId().equals(patientId))
                     .findFirst()
-                    .orElseThrow(() -> new ValidationException(List.of("There is no patient with the id " + patientId)));
+                    .orElseThrow(() -> new ValidationException(
+                            List.of("There is no patient with the id " + patientId)));
         }
 
         int getPatientCalls() {
@@ -168,7 +169,11 @@ final class TestDoubles {
         }
     }
 
-    /** C2: three test types and one schedule of the room of {@code TT-01}, on Tuesdays from 09:00 to 11:00. */
+    /**
+     * C2: four test types and the schedules of their rooms: Room 1 ({@code TT-01}, 15 minutes) on Tuesdays from 09:00
+     * to 11:00, Room 2 ({@code TT-02}, 30 minutes) on Tuesdays from 09:00 to 13:00, and Room 4 ({@code TT-04}), whose
+     * only schedule is inactive. {@code TT-03} is inactive. C2 keeps one schedule per room (its key is the resource).
+     */
     static final class FakeSystemParameterService implements ISystemParameterService {
         static final LocalDate TUESDAY = LocalDate.of(2026, 11, 24);
         private static final List<TestType> TEST_TYPES = List.of(
@@ -177,10 +182,13 @@ final class TestDoubles {
                 new TestType("TT-02", "Blood test", "Laboratory", "Room 2", 30, null, false, false, null, "ROUTINE",
                         false, true),
                 new TestType("TT-03", "Old scan", "CT", "Room 3", 20, null, false, false, null, "ROUTINE", false,
-                        false));
+                        false),
+                new TestType("TT-04", "Bone scan", "Nuclear medicine", "Room 4", 15, null, false, false, null,
+                        "ROUTINE", false, true));
         private static final List<Schedule> SCHEDULES = List.of(
                 new Schedule("Room 1", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(11, 0), true),
-                new Schedule("Room 2", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(13, 0), true));
+                new Schedule("Room 2", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(13, 0), true),
+                new Schedule("Room 4", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(11, 0), false));
 
         private int calls;
 
@@ -291,6 +299,18 @@ final class TestDoubles {
         }
     }
 
+    /**
+     * C4: an order that is not a {@link DiagnosticOrder}, as a follow-up order of UC07, which has no priority. It only
+     * exists in the tests, because the follow-up order of C4 1.1.0 is not in this branch.
+     */
+    static final class OrderWithoutPriority extends ClinicalOrder {
+        OrderWithoutPriority(String orderId, String patientId, String testTypeId, String requester,
+                LocalDate creationDate) {
+            super(orderId, patientId, testTypeId, requester, "Control of the nodule", "Follow-up of a known lesion",
+                    creationDate);
+        }
+    }
+
     /** C4: the pending needs and their orders, kept in memory so the tests can check what C5 asks for. */
     static final class FakeClinicalOrderService implements IClinicalOrderService {
         private final Map<String, SchedulingNeed> needs = new LinkedHashMap<>();
@@ -311,6 +331,18 @@ final class TestDoubles {
 
         int pendingCalls() {
             return pendingCalls;
+        }
+
+        /**
+         * Puts a need in a status directly, as if another use case of C4 had changed it, so that a test can build the
+         * state in which C4 answers that the need is already in that status.
+         *
+         * @param needId the id of the need
+         * @param status its new status
+         */
+        void forceStatus(String needId, SchedulingNeedStatus status) {
+            SchedulingNeed need = needs.get(needId);
+            needs.put(needId, new SchedulingNeed(needId, need.getOrderId(), need.getDueDate(), status));
         }
 
         @Override
