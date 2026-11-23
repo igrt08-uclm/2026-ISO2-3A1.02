@@ -11,7 +11,7 @@
 ## Decisions
 - **Contract (rule 9):** the seven operations of `IAppointmentService` exactly as `C5-design.md` gives them, in
   `es.uclm.esi.iso2.common.appointments.contracts`, with the data classes `Appointment`, `AppointmentStatus`,
-  `TimeSlot` and `PendingNeedView` in `...appointments.domain`. `common` goes from `1.6.0-SNAPSHOT` to `1.7.0-SNAPSHOT`.
+  `TimeSlot` and `PendingNeedView` in `...appointments.domain`. `common` goes from `1.7.0-SNAPSHOT` to `1.8.0-SNAPSHOT`, because UC07 takes it to `1.7.0-SNAPSHOT` and this branch merges after that one.
 - **Module (rule 9):** `server/c5-appointments`, `artifactId` `server-c5-appointments`, `1.0.0-SNAPSHOT`, depends only on
   `common`; packages `...server.appointments.persistence` and `...server.appointments.service`.
 - **Permission:** every operation needs `MANAGE_APPOINTMENTS` (D37, already in C1 1.2.4 for `ADMISSIONS_STAFF`); a denied
@@ -38,7 +38,7 @@
 ## Files
 | File | Action | What |
 |---|---|---|
-| `common/pom.xml`, `pom.xml` | change | `common` `1.7.0-SNAPSHOT` and `server-c5-appointments` `1.0.0-SNAPSHOT` (rule 9) |
+| `common/pom.xml`, `pom.xml` | change | `common` `1.8.0-SNAPSHOT` and `server-c5-appointments` `1.0.0-SNAPSHOT` (rule 9) |
 | `common/.../common/appointments/**` | create | `package-info`, the four data classes and `IAppointmentService` |
 | `server/pom.xml` | change | module `c5-appointments` (rule 9) |
 | `server/c5-appointments/pom.xml` | create | the module (rule 9) |
@@ -58,7 +58,7 @@
 
 ## Status
 - **In progress:** nothing; steps 1 to 3 are done.
-- **Done:** the contract and the data classes in `common` `1.7.0-SNAPSHOT`, the module `server-c5-appointments` `1.0.0`,
+- **Done:** the contract and the data classes in `common` `1.8.0-SNAPSHOT`, the module `server-c5-appointments` `1.0.0`,
   the repository and `AppointmentService` with the seven operations, the free slots of D40 and the audit.
 - **State for Adam (Testing):** to cover in `feature/UC13-server-tests`: the permission and `APPOINTMENT_ACCESS_DENIED`;
   the seven operations with their messages; the free slots for a schedule of a room (days, duration, occupied and
