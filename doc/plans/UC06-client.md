@@ -18,17 +18,49 @@
 
 ## Questions and answers
 Proposals of Implementation; **none is decided yet**: this plan is written to be approved, and no file changes before that approval (rule 4 of the cycle).
-- **Q1 – Module, packages and versions (rule 9).** **Proposal:** a new module `client/c4-orders` (`artifactId` `client-c4-orders`, version `1.0.0-SNAPSHOT`, depends only on `common` and JUnit, as `client/c3-patients`), package `es.uclm.esi.iso2.client.orders.presentation`, added to `client/pom.xml` and to the `<dependencyManagement>` of the root pom. `client-c1-access` goes to `1.2.5-SNAPSHOT` and gets the dependencies on `server-c4-orders` and `client-c4-orders` in the last step, as UC12 did with C3. **A:** pending.
-- **Q2 – The class.** **Proposal:** `IU_OrderProcedure`, a `JPanel` (so the tests create it without a display), which receives the `IClinicalOrderService`, the `IPatientService`, the `ISystemParameterService`, the username of the requester, a `Predicate<String>` to confirm (as the other screens) and the action of *Back*; the methods of the design keep their names. **A:** pending.
-- **Q3 – Layout.** **Proposal:** at the left a search box and the table of patients (*Identifier*, *Full name*, *Date of birth*), at the right the form of the order (test type, priority, clinical indication, justification), under it the table of the orders of the selected patient (*Date*, *Test type*, *Priority*, *Indication*) and the buttons *Place order* and *Back*; a line says how many patients were found and another one says what happened. When the screen opens it lists all the patients. **A:** pending.
-- **Q4 – Selecting the patient.** **Proposal:** a click on a row calls `onSelectPatient`; the screen reads the patient from C3 (`getPatient`) and, if it is not active, calls `showPatientInactive` and disables the form (the server would reject the order anyway); if it is active, it loads the test types and the priorities and shows the orders of that patient. **A:** pending.
-- **Q5 – Test types and priorities.** **Proposal:** the list of test types offers only the active ones (`isActive()`, D-022) and shows `TT-01 · Chest X-ray`; the list of priorities offers the configured ones that are active (`getPriorities`, as the server checks). If C2 returns none, the form says so and *Place order* stays disabled. **A:** pending.
-- **Q6 – Validation in the client.** **Proposal:** the same rules and messages as the server (`doc/plans/UC06-server.md`, Q4–Q5): patient, test type, priority, indication and justification required; all the errors together, in red, with `⚠`, and nothing is sent; the field of each error gets a red border. **A:** pending.
-- **Q7 – After a successful order.** **Proposal:** "Order ORD-0001 created." in green; the form is emptied (the patient stays selected) and the table of orders is loaded again; the order is placed for the selected patient with the requester of the session. **A:** pending.
-- **Q8 – Errors of the server.** **Proposal:** `ValidationException` shows every message of the server together; `AccessDeniedException` shows "You do not have permission to order procedures." and leaves only *Back* enabled. **A:** pending.
-- **Q9 – Welcome screen and `Main`.** **Proposal:** `IU_Welcome` gets one more constructor with `Runnable onOrderProcedure` and the button *Order procedure* (Alt+O), shown only with `ORDER_PROCEDURES`; the current constructors stay unchanged, so the tests of C1 do not change. `Main` creates the `ClinicalOrderService` with the role service and the audit service of C1 plus the `SystemParameterService` and the `PatientService` it already builds, and shows the screen with the title "Order a diagnostic procedure". **A:** pending.
-- **Q10 – Keyboard.** **Proposal:** *Place order* Alt+P, *Search* Alt+H, *Back* Alt+B; the fields Alt+T (test type), Alt+R (priority), Alt+C (clinical indication) and Alt+J (justification). **A:** pending.
-- **Q11 – Unsaved changes.** **Proposal:** if the form has data and the user presses another patient or *Back*, the screen asks "Discard the unsaved changes?"; an empty form is not a change. **A:** pending.
+- **Q1 – Module, packages and versions (rule 9).** **Proposal:** a new module `client/c4-orders` (`artifactId` `client-c4-orders`, version `1.0.0-SNAPSHOT`, depends only on `common` and JUnit, as `client/c3-patients`), package `es.uclm.esi.iso2.client.orders.presentation`, added to `client/pom.xml` and to the `<dependencyManagement>` of the root pom. `client-c1-access` goes to `1.2.5-SNAPSHOT` and gets the dependencies on `server-c4-orders` and `client-c4-orders` in the last step, as UC12 did with C3. **A:** accepted (Ignacio, 23/11/2026): `client-c4-orders` `1.0.0-SNAPSHOT` and `client-c1-access` `1.2.5-SNAPSHOT`.
+- **Q2 – The class.** **Proposal:** `IU_OrderProcedure`, a `JPanel` (so the tests create it without a display), which receives the `IClinicalOrderService`, the `IPatientService`, the `ISystemParameterService`, the username of the requester, a `Predicate<String>` to confirm (as the other screens) and the action of *Back*; the methods of the design keep their names. **A:** accepted (Ignacio, 23/11/2026).
+- **Q3 – Layout.** **Proposal:** at the left a search box and the table of patients (*Identifier*, *Full name*, *Date of birth*), at the right the form of the order (test type, priority, clinical indication, justification), under it the table of the orders of the selected patient (*Date*, *Test type*, *Priority*, *Indication*) and the buttons *Place order* and *Back*; a line says how many patients were found and another one says what happened. When the screen opens it lists all the patients. **A:** accepted (Ignacio, 23/11/2026).
+- **Q4 – Selecting the patient.** **Proposal:** a click on a row calls `onSelectPatient`; the screen reads the patient from C3 (`getPatient`) and, if it is not active, calls `showPatientInactive` and disables the form (the server would reject the order anyway); if it is active, it loads the test types and the priorities and shows the orders of that patient. **A:** accepted (Ignacio, 23/11/2026). **Deviation for Design:** `onSelectPatient` receives the health-card identifier that the table shows, not `patientId` as the design of `doc/design/C4-client-design.puml` says; the patient is read with `searchPatients(identifier)` and the exact identifier is compared, because C3 only offers the health card number to the screen.
+- **Q5 – Test types and priorities.** **Proposal:** the list of test types offers only the active ones (`isActive()`, D-022) and shows `TT-01 · Chest X-ray`; the list of priorities offers the configured ones that are active (`getPriorities`, as the server checks). If C2 returns none, the form says so and *Place order* stays disabled. **A:** accepted (Ignacio, 23/11/2026).
+- **Q6 – Validation in the client.** **Proposal:** the same rules and messages as the server (`doc/plans/UC06-server.md`, Q4–Q5): patient, test type, priority, indication and justification required; all the errors together, in red, with `⚠`, and nothing is sent; the field of each error gets a red border. **A:** accepted (Ignacio, 23/11/2026); the border is fixed in step 11 (F-03).
+- **Q7 – After a successful order.** **Proposal:** "Order ORD-0001 created." in green; the form is emptied (the patient stays selected) and the table of orders is loaded again; the order is placed for the selected patient with the requester of the session. **A:** accepted (Ignacio, 23/11/2026). **Deviation:** `ClinicalOrder` has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder`.
+- **Q8 – Errors of the server.** **Proposal:** `ValidationException` shows every message of the server together; `AccessDeniedException` shows "You do not have permission to order procedures." and leaves only *Back* enabled. **A:** accepted (Ignacio, 23/11/2026); the *Search* button is fixed in step 10 (F-02).
+- **Q9 – Welcome screen and `Main`.** **Proposal:** `IU_Welcome` gets one more constructor with `Runnable onOrderProcedure` and the button *Order procedure* (Alt+O), shown only with `ORDER_PROCEDURES`; the current constructors stay unchanged, so the tests of C1 do not change. `Main` creates the `ClinicalOrderService` with the role service and the audit service of C1 plus the `SystemParameterService` and the `PatientService` it already builds, and shows the screen with the title "Order a diagnostic procedure". **A:** accepted (Ignacio, 23/11/2026).
+- **Q10 – Keyboard.** **Proposal:** *Place order* Alt+P, *Search* Alt+H, *Back* Alt+B; the fields Alt+T (test type), Alt+R (priority), Alt+C (clinical indication) and Alt+J (justification). **A:** accepted (Ignacio, 23/11/2026); the Alt keys are fixed in step 11 (F-04).
+- **Q11 – Unsaved changes.** **Proposal:** if the form has data and the user presses another patient or *Back*, the screen asks "Discard the unsaved changes?"; an empty form is not a change. **A:** accepted (Ignacio, 23/11/2026).
+
+## Fixes after the review of Testing (23/11/2026)
+The review of `feature/UC06-client` (#204) against `doc/testing/test-cases/UC06-client-test-design.md` found five
+defects and four documents that disagree with the plan. They are the new steps 9 to 12. No test and no expected value
+is changed here (rule 17): Adam writes TC06C-44 and updates the expected values that these fixes change.
+- **F-01 – the denied access is hidden when the permission is lost while selecting (TC06C-44).** `findPatient`
+  catches the `AccessDeniedException`, calls `handleDenied()` and returns `null`; `onSelectPatient` then writes
+  “There is no patient with the identifier …” over the denied message. **Proposal:** remove the `catch` of
+  `findPatient`, so the exception reaches the `catch` of `onSelectPatient`, which already calls `handleDenied()`:
+  one place handles the denial. *Pending: the member confirms this way, and not an `if (denied) return;` after
+  `findPatient`.*
+- **F-02 – *Search* stays enabled after the denied access.** `handleDenied()` disables the form, the table and the
+  search box, but not the button *Search* (Q8 says only *Back* stays enabled). **Proposal:** keep the button in a
+  field (it is local in `buildBody`) and disable it in `handleDenied()`.
+- **F-03 – no red border on the fields with errors (Q6).** **Proposal:** a line border of `ERROR_COLOR` on the fields
+  of the errors of the client's own validation (test type, priority, clinical indication and justification); the
+  borders are cleared when the form is shown again, after a success and before a new validation. The messages of a
+  `ValidationException` of the server are free text, so only their text is shown. *Pending: the member confirms that
+  the server errors need no border.*
+- **F-04 – no Alt keys for the fields (Q10).** **Proposal:** `setLabelFor` + `setDisplayedMnemonic` on the labels
+  *Test type* (Alt+T), *Priority* (Alt+R), *Clinical indication* (Alt+C) and *Justification* (Alt+J); `addField`
+  receives the mnemonic as a parameter.
+- **F-05 – the priority is shown only by its name.** The *Usability decisions* say “the priority is shown by its
+  name, with its id next to it”. **Proposal:** `URGENT · Urgent` in the list and in the column *Priority* of the
+  table, the same format as the test types (`id · name`, Q5). *Pending: the member confirms the format. TC06C-06, 17
+  and 18 will fail until Testing updates their expected values, which this branch does not touch (rule 17).*
+- **Documents.** `agents/components.md` says `client-c1-access` is `1.2.4`; the pom is `1.2.5` (step 6).
+  `IU_OrderProcedure.java:405` is 121 characters.
+- **Status of the tests.** The 43 tests of Testing (commit `6883914`) are headless: they build the screen and never
+  show it, so `mvn -B verify` runs them without a display. In this container they still fail with
+  `Fontconfig head is null`, because it has neither `libfontconfig` nor fonts: that is a machine without fonts, not a
+  machine without desktop. With fonts, the suite runs in `mvn -B verify`.
 
 ## Screen (low-fidelity prototype)
 ```
@@ -80,7 +112,11 @@ Welcome screen: a new button *Order procedure* (Alt+O), visible only with `ORDER
 | `client/c1-access/src/main/java/es/uclm/esi/iso2/client/access/presentation/IU_Welcome.java` | change | one more constructor and the button *Order procedure* (Q9) | 6 |
 | `client/c1-access/src/main/java/es/uclm/esi/iso2/client/Main.java` | change | the service and the navigation (Q9) | 6 |
 | `agents/architecture.md`, `agents/components.md` | change | the tree with `client/c4-orders` and the versions — **rule 9** | 7 |
-| `doc/plans/UC06-client.md` | create/update | this plan | 1, 8 |
+| `doc/plans/UC06-client.md` | change | this plan: Q1 to Q11 answered, the fixes F-01 to F-05 and the deviation of Q4 | 1, 9 |
+| `agents/components.md` | change | `client-c1-access` `1.2.5`, as the pom already says (F-0, documents of the review) | 9 |
+| `client/c4-orders/src/main/java/es/uclm/esi/iso2/client/orders/presentation/IU_OrderProcedure.java` | change | F-01 and F-02: the denied message survives a selection and *Search* is disabled; line 405 wrapped | 10 |
+| `client/c4-orders/src/main/java/es/uclm/esi/iso2/client/orders/presentation/IU_OrderProcedure.java` | change | F-03 and F-04: red border of the fields with errors and the Alt keys of the labels | 11 |
+| `client/c4-orders/src/main/java/es/uclm/esi/iso2/client/orders/presentation/IU_OrderProcedure.java` | change | F-05: the priority as `id · name` in the list and in the table | 12 |
 
 No other file changes: nothing under `server/`, nothing of C1 beyond `IU_Welcome`, `Main` and the pom of the last step, no test (rule 17). The screen only imports `common` and Swing, never `server`; every class and public method has its Javadoc in English (rule 18).
 
@@ -93,21 +129,26 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [x] 5. `IU_OrderProcedure`, unsaved changes and the denied access (Q8, Q11).
 - [x] 6. `IU_Welcome` (button *Order procedure*) and `Main` (service and navigation); `client-c1-access` `1.2.5-SNAPSHOT` and its two dependencies (Q1, Q9).
 - [x] 7. `agents/architecture.md` and `agents/components.md`.
-- [ ] 8. Hand the branch over to Testing: the manual check and the tests of UC06-client; the pull request (`Closes #67`) against `feature/UC06-server` or `develop`, as the member decides.
+- [x] 8. Hand the branch over to Testing: the test design and the tests of UC06-client (Testing's commit `6883914`, `test(UC06): T.04 test design and headless client tests TC06C-01..43 (#69)`); the pull request #204 (`Closes #67`) against `feature/UC06-server`.
+- [ ] 9. This plan (Q1 to Q11 answered, the fixes F-01 to F-05 and the deviation of Q4) and `agents/components.md` (`client-c1-access` `1.2.5`) — `docs(UC06): answers, fixes of the review and the deviation of Q4 (#67)`.
+- [ ] 10. F-01 and F-02 in `IU_OrderProcedure`: the denied message is not overwritten by a selection and *Search* is disabled; line 405 wrapped — `fix(UC06): keep the denied message when a patient is selected (#67)`.
+- [ ] 11. F-03 and F-04 in `IU_OrderProcedure`: the red border of the fields with errors and the Alt+T/R/C/J of the labels — `fix(UC06): mark the fields with errors and add the Alt keys (#67)`.
+- [ ] 12. F-05 in `IU_OrderProcedure`: the priority as `id · name` in the list and in the table — `fix(UC06): show the id of the priority next to its name (#67)`.
 
 ## Verification
 - [ ] Every acceptance criterion of #67: the physician creates an order for an active patient with an active test type and a configured priority and sees it in the list of the patient; invalid data is rejected with a message and nothing is created; deactivated test types are not offered; an inactive patient is not allowed to be ordered for; the denied access is explained.
 - [ ] `IU_OrderProcedure` only imports `common` and Swing.
 - [ ] No class of C1 changes except `IU_Welcome`, `Main` and the `pom.xml` of the last step.
 - [ ] Each row of *Usability decisions* is checked in the running application (Testing).
-- [ ] `mvn -B verify` is green with the tests of Testing (coverage included).
+- [ ] `mvn -B verify` is green with the tests of Testing (coverage included). They are headless and need no display and no desktop; they do need fontconfig and fonts installed in the machine.
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing; steps 1 to 7 are committed in `feature/UC06-client`.
-- **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7).
-- **Next step:** step 8, the handover to Testing: the manual check of *Usability decisions* in a machine with a desktop and the tests of `IU_OrderProcedure`; then the pull request (`Closes #67`) against `feature/UC06-server` or `develop`, as the member decides.
-- **Deviations:** steps 3 to 5 are one commit; `agents/components.md` is not changed because its table already says “C4 Clinical orders → UC06 → 1.0.0”; `IClinicalOrderService.getOrdersOfPatient` returns `ClinicalOrder`, which has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder` — the contract of `common` is not changed here, to keep #202 as it was reviewed.
-- **Not checked here:** the application was not started: this machine has no desktop and no fontconfig, so not even the existing Swing tests of the client can run. The manual usability check is left to Testing.
-- **Open questions:** none; Q1 to Q11 are answered by the approval of the plan.
-- **Last update:** 23/11/2026, Ignacio — steps 2 to 7 committed; the branch is ready for Testing.
+- **In progress:** nothing.
+- **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7); step 8 is Testing's commit `6883914` (test design and 43 headless tests). The five defects F-01 to F-05 of the review are open.
+- **Next step:** step 9, this plan and `agents/components.md`, after the member's yes; then the code fixes of steps 10 to 12 (`IU_OrderProcedure`).
+- **Tests of Testing on this machine:** they are headless (no display, no desktop) but they need `libfontconfig` and fonts. This container has neither: `mvn -B verify` stops in `client-c2-configuration` with `Fontconfig head is null` before reaching `client-c4-orders`, and `mvn -B -pl client/c4-orders -am verify` gives 18 failures and 7 errors in `IU_OrderProcedureTest` for the same reason (the first `JComboBox.addItem` asks for the font metrics and throws, and `onSelectPatient` catches it as a `RuntimeException`, which leaves the list half filled). None of those failures is a defect of the screen found by this session.
+- **Deviations:** steps 3 to 5 are one commit; `agents/components.md` still says 1.2.4 for `client-c1-access` (fixed in step 9); `IClinicalOrderService.getOrdersOfPatient` returns `ClinicalOrder`, which has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder` — the contract of `common` is not changed here, to keep #202 as it was reviewed; `onSelectPatient` takes the health-card identifier (Q4).
+- **Not checked here:** the application was not started and the tests of the client could not run in this container (no fonts). The manual usability check is Testing's.
+- **Open questions:** the way of fixing F-01 (remove the `catch` of `findPatient` and not `if (denied) return;`), the scope of F-03 (no border for the errors of the server), the format of F-05 (`URGENT · Urgent`) and whether F-05 may be committed before Testing updates TC06C-06, 17 and 18 (it makes those three cases red, because they expect the name only).
+- **Last update:** 23/11/2026, Ignacio — steps 1 to 8 done; the plan has the fixes of the review as steps 9 to 12 and waits for the yes.
