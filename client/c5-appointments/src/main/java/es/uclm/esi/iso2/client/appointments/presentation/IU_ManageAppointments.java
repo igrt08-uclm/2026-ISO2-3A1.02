@@ -185,8 +185,13 @@ public class IU_ManageAppointments extends JPanel {
         return footer;
     }
 
-    /** Loads the pending needs and the appointments. */
-    public void loadData() {
+    /**
+     * Loads the pending needs and the appointments. Returns {@code true} when the data was read and displayed, and
+     * {@code false} when it could not be read (the status already shows the reason).
+     *
+     * @return {@code true} if the data was read successfully
+     */
+    public boolean loadData() {
         txtDate.setText(txtDate.getText().isEmpty() ? DAY.format(LocalDate.now()) : txtDate.getText());
         List<PendingNeedView> readNeeds;
         List<Appointment> readAppointments;
@@ -195,13 +200,13 @@ public class IU_ManageAppointments extends JPanel {
             readAppointments = service.getAppointments(requester);
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
-            return;
+            return false;
         } catch (ValidationException validationException) {
             showErrors(validationException.getErrors());
-            return;
+            return false;
         } catch (RuntimeException exception) {
             showErrors(List.of("The data could not be read: " + exception.getMessage()));
-            return;
+            return false;
         }
         needs.clear();
         needs.addAll(readNeeds);
@@ -216,6 +221,7 @@ public class IU_ManageAppointments extends JPanel {
         appointments.addAll(readAppointments);
         displayAppointments();
         lblStatus.setText(" ");
+        return true;
     }
 
     private void displayAppointments() {
@@ -291,11 +297,12 @@ public class IU_ManageAppointments extends JPanel {
     public void onBookSlot(String needId, TimeSlot slot) {
         try {
             Appointment created = service.bookAppointment(requester, needId, slot);
-            showConfirmation("Appointment " + created.getAppointmentId() + " booked on "
-                    + MOMENT.format(created.getStart()) + ".");
             slots.clear();
             slotModel.setRowCount(0);
-            loadData();
+            if (loadData()) {
+                showConfirmation("Appointment " + created.getAppointmentId() + " booked on "
+                        + MOMENT.format(created.getStart()) + ".");
+            }
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
         } catch (ValidationException validationException) {
@@ -326,11 +333,12 @@ public class IU_ManageAppointments extends JPanel {
     public void onRescheduleAppointment(String appointmentId, TimeSlot newSlot) {
         try {
             Appointment moved = service.rescheduleAppointment(requester, appointmentId, newSlot);
-            showConfirmation("Appointment " + moved.getAppointmentId() + " moved to "
-                    + MOMENT.format(moved.getStart()) + ".");
             slots.clear();
             slotModel.setRowCount(0);
-            loadData();
+            if (loadData()) {
+                showConfirmation("Appointment " + moved.getAppointmentId() + " moved to "
+                        + MOMENT.format(moved.getStart()) + ".");
+            }
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
         } catch (ValidationException validationException) {
@@ -358,10 +366,11 @@ public class IU_ManageAppointments extends JPanel {
     public void onCancelAppointment(String appointmentId) {
         try {
             Appointment cancelled = service.cancelAppointment(requester, appointmentId);
-            showConfirmation("Appointment " + cancelled.getAppointmentId() + " cancelled.");
             slots.clear();
             slotModel.setRowCount(0);
-            loadData();
+            if (loadData()) {
+                showConfirmation("Appointment " + cancelled.getAppointmentId() + " cancelled.");
+            }
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
         } catch (ValidationException validationException) {
