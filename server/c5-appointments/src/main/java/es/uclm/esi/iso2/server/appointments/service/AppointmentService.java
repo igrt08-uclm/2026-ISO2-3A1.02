@@ -21,6 +21,7 @@ import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.appointments.persistence.IAppointmentRepository;
 import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -101,8 +102,17 @@ public class AppointmentService implements IAppointmentService {
      */
     public void loadSeedData() {
         if (appointments.findAll().isEmpty()) {
-            AppointmentSeedData.appointments(LocalDate.now(clock)).forEach(appointments::save);
+            AppointmentSeedData.appointments(nextWorkingDay(LocalDate.now(clock))).forEach(appointments::save);
         }
+    }
+
+    /** The first working day (Monday to Friday) after {@code day}. */
+    static LocalDate nextWorkingDay(LocalDate day) {
+        LocalDate next = day.plusDays(1);
+        while (next.getDayOfWeek() == DayOfWeek.SATURDAY || next.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            next = next.plusDays(1);
+        }
+        return next;
     }
 
     @Override
@@ -310,15 +320,15 @@ public class AppointmentService implements IAppointmentService {
         List<String> errors = new ArrayList<>();
         if (slot.getStart() == null || slot.getEnd() == null) {
             errors.add("The start and the end of the slot are required");
+            return errors;
         } else if (!slot.getEnd().isAfter(slot.getStart())) {
             errors.add("The end of the slot must be after its start");
         } else if (!slot.getStart().toLocalDate().equals(slot.getEnd().toLocalDate())) {
             errors.add("The slot must be inside a single day");
-        } else if (slot.getEnd().minusMinutes(testType.getDurationMinutes()).isAfter(slot.getStart())
-                || slot.getStart().plusMinutes(testType.getDurationMinutes()).isBefore(slot.getEnd())) {
+        } else if (!slot.getEnd().equals(slot.getStart().plusMinutes(testType.getDurationMinutes()))) {
             errors.add("The duration of the slot must match the duration of the test type "
                     + testType.getId());
-        } else if (!startOnGrid(slot.getStart(), testType)) {
+        } else if (!startOnGrid(slot.getStart(), testType, requester)) {
             errors.add("The start of the slot must be on the grid of the schedule of the room "
                     + testType.getRoom());
         }
@@ -342,8 +352,17 @@ public class AppointmentService implements IAppointmentService {
      * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
      * the room, for every active schedule of that room.
      */
-    private boolean startOnGrid(LocalDateTime start, TestType testType) throws AccessDeniedException {
-        for (Schedule schedule : schedulesOf(testType.getRoom(), null)) {
+    /**
+     * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
+     * the room, for every active schedule of that room. The requester is used to read the schedules of C2.
+     *
+     * @param start the start of the slot
+     * @param testType the test type whose room and duration define the grid
+     * @param requester the user asking for the schedules
+     * @return {@code true} if the start is on the grid of some active schedule of the room
+     */
+    private boolean startOnGrid(LocalDateTime start, TestType testType, String requester) throws AccessDeniedException {
+        for (Schedule schedule : schedulesOf(testType.getRoom(), requester)) {
             if (schedule.getDaysOfWeek().contains(start.getDayOfWeek())) {
                 LocalDateTime gridStart = LocalDateTime.of(start.toLocalDate(), schedule.getStartTime());
                 long minutesFromGrid = start.toLocalTime().toSecondOfDay() / 60
