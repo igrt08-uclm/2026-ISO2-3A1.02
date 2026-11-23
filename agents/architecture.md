@@ -22,7 +22,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
   is created in its own iteration; for now `common` only has `es.uclm.esi.iso2.common.access` (C1).
 - Client and server talk through **interfaces (contracts)** in `common` (D-016, #35): the server implements them and
   the client uses them. The communication is simulated with direct Java calls, not a network. The version of
-  `common` is set once in the `<dependencyManagement>` of the parent pom.
+  `common` is set once in the `<dependencyManagement>` of the parent pom. `common` is at `1.8.0` after UC07 and UC13.
 - The client starts the whole program: only `es.uclm.esi.iso2.client.Main` imports `server`, to create the services.
   The screens (`IU_` classes, Swing, D-030) only use `common`.
 - External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces. The SSO is `IAuthenticatorSystem`,

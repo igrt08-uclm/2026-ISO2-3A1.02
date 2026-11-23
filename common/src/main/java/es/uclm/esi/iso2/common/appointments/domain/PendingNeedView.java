@@ -3,8 +3,8 @@ package es.uclm.esi.iso2.common.appointments.domain;
 import java.time.LocalDate;
 
 /**
- * A pending scheduling need of C4 with the data that the admissions staff needs to book it (UC13): the patient, the test
- * type, the priority and the date of the order. It is computed when it is asked for and it is never saved.
+ * A pending scheduling need of C4 with the data that the admissions staff needs to book it (UC13): the patient,
+ * the test type, the priority and the date of the order. It is computed when it is asked for and it is never saved.
  */
 public class PendingNeedView {
     private final String needId;

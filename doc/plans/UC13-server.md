@@ -58,8 +58,13 @@
 
 ## Status
 - **In progress:** nothing; steps 1 to 3 are done.
-- **Done:** the contract and the data classes in `common` `1.8.0-SNAPSHOT`, the module `server-c5-appointments` `1.0.0`,
-  the repository and `AppointmentService` with the seven operations, the free slots of D40 and the audit.
+- **Done:** the contract and the data classes in `common` `1.8.0`, the module `server-c5-appointments` `1.0.0`,
+  the repository and `AppointmentService` with the seven operations, the free slots of D40 and the audit; the
+  `AccessDeniedException` of `schedulesOf` propagates instead of returning an empty list (Javier's decision, #208);
+  the three new validations of `slotErrors` (null start/end, end after start, same day, duration match, start on grid);
+  the C4 calls in `bookAppointment` and `cancelAppointment` before saving; `AppointmentSeedData` and `OrderSeedData`
+  with the data from Adam (#208); `loadSeedData()` in C4 and C5; `equals`/`hashCode` in `TimeSlot`; `common` at
+  `1.8.0`.
 - **State for Adam (Testing):** to cover in `feature/UC13-server-tests`: the permission and `APPOINTMENT_ACCESS_DENIED`;
   the seven operations with their messages; the free slots for a schedule of a room (days, duration, occupied and
   cancelled appointments, range with `toDate` before `fromDate`); the booking of a pending need, of a need already booked,

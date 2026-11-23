@@ -92,6 +92,18 @@ public class ClinicalOrderService implements IClinicalOrderService {
                 auditRecorder, systemParameterService, patientService, Clock.systemDefaultZone());
     }
 
+    /**
+     * Loads four invented orders with their scheduling needs, only if the system starts with no data at all. It is
+     * called when the program starts, not by a user, so it does not need a permission and it is not registered in
+     * the audit log.
+     */
+    public void loadSeedData() {
+        if (orders.findById("ORD-0001") == null) {
+            OrderSeedData.orders(LocalDate.now(clock)).forEach(orders::save);
+            OrderSeedData.needs().forEach(needs::save);
+        }
+    }
+
     @Override
     public DiagnosticOrder orderDiagnosticProcedure(String requester, DiagnosticOrder order)
             throws AccessDeniedException, ValidationException {

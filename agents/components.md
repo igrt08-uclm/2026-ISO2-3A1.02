@@ -31,6 +31,7 @@ differ if a use case changes only one of them. `common` keeps one package per co
 | Component | Submodule folder | Use case → component version |
 |---|---|---|
 | C1 Access and security | `c1-access` | UC22 → 1.0.0, UC19 → 1.1.0, UC18 → 1.2.0 |
+| Common | `common` | UC07 → 1.7.0-SNAPSHOT, UC13 → 1.8.0 |
 | C2 Configuration and integrations | `c2-configuration` | UC17 → 1.0.0, UC20 → 1.1.0 |
 | C3 Patients | `c3-patients` | UC12 register and modify → 1.0.0, UC12 discharge → 1.1.0 (It8) |
 | C4 Clinical orders | `c4-orders` | UC06 → 1.0.0, UC07 → 1.1.0, UC08 → 1.2.0 (It9) |
