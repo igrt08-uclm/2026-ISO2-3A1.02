@@ -7,7 +7,7 @@
 | **Specification** | use case issue #66, sub-issue #67 and the wiki page *Requirements and Use Cases* |
 | **Design** | `doc/design/C4-client-design.puml` (`IU_OrderProcedure`) · contracts: `IClinicalOrderService` (section 6 of #65, `doc/plans/UC06-server.md`) · `IPatientService` and `ISystemParameterService` |
 | **Usability guide** | IPO I, as in `doc/plans/UC17-client.md` and `doc/plans/UC12-client.md` |
-| **Plan approved by** | *pending* |
+| **Plan approved by** | Ignacio Romero Torres, 23/11/2026 (the proposals Q1 to Q11 accepted as written) |
 
 ## Decisions already taken
 - **Issue #67 (David, 01/11/2026):** the physician orders from an order screen; they select the test type, write the clinical indication and the justification and choose the priority; the screen lists the orders already placed for that patient with test type, priority, indication and date; the status of each order and its appointment belong to UC08 (Iteration 9); deactivated test types are not offered (D-022); if the patient is not active the screen does not allow ordering and explains why (UC12); if the user does not have the permission of the physician role, access is denied (UC18).
