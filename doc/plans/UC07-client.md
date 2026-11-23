@@ -14,9 +14,10 @@
   and *Back*. It is a `JPanel` so the tests can create it without a display.
 - **Only eligible test types are offered:** the screen asks C2 for the catalogue and shows the test types that are
   `isActive() && isFollowUpEligible()`. If there is none, the form is disabled and the reason is shown.
-- **Recurrence interval:** a `JSpinner` from 1 to 120 months, so the user cannot type a non-positive value; the screen
-  still validates it (`<= 0` → `The recurrence interval must be a positive number of months`) because the box can be
-  edited by keyboard in some look and feels.
+- **Recurrence interval:** a `JSpinner` from 0 to 120 months. The minimum is 0 and not 1 on purpose: with a minimum of
+  1 the check `<= 0` of the screen would never run and its message would be dead code. So the user can choose 0 and the
+  screen shows `The recurrence interval must be a positive number of months`, which is the same text as the server of
+  #71, and a negative value is still impossible.
 - **Messages of the client:** the same texts as the server of #71 (Q3 of its plan), so the user reads the reason before
   the call and the server confirms it; the errors of `ValidationException` are shown as they come.
 - **Orders of the patient:** the table shows the date, the test type, the interval and the indication. As in `IU_OrderProcedure`,
@@ -56,7 +57,12 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
 - [ ] `mvn -B verify` green with the tests of Adam (Testing).
 
 ## Status
-- **In progress:** step 2.
-- **Next step:** step 2 (`IU_OrderFollowUp`).
+- **In progress:** nothing; steps 1 to 3 are done and pushed in `feature/UC07-client` (pull request #207).
+- **Done:** `da1ee8c` the screen, `74de1d5` the button *Order follow-up*, `Main` and the versions, `6c82beb` this plan.
+  Correction of the review of 23/11/2026: the `JSpinner` of the interval goes from **0** to 120 months, because with a
+  minimum of 1 the check `<= 0` of the screen never ran; the message of the design is now reachable (0 months) and the
+  negative values are still impossible.
+- **Next step:** step 4, the branch `feature/UC07-client-tests` for Adam: the tests of `IU_OrderFollowUp` in a machine
+  with a display, and the manual walk of *Usability decisions*.
 - **Open questions:** none.
-- **Last update:** 23/11/2026, Ignacio.
+- **Last update:** 23/11/2026, Ignacio — screen corrected after the review; the implementation is complete.
