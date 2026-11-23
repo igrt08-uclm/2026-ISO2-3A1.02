@@ -51,7 +51,7 @@ Every question "Discard the unsaved changes?" is answered by the test (Yes or No
 | Test type (list) | catalogue of C2 | Active (offered) | the six of the seed data |
 | | | Deactivated (not offered) | `XRAY-OLD` |
 | | | No active one (Limit Val.: 0) | all deactivated; empty catalogue |
-| Priority (list) | priorities of C2 | Active (offered) | Urgent, Preferential, Routine |
+| Priority (list) | priorities of C2 | Active (offered) | `URGENT · Urgent`, `PREFERENTIAL · Preferential`, `ROUTINE · Routine` (F-05) |
 | | | Deactivated (not offered) | `OLD-TIER` |
 | | | No active one (Limit Val.: 0) | all deactivated; none |
 | Clinical indication | text | Not blank | `Headache after a fall`, `"  Headache after a fall "` (trimmed) |
@@ -75,14 +75,14 @@ questions asked and whether *Back* runs its action.
 
 ## 2. Combination of the values
 The inputs of the form only matter after an active patient is selected, so the suite is built with **each use**: every
-testing value of section 1 appears in at least one case, and the rest of the form takes a valid value
-(`CT-HEAD`, Urgent, "Headache after a fall", "Rule out bleeding", Lucía). The pairs that the code combines in one
+testing value of section 1 appears in at least one case, and the rest of the form takes a valid value (`CT-HEAD`,
+`URGENT · Urgent`, "Headache after a fall", "Rule out bleeding", Lucía). The pairs that the code combines in one
 decision are also covered **pairwise** (all the combinations of two values): blank indication × blank justification
-(TC06C-12, 13, 14, 15, 17), no active test type × no active priority (TC06C-07, 08, 16, 03), patient selected ×
-unsaved text (TC06C-30 to 36). Maximum number of test cases: the free texts have no maximum (any `String`, no maximum
-length, Q5 of the server plan), so the domain is divided into the classes of section 1; with them the full product of
-the form would be 4 patients × 3 test-type classes × 3 priority classes × 4 × 4 texts = 576 cases, which each use
-plus the pairs above reduce to the 43 of section 4.
+(TC06C-12, 13, 14, 15, 17), no active test type × no active priority (TC06C-07, 08, 16, 03), patient selected × unsaved
+text (TC06C-30 to 36). Maximum number of test cases: the free texts have no maximum (any `String`, no maximum length, Q5
+of the server plan), so the domain is divided into the classes of section 1; with them the full product of the form
+would be 4 patients × 3 test-type classes × 3 priority classes × 4 × 4 texts = 576 cases, which each use plus the pairs
+above reduce to the 43 of section 4; the fixes F-01 to F-04 add TC06C-44 to 49.
 
 ## 3. Coverage (white box)
 Decisions of `IU_OrderProcedure` and the cases that make each condition true (T) and false (F):
@@ -90,6 +90,7 @@ Decisions of `IU_OrderProcedure` and the cases that make each condition true (T)
 | Decision | Condition | T | F |
 |---|---|---|---|
 | `onSearch`, `onSelectPatient`, `onSubmitOrder`: `denied` | — | TC06C-22 | every other case |
+| `onSelectPatient` → `findPatient`: C3 denies after opening (F-01) | — | TC06C-44 | TC06C-03 |
 | `displayPatients`: `getDateOfBirth() == null` | — | TC06C-01 (Inés) | TC06C-01 (Lucía) |
 | `displayPatients`: `size() == 1` | — | TC06C-02 (mario) | TC06C-01 (3), TC06C-02 (0) |
 | `selectedRowChanged`: `row < 0 \|\| row == lastPatientRow` | `row < 0` | — (see below) | TC06C-03 |
@@ -110,6 +111,8 @@ Decisions of `IU_OrderProcedure` and the cases that make each condition true (T)
 | `validateForm`: justification blank | — | TC06C-12, 13, 15 | TC06C-14, 17 |
 | `onSubmitOrder`: `errors.isEmpty()` | — | TC06C-17, 18 | TC06C-11 to 16 |
 | `showValidationErrors`: `size() == 1` | — | TC06C-14, 20 | TC06C-12, 19 |
+| `markErrorFields`: `error.field() != null` (F-03) | — | TC06C-46 (the four fields) | TC06C-11 (the patient) |
+| `clearErrorBorders` (F-03): before validating, after a success, on reload | — | TC06C-47 | — |
 | `onBackRequested`: `hasUnsavedChanges() && !confirm` | unsaved | TC06C-31, 32 | TC06C-30 |
 | | `!confirm` | TC06C-31 (No) | TC06C-32 (Yes) |
 | `hasUnsavedChanges` (MC/DC): `patient != null && (!indication.isBlank() \|\| !justification.isBlank())` | patient | TC06C-31 | TC06C-33 |
@@ -122,11 +125,11 @@ Decisions of `IU_OrderProcedure` and the cases that make each condition true (T)
 `IU_Welcome`: `onOrderProcedure != null && hasPermission(ORDER_PROCEDURES)`: (T,T) TC06C-38, (F,T) TC06C-41,
 (T,F) TC06C-40; the older constructor passes `null` (TC06C-42).
 
-Result of JaCoCo for `client-c4-orders` (`mvn -B verify`): 98.9 % of the lines (270 of 273) and 97.4 % of the
-branches (74 of 76), above the 80 % / 70 % of D-033. Not covered: the `catch (AccessDeniedException)` of
-`findPatient` (finding F-01 of section 5), `row < 0` true in `selectedRowChanged` (a selection cleared by Swing while
-a row is selected) and the `valueIsAdjusting` branch of the listener of the table (Swing only sends it while the
-mouse is dragged).
+Result of JaCoCo for `client-c4-orders` (`mvn -B verify`, with TC06C-44 to 49 and the fixes `c227441`, `4fd6204`): 100 %
+of the lines (295 of 295) and 97.6 % of the branches (82 of 84), above the 80 % / 70 % of D-033. Not covered: `row < 0`
+true in `selectedRowChanged` (a selection cleared by Swing while a row is selected) and the `valueIsAdjusting` branch of
+the listener of the table (Swing only sends it while the mouse is dragged). The `catch` of `findPatient` that hid F-01
+was removed by `c227441`.
 
 ## 4. Test cases
 
@@ -134,10 +137,10 @@ mouse is dragged).
 |---|---|---|---|---|
 | TC06C-01 | constructor | Open the screen | Patients table *Identifier*, *Full name*, *Date of birth* with the 3 patients (`14/03/1980`, `02/11/1975`, empty for Inés); "3 patients found."; one search with `""`; no patient selected; form disabled; orders table *Date*, *Test type*, *Priority*, *Indication* empty; *Back* enabled; no call to C4 (Q3) | `tc06c01OpeningListsThePatients` |
 | TC06C-02 | *Search*, Enter | `"  mario "` with the button; `zzz` with Enter | Mario only and "1 patient found."; then no row and "0 patients found."; searches `""`, `mario`, `zzz` (trimmed) | `tc06c02SearchFindsOneOrNone` |
-| TC06C-03 | select row | Lucía (active, 2 orders) | Form enabled and empty; orders `20/11/2026 · Chest X-ray · Routine · Persistent cough` and `21/11/2026 · Knee MRI · Urgent · Knee pain after a fall`; one reading of P-0001 by `mgarcia` (Q4) | `tc06c03ActivePatientShowsTheFormAndTheOrders` |
+| TC06C-03 | select row | Lucía (active, 2 orders) | Form enabled and empty; orders `20/11/2026 · Chest X-ray · ROUTINE · Routine · Persistent cough` and `21/11/2026 · Knee MRI · URGENT · Urgent · Knee pain after a fall`; one reading of P-0001 by `mgarcia` (Q4) | `tc06c03ActivePatientShowsTheFormAndTheOrders` |
 | TC06C-04 | select row | Mario (active, no orders) | Form enabled; empty list of orders | `tc06c04PatientWithoutOrders` |
 | TC06C-05 | `displayOrderForm` | Lucía; catalogue with `XRAY-OLD` deactivated | The six active test types as `id · name`, in the order of C2; `XRAY-OLD` not offered (Q5, D-022) | `tc06c05OnlyActiveTestTypes` |
-| TC06C-06 | `displayOrderForm` | Lucía; `OLD-TIER` deactivated | Urgent, Preferential, Routine; `OLD-TIER` not offered (Q5) | `tc06c06OnlyActivePriorities` |
+| TC06C-06 | `displayOrderForm` | Lucía; `OLD-TIER` deactivated | `URGENT · Urgent`, `PREFERENTIAL · Preferential`, `ROUTINE · Routine` (id · name, F-05: Design, PR #204, 23/11/2026); `OLD-TIER` not offered (Q5) | `tc06c06OnlyActivePriorities` |
 | TC06C-07 | `displayOrderForm` | Every test type deactivated | No test type; form disabled; "⚠ There are no active test types or priorities to order with." in red; the orders are still listed (Q5) | `tc06c07NoActiveTestTypes` |
 | TC06C-08 | `displayOrderForm` | Every priority deactivated | No priority; form disabled; the same message (Q5) | `tc06c08NoActivePriorities` |
 | TC06C-09 | select row, *Place order* | Lucía, then Inés (inactive) | "⚠ The patient P-0009 is not active, so no order can be placed." in red; form disabled; orders table empty; the orders of Inés are not read; nothing sent (#67, Q4) | `tc06c09InactivePatient` |
@@ -148,8 +151,8 @@ mouse is dragged).
 | TC06C-14 | *Place order* | Indication `"  "`, justification valid | Only "⚠ The clinical indication is required"; the justification is kept | `tc06c14OnlyIndicationBlank` |
 | TC06C-15 | *Place order* | Indication valid, justification `""` | Only "⚠ The justification is required"; the indication is kept | `tc06c15OnlyJustificationEmpty` |
 | TC06C-16 | `onSubmitOrder` | Lucía; C2 without test types and priorities; texts valid | "⚠ The test type is required The priority is required"; nothing sent | `tc06c16NoTestTypeAndNoPriority` |
-| TC06C-17 | *Place order* | Lucía, `CT-HEAD · Head CT`, Urgent, `"  Headache after a fall "`, `" Rule out bleeding  "` | One call by `mgarcia` with order id `null`, P-0001, `CT-HEAD`, `URGENT`, the texts trimmed, no date; "Order ORD-0003 created." in green; fields emptied; Lucía still selected; the orders read again, the new one last with today's date (Q7) | `tc06c17ValidOrder` |
-| TC06C-18 | *Place order* | Mario, `XRAY-CHEST`, Routine, `a`, `b` (Limit Val.) | Sent with `a` and `b`; "Order ORD-0003 created."; one order in the list | `tc06c18OneCharacterTexts` |
+| TC06C-17 | *Place order* | Lucía, `CT-HEAD · Head CT`, `URGENT · Urgent`, `"  Headache after a fall "`, `" Rule out bleeding  "` | One call by `mgarcia` with order id `null`, P-0001, `CT-HEAD`, `URGENT`, the texts trimmed, no date; "Order ORD-0003 created." in green; fields emptied; Lucía still selected; the orders read again, the new one last with today's date (Q7) | `tc06c17ValidOrder` |
+| TC06C-18 | *Place order* | Mario, `XRAY-CHEST`, `ROUTINE · Routine`, `a`, `b` (Limit Val.) | Sent with `a` and `b`; "Order ORD-0003 created."; one order in the list | `tc06c18OneCharacterTexts` |
 | TC06C-19 | *Place order* | Valid form; C4 rejects with 2 errors | "⚠ The patient P-0001 is not active The test type CT-HEAD is not active" in red; the list is not read again; the form keeps the data (Q8) | `tc06c19ServerRejectsWithTwoErrors` |
 | TC06C-20 | *Place order* | C4 rejects with 1 error | "⚠ The priority URGENT is not active" | `tc06c20ServerRejectsWithOneError` |
 | TC06C-21 | *Place order* | C4 fails (Conjeture) | "⚠ The order could not be created: The server cannot be reached"; list and form unchanged | `tc06c21ServerFailsWhileOrdering` |
@@ -175,7 +178,12 @@ mouse is dragged).
 | TC06C-41 | `IU_Welcome` | `ORDER_PROCEDURES` but `null` action | Only *Log out* (Q9) | `tc06c41WithoutTheActionNobodySeesTheButton` |
 | TC06C-42 | `IU_Welcome` | The constructor of UC12 with every permission | The buttons of UC12, no *Order procedure* (Q9: the old constructors do not change) | `tc06c42OlderConstructorDoesNotShowTheButton` |
 | TC06C-43 | `onSelectPatient` | `HC-000000`: a part of every identifier (Conjeture) | "⚠ There is no patient with the identifier HC-000000"; no patient; no call to C4 | `tc06c43PartialIdentifier` |
-| TC06C-44 | select row | The permission of C3 is revoked after opening, then Lucía is selected (Conjeture) | The denied message; only *Back* enabled (Q8) | — (defect F-01, not written) |
+| TC06C-44 | select row | The permission of C3 is revoked after opening, then Lucía is selected (Conjeture; F-01) | "⚠ You do not have permission to order procedures." in red; no patient selected; form, table, search box and *Search* disabled; *Back* enabled; no call to C4 (Q8) | `tc06c44PermissionLostBeforeSelecting` |
+| TC06C-45 | *Place order*; constructor | Valid form and C4 denies; C3 denies on opening (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled (Q8) | `tc06c45SearchDisabledAfterDeniedOrder`, `tc06c45SearchDisabledWhenDeniedOnOpening` |
+| TC06C-46 | `onSubmitOrder`, *Place order* | Just opened, empty form; Lucía with only the indication `"  "` (F-03) | A `LineBorder` of red (180, 0, 0) on test type, priority, indication and justification; then only on the indication (Q6) | `tc06c46EmptyFormBordersTheFourFields`, `tc06c46OnlyIndicationBlankBordersOnlyIt` |
+| TC06C-47 | *Place order*, select row | Lucía, indication and justification empty: then the indication typed and ordered again; both typed and ordered (success); Mario selected (F-03) | Before: indication and justification bordered. Then only the justification; after the success none; after selecting Mario none (Q6, answer of Testing) | `tc06c47BordersClearedBeforeANewValidation`, `tc06c47BordersClearedAfterASuccess`, `tc06c47BordersClearedOnReload` |
+| TC06C-48 | *Place order* | Valid form; C4 rejects with 2 errors (F-03) | The two messages in the message area; no field bordered (Q6, answer of Testing: the server's messages only appear in the message area) | `tc06c48ServerErrorsDoNotBorderTheFields` |
+| TC06C-49 | labels | Open the screen (F-04) | The labels *Test type*, *Priority*, *Clinical indication*, *Justification* show Alt+T, Alt+R, Alt+C, Alt+J and their `labelFor` is their own list or field (Q10) | `tc06c49FieldMnemonics` |
 
 Postcondition of every case: nothing is stored except by `orderDiagnosticProcedure` of the fake (TC06C-17, 18); after
 a rejected, denied or failed order, or an error of the client, no order is created and the list of the patient is the
@@ -183,21 +191,25 @@ same; the screen is never shown.
 
 ## 5. Not covered / Not defined
 
-**Defects found** (the expected result is defined, the code differs; no test is written, so the build stays green;
-each needs an issue and a `bugfix/…` branch, D-034):
-- **F-01 – The denied access is hidden when the permission is lost while selecting (TC06C-44).** `findPatient`
-  catches the `AccessDeniedException`, calls `handleDenied()` and returns `null`, and `onSelectPatient` then writes
-  "⚠ There is no patient with the identifier HC-0000001" over the denied message (checked with a throw-away test).
+**Defects found** in the review of `feature/UC06-client` (#204). F-01 to F-04 are **fixed** by Implementation in
+`c227441` (F-01) and `4fd6204` (F-02 to F-04), steps 9 to 11 of `doc/plans/UC06-client.md`, and checked by TC06C-44 to
+49. F-05 is **decided by Design** (PR #204, 23/11/2026): the priority is shown as `URGENT · Urgent` (id · name, the
+separator of the test types) in the list and in the column *Priority*; the expected values of TC06C-03, 06, 07, 17, 18
+and 19 and the priorities chosen in the other cases follow it.
+- **F-01 (fixed, `c227441`) – The denied access is hidden when the permission is lost while selecting
+  (TC06C-44).** `findPatient` caught the `AccessDeniedException`, called `handleDenied()` and returned `null`, and
+  `onSelectPatient` then wrote "⚠ There is no patient with the identifier HC-0000001" over the denied message.
   Q8 says the denied access shows "You do not have permission to order procedures.".
-- **F-02 – *Search* stays enabled after the denied access.** `handleDenied()` disables the form, the table and the
-  search box, but not the button *Search* (it does nothing, because `onSearch` returns). Q8 says "leaves only *Back*
-  enabled". TC06C-22 and 23 check the search box only.
-- **F-03 – No red border on the fields with errors.** Q6 says "the field of each error gets a red border"; the
-  screen only writes the message.
-- **F-04 – No Alt keys for the fields.** Q10 gives Alt+T, Alt+R, Alt+C and Alt+J; the labels of the form have no
-  `setLabelFor` nor `setDisplayedMnemonic` (TC06C-37 checks only the buttons).
-- **F-05 – The priority is shown only by its name.** *Usability decisions* says "the priority is shown by its name,
-  with its id next to it"; the list and the table show only the name (TC06C-06 checks what the code shows).
+- **F-02 (fixed, `4fd6204`) – *Search* stayed enabled after the denied access.** `handleDenied()` disabled the
+  form, the table and the search box, but not the button *Search*. Q8 says "leaves only *Back* enabled" (TC06C-45).
+- **F-03 (fixed, `4fd6204`) – No red border on the fields with errors.** Q6 says "the field of each error gets a red
+  border"; the screen only wrote the message (TC06C-46 to 48).
+- **F-04 (fixed, `4fd6204`) – No Alt keys for the fields.** Q10 gives Alt+T, Alt+R, Alt+C and Alt+J; the labels of
+  the form had no `setLabelFor` nor `setDisplayedMnemonic` (TC06C-49).
+- **F-05 (decided by Design, PR #204, 23/11/2026; fix pending, step 12) – The priority is shown only by its name.**
+  *Usability decisions* says "the priority is shown by its name, with its id next to it"; the list and the table showed
+  only the name. Design decided `URGENT · Urgent` in the list and in the column *Priority* (TC06C-03, 06, 17); an order
+  whose priority is not in C2 (TC06C-29, `VIP`) is not defined by Design, so its expected value is not changed.
 
 **Not defined** (no expected result in the plan or the specification):
 - The order of the list of orders (the client shows them in the order of C4; newest first is not said).

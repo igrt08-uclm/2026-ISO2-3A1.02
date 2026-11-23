@@ -17,8 +17,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -117,6 +119,17 @@ class IU_OrderProcedureTest {
         return combo(screen, TEST_TYPE).isEnabled() && combo(screen, PRIORITY).isEnabled()
                 && field(screen, INDICATION).isEnabled() && field(screen, JUSTIFICATION).isEnabled()
                 && screen.getPlaceOrderButton().isEnabled();
+    }
+
+    /** Whether the field has the red line border of an error of the client (Q6). */
+    private static boolean redBorder(JComponent field) {
+        return field.getBorder() instanceof LineBorder line && RED.equals(line.getLineColor());
+    }
+
+    /** Which of the four fields of the form, in order, have the red border of an error. */
+    private static List<Boolean> bordered(IU_OrderProcedure screen) {
+        return List.of(redBorder(combo(screen, TEST_TYPE)), redBorder(combo(screen, PRIORITY)),
+                redBorder(field(screen, INDICATION)), redBorder(field(screen, JUSTIFICATION)));
     }
 
     /** A filled form for Lucía that the client accepts. */
@@ -218,13 +231,14 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-06 Only the active priorities are offered, by name; the deactivated OLD-TIER is not")
+    @DisplayName("TC06C-06 Only the active priorities are offered, as id · name; the deactivated OLD-TIER is not")
     void tc06c06OnlyActivePriorities() {
         // Act
         IU_OrderProcedure screen = select(open(), LUCIA);
 
         // Assert
-        assertEquals(List.of("URGENT · Urgent", "PREFERENTIAL · Preferential", "ROUTINE · Routine"), Screen.items(combo(screen, PRIORITY)));
+        assertEquals(List.of("URGENT · Urgent", "PREFERENTIAL · Preferential", "ROUTINE · Routine"),
+                Screen.items(combo(screen, PRIORITY)));
     }
 
     @Test
@@ -822,5 +836,191 @@ class IU_OrderProcedureTest {
                 () -> assertEquals(KeyEvent.VK_P, Screen.button(screen, PLACE_ORDER).getMnemonic()),
                 () -> assertEquals(KeyEvent.VK_H, Screen.button(screen, "Search").getMnemonic()),
                 () -> assertEquals(KeyEvent.VK_B, Screen.button(screen, "Back").getMnemonic()));
+    }
+
+    @Test
+    @DisplayName("TC06C-44 The permission of C3 is lost after opening: selecting a patient shows the denied message")
+    void tc06c44PermissionLostBeforeSelecting() {
+        // Arrange
+        IU_OrderProcedure screen = open();
+        patients.denyAll();
+
+        // Act
+        select(screen, LUCIA);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertFalse(screen.getPatientsTable().isEnabled()),
+                () -> assertFalse(screen.getSearchField().isEnabled()),
+                () -> assertFalse(Screen.button(screen, "Search").isEnabled()),
+                () -> assertTrue(Screen.button(screen, "Back").isEnabled()),
+                () -> assertTrue(orders.requesters().isEmpty()));
+    }
+
+    @Test
+    @DisplayName("TC06C-45 After a denied order the button Search is disabled and only Back stays enabled")
+    void tc06c45SearchDisabledAfterDeniedOrder() {
+        // Arrange
+        IU_OrderProcedure screen = validFormOfLucia();
+        orders.denyAll();
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertFalse(Screen.button(screen, "Search").isEnabled()),
+                () -> assertFalse(screen.getPlaceOrderButton().isEnabled()),
+                () -> assertTrue(Screen.button(screen, "Back").isEnabled()));
+    }
+
+    @Test
+    @DisplayName("TC06C-45 Denied on opening, the button Search is disabled and only Back stays enabled")
+    void tc06c45SearchDisabledWhenDeniedOnOpening() {
+        // Arrange
+        patients.denyAll();
+
+        // Act
+        IU_OrderProcedure screen = open();
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertFalse(Screen.button(screen, "Search").isEnabled()),
+                () -> assertFalse(screen.getPlaceOrderButton().isEnabled()),
+                () -> assertTrue(Screen.button(screen, "Back").isEnabled()));
+    }
+
+    @Test
+    @DisplayName("TC06C-46 An empty form gives a red border to the test type, priority, indication and justification")
+    void tc06c46EmptyFormBordersTheFourFields() {
+        // Arrange
+        IU_OrderProcedure screen = open();
+        List<Boolean> before = bordered(screen);
+
+        // Act
+        screen.onSubmitOrder();
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of(false, false, false, false), before),
+                () -> assertEquals(List.of(true, true, true, true), bordered(screen)));
+    }
+
+    @Test
+    @DisplayName("TC06C-46 Only the indication blank gives a red border to the indication and to no other field")
+    void tc06c46OnlyIndicationBlankBordersOnlyIt() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "  ", "Rule out bleeding");
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals("⚠ " + INDICATION_REQUIRED, screen.getStatusMessage()),
+                () -> assertEquals(List.of(false, false, true, false), bordered(screen)));
+    }
+
+    @Test
+    @DisplayName("TC06C-47 The borders are cleared before a new validation: the field fixed loses its border")
+    void tc06c47BordersClearedBeforeANewValidation() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        placeOrder(screen);
+        List<Boolean> before = bordered(screen);
+        field(screen, INDICATION).setText("Headache after a fall");
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of(false, false, true, true), before),
+                () -> assertEquals("⚠ " + JUSTIFICATION_REQUIRED, screen.getStatusMessage()),
+                () -> assertEquals(List.of(false, false, false, true), bordered(screen)));
+    }
+
+    @Test
+    @DisplayName("TC06C-47 The borders are cleared after a successful order")
+    void tc06c47BordersClearedAfterASuccess() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "", "");
+        placeOrder(screen);
+        List<Boolean> before = bordered(screen);
+        field(screen, INDICATION).setText("Headache after a fall");
+        field(screen, JUSTIFICATION).setText("Rule out bleeding");
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of(false, false, true, true), before),
+                () -> assertEquals("Order ORD-0003 created.", screen.getStatusMessage()),
+                () -> assertEquals(List.of(false, false, false, false), bordered(screen)));
+    }
+
+    @Test
+    @DisplayName("TC06C-47 The borders are cleared when another patient is selected and the form is reloaded")
+    void tc06c47BordersClearedOnReload() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "", "");
+        placeOrder(screen);
+        List<Boolean> before = bordered(screen);
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of(false, false, true, true), before),
+                () -> assertEquals("P-0002", screen.getSelectedPatient().getPatientId()),
+                () -> assertEquals(List.of(false, false, false, false), bordered(screen)));
+    }
+
+    @Test
+    @DisplayName("TC06C-48 The errors of the server are only shown as a message: no field gets a red border")
+    void tc06c48ServerErrorsDoNotBorderTheFields() {
+        // Arrange
+        IU_OrderProcedure screen = validFormOfLucia();
+        orders.rejectNextOrder("The patient P-0001 is not active", "The test type CT-HEAD is not active");
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals("⚠ The patient P-0001 is not active The test type CT-HEAD is not active",
+                        screen.getStatusMessage()),
+                () -> assertEquals(List.of(false, false, false, false), bordered(screen)));
+    }
+
+    @Test
+    @DisplayName("TC06C-49 The fields have their keys: test type Alt+T, priority Alt+R, indication Alt+C, "
+            + "justification Alt+J")
+    void tc06c49FieldMnemonics() {
+        // Act
+        IU_OrderProcedure screen = open();
+
+        // Assert
+        assertAll(
+                () -> assertEquals(KeyEvent.VK_T, Screen.label(screen, TEST_TYPE).getDisplayedMnemonic()),
+                () -> assertEquals(combo(screen, TEST_TYPE), Screen.label(screen, TEST_TYPE).getLabelFor()),
+                () -> assertEquals(KeyEvent.VK_R, Screen.label(screen, PRIORITY).getDisplayedMnemonic()),
+                () -> assertEquals(combo(screen, PRIORITY), Screen.label(screen, PRIORITY).getLabelFor()),
+                () -> assertEquals(KeyEvent.VK_C, Screen.label(screen, INDICATION).getDisplayedMnemonic()),
+                () -> assertEquals(field(screen, INDICATION), Screen.label(screen, INDICATION).getLabelFor()),
+                () -> assertEquals(KeyEvent.VK_J, Screen.label(screen, JUSTIFICATION).getDisplayedMnemonic()),
+                () -> assertEquals(field(screen, JUSTIFICATION),
+                        Screen.label(screen, JUSTIFICATION).getLabelFor()));
     }
 }
