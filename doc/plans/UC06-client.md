@@ -86,13 +86,13 @@ No other file changes: nothing under `server/`, nothing of C1 beyond `IU_Welcome
 
 ## Steps
 One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (the coverage of `client-c4-orders` is only measured when Adam's tests exist; JaCoCo skips a module without tests).
-- [ ] 1. This plan (`docs(UC06): plan for the client part (#67)`). **Wait for the approval of the member (rule 4) before step 2.**
-- [ ] 2. Poms: module `client/c4-orders` and its managed version (Q1); the poms of `client-c1-access` wait for step 6.
-- [ ] 3. `IU_OrderProcedure`, the display: patient search and table, the form with the active test types and priorities, the table of orders of the selected patient, the lines of status, *Back* (Q3, Q4, Q5).
-- [ ] 4. `IU_OrderProcedure`, *Place order*: reading of the form, validation in the client, call to `orderDiagnosticProcedure`, messages, reload of the orders and the inactive patient (Q6, Q7, Q8).
-- [ ] 5. `IU_OrderProcedure`, unsaved changes and the denied access (Q8, Q11).
-- [ ] 6. `IU_Welcome` (button *Order procedure*) and `Main` (service and navigation); `client-c1-access` `1.2.5-SNAPSHOT` and its two dependencies (Q1, Q9).
-- [ ] 7. `agents/architecture.md` and `agents/components.md`.
+- [x] 1. This plan (`docs(UC06): plan for the client part (#67)`). **Wait for the approval of the member (rule 4) before step 2.**
+- [x] 2. Poms: module `client/c4-orders` and its managed version (Q1); the poms of `client-c1-access` wait for step 6.
+- [x] 3. `IU_OrderProcedure`, the display: patient search and table, the form with the active test types and priorities, the table of orders of the selected patient, the lines of status, *Back* (Q3, Q4, Q5).
+- [x] 4. `IU_OrderProcedure`, *Place order*: reading of the form, validation in the client, call to `orderDiagnosticProcedure`, messages, reload of the orders and the inactive patient (Q6, Q7, Q8).
+- [x] 5. `IU_OrderProcedure`, unsaved changes and the denied access (Q8, Q11).
+- [x] 6. `IU_Welcome` (button *Order procedure*) and `Main` (service and navigation); `client-c1-access` `1.2.5-SNAPSHOT` and its two dependencies (Q1, Q9).
+- [x] 7. `agents/architecture.md` and `agents/components.md`.
 - [ ] 8. Hand the branch over to Testing: the manual check and the tests of UC06-client; the pull request (`Closes #67`) against `feature/UC06-server` or `develop`, as the member decides.
 
 ## Verification
@@ -104,7 +104,10 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** the approval of this plan (step 1 is written; steps 2 to 8 wait for a yes). Then step 2 (`client/c4-orders/pom.xml`, `client/pom.xml`, `pom.xml`).
-- **Open questions:** every Q of the list above (Q1 to Q11).
-- **Last update:** 23/11/2026, Ignacio — plan written, pending approval.
+- **In progress:** nothing; steps 1 to 7 are committed in `feature/UC06-client`.
+- **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7).
+- **Next step:** step 8, the handover to Testing: the manual check of *Usability decisions* in a machine with a desktop and the tests of `IU_OrderProcedure`; then the pull request (`Closes #67`) against `feature/UC06-server` or `develop`, as the member decides.
+- **Deviations:** steps 3 to 5 are one commit; `agents/components.md` is not changed because its table already says “C4 Clinical orders → UC06 → 1.0.0”; `IClinicalOrderService.getOrdersOfPatient` returns `ClinicalOrder`, which has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder` — the contract of `common` is not changed here, to keep #202 as it was reviewed.
+- **Not checked here:** the application was not started: this machine has no desktop and no fontconfig, so not even the existing Swing tests of the client can run. The manual usability check is left to Testing.
+- **Open questions:** none; Q1 to Q11 are answered by the approval of the plan.
+- **Last update:** 23/11/2026, Ignacio — steps 2 to 7 committed; the branch is ready for Testing.
