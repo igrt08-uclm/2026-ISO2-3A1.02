@@ -16,8 +16,9 @@
 - **Messages:** the errors of `ValidationException` are shown as they come, joined in red; the success messages say the
   id of the appointment and its new moment; a denied access disables every action and explains it.
 - **Confirmations:** booking and cancelling ask for confirmation with the `Predicate<String>` of the project.
-- **Versions (rule 9):** new module `client-c5-appointments` `1.0.0-SNAPSHOT`; `client-c1-access` goes to
-  `1.2.5-SNAPSHOT` and depends on `server-c4-orders`, `server-c5-appointments` and `client-c5-appointments`, because
+- **Versions (rule 9):** `common` goes from `1.7.0-SNAPSHOT` to `1.8.0-SNAPSHOT` (UC07 raised it to 1.7.0 and this
+  branch merges after it); new module `client-c5-appointments` `1.0.0-SNAPSHOT`; `client-c1-access` goes to
+  `1.2.7-SNAPSHOT` (UC06-client took it to 1.2.5 and UC07-client to 1.2.6) and depends on `server-c4-orders`, `server-c5-appointments` and `client-c5-appointments`, because
   `Main` starts the services.
 - **Tests:** the tests of the screen are Adam's (rule 17) and go in `feature/UC13-client-tests`; this branch is the
   implementation. The screen exposes `getNeedsTable`, `getSlotsTable`, `getAppointmentsTable` and `getStatusMessage` for
@@ -29,7 +30,7 @@
 | `client/c5-appointments/pom.xml` | create the module |
 | `client/c5-appointments/.../presentation/IU_ManageAppointments.java` | create the screen |
 | `client/pom.xml`, `pom.xml` | the module and its managed version |
-| `client/c1-access/pom.xml` | `1.2.5-SNAPSHOT` and the three dependencies |
+| `client/c1-access/pom.xml` | `1.2.7-SNAPSHOT` and the three dependencies |
 | `client/c1-access/.../access/presentation/IU_Welcome.java` | the button *Manage appointments* with `MANAGE_APPOINTMENTS` |
 | `client/c1-access/.../client/Main.java` | the service and the navigation |
 | `doc/plans/UC13-client.md` | this plan |
