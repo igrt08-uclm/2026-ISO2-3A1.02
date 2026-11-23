@@ -2,6 +2,7 @@ package es.uclm.esi.iso2.server.orders.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
+import es.uclm.esi.iso2.common.orders.contracts.IClinicalOrderService;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
@@ -20,8 +22,11 @@ import es.uclm.esi.iso2.server.orders.service.RecordingAuditRecorder.AuditEntry;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.lang.reflect.Method;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -256,9 +261,7 @@ class ClinicalOrderServiceTest {
             assertAll(
                     () -> assertEquals(List.of(new AuditEntry(PHYSICIAN, CREATED, "ORDER:ORD-0001")),
                             audit.entries()),
-                    () -> assertEquals(1, patients.getPatientCalls()),
-                    () -> assertTrue(audit.entries().stream()
-                            .noneMatch(entry -> entry.action().startsWith("PATIENT_"))));
+                    () -> assertEquals(1, patients.getPatientCalls()));
         }
     }
 
@@ -518,6 +521,134 @@ class ClinicalOrderServiceTest {
             service.markSchedulingNeedBooked(ADMISSIONS, "NEED-0001");
             service.markSchedulingNeedPending(ADMISSIONS, "NEED-0001");
             assertTrue(audit.entries().isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("6. Permission: each requester class and the order of the checks")
+    class PermissionOfEveryOperation {
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = { ADMISSIONS, ADMIN, PATIENT_USER, INACTIVE, UNKNOWN })
+        @DisplayName("TC06S-45 a requester without ORDER_PROCEDURES cannot read the orders of a patient")
+        void readingOrdersWithoutPermissionIsDenied(String requester)
+                throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            audit.clear();
+            assertDenied(requester, () -> service.getOrdersOfPatient(requester, PATIENT), ORDERS);
+        }
+
+        @Test
+        @DisplayName("TC06S-46 the permission is checked before the order is validated")
+        void permissionBeforeValidation() {
+            DiagnosticOrder unknownPatient = order("P-9999", "TT-01", "URGENT");
+            DiagnosticOrder blankIndication = new DiagnosticOrder(null, PATIENT, "TT-01", PHYSICIAN, " ",
+                    "Rule out pneumonia", null, "URGENT");
+            assertDenied(ADMIN, () -> service.orderDiagnosticProcedure(ADMIN, null), ORDERS);
+            audit.clear();
+            assertDenied(ADMIN, () -> service.orderDiagnosticProcedure(ADMIN, unknownPatient), ORDERS);
+            audit.clear();
+            assertDenied(ADMIN, () -> service.orderDiagnosticProcedure(ADMIN, blankIndication), ORDERS);
+            assertAll(
+                    () -> assertEquals(0, patients.getPatientCalls()),
+                    () -> assertEquals(0, parameters.calls()),
+                    () -> assertNull(orders.findById("ORD-0001")));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { PHYSICIAN, ADMISSIONS })
+        @DisplayName("TC06S-47 ORDER_PROCEDURES or MANAGE_APPOINTMENTS is enough to read an order and change its need")
+        void eitherPermissionIsAcceptedInC5Operations(String requester)
+                throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            audit.clear();
+            ClinicalOrder found = service.getOrder(requester, "ORD-0001");
+            service.markSchedulingNeedBooked(requester, "NEED-0001");
+            SchedulingNeedStatus booked = needs.findById("NEED-0001").getStatus();
+            service.markSchedulingNeedPending(requester, "NEED-0001");
+            assertAll(
+                    () -> assertEquals("ORD-0001", found.getOrderId()),
+                    () -> assertEquals(SchedulingNeedStatus.BOOKED, booked),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, needs.findById("NEED-0001").getStatus()),
+                    () -> assertTrue(audit.entries().isEmpty()));
+        }
+    }
+
+    @Nested
+    @DisplayName("7. Reads, unknown needs, boundaries and orders that are never edited")
+    class MoreCases {
+
+        @Test
+        @DisplayName("TC06S-48 the orders of another patient are not returned")
+        void ordersOfAnotherPatientAreExcluded() throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            service.orderDiagnosticProcedure(PHYSICIAN, order("P-0002", "TT-02", "ROUTINE"));
+            service.orderDiagnosticProcedure(PHYSICIAN, order(PATIENT, "TT-02", "ROUTINE"));
+            List<ClinicalOrder> found = service.getOrdersOfPatient(PHYSICIAN, PATIENT);
+            assertEquals(List.of("ORD-0001", "ORD-0003"), found.stream().map(ClinicalOrder::getOrderId).toList());
+        }
+
+        @Test
+        @DisplayName("TC06S-49 reading the orders of a patient is not audited")
+        void readingOrdersIsNotAudited() throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            audit.clear();
+            service.getOrdersOfPatient(PHYSICIAN, PATIENT);
+            assertTrue(audit.entries().isEmpty());
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = { "NEED-9999" })
+        @DisplayName("TC06S-50 an unknown need id cannot be made pending")
+        void unknownNeedCannotBeMadePending(String needId) throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            assertEquals(List.of("There is no scheduling need with the id " + needId),
+                    errorsOf(() -> service.markSchedulingNeedPending(ADMISSIONS, needId)));
+        }
+
+        @Test
+        @DisplayName("TC06S-51 an empty need id cannot be booked")
+        void emptyNeedIdCannotBeBooked() throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            assertAll(
+                    () -> assertEquals(List.of("There is no scheduling need with the id "),
+                            errorsOf(() -> service.markSchedulingNeedBooked(ADMISSIONS, ""))),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, needs.findById("NEED-0001").getStatus()));
+        }
+
+        @Test
+        @DisplayName("TC06S-52 an indication and a justification of one character are accepted")
+        void oneCharacterTextsAreAccepted() throws AccessDeniedException, ValidationException {
+            DiagnosticOrder sent = new DiagnosticOrder(null, PATIENT, "TT-01", PHYSICIAN, "a", "b", null, "URGENT");
+            DiagnosticOrder created = service.orderDiagnosticProcedure(PHYSICIAN, sent);
+            assertAll(
+                    () -> assertEquals("a", created.getIndication()),
+                    () -> assertEquals("b", created.getJustification()));
+        }
+
+        @Test
+        @DisplayName("TC06S-53 the contract has no operation to update, edit, modify, cancel, delete or remove")
+        void contractHasNoOperationToChangeAnOrder() {
+            List<String> forbidden = List.of("update", "edit", "modify", "cancel", "delete", "remove");
+            List<String> names = Arrays.stream(IClinicalOrderService.class.getMethods()).map(Method::getName).toList();
+            assertAll(
+                    () -> assertEquals(6, names.size()),
+                    () -> assertFalse(names.stream().anyMatch(name -> forbidden.stream()
+                            .anyMatch(prefix -> name.toLowerCase(Locale.ROOT).startsWith(prefix)))));
+        }
+
+        @Test
+        @DisplayName("TC06S-54 sending again a created order creates a new one and leaves the first unchanged")
+        void resentOrderCreatesANewOne() throws AccessDeniedException, ValidationException {
+            DiagnosticOrder first = service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            DiagnosticOrder second = service.orderDiagnosticProcedure(PHYSICIAN, first);
+            assertAll(
+                    () -> assertEquals("ORD-0002", second.getOrderId()),
+                    () -> assertSame(first, orders.findById("ORD-0001")),
+                    () -> assertEquals("ORD-0001", first.getOrderId()),
+                    () -> assertEquals(2, orders.findByPatient(PATIENT).size()));
         }
     }
 }
