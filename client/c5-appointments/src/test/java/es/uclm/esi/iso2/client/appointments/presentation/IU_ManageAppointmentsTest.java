@@ -85,6 +85,18 @@ class IU_ManageAppointmentsTest {
         return screen;
     }
 
+    /**
+     * Opens the screen, selects the appointment of the row, finds the slots of its test type on 30/11/2026 and selects
+     * the slot of the row (decision F-02 of Design, PR #210).
+     */
+    private IU_ManageAppointments appointmentAndSlot(int appointment, int slot) {
+        IU_ManageAppointments screen = open();
+        select(screen.getAppointmentsTable(), appointment);
+        findSlots(screen, DAY);
+        select(screen.getSlotsTable(), slot);
+        return screen;
+    }
+
     private static Color statusColour(IU_ManageAppointments screen) {
         return Screen.label(screen, screen.getStatusMessage()).getForeground();
     }
@@ -209,7 +221,7 @@ class IU_ManageAppointmentsTest {
     }
 
     @Test
-    @DisplayName("TC13C-06 Find slots without a selected need asks for one and sends nothing")
+    @DisplayName("TC13C-06 Find slots without a selected need or appointment asks for one and sends nothing")
     void tc13c06FindSlotsWithoutNeed() {
         // Act
         IU_ManageAppointments screen = open();
@@ -217,7 +229,8 @@ class IU_ManageAppointmentsTest {
 
         // Assert
         assertAll(
-                () -> assertEquals("⚠ Select a pending need before looking for slots.", screen.getStatusMessage()),
+                () -> assertEquals("⚠ Select a pending need or an appointment before looking for slots.",
+                        screen.getStatusMessage()),
                 () -> assertEquals(RED, statusColour(screen)),
                 () -> assertTrue(service.slotQueries().isEmpty()),
                 () -> assertEquals(List.of("needs", "appointments"), service.calls()));
@@ -462,7 +475,7 @@ class IU_ManageAppointmentsTest {
     }
 
     @Test
-    @DisplayName("TC13C-19 A failure of the reading is explained with its cause (colour: F-03)")
+    @DisplayName("TC13C-19 A failure of the reading is explained with its cause (colour: TC13C-42)")
     void tc13c19FailureWhileReading() {
         // Arrange
         service.failReads(new IllegalStateException("The server cannot be reached"));
@@ -480,11 +493,14 @@ class IU_ManageAppointmentsTest {
     }
 
     @Test
-    @DisplayName("TC13C-20 Move sends one move of the selected appointment, without asking, and never a booking")
+    @DisplayName("TC13C-20 Move asks, sends one move of the selected appointment to its slot, and never a booking")
     void tc13c20MoveTheSelectedAppointment() {
         // Arrange
-        IU_ManageAppointments screen = needAndSlot(LUCIA, 0);
+        IU_ManageAppointments screen = open();
+        select(screen.getNeedsTable(), LUCIA);
         select(screen.getAppointmentsTable(), APT_0001);
+        findSlots(screen, DAY);
+        select(screen.getSlotsTable(), 0);
 
         // Act
         click(screen, "Move");
@@ -492,7 +508,8 @@ class IU_ManageAppointmentsTest {
         // Assert
         assertAll(
                 () -> assertEquals(List.of("reschedule APT-0001 XRAY-1 2026-11-30T09:00"), service.changes()),
-                () -> assertTrue(questions.isEmpty()),
+                () -> assertEquals(List.of("Move the appointment APT-0001 to 30/11/2026 09:00?"), questions),
+                () -> assertEquals(List.of("XRAY-CHEST 2026-11-30 2026-11-30"), service.slotQueries()),
                 () -> assertEquals(REQUESTER, service.requesters().get(3)),
                 () -> assertEquals(List.of("APT-0001", "P-0003", "XRAY-CHEST", "30/11/2026 09:00", "RESCHEDULED"),
                         appointmentRow(screen, APT_0001)),
@@ -524,8 +541,7 @@ class IU_ManageAppointmentsTest {
     @DisplayName("TC13C-22 A rejected move shows the reason in red and changes nothing")
     void tc13c22ServerRejectsTheMove() {
         // Arrange
-        IU_ManageAppointments screen = needAndSlot(LUCIA, 0);
-        select(screen.getAppointmentsTable(), APT_0001);
+        IU_ManageAppointments screen = appointmentAndSlot(APT_0001, 0);
         service.rejectNext("The slot is outside the schedule of the room");
 
         // Act
@@ -542,8 +558,7 @@ class IU_ManageAppointmentsTest {
     @DisplayName("TC13C-23 Denied while moving: the denied message and only Back enabled")
     void tc13c23DeniedWhileMoving() {
         // Arrange
-        IU_ManageAppointments screen = needAndSlot(LUCIA, 0);
-        select(screen.getAppointmentsTable(), APT_0001);
+        IU_ManageAppointments screen = appointmentAndSlot(APT_0001, 0);
         service.denyAll();
 
         // Act
@@ -665,7 +680,7 @@ class IU_ManageAppointmentsTest {
     }
 
     @Test
-    @DisplayName("TC13C-29 The buttons of the screen and their keys: Find slots Alt+F, Book Alt+B, Back Alt+K")
+    @DisplayName("TC13C-29 The buttons and the keys of the code: Alt+F, Alt+B, Alt+M, Alt+C and Back Alt+B (N-02)")
     void tc13c29ButtonsAndMnemonics() {
         // Act
         IU_ManageAppointments screen = open();
@@ -676,7 +691,9 @@ class IU_ManageAppointmentsTest {
                         Screen.buttonTexts(screen)),
                 () -> assertEquals(KeyEvent.VK_F, Screen.button(screen, "Find slots").getMnemonic()),
                 () -> assertEquals(KeyEvent.VK_B, Screen.button(screen, "Book").getMnemonic()),
-                () -> assertEquals(KeyEvent.VK_K, Screen.button(screen, "Back").getMnemonic()));
+                () -> assertEquals(KeyEvent.VK_M, Screen.button(screen, "Move").getMnemonic()),
+                () -> assertEquals(KeyEvent.VK_C, Screen.button(screen, "Cancel appointment").getMnemonic()),
+                () -> assertEquals(KeyEvent.VK_B, Screen.button(screen, "Back").getMnemonic()));
     }
 
     @Test
@@ -730,5 +747,110 @@ class IU_ManageAppointmentsTest {
 
         // Assert
         assertEquals(List.of(false, false, true), cancelled);
+    }
+
+    @Test
+    @DisplayName("TC13C-38 With only an appointment selected, Find slots asks for the slots of its test type")
+    void tc13c38FindSlotsOfTheSelectedAppointment() {
+        // Arrange
+        IU_ManageAppointments screen = open();
+        select(screen.getAppointmentsTable(), APT_0003);
+
+        // Act
+        findSlots(screen, DAY);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("CT-HEAD 2026-11-30 2026-11-30"), service.slotQueries()),
+                () -> assertEquals(List.of(List.of("CT-1", "30/11/2026 12:00", "30/11/2026 12:30")),
+                        Screen.rows(screen.getSlotsTable())),
+                () -> assertEquals("1 free slot.", screen.getStatusMessage()));
+    }
+
+    @Test
+    @DisplayName("TC13C-39 With a need and an appointment selected, Find slots uses the test type of the appointment")
+    void tc13c39AppointmentWinsOverTheNeedWhenFindingSlots() {
+        // Arrange
+        IU_ManageAppointments screen = open();
+        select(screen.getNeedsTable(), LUCIA);
+        select(screen.getAppointmentsTable(), APT_0003);
+
+        // Act
+        findSlots(screen, DAY);
+
+        // Assert
+        assertEquals(List.of("CT-HEAD 2026-11-30 2026-11-30"), service.slotQueries());
+    }
+
+    @Test
+    @DisplayName("TC13C-40 An appointment is moved to a slot of its own test type without selecting any need")
+    void tc13c40MoveWithoutAnyNeed() {
+        // Arrange
+        IU_ManageAppointments screen = open();
+        select(screen.getAppointmentsTable(), APT_0003);
+        findSlots(screen, DAY);
+        select(screen.getSlotsTable(), 0);
+
+        // Act
+        click(screen, "Move");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("reschedule APT-0003 CT-1 2026-11-30T12:00"), service.changes()),
+                () -> assertEquals(List.of("APT-0003", "P-0004", "CT-HEAD", "30/11/2026 12:00", "RESCHEDULED"),
+                        appointmentRow(screen, APT_0003)));
+    }
+
+    @Test
+    @DisplayName("TC13C-41 The needs table shows the order date and then the due date of each need")
+    void tc13c41NeedsShowTheOrderDateAndTheDueDate() {
+        // Act
+        IU_ManageAppointments screen = open();
+
+        // Assert
+        List<String> columns = Screen.columns(screen.getNeedsTable()).stream().map(String::toLowerCase).toList();
+        List<String> lucia = Screen.rows(screen.getNeedsTable()).get(LUCIA);
+        List<String> mario = Screen.rows(screen.getNeedsTable()).get(MARIO);
+        assertAll(
+                () -> assertTrue(columns.stream().anyMatch(name -> name.contains("order")), columns.toString()),
+                () -> assertTrue(columns.stream().anyMatch(name -> name.contains("due")), columns.toString()),
+                () -> assertTrue(lucia.contains("20/11/2026"), lucia.toString()),
+                () -> assertTrue(lucia.indexOf("20/11/2026") < lucia.indexOf("27/11/2026"), lucia.toString()),
+                () -> assertTrue(mario.contains("21/11/2026"), mario.toString()),
+                () -> assertTrue(mario.indexOf("21/11/2026") < mario.lastIndexOf(""), mario.toString()));
+    }
+
+    @Test
+    @DisplayName("TC13C-42 A failure of the reading is shown in the error style (red)")
+    void tc13c42FailureWhileReadingIsRed() {
+        // Arrange
+        service.failReads(new IllegalStateException("The server cannot be reached"));
+
+        // Act
+        IU_ManageAppointments screen = open();
+
+        // Assert
+        assertAll(
+                () -> assertTrue(screen.getStatusMessage()
+                        .contains("The data could not be read: The server cannot be reached")),
+                () -> assertEquals(RED, statusColour(screen)));
+    }
+
+    @Test
+    @DisplayName("TC13C-45 Move answered No sends nothing and the appointment stays booked (N-08)")
+    void tc13c45MoveAnsweredNo() {
+        // Arrange
+        IU_ManageAppointments screen = appointmentAndSlot(APT_0001, 0);
+        answer = false;
+
+        // Act
+        click(screen, "Move");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("Move the appointment APT-0001 to 30/11/2026 09:00?"), questions),
+                () -> assertTrue(service.changes().isEmpty()),
+                () -> assertEquals("BOOKED", Screen.cell(screen.getAppointmentsTable(), APT_0001, "Status")),
+                () -> assertEquals("2 free slots.", screen.getStatusMessage()));
     }
 }
