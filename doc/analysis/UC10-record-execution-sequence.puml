@@ -1,0 +1,73 @@
+@startuml UC10_RecordExecution_Sequence
+!include ../design/common/_style.puml
+
+title UC10 – Record procedure execution details and document incidents (Analysis Sequence Diagram)
+
+actor "Physician" as Physician
+boundary "IU_RecordExecution" as IU
+control "Control_RecordExecution" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Patient" as Patient
+entity "Appointment" as Appt
+entity "TestType" as TestType
+entity "ProcedureExecution" as Exec
+entity "AuditLog" as Audit
+
+== Own worklist of the day ==
+Physician -> IU : 1: openWorklist(date)
+IU -> Ctrl : 2: obtainWorklist(date)
+Ctrl -> UserAcc : 3: hasPermission(physician, RECORD_EXECUTIONS)
+alt permission granted
+  Ctrl -> Patient : 4: getAssignedPatients(physician)
+  Ctrl -> Appt : 5: getBookedAppointments(date, patientIds)
+  loop for each appointment
+    Ctrl -> TestType : 6: getTestType(testTypeId)
+  end
+  Ctrl -> Audit : 7: register(physician, WORKLIST_ACCESSED, date)
+  Ctrl --> IU : 8: showWorklist(worklist)
+else no permission
+  Ctrl -> Audit : 3a: register(physician, ACCESS_DENIED, RECORD_EXECUTIONS)
+  Ctrl --> IU : 3b: showError(accessDenied)
+end
+
+== Open the execution form ==
+Physician -> IU : 9: selectProcedure(appointmentId)
+IU -> Ctrl : 10: startExecution(appointmentId)
+Ctrl -> UserAcc : 11: hasPermission(physician, RECORD_EXECUTIONS)
+alt permission granted
+  Ctrl -> Appt : 12: getAppointment(appointmentId)
+  Ctrl -> Patient : 13: getPatient(patientId)
+  Ctrl -> TestType : 14: getTestType(testTypeId)
+  Ctrl --> IU : 15: showExecutionForm(patient, safetyRequirements, consentRequirements, contrastRequirements)
+else no permission
+  Ctrl -> Audit : 11a: register(physician, ACCESS_DENIED, RECORD_EXECUTIONS)
+  Ctrl --> IU : 11b: showError(accessDenied)
+end
+
+== Record the execution (and the incident, if any) ==
+Physician -> IU : 16: enterExecution(appointmentId, performed, checks, contrast, incident, incidentDescription)
+IU -> Ctrl : 17: recordExecution(appointmentId, performed, checks, contrast, incident, incidentDescription)
+Ctrl -> UserAcc : 18: hasPermission(physician, RECORD_EXECUTIONS)
+alt permission granted
+  Ctrl -> Appt : 19: isExecutable(appointmentId)
+  Ctrl -> TestType : 20: getTestType(testTypeId)
+  Ctrl -> Exec : 21: validate(performed, checks, contrast, incident, incidentDescription, requirements)
+  alt valid execution
+    Ctrl -> Exec : 22: create(appointmentId, physician, performed, checks, contrast, incident, incidentDescription)
+    Ctrl -> Appt : 23: markExecuted(appointmentId)
+    Ctrl -> Audit : 24: register(physician, EXECUTION_RECORDED, executionId)
+    opt there was an incident
+      Ctrl -> Audit : 25: register(physician, INCIDENT_RECORDED, executionId)
+    end
+    Ctrl --> IU : 26: showConfirmation(execution)
+  else appointment not found, cancelled or already executed
+    Ctrl --> IU : 26a: showError(reason)
+  else mandatory field missing or safety requirement not checked
+    Ctrl --> IU : 26b: showError(missingFields)
+  end
+else no permission
+  Ctrl -> Audit : 18a: register(physician, ACCESS_DENIED, RECORD_EXECUTIONS)
+  Ctrl --> IU : 18b: showError(accessDenied)
+end
+
+@enduml
