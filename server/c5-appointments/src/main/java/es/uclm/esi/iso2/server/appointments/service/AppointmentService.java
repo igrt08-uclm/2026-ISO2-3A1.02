@@ -325,8 +325,7 @@ public class AppointmentService implements IAppointmentService {
             errors.add("The end of the slot must be after its start");
         } else if (!slot.getStart().toLocalDate().equals(slot.getEnd().toLocalDate())) {
             errors.add("The slot must be inside a single day");
-        } else if (slot.getEnd().minusMinutes(testType.getDurationMinutes()).isAfter(slot.getStart())
-                || slot.getStart().plusMinutes(testType.getDurationMinutes()).isBefore(slot.getEnd())) {
+        } else if (!slot.getEnd().equals(slot.getStart().plusMinutes(testType.getDurationMinutes()))) {
             errors.add("The duration of the slot must match the duration of the test type "
                     + testType.getId());
         } else if (!startOnGrid(slot.getStart(), testType, requester)) {
