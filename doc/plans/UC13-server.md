@@ -62,7 +62,7 @@
       the branch reaches `develop`).
 
 ## Status
-- **In progress:** nothing; steps 1 to 3 are done.
+- **In progress:** nothing.
 - **Done:** the contract and the data classes in `common` `1.8.0`, the module `server-c5-appointments` `1.0.0`,
   the repository and `AppointmentService` with the seven operations, the free slots of D40 and the audit; the
   `AccessDeniedException` of `schedulesOf` propagates instead of returning an empty list (Javier's decision, #208);
@@ -70,11 +70,19 @@
   the C4 calls in `bookAppointment` and `cancelAppointment` before saving; `AppointmentSeedData` and `OrderSeedData`
   with the data from Adam (#208); `loadSeedData()` in C4 and C5; `TimeSlot` has no equals/hashCode: nothing compares
   slots (decided with Testing, 23/11/2026); `common` at `1.8.0`.
+- **Fixes from the review of Testing:**
+  - Step 1 – D1 `c5f512d`: `startOnGrid` now reads the schedules with the requester.
+  - Step 2 – D5 `6a56ef9`: `slotErrors` returns early when the start or the end is null.
+  - Step 2b – D6 `53ecd94`: a slot shorter than the test type is rejected.
+  - Step 3 – D2 `6721cfd`: the seed appointments are on the first working day after the start (`nextWorkingDay`).
+  - Step 4 – D3 `6ca690e`: the C4 seed needs use the clock of the service.
+  - Step 5 – D4 `65273ef`: the C4 seed loads only when none of its eight ids exists.
+  - Step 6 – `4ce0879`: `TimeSlot` has no equals/hashCode (decision (b)).
 - **State for Adam (Testing):** to cover in `feature/UC13-server-tests`: the permission and `APPOINTMENT_ACCESS_DENIED`;
   the seven operations with their messages; the free slots for a schedule of a room (days, duration, occupied and
   cancelled appointments, range with `toDate` before `fromDate`); the booking of a pending need, of a need already booked,
   of a slot of another room, outside the schedule, in the past and taken; the active and inactive patient; the reschedule
   of a booked, cancelled and unknown appointment; the cancellation and the need pending again in C4; the four audit
-  actions.
-- **Next step:** the branch `feature/UC13-server-tests` and, after that, the client (#130).
-- **Last update:** 23/11/2026, Ignacio (recorded the group decision for the slot validation of 844405d from Adam's comment on #210).
+  actions; the cases of D1, D2, D5, D6 (TC13S-70, 72, 73, 77, 78, 81).
+- **Next step:** Testing adds TC13S-67..76 and the cases of D1, D2, D5 and D6.
+- **Last update:** 23/11/2026, Ignacio (fixes of the review of Testing).
