@@ -29,11 +29,11 @@ final class OrderSeedData {
     }
 
     /** One pending need per order, due on the creation date, with the status of the appointment. */
-    static List<SchedulingNeed> needs() {
+    static List<SchedulingNeed> needs(LocalDate day) {
         return List.of(
-                new SchedulingNeed("NEED-0001", "ORD-0001", LocalDate.now(), SchedulingNeedStatus.BOOKED),
-                new SchedulingNeed("NEED-0002", "ORD-0002", LocalDate.now(), SchedulingNeedStatus.PENDING),
-                new SchedulingNeed("NEED-0003", "ORD-0003", LocalDate.now(), SchedulingNeedStatus.BOOKED),
-                new SchedulingNeed("NEED-0004", "ORD-0004", LocalDate.now(), SchedulingNeedStatus.PENDING));
+                new SchedulingNeed("NEED-0001", "ORD-0001", day, SchedulingNeedStatus.BOOKED),
+                new SchedulingNeed("NEED-0002", "ORD-0002", day, SchedulingNeedStatus.PENDING),
+                new SchedulingNeed("NEED-0003", "ORD-0003", day, SchedulingNeedStatus.BOOKED),
+                new SchedulingNeed("NEED-0004", "ORD-0004", day, SchedulingNeedStatus.PENDING));
     }
 }
