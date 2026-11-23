@@ -546,3 +546,31 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** Plain-text `.puml` files support parallel work, line-by-line PR reviews, zero round-trip corruption, direct readability by Spec-Driven Development agents (D-025), and single-source-of-truth contract reuse via `!includesub`. Human review and approval in PRs preserve the discipline ownership of D-008.
 - **Consequences:** Replaces D-017, updates D-008 (official models are PlantUML in `doc/`, AI proposals still require human approval) and retires assumption A4 of D-031. `AGENTS.md`, `README.md`, `doc/design/README.md` and the wiki (*Traceability and releases*, *Requirements and Use Cases*, *Iterations*, *Home*, *Working with AI*, *Decisions*, *Planification*) are updated.
 - **Status:** Approved in Meeting 9 (22/11/2026) and implemented in #177; pending pull request review by another member (D-001).
+
+## D-047 · One context file per component, read first in step 1
+**Date:** 23/11/2026 · **Iteration:** 4–5 · **Minutes:** — · **Issues:** —
+
+- **Context:** Step 1 of the cycle in AGENTS.md makes the agent read, in every session, the sub-issue, its use case
+  issue, section 6 of the component issue, the approved design and the decisions they cite. Since D-045 there is one
+  conversation per step, so this reading is repeated at every step of every sub-issue of the same component. Each
+  decision entry costs about 400 tokens and each design image 700–4,800 (`agents/token-efficiency.md`).
+- **Decision:**
+  - Each component has a short summary, `doc/plans/Cn-context.md`, made from `doc/plans/CONTEXT-TEMPLATE.md`
+    (about 40 lines): the decisions that apply (number and one line), the contracts of section 6 of the component
+    issue, the classes of the approved design, the status of each sub-issue, and links. Every line cites its source
+    (rule 12).
+  - In step 1 of the cycle the agent reads it first, and opens the sources only for what the task needs. If the file
+    disagrees with a source, the source wins (rule 11) and the agent tells the member.
+  - Every pull request of the component updates the file (for example, the status of its sub-issue), and the member
+    who merges the pull request checks that it did. `develop` only changes through a pull request (D-001), so the file
+    is not updated after the merge.
+  - `doc/plans/C4-context.md` is the first one, as an example.
+- **Alternatives:** Reading all the sources in every session, as until now. Writing the summary in the component issue,
+  which is not versioned with the code and is owned by its author. One summary of all the components in
+  `agents/components.md`, which would grow with every component and be read whole every time.
+- **Reason:** The agent starts each conversation from a short file instead of several long sources, and the sources
+  stay the reference, so nothing is lost if the summary is out of date.
+- **Consequences:** Step 1 of the cycle and the table *Where to find things* of AGENTS.md are updated in this pull
+  request. A file that is not updated misleads the agent: that is why the source always wins and the merger checks it.
+  The saving is checked as in D-045, by comparing the rows of *Token usage* before and after. Extends D-025 and D-045.
+- **Status:** Proposed by David on 23/11/2026; to be discussed in the next meeting (draft pull request).
