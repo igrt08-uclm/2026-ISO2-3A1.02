@@ -23,7 +23,7 @@ Proposals of Implementation; **none is decided yet**: this plan is written to be
 - **Q3 – Layout.** **Proposal:** at the left a search box and the table of patients (*Identifier*, *Full name*, *Date of birth*), at the right the form of the order (test type, priority, clinical indication, justification), under it the table of the orders of the selected patient (*Date*, *Test type*, *Priority*, *Indication*) and the buttons *Place order* and *Back*; a line says how many patients were found and another one says what happened. When the screen opens it lists all the patients. **A:** accepted (Ignacio, 23/11/2026).
 - **Q4 – Selecting the patient.** **Proposal:** a click on a row calls `onSelectPatient`; the screen reads the patient from C3 (`getPatient`) and, if it is not active, calls `showPatientInactive` and disables the form (the server would reject the order anyway); if it is active, it loads the test types and the priorities and shows the orders of that patient. **A:** accepted (Ignacio, 23/11/2026). **Deviation for Design:** `onSelectPatient` receives the health-card identifier that the table shows, not `patientId` as the design of `doc/design/C4-client-design.puml` says; the patient is read with `searchPatients(identifier)` and the exact identifier is compared, because C3 only offers the health card number to the screen.
 - **Q5 – Test types and priorities.** **Proposal:** the list of test types offers only the active ones (`isActive()`, D-022) and shows `TT-01 · Chest X-ray`; the list of priorities offers the configured ones that are active (`getPriorities`, as the server checks). If C2 returns none, the form says so and *Place order* stays disabled. **A:** accepted (Ignacio, 23/11/2026).
-- **Q6 – Validation in the client.** **Proposal:** the same rules and messages as the server (`doc/plans/UC06-server.md`, Q4–Q5): patient, test type, priority, indication and justification required; all the errors together, in red, with `⚠`, and nothing is sent; the field of each error gets a red border. **A:** accepted (Ignacio, 23/11/2026); the border is fixed in step 11 (F-03).
+- **Q6 – Validation in the client.** **Proposal:** the same rules and messages as the server (`doc/plans/UC06-server.md`, Q4–Q5): patient, test type, priority, indication and justification required; all the errors together, in red, with `⚠`, and nothing is sent; the field of each error gets a red border. **A:** accepted (Ignacio, 23/11/2026); the border is fixed in step 11 (F-03). **A of Testing (Adam, 23/11/2026):** the red border is only for the errors of the client (test type, priority, clinical indication and justification); it is cleared when the form is reloaded, after a success and before validating again; the messages of the server only appear in the message area.
 - **Q7 – After a successful order.** **Proposal:** "Order ORD-0001 created." in green; the form is emptied (the patient stays selected) and the table of orders is loaded again; the order is placed for the selected patient with the requester of the session. **A:** accepted (Ignacio, 23/11/2026). **Deviation:** `ClinicalOrder` has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder`.
 - **Q8 – Errors of the server.** **Proposal:** `ValidationException` shows every message of the server together; `AccessDeniedException` shows "You do not have permission to order procedures." and leaves only *Back* enabled. **A:** accepted (Ignacio, 23/11/2026); the *Search* button is fixed in step 10 (F-02).
 - **Q9 – Welcome screen and `Main`.** **Proposal:** `IU_Welcome` gets one more constructor with `Runnable onOrderProcedure` and the button *Order procedure* (Alt+O), shown only with `ORDER_PROCEDURES`; the current constructors stay unchanged, so the tests of C1 do not change. `Main` creates the `ClinicalOrderService` with the role service and the audit service of C1 plus the `SystemParameterService` and the `PatientService` it already builds, and shows the screen with the title "Order a diagnostic procedure". **A:** accepted (Ignacio, 23/11/2026).
@@ -38,23 +38,27 @@ is changed here (rule 17): Adam writes TC06C-44 and updates the expected values 
   catches the `AccessDeniedException`, calls `handleDenied()` and returns `null`; `onSelectPatient` then writes
   “There is no patient with the identifier …” over the denied message. **Proposal:** remove the `catch` of
   `findPatient`, so the exception reaches the `catch` of `onSelectPatient`, which already calls `handleDenied()`:
-  one place handles the denial. *Pending: the member confirms this way, and not an `if (denied) return;` after
-  `findPatient`.*
+  one place handles the denial. **Decided (Testing, 23/11/2026):** this way; the only requirement is that the
+  denied message is seen (TC06C-44), whatever the mechanism.
 - **F-02 – *Search* stays enabled after the denied access.** `handleDenied()` disables the form, the table and the
   search box, but not the button *Search* (Q8 says only *Back* stays enabled). **Proposal:** keep the button in a
   field (it is local in `buildBody`) and disable it in `handleDenied()`.
 - **F-03 – no red border on the fields with errors (Q6).** **Proposal:** a line border of `ERROR_COLOR` on the fields
   of the errors of the client's own validation (test type, priority, clinical indication and justification); the
   borders are cleared when the form is shown again, after a success and before a new validation. The messages of a
-  `ValidationException` of the server are free text, so only their text is shown. *Pending: the member confirms that
-  the server errors need no border.*
+  `ValidationException` of the server are free text, so only their text is shown. **Decided (Testing, 23/11/2026):**
+  exactly that scope, and the borders are cleared on reload, after a success and before validating again.
 - **F-04 – no Alt keys for the fields (Q10).** **Proposal:** `setLabelFor` + `setDisplayedMnemonic` on the labels
   *Test type* (Alt+T), *Priority* (Alt+R), *Clinical indication* (Alt+C) and *Justification* (Alt+J); `addField`
   receives the mnemonic as a parameter.
 - **F-05 – the priority is shown only by its name.** The *Usability decisions* say “the priority is shown by its
   name, with its id next to it”. **Proposal:** `URGENT · Urgent` in the list and in the column *Priority* of the
-  table, the same format as the test types (`id · name`, Q5). *Pending: the member confirms the format. TC06C-06, 17
-  and 18 will fail until Testing updates their expected values, which this branch does not touch (rule 17).*
+  table, the same format as the test types (`id · name`, Q5). **Pending, Design (Marcos and Denis):** the plan
+  contradicts itself (the usability table says “name with its id next to it”, the mockup shows only `URGENT`), so
+  Design must decide the text; Implementation does not decide it. **Also pending, Testing:** the current cases expect
+  the name only (TC06C-01, 03, 06, 17 and 18 and the column *Priority* of the table were taken from the code, not
+  from the plan), so Testing uploads those expected values first and step 12 comes after; this branch does not touch
+  a test (rule 17).
 - **Documents.** `agents/components.md` says `client-c1-access` is `1.2.4`; the pom is `1.2.5` (step 6).
   `IU_OrderProcedure.java:405` is 121 characters.
 - **Status of the tests.** The 43 tests of Testing (commit `6883914`) are headless: they build the screen and never
@@ -130,10 +134,10 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [x] 6. `IU_Welcome` (button *Order procedure*) and `Main` (service and navigation); `client-c1-access` `1.2.5-SNAPSHOT` and its two dependencies (Q1, Q9).
 - [x] 7. `agents/architecture.md` and `agents/components.md`.
 - [x] 8. Hand the branch over to Testing: the test design and the tests of UC06-client (Testing's commit `6883914`, `test(UC06): T.04 test design and headless client tests TC06C-01..43 (#69)`); the pull request #204 (`Closes #67`) against `feature/UC06-server`.
-- [ ] 9. This plan (Q1 to Q11 answered, the fixes F-01 to F-05 and the deviation of Q4) and `agents/components.md` (`client-c1-access` `1.2.5`) — `docs(UC06): answers, fixes of the review and the deviation of Q4 (#67)`.
+- [ ] 9. This plan (Q1 to Q11 answered, the answers of Testing to F-01, F-03 and F-05, the fixes and the deviation of Q4) and `agents/components.md` (`client-c1-access` `1.2.5`) — `docs(UC06): answers and state of the fixes of the review (#67)`.
 - [ ] 10. F-01 and F-02 in `IU_OrderProcedure`: the denied message is not overwritten by a selection and *Search* is disabled; line 405 wrapped — `fix(UC06): keep the denied message when a patient is selected (#67)`.
 - [ ] 11. F-03 and F-04 in `IU_OrderProcedure`: the red border of the fields with errors and the Alt+T/R/C/J of the labels — `fix(UC06): mark the fields with errors and add the Alt keys (#67)`.
-- [ ] 12. F-05 in `IU_OrderProcedure`: the priority as `id · name` in the list and in the table — `fix(UC06): show the id of the priority next to its name (#67)`.
+- [ ] 12. F-05 in `IU_OrderProcedure`: the priority as `id · name` in the list and in the table — `fix(UC06): show the id of the priority next to its name (#67)`. **Blocked:** waiting for Design's format and for Testing's new expected values (TC06C-01, 03, 06, 17 and 18).
 
 ## Verification
 - [ ] Every acceptance criterion of #67: the physician creates an order for an active patient with an active test type and a configured priority and sees it in the list of the patient; invalid data is rejected with a message and nothing is created; deactivated test types are not offered; an inactive patient is not allowed to be ordered for; the denied access is explained.
@@ -144,7 +148,7 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing.
+- **In progress:** step 9, this plan and `agents/components.md` (23/11/2026).
 - **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7); step 8 is Testing's commit `6883914` (test design and 43 headless tests). The five defects F-01 to F-05 of the review are open.
 - **Next step:** step 9, this plan and `agents/components.md`, after the member's yes; then the code fixes of steps 10 to 12 (`IU_OrderProcedure`).
 - **Tests of Testing on this machine:** they are headless (no display, no desktop) but they need `libfontconfig` and fonts. This container has neither: `mvn -B verify` stops in `client-c2-configuration` with `Fontconfig head is null` before reaching `client-c4-orders`, and `mvn -B -pl client/c4-orders -am verify` gives 18 failures and 7 errors in `IU_OrderProcedureTest` for the same reason (the first `JComboBox.addItem` asks for the font metrics and throws, and `onSelectPatient` catches it as a `RuntimeException`, which leaves the list half filled). None of those failures is a defect of the screen found by this session.
