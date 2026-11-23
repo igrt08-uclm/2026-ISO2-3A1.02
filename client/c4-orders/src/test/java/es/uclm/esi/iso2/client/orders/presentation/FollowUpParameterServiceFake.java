@@ -1,0 +1,145 @@
+package es.uclm.esi.iso2.client.orders.presentation;
+
+import es.uclm.esi.iso2.common.configuration.contracts.ISystemParameterService;
+import es.uclm.esi.iso2.common.configuration.domain.AppointmentPolicy;
+import es.uclm.esi.iso2.common.configuration.domain.Priority;
+import es.uclm.esi.iso2.common.configuration.domain.Protocol;
+import es.uclm.esi.iso2.common.configuration.domain.Schedule;
+import es.uclm.esi.iso2.common.configuration.domain.TestType;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Test double of {@link ISystemParameterService} (C2) for the screens of C4 in the tests of UC07: it only gives the
+ * test types and the priorities that a test puts in it, in that order. The other operations of C2 are not used.
+ */
+class FollowUpParameterServiceFake implements ISystemParameterService {
+    private final List<TestType> testTypes = new ArrayList<>();
+    private final List<Priority> priorities = new ArrayList<>();
+
+    /**
+     * The usual data: the six active test types of the seed data of C2 with their eligibility for follow-up (only
+     * {@code CT-HEAD} is not eligible), plus the invented deactivated {@code XRAY-OLD} (eligible) and {@code CT-OLD}
+     * (not eligible), and the three active priorities of the seed data.
+     */
+    static FollowUpParameterServiceFake withSeedData() {
+        FollowUpParameterServiceFake service = new FollowUpParameterServiceFake();
+        service.testTypes.add(testType("XRAY-CHEST", "Chest X-ray", true, true));
+        service.testTypes.add(testType("CT-HEAD", "Head CT", false, true));
+        service.testTypes.add(testType("MRI-KNEE", "Knee MRI", true, true));
+        service.testTypes.add(testType("XRAY-OLD", "Old chest X-ray", true, false));
+        service.testTypes.add(testType("US-ABDOMEN", "Abdominal ultrasound", true, true));
+        service.testTypes.add(testType("CT-OLD", "Old head CT", false, false));
+        service.testTypes.add(testType("MAMMO-BILATERAL", "Bilateral mammography", true, true));
+        service.testTypes.add(testType("DEXA-SPINE", "Bone densitometry", true, true));
+        service.priorities.add(new Priority("URGENT", "Urgent", "Within hours", true));
+        service.priorities.add(new Priority("PREFERENTIAL", "Preferential", "Within a few days", true));
+        service.priorities.add(new Priority("ROUTINE", "Routine", "Within a few weeks", true));
+        return service;
+    }
+
+    /** A test type with only the data that the screens read. */
+    static TestType testType(String id, String name, boolean followUpEligible, boolean active) {
+        return new TestType(id, name, "Modality", "Room 1", 10, "", false, false, "", "ROUTINE", followUpEligible,
+                active);
+    }
+
+    /** The test types that the service gives, to change them in a test. */
+    List<TestType> testTypes() {
+        return testTypes;
+    }
+
+    /** The priorities that the service gives, to change them in a test. */
+    List<Priority> priorities() {
+        return priorities;
+    }
+
+    @Override
+    public List<TestType> getTestTypes(String requester) {
+        return List.copyOf(testTypes);
+    }
+
+    @Override
+    public List<Priority> getPriorities(String requester) {
+        return List.copyOf(priorities);
+    }
+
+    @Override
+    public TestType getTestType(String requester, String testTypeId) {
+        throw unused();
+    }
+
+    @Override
+    public TestType createTestType(String requester, TestType testType) {
+        throw unused();
+    }
+
+    @Override
+    public TestType updateTestType(String requester, String testTypeId, TestType testType) {
+        throw unused();
+    }
+
+    @Override
+    public void deactivateTestType(String requester, String testTypeId) {
+        throw unused();
+    }
+
+    @Override
+    public List<Protocol> getProtocols(String requester) {
+        throw unused();
+    }
+
+    @Override
+    public Protocol saveProtocol(String requester, Protocol protocol) {
+        throw unused();
+    }
+
+    @Override
+    public void deactivateProtocol(String requester, String protocolId) {
+        throw unused();
+    }
+
+    @Override
+    public List<Schedule> getSchedules(String requester) {
+        throw unused();
+    }
+
+    @Override
+    public Schedule saveSchedule(String requester, Schedule schedule) {
+        throw unused();
+    }
+
+    @Override
+    public void deactivateSchedule(String requester, String resource) {
+        throw unused();
+    }
+
+    @Override
+    public List<AppointmentPolicy> getAppointmentPolicies(String requester) {
+        throw unused();
+    }
+
+    @Override
+    public AppointmentPolicy saveAppointmentPolicy(String requester, AppointmentPolicy policy) {
+        throw unused();
+    }
+
+    @Override
+    public void deactivateAppointmentPolicy(String requester, String policyId) {
+        throw unused();
+    }
+
+    @Override
+    public Priority savePriority(String requester, Priority priority) {
+        throw unused();
+    }
+
+    @Override
+    public void deactivatePriority(String requester, String priorityId) {
+        throw unused();
+    }
+
+    private static UnsupportedOperationException unused() {
+        return new UnsupportedOperationException("Not used by the screens of C4");
+    }
+}
