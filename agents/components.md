@@ -31,6 +31,7 @@ differ if a use case changes only one of them. `common` keeps one package per co
 | Component | Submodule folder | Use case → component version |
 |---|---|---|
 | C1 Access and security | `c1-access` | UC22 → 1.0.0, UC19 → 1.1.0, UC18 → 1.2.0 |
+| Common | `common` | UC07 → 1.7.0-SNAPSHOT, UC13 → 1.8.0 |
 | C2 Configuration and integrations | `c2-configuration` | UC17 → 1.0.0, UC20 → 1.1.0 |
 | C3 Patients | `c3-patients` | UC12 register and modify → 1.0.0, UC12 discharge → 1.1.0 (It8) |
 | C4 Clinical orders | `c4-orders` | UC06 → 1.0.0, UC07 → 1.1.0, UC08 → 1.2.0 (It9) |
@@ -53,7 +54,7 @@ differ if a use case changes only one of them. `common` keeps one package per co
   the old cumulative numbering of D-014, and the table above replaces it.
 - **Patches of a finished component (D-036).** When a component needs a change in a finished one, the finished
   component raises PATCH, in its own branch and pull request approved by its owner, and `common` raises MINOR if
-  contracts are added to it. C1 is at 1.2.4 in the server and 1.2.4 in the client (#109, #116, #172, #173); `common` is at 1.7.0-SNAPSHOT.
+  contracts are added to it. C1 is at 1.2.4 in the server and 1.2.4 in the client (#109, #116, #172, #173); `common` is at 1.8.0-SNAPSHOT.
 - If a submodule name of the table is not the one used in the repository, the repository wins: tell the member and
   this file is corrected.
 

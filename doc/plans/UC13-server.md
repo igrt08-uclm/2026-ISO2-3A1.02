@@ -11,7 +11,7 @@
 ## Decisions
 - **Contract (rule 9):** the seven operations of `IAppointmentService` exactly as `C5-design.md` gives them, in
   `es.uclm.esi.iso2.common.appointments.contracts`, with the data classes `Appointment`, `AppointmentStatus`,
-  `TimeSlot` and `PendingNeedView` in `...appointments.domain`. `common` goes from `1.6.0-SNAPSHOT` to `1.7.0-SNAPSHOT`.
+  `TimeSlot` and `PendingNeedView` in `...appointments.domain`. `common` goes from `1.7.0-SNAPSHOT` to `1.8.0-SNAPSHOT`, because UC07 takes it to `1.7.0-SNAPSHOT` and this branch merges after that one.
 - **Module (rule 9):** `server/c5-appointments`, `artifactId` `server-c5-appointments`, `1.0.0-SNAPSHOT`, depends only on
   `common`; packages `...server.appointments.persistence` and `...server.appointments.service`.
 - **Permission:** every operation needs `MANAGE_APPOINTMENTS` (D37, already in C1 1.2.4 for `ADMISSIONS_STAFF`); a denied
@@ -35,10 +35,15 @@
 - **Not in this plan:** the client of UC13 (#130), UC15 (#134) and UC14 (#137), the seed data of C5, the waitlists and
   the daily schedule.
 
+- **Slot validation (844405d): decided by the group.** `slotErrors` rejects a slot whose start or end is null, whose
+  end is not after its start, that spans more than one day, whose duration does not match the duration of the test type,
+  and whose start is not on the grid of the schedule of the room (`startOnGrid`). Recorded by Ignacio, 23/11/2026, in
+  answer to Adam's comment on #210.
+
 ## Files
 | File | Action | What |
 |---|---|---|
-| `common/pom.xml`, `pom.xml` | change | `common` `1.7.0-SNAPSHOT` and `server-c5-appointments` `1.0.0-SNAPSHOT` (rule 9) |
+| `common/pom.xml`, `pom.xml` | change | `common` `1.8.0-SNAPSHOT` and `server-c5-appointments` `1.0.0-SNAPSHOT` (rule 9) |
 | `common/.../common/appointments/**` | create | `package-info`, the four data classes and `IAppointmentService` |
 | `server/pom.xml` | change | module `c5-appointments` (rule 9) |
 | `server/c5-appointments/pom.xml` | create | the module (rule 9) |
@@ -57,14 +62,27 @@
       the branch reaches `develop`).
 
 ## Status
-- **In progress:** nothing; steps 1 to 3 are done.
-- **Done:** the contract and the data classes in `common` `1.7.0-SNAPSHOT`, the module `server-c5-appointments` `1.0.0`,
-  the repository and `AppointmentService` with the seven operations, the free slots of D40 and the audit.
+- **In progress:** nothing.
+- **Done:** the contract and the data classes in `common` `1.8.0`, the module `server-c5-appointments` `1.0.0`,
+  the repository and `AppointmentService` with the seven operations, the free slots of D40 and the audit; the
+  `AccessDeniedException` of `schedulesOf` propagates instead of returning an empty list (Javier's decision, #208);
+  the three new validations of `slotErrors` (null start/end, end after start, same day, duration match, start on grid);
+  the C4 calls in `bookAppointment` and `cancelAppointment` before saving; `AppointmentSeedData` and `OrderSeedData`
+  with the data from Adam (#208); `loadSeedData()` in C4 and C5; `TimeSlot` has no equals/hashCode: nothing compares
+  slots (decided with Testing, 23/11/2026); `common` at `1.8.0`.
+- **Fixes from the review of Testing:**
+  - Step 1 – D1 `c5f512d`: `startOnGrid` now reads the schedules with the requester.
+  - Step 2 – D5 `6a56ef9`: `slotErrors` returns early when the start or the end is null.
+  - Step 2b – D6 `53ecd94`: a slot shorter than the test type is rejected.
+  - Step 3 – D2 `6721cfd`: the seed appointments are on the first working day after the start (`nextWorkingDay`).
+  - Step 4 – D3 `6ca690e`: the C4 seed needs use the clock of the service.
+  - Step 5 – D4 `65273ef`: the C4 seed loads only when none of its eight ids exists.
+  - Step 6 – `4ce0879`: `TimeSlot` has no equals/hashCode (decision (b)).
 - **State for Adam (Testing):** to cover in `feature/UC13-server-tests`: the permission and `APPOINTMENT_ACCESS_DENIED`;
   the seven operations with their messages; the free slots for a schedule of a room (days, duration, occupied and
   cancelled appointments, range with `toDate` before `fromDate`); the booking of a pending need, of a need already booked,
   of a slot of another room, outside the schedule, in the past and taken; the active and inactive patient; the reschedule
   of a booked, cancelled and unknown appointment; the cancellation and the need pending again in C4; the four audit
-  actions.
-- **Next step:** the branch `feature/UC13-server-tests` and, after that, the client (#130).
-- **Last update:** 23/11/2026, Ignacio.
+  actions; the cases of D1, D2, D5, D6 (TC13S-70, 72, 73, 77, 78, 81).
+- **Next step:** Testing adds TC13S-67..76 and the cases of D1, D2, D5 and D6.
+- **Last update:** 23/11/2026, Ignacio (fixes of the review of Testing).

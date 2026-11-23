@@ -3,9 +3,9 @@ package es.uclm.esi.iso2.common.appointments.domain;
 import java.time.LocalDateTime;
 
 /**
- * An appointment of a patient for a test type in a room (UC13, D40). It is created from a pending scheduling need of C4,
- * which is marked as booked, and it keeps the physician of the order (D44). It is never deleted: it is only changed to
- * {@link AppointmentStatus#RESCHEDULED} or {@link AppointmentStatus#CANCELLED} (D-022).
+ * An appointment of a patient for a test type in a room (UC13, D40). It is created from a pending scheduling need
+ * of C4, which is marked as booked, and it keeps the physician of the order (D44). It is never deleted: it is only
+ * changed to {@link AppointmentStatus#RESCHEDULED} or {@link AppointmentStatus#CANCELLED} (D-022).
  */
 public class Appointment {
     private final String appointmentId;

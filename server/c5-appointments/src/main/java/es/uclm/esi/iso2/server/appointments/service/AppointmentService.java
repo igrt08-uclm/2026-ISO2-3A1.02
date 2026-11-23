@@ -21,6 +21,7 @@ import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.appointments.persistence.IAppointmentRepository;
 import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,12 +30,12 @@ import java.util.List;
 
 /**
  * Books, moves and cancels the appointments of the patients (UC13, Control_ManageAppointments). Every operation needs
- * {@code MANAGE_APPOINTMENTS}; a denied attempt is registered as {@code APPOINTMENT_ACCESS_DENIED} and the bookings, moves
- * and cancellations as {@code APPOINTMENT_BOOKED}, {@code APPOINTMENT_RESCHEDULED} and {@code APPOINTMENT_CANCELLED}. The
- * free slots come from the schedule of the room of the test type and from the appointments that are not cancelled, and an
- * appointment is only booked in a free slot of the room of its test type, inside the schedule and not in the past, for an
- * active patient. Booking marks the scheduling need as booked in C4; cancelling leaves it pending again. Appointments are
- * never deleted (D-022).
+ * {@code MANAGE_APPOINTMENTS}; a denied attempt is registered as {@code APPOINTMENT_ACCESS_DENIED} and the bookings,
+ * moves and cancellations as {@code APPOINTMENT_BOOKED}, {@code APPOINTMENT_RESCHEDULED} and
+ * {@code APPOINTMENT_CANCELLED}. The free slots come from the schedule of the room of the test type and from the
+ * appointments that are not cancelled, and an appointment is only booked in a free slot of the room of its test type,
+ * inside the schedule and not in the past, for an active patient. Booking marks the scheduling need as booked in C4;
+ * cancelling leaves it pending again. Appointments are never deleted (D-022).
  */
 public class AppointmentService implements IAppointmentService {
     private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
@@ -93,6 +94,25 @@ public class AppointmentService implements IAppointmentService {
             IAuditRecorder auditRecorder) {
         this(new InMemoryAppointmentRepository(), orderService, patientService, systemParameterService,
                 roleManagementService, auditRecorder, Clock.systemDefaultZone());
+    }
+
+    /**
+     * Loads three invented appointments, only if the system starts with no appointments at all. It is called when
+     * the program starts, not by a user, so it does not need a permission and it is not registered in the audit log.
+     */
+    public void loadSeedData() {
+        if (appointments.findAll().isEmpty()) {
+            AppointmentSeedData.appointments(nextWorkingDay(LocalDate.now(clock))).forEach(appointments::save);
+        }
+    }
+
+    /** The first working day (Monday to Friday) after {@code day}. */
+    static LocalDate nextWorkingDay(LocalDate day) {
+        LocalDate next = day.plusDays(1);
+        while (next.getDayOfWeek() == DayOfWeek.SATURDAY || next.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            next = next.plusDays(1);
+        }
+        return next;
     }
 
     @Override
@@ -178,11 +198,11 @@ public class AppointmentService implements IAppointmentService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
+        orderService.markSchedulingNeedBooked(requester, needId);
         Appointment created = new Appointment(nextAppointmentId(), needId, order.getPatientId(),
                 order.getTestTypeId(), testType.getRoom(), order.getRequester(), slot.getStart(), slot.getEnd(),
                 AppointmentStatus.BOOKED);
         appointments.save(created);
-        orderService.markSchedulingNeedBooked(requester, needId);
         auditRecorder.register(requester, BOOKED, APPOINTMENT + created.getAppointmentId());
         return created;
     }
@@ -228,12 +248,12 @@ public class AppointmentService implements IAppointmentService {
         Appointment cancelled = new Appointment(current.getAppointmentId(), current.getNeedId(),
                 current.getPatientId(), current.getTestTypeId(), current.getRoom(), current.getPhysician(),
                 current.getStart(), current.getEnd(), AppointmentStatus.CANCELLED);
-        appointments.save(cancelled);
         try {
             orderService.markSchedulingNeedPending(requester, current.getNeedId());
         } catch (ValidationException alreadyPending) {
-            // The need was pending again already: this appointment had been moved before, so there is nothing to do.
+            // The need was already pending: nothing to do.
         }
+        appointments.save(cancelled);
         auditRecorder.register(requester, CANCELLED, APPOINTMENT + cancelled.getAppointmentId());
         return cancelled;
     }
@@ -296,8 +316,22 @@ public class AppointmentService implements IAppointmentService {
 
     /** Every reason why the slot cannot be used for that test type, ignoring the appointment that is being moved. */
     private List<String> slotErrors(TimeSlot slot, TestType testType, String ignoredAppointmentId,
-            String requester) {
+            String requester) throws AccessDeniedException {
         List<String> errors = new ArrayList<>();
+        if (slot.getStart() == null || slot.getEnd() == null) {
+            errors.add("The start and the end of the slot are required");
+            return errors;
+        } else if (!slot.getEnd().isAfter(slot.getStart())) {
+            errors.add("The end of the slot must be after its start");
+        } else if (!slot.getStart().toLocalDate().equals(slot.getEnd().toLocalDate())) {
+            errors.add("The slot must be inside a single day");
+        } else if (!slot.getEnd().equals(slot.getStart().plusMinutes(testType.getDurationMinutes()))) {
+            errors.add("The duration of the slot must match the duration of the test type "
+                    + testType.getId());
+        } else if (!startOnGrid(slot.getStart(), testType, requester)) {
+            errors.add("The start of the slot must be on the grid of the schedule of the room "
+                    + testType.getRoom());
+        }
         if (!testType.getRoom().equals(slot.getRoom())) {
             errors.add("The room " + slot.getRoom() + " is not the room of the test type " + testType.getId());
         }
@@ -314,7 +348,35 @@ public class AppointmentService implements IAppointmentService {
         return errors;
     }
 
-    private boolean insideSchedule(TimeSlot slot, String room, String requester) {
+    /**
+     * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
+     * the room, for every active schedule of that room.
+     */
+    /**
+     * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
+     * the room, for every active schedule of that room. The requester is used to read the schedules of C2.
+     *
+     * @param start the start of the slot
+     * @param testType the test type whose room and duration define the grid
+     * @param requester the user asking for the schedules
+     * @return {@code true} if the start is on the grid of some active schedule of the room
+     */
+    private boolean startOnGrid(LocalDateTime start, TestType testType, String requester) throws AccessDeniedException {
+        for (Schedule schedule : schedulesOf(testType.getRoom(), requester)) {
+            if (schedule.getDaysOfWeek().contains(start.getDayOfWeek())) {
+                LocalDateTime gridStart = LocalDateTime.of(start.toLocalDate(), schedule.getStartTime());
+                long minutesFromGrid = start.toLocalTime().toSecondOfDay() / 60
+                        - gridStart.toLocalTime().toSecondOfDay() / 60;
+                if (minutesFromGrid >= 0
+                        && minutesFromGrid % testType.getDurationMinutes() == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean insideSchedule(TimeSlot slot, String room, String requester) throws AccessDeniedException {
         for (Schedule schedule : schedulesOf(room, requester)) {
             if (schedule.getDaysOfWeek().contains(slot.getStart().getDayOfWeek())
                     && !slot.getStart().toLocalTime().isBefore(schedule.getStartTime())
@@ -325,13 +387,8 @@ public class AppointmentService implements IAppointmentService {
         return false;
     }
 
-    private List<Schedule> schedulesOf(String room, String requester) {
-        List<Schedule> schedules;
-        try {
-            schedules = systemParameterService.getSchedules(requester);
-        } catch (AccessDeniedException deniedException) {
-            schedules = List.of();
-        }
+    private List<Schedule> schedulesOf(String room, String requester) throws AccessDeniedException {
+        List<Schedule> schedules = systemParameterService.getSchedules(requester);
         return schedules.stream()
                 .filter(schedule -> room.equals(schedule.getResource()) && schedule.isActive())
                 .toList();

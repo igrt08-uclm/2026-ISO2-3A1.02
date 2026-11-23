@@ -10,14 +10,14 @@ import java.util.List;
 
 /**
  * Books, moves and cancels the appointments of the patients (UC13, C5 1.0.0). Every operation needs the permission
- * {@code MANAGE_APPOINTMENTS} of the admissions staff (D37); a denied attempt and every booking, move or cancellation is
- * registered in the audit log (UC19). An appointment is never deleted: it is cancelled and its slot is free again
- * (D-022).
+ * {@code MANAGE_APPOINTMENTS} of the admissions staff (D37); a denied attempt and every booking, move or
+ * cancellation is registered in the audit log (UC19). An appointment is never deleted: it is cancelled and its
+ * slot is free again (D-022).
  */
 public interface IAppointmentService {
     /**
-     * Returns the pending scheduling needs of C4 with the data of the patient, the test type and the priority, so that the
-     * admissions staff can choose the one to book.
+     * Returns the pending scheduling needs of C4 with the data of the patient, the test type and the priority, so
+     * that the admissions staff can choose the one to book.
      *
      * @param requester the username of the user who asks
      * @return the pending needs, in the order in which C4 created them
@@ -42,8 +42,8 @@ public interface IAppointmentService {
             throws AccessDeniedException, ValidationException;
 
     /**
-     * Books a free slot for a pending scheduling need and marks the need as booked in C4. The physician of the appointment
-     * is the one who ordered the test.
+     * Books a free slot for a pending scheduling need and marks the need as booked in C4. The physician of the
+     * appointment is the one who ordered the test.
      *
      * @param requester the username of the admissions staff who books
      * @param needId the id of the pending scheduling need

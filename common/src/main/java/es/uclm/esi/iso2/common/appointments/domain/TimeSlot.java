@@ -3,9 +3,9 @@ package es.uclm.esi.iso2.common.appointments.domain;
 import java.time.LocalDateTime;
 
 /**
- * A slot of a room (UC13, D40): the free ones are computed from the schedule of the room and the duration of the test
- * type, and they are never saved. A slot is identified by its room and its start, so two slots of the same room with the
- * same start are the same slot.
+ * A slot of a room (UC13, D40): the free ones are computed from the schedule of the room and the duration of the
+ * test type, and they are never saved. A slot is identified by its room and its start, so two slots of the same room
+ * with the same start are the same slot.
  */
 public class TimeSlot {
     private final String room;
