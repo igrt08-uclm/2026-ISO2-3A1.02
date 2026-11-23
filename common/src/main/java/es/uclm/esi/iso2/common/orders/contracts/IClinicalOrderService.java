@@ -31,10 +31,10 @@ public interface IClinicalOrderService {
             throws AccessDeniedException, ValidationException;
 
     /**
-     * Creates a periodic follow-up order for an active patient and a test type eligible for follow-up, with its clinical
-     * indication, its justification and a positive recurrence interval, and the pending scheduling needs of the next 12
-     * months (D-040). The server gives the {@code orderId}, takes the requester as the physician who asked for it and
-     * today as the creation date.
+     * Creates a periodic follow-up order for an active patient and a test type eligible for follow-up, with its
+     * clinical indication, its justification and a positive recurrence interval, and the pending scheduling needs of
+     * the next 12 months (D-040). The server gives the {@code orderId}, takes the requester as the physician who asked
+     * for it and today as the creation date.
      *
      * @param requester the username of the physician who orders
      * @param order the data of the order; its {@code orderId}, {@code requester} and {@code creationDate} are
