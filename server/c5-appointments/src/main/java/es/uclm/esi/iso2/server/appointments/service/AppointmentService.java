@@ -21,6 +21,7 @@ import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.appointments.persistence.IAppointmentRepository;
 import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -101,8 +102,17 @@ public class AppointmentService implements IAppointmentService {
      */
     public void loadSeedData() {
         if (appointments.findAll().isEmpty()) {
-            AppointmentSeedData.appointments(LocalDate.now(clock)).forEach(appointments::save);
+            AppointmentSeedData.appointments(nextWorkingDay(LocalDate.now(clock))).forEach(appointments::save);
         }
+    }
+
+    /** The first working day (Monday to Friday) after {@code day}. */
+    static LocalDate nextWorkingDay(LocalDate day) {
+        LocalDate next = day.plusDays(1);
+        while (next.getDayOfWeek() == DayOfWeek.SATURDAY || next.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            next = next.plusDays(1);
+        }
+        return next;
     }
 
     @Override
