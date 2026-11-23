@@ -310,6 +310,7 @@ public class AppointmentService implements IAppointmentService {
         List<String> errors = new ArrayList<>();
         if (slot.getStart() == null || slot.getEnd() == null) {
             errors.add("The start and the end of the slot are required");
+            return errors;
         } else if (!slot.getEnd().isAfter(slot.getStart())) {
             errors.add("The end of the slot must be after its start");
         } else if (!slot.getStart().toLocalDate().equals(slot.getEnd().toLocalDate())) {
