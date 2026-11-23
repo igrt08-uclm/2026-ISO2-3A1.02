@@ -69,6 +69,7 @@ public class IU_OrderProcedure extends JPanel {
     private final JComboBox<Option> cmbPriority = new JComboBox<>();
     private final JTextField txtIndication = new JTextField(20);
     private final JTextField txtJustification = new JTextField(20);
+    private final JButton btnSearch = new JButton("Search");
     private final JButton btnPlaceOrder = new JButton("Place order");
 
     private final DefaultTableModel orderModel = new DefaultTableModel(
@@ -124,7 +125,6 @@ public class IU_OrderProcedure extends JPanel {
     private JSplitPane buildBody() {
         JPanel left = new JPanel(new BorderLayout(4, 4));
         JPanel searchRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JButton btnSearch = new JButton("Search");
         btnSearch.setMnemonic('H');
         searchRow.add(new JLabel("Search"));
         searchRow.add(txtSearch);
@@ -273,18 +273,22 @@ public class IU_OrderProcedure extends JPanel {
         }
     }
 
-    private Patient findPatient(String identifier) {
-        try {
-            for (Patient patient : patientService.searchPatients(requester, identifier)) {
-                if (identifier.equals(patient.getIdentifier())) {
-                    return patient;
-                }
+    /**
+     * Finds the patient whose identifier is exactly the one that the table shows. An {@code AccessDeniedException}
+     * of C3 is not caught here: it reaches the {@code catch} of {@link #onSelectPatient(String)}, so that the denial is
+     * handled in one place and its message is not overwritten by “There is no patient with the identifier …”.
+     *
+     * @param identifier the health card number of the patient
+     * @return the patient, or {@code null} when C3 does not know it
+     * @throws AccessDeniedException when the requester does not have the permission to search patients
+     */
+    private Patient findPatient(String identifier) throws AccessDeniedException {
+        for (Patient patient : patientService.searchPatients(requester, identifier)) {
+            if (identifier.equals(patient.getIdentifier())) {
+                return patient;
             }
-            return null;
-        } catch (AccessDeniedException deniedException) {
-            handleDenied();
-            return null;
         }
+        return null;
     }
 
     /**
@@ -402,7 +406,8 @@ public class IU_OrderProcedure extends JPanel {
     public void showPatientInactive(Patient patient) {
         orderModel.setRowCount(0);
         setFormEnabled(false);
-        showOperationResultError("The patient " + patient.getPatientId() + " is not active, so no order can be placed.");
+        showOperationResultError(
+                "The patient " + patient.getPatientId() + " is not active, so no order can be placed.");
     }
 
     /**
@@ -441,6 +446,7 @@ public class IU_OrderProcedure extends JPanel {
         setFormEnabled(false);
         patientTable.setEnabled(false);
         txtSearch.setEnabled(false);
+        btnSearch.setEnabled(false);
         showOperationResultError(DENIED_MESSAGE);
     }
 

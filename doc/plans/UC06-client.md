@@ -134,7 +134,7 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [x] 6. `IU_Welcome` (button *Order procedure*) and `Main` (service and navigation); `client-c1-access` `1.2.5-SNAPSHOT` and its two dependencies (Q1, Q9).
 - [x] 7. `agents/architecture.md` and `agents/components.md`.
 - [x] 8. Hand the branch over to Testing: the test design and the tests of UC06-client (Testing's commit `6883914`, `test(UC06): T.04 test design and headless client tests TC06C-01..43 (#69)`); the pull request #204 (`Closes #67`) against `feature/UC06-server`.
-- [ ] 9. This plan (Q1 to Q11 answered, the answers of Testing to F-01, F-03 and F-05, the fixes and the deviation of Q4) and `agents/components.md` (`client-c1-access` `1.2.5`) — `docs(UC06): answers and state of the fixes of the review (#67)`.
+- [x] 9. This plan (Q1 to Q11 answered, the answers of Testing to F-01, F-03 and F-05, the fixes and the deviation of Q4) and `agents/components.md` (`client-c1-access` `1.2.5`) — `90c3fd8` `docs(UC06): answers and state of the fixes of the review (#67)`.
 - [ ] 10. F-01 and F-02 in `IU_OrderProcedure`: the denied message is not overwritten by a selection and *Search* is disabled; line 405 wrapped — `fix(UC06): keep the denied message when a patient is selected (#67)`.
 - [ ] 11. F-03 and F-04 in `IU_OrderProcedure`: the red border of the fields with errors and the Alt+T/R/C/J of the labels — `fix(UC06): mark the fields with errors and add the Alt keys (#67)`.
 - [ ] 12. F-05 in `IU_OrderProcedure`: the priority as `id · name` in the list and in the table — `fix(UC06): show the id of the priority next to its name (#67)`. **Blocked:** waiting for Design's format and for Testing's new expected values (TC06C-01, 03, 06, 17 and 18).
@@ -148,7 +148,7 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** step 9, this plan and `agents/components.md` (23/11/2026).
+- **In progress:** step 10, F-01 and F-02 in `IU_OrderProcedure` (23/11/2026).
 - **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7); step 8 is Testing's commit `6883914` (test design and 43 headless tests). The five defects F-01 to F-05 of the review are open.
 - **Next step:** step 9, this plan and `agents/components.md`, after the member's yes; then the code fixes of steps 10 to 12 (`IU_OrderProcedure`).
 - **Tests of Testing on this machine:** they are headless (no display, no desktop) but they need `libfontconfig` and fonts. This container has neither: `mvn -B verify` stops in `client-c2-configuration` with `Fontconfig head is null` before reaching `client-c4-orders`, and `mvn -B -pl client/c4-orders -am verify` gives 18 failures and 7 errors in `IU_OrderProcedureTest` for the same reason (the first `JComboBox.addItem` asks for the font metrics and throws, and `onSelectPatient` catches it as a `RuntimeException`, which leaves the list half filled). None of those failures is a defect of the screen found by this session.
