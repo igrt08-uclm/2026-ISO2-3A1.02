@@ -22,8 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,6 +33,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -86,6 +89,7 @@ public class IU_OrderProcedure extends JPanel {
 
     private final Map<String, String> testTypeNames = new LinkedHashMap<>();
     private final Map<String, String> priorityNames = new LinkedHashMap<>();
+    private final transient Map<JComponent, Border> defaultBorders = new LinkedHashMap<>();
 
     private transient Patient selectedPatient;
     private boolean denied;
@@ -113,6 +117,7 @@ public class IU_OrderProcedure extends JPanel {
         add(buildHeader(), BorderLayout.NORTH);
         add(buildBody(), BorderLayout.CENTER);
         add(buildFooter(), BorderLayout.SOUTH);
+        rememberBorders();
         onSearch();
     }
 
@@ -150,13 +155,13 @@ public class IU_OrderProcedure extends JPanel {
         constraints.anchor = GridBagConstraints.WEST;
         constraints.gridx = 0;
         constraints.gridy = 0;
-        addField(form, constraints, "Test type", cmbTestType);
+        addField(form, constraints, "Test type", cmbTestType, 'T');
         constraints.gridy++;
-        addField(form, constraints, "Priority", cmbPriority);
+        addField(form, constraints, "Priority", cmbPriority, 'R');
         constraints.gridy++;
-        addField(form, constraints, "Clinical indication", txtIndication);
+        addField(form, constraints, "Clinical indication", txtIndication, 'C');
         constraints.gridy++;
-        addField(form, constraints, "Justification", txtJustification);
+        addField(form, constraints, "Justification", txtJustification, 'J');
         constraints.gridy++;
         constraints.gridx = 1;
         btnPlaceOrder.setMnemonic('P');
@@ -175,9 +180,22 @@ public class IU_OrderProcedure extends JPanel {
         return split;
     }
 
-    private void addField(JPanel form, GridBagConstraints constraints, String label, java.awt.Component field) {
+    /**
+     * Adds a label and its field to the form, with the Alt key of the label (Q10).
+     *
+     * @param form the panel of the form
+     * @param constraints the position of the label and the field
+     * @param text the text of the label
+     * @param field the field that the label describes
+     * @param mnemonic the letter of the key that focuses the field, with Alt
+     */
+    private void addField(JPanel form, GridBagConstraints constraints, String text, java.awt.Component field,
+            char mnemonic) {
         constraints.gridx = 0;
-        form.add(new JLabel(label), constraints);
+        JLabel label = new JLabel(text);
+        label.setLabelFor(field);
+        label.setDisplayedMnemonic(mnemonic);
+        form.add(label, constraints);
         constraints.gridx = 1;
         form.add(field, constraints);
     }
@@ -300,6 +318,7 @@ public class IU_OrderProcedure extends JPanel {
      * @param orders the orders of the patient
      */
     public void displayOrderForm(List<TestType> testTypes, List<Priority> priorities, List<ClinicalOrder> orders) {
+        clearErrorBorders();
         cmbTestType.removeAllItems();
         testTypeNames.clear();
         int activeTestTypes = 0;
@@ -355,9 +374,11 @@ public class IU_OrderProcedure extends JPanel {
         if (denied) {
             return;
         }
-        List<String> errors = validateForm();
+        clearErrorBorders();
+        List<FormError> errors = validateForm();
         if (!errors.isEmpty()) {
-            showValidationErrors(errors);
+            markErrorFields(errors);
+            showValidationErrors(errors.stream().map(FormError::message).toList());
             return;
         }
         DiagnosticOrder sent = new DiagnosticOrder(null, selectedPatient.getPatientId(),
@@ -365,6 +386,7 @@ public class IU_OrderProcedure extends JPanel {
                 txtJustification.getText().trim(), null, ((Option) cmbPriority.getSelectedItem()).id);
         try {
             DiagnosticOrder created = orderService.orderDiagnosticProcedure(requester, sent);
+            clearErrorBorders();
             showOperationResultSuccess("Order " + created.getOrderId() + " created.");
             txtIndication.setText("");
             txtJustification.setText("");
@@ -378,24 +400,58 @@ public class IU_OrderProcedure extends JPanel {
         }
     }
 
-    private List<String> validateForm() {
-        List<String> errors = new ArrayList<>();
+    /** The errors of the form, each one with the field that has to be marked (or {@code null}). */
+    private List<FormError> validateForm() {
+        List<FormError> errors = new ArrayList<>();
         if (selectedPatient == null) {
-            errors.add("Select a patient before placing an order.");
+            errors.add(new FormError("Select a patient before placing an order.", null));
         }
         if (cmbTestType.getSelectedItem() == null) {
-            errors.add("The test type is required");
+            errors.add(new FormError("The test type is required", cmbTestType));
         }
         if (cmbPriority.getSelectedItem() == null) {
-            errors.add("The priority is required");
+            errors.add(new FormError("The priority is required", cmbPriority));
         }
         if (txtIndication.getText().isBlank()) {
-            errors.add("The clinical indication is required");
+            errors.add(new FormError("The clinical indication is required", txtIndication));
         }
         if (txtJustification.getText().isBlank()) {
-            errors.add("The justification is required");
+            errors.add(new FormError("The justification is required", txtJustification));
         }
         return errors;
+    }
+
+    /**
+     * Remembers the border of each field of the form, so that the red border of an error can be removed later.
+     */
+    private void rememberBorders() {
+        for (JComponent field : List.of(cmbTestType, cmbPriority, txtIndication, txtJustification)) {
+            defaultBorders.put(field, field.getBorder());
+        }
+    }
+
+    /**
+     * Marks with a red border the fields of the errors of the client (Q6, answer of Testing).
+     *
+     * @param errors the errors of the form
+     */
+    private void markErrorFields(List<FormError> errors) {
+        for (FormError error : errors) {
+            if (error.field() != null) {
+                error.field().setBorder(BorderFactory.createLineBorder(ERROR_COLOR));
+            }
+        }
+    }
+
+    /** Removes the red border of the fields, when the form is reloaded, after a success or before validating again. */
+    private void clearErrorBorders() {
+        for (Map.Entry<JComponent, Border> entry : defaultBorders.entrySet()) {
+            entry.getKey().setBorder(entry.getValue());
+        }
+    }
+
+    /** One error of the form: the message for the user and the field to mark, if any. */
+    private record FormError(String message, JComponent field) {
     }
 
     /**
