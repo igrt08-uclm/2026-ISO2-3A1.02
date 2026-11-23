@@ -29,12 +29,12 @@ import java.util.List;
 
 /**
  * Books, moves and cancels the appointments of the patients (UC13, Control_ManageAppointments). Every operation needs
- * {@code MANAGE_APPOINTMENTS}; a denied attempt is registered as {@code APPOINTMENT_ACCESS_DENIED} and the bookings, moves
- * and cancellations as {@code APPOINTMENT_BOOKED}, {@code APPOINTMENT_RESCHEDULED} and {@code APPOINTMENT_CANCELLED}. The
- * free slots come from the schedule of the room of the test type and from the appointments that are not cancelled, and an
- * appointment is only booked in a free slot of the room of its test type, inside the schedule and not in the past, for an
- * active patient. Booking marks the scheduling need as booked in C4; cancelling leaves it pending again. Appointments are
- * never deleted (D-022).
+ * {@code MANAGE_APPOINTMENTS}; a denied attempt is registered as {@code APPOINTMENT_ACCESS_DENIED} and the bookings,
+ * moves and cancellations as {@code APPOINTMENT_BOOKED}, {@code APPOINTMENT_RESCHEDULED} and
+ * {@code APPOINTMENT_CANCELLED}. The free slots come from the schedule of the room of the test type and from the
+ * appointments that are not cancelled, and an appointment is only booked in a free slot of the room of its test type,
+ * inside the schedule and not in the past, for an active patient. Booking marks the scheduling need as booked in C4;
+ * cancelling leaves it pending again. Appointments are never deleted (D-022).
  */
 public class AppointmentService implements IAppointmentService {
     private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
@@ -235,14 +235,14 @@ public class AppointmentService implements IAppointmentService {
         if (current.getStatus() == AppointmentStatus.CANCELLED) {
             throw new ValidationException(List.of("The appointment " + appointmentId + " is already cancelled"));
         }
+        Appointment cancelled = new Appointment(current.getAppointmentId(), current.getNeedId(),
+                current.getPatientId(), current.getTestTypeId(), current.getRoom(), current.getPhysician(),
+                current.getStart(), current.getEnd(), AppointmentStatus.CANCELLED);
         try {
             orderService.markSchedulingNeedPending(requester, current.getNeedId());
         } catch (ValidationException alreadyPending) {
             // The need was already pending: nothing to do.
         }
-        Appointment cancelled = new Appointment(current.getAppointmentId(), current.getNeedId(),
-                current.getPatientId(), current.getTestTypeId(), current.getRoom(), current.getPhysician(),
-                current.getStart(), current.getEnd(), AppointmentStatus.CANCELLED);
         appointments.save(cancelled);
         auditRecorder.register(requester, CANCELLED, APPOINTMENT + cancelled.getAppointmentId());
         return cancelled;

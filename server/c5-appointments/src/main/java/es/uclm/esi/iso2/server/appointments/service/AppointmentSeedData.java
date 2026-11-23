@@ -2,6 +2,7 @@ package es.uclm.esi.iso2.server.appointments.service;
 
 import es.uclm.esi.iso2.common.appointments.domain.Appointment;
 import es.uclm.esi.iso2.common.appointments.domain.AppointmentStatus;
+import es.uclm.esi.iso2.common.appointments.domain.TimeSlot;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,15 +17,18 @@ final class AppointmentSeedData {
     static List<Appointment> appointments(LocalDate day) {
         return List.of(
                 new Appointment("APT-0001", "NEED-0001", "P-0001", "CT-HEAD", "Room CT-1",
-                        "mgarcia", LocalDateTime.of(day, LocalTime.of(9, 0)),
+                        "mgarcia",
+                        LocalDateTime.of(day, LocalTime.of(9, 0)),
                         LocalDateTime.of(day, LocalTime.of(9, 20)),
                         AppointmentStatus.BOOKED),
                 new Appointment("APT-0002", "NEED-0002", "P-0002", "CT-HEAD", "Room CT-1",
-                        "mgarcia", LocalDateTime.of(day, LocalTime.of(9, 20)),
+                        "mgarcia",
+                        LocalDateTime.of(day, LocalTime.of(9, 20)),
                         LocalDateTime.of(day, LocalTime.of(9, 40)),
                         AppointmentStatus.CANCELLED),
                 new Appointment("APT-0003", "NEED-0003", "P-0003", "CT-HEAD", "Room CT-1",
-                        "mgarcia", LocalDateTime.of(day, LocalTime.of(10, 0)),
+                        "mgarcia",
+                        LocalDateTime.of(day, LocalTime.of(10, 0)),
                         LocalDateTime.of(day, LocalTime.of(10, 20)),
                         AppointmentStatus.RESCHEDULED));
     }
