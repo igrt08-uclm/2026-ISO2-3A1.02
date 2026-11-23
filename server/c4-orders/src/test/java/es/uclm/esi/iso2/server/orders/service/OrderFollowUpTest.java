@@ -23,21 +23,24 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Tests of the follow-up orders of {@link ClinicalOrderService} (UC07 server, #71). Each test names the case of the test
- * design (`doc/testing/test-cases/UC07-server-test-design.md`, TC07S-xx) that it checks. The service uses empty in-memory
- * repositories, the fakes of C1, C2 and C3 of the test design and a fixed clock, so the creation date of every order is
- * 23/11/2026 and the due dates of the needs do not depend on the day the tests are run.
+ * Tests of the follow-up orders of {@link ClinicalOrderService} (UC07 server, #71). Each test names the case of the
+ * test design ({@code doc/testing/test-cases/UC07-server-test-design.md}, TC07S-xx) that it checks. The service uses
+ * empty in-memory repositories, the fakes of C1, C2 and C3 of the test design and a fixed clock, so the creation date
+ * of every order is 23/11/2026 (31/01/2027 and 29/02/2028 in the month-end cases) and the due dates of the needs are
+ * written as literal dates that do not depend on the day the tests are run (D-040, plan Q4).
  */
 @DisplayName("ClinicalOrderService · follow-up orders")
 class OrderFollowUpTest {
@@ -101,6 +104,17 @@ class OrderFollowUpTest {
         assertEquals(List.of(new AuditEntry(requester, DENIED, ORDERS)), audit.entries());
     }
 
+    /** The due dates of the pending needs, in the order in which they were created. */
+    private List<LocalDate> dueDates() {
+        return needs.findPending().stream().map(SchedulingNeed::getDueDate).toList();
+    }
+
+    /** A service with empty repositories whose clock is fixed at 10:00 UTC of the given day. */
+    private ClinicalOrderService serviceOn(String day) {
+        Clock clock = Clock.fixed(Instant.parse(day + "T10:00:00Z"), ZoneOffset.UTC);
+        return new ClinicalOrderService(orders, needs, roles, audit, parameters, patients, clock);
+    }
+
     private static DiagnosticOrder diagnosticOrder() {
         return new DiagnosticOrder(null, PATIENT, NOT_ELIGIBLE, PHYSICIAN, "Chest pain", "Rule out pneumonia", null,
                 "URGENT");
@@ -144,6 +158,24 @@ class OrderFollowUpTest {
             assertDenied(requester, () -> service.orderFollowUp(requester, validOrder()));
             assertNull(orders.findById("ORD-0001"));
         }
+
+        /** A {@code null} order and an order with every field wrong. */
+        static Stream<Arguments> invalidOrders() {
+            return Stream.of(Arguments.of((FollowUpOrder) null),
+                    Arguments.of(new FollowUpOrder(null, "P-9999", NOT_ELIGIBLE, ADMIN, "", "  ", null, 0)));
+        }
+
+        @ParameterizedTest
+        @MethodSource("invalidOrders")
+        @DisplayName("TC07S-32 admin with an invalid follow-up order is denied before the order is validated")
+        void permissionBeforeValidation(FollowUpOrder sent) {
+            assertDenied(ADMIN, () -> service.orderFollowUp(ADMIN, sent));
+            assertAll(
+                    () -> assertEquals(0, patients.getPatientCalls()),
+                    () -> assertEquals(0, parameters.calls()),
+                    () -> assertNull(orders.findById("ORD-0001")),
+                    () -> assertTrue(needs.findPending().isEmpty()));
+        }
     }
 
     @Nested
@@ -157,7 +189,8 @@ class OrderFollowUpTest {
             assertAll(
                     () -> assertEquals(List.of(new AuditEntry(PHYSICIAN, CREATED, "ORDER:ORD-0001")),
                             audit.entries()),
-                    () -> assertTrue(audit.entries().stream().noneMatch(entry -> entry.action().startsWith("PATIENT_"))));
+                    () -> assertTrue(audit.entries().stream()
+                            .noneMatch(entry -> entry.action().startsWith("PATIENT_"))));
         }
 
         @Test
@@ -211,9 +244,11 @@ class OrderFollowUpTest {
                     () -> assertEquals(2, pending.size()),
                     () -> assertEquals("NEED-0001", pending.get(0).getNeedId()),
                     () -> assertEquals("ORD-0001", pending.get(0).getOrderId()),
-                    () -> assertEquals(TODAY.plusMonths(6), pending.get(0).getDueDate()),
+                    () -> assertEquals(LocalDate.of(2027, 5, 23), pending.get(0).getDueDate()),
                     () -> assertEquals("NEED-0002", pending.get(1).getNeedId()),
-                    () -> assertEquals(TODAY.plusMonths(12), pending.get(1).getDueDate()),
+                    () -> assertEquals("ORD-0001", pending.get(1).getOrderId()),
+                    () -> assertEquals(LocalDate.of(2027, 11, 23), pending.get(1).getDueDate()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, pending.get(0).getStatus()),
                     () -> assertEquals(SchedulingNeedStatus.PENDING, pending.get(1).getStatus()));
         }
 
@@ -223,7 +258,7 @@ class OrderFollowUpTest {
             List<SchedulingNeed> pending = needsOf(order(PATIENT, ELIGIBLE, 12));
             assertAll(
                     () -> assertEquals(1, pending.size()),
-                    () -> assertEquals(TODAY.plusMonths(12), pending.get(0).getDueDate()));
+                    () -> assertEquals(LocalDate.of(2027, 11, 23), pending.get(0).getDueDate()));
         }
 
         @Test
@@ -232,18 +267,93 @@ class OrderFollowUpTest {
             List<SchedulingNeed> pending = needsOf(order(PATIENT, ELIGIBLE, 5));
             assertAll(
                     () -> assertEquals(2, pending.size()),
-                    () -> assertEquals(TODAY.plusMonths(5), pending.get(0).getDueDate()),
-                    () -> assertEquals(TODAY.plusMonths(10), pending.get(1).getDueDate()));
+                    () -> assertEquals(LocalDate.of(2027, 4, 23), pending.get(0).getDueDate()),
+                    () -> assertEquals(LocalDate.of(2027, 9, 23), pending.get(1).getDueDate()));
         }
 
         @Test
         @DisplayName("TC07S-20 an interval of 1 month creates twelve pending needs")
         void oneMonth() throws AccessDeniedException, ValidationException {
-            List<SchedulingNeed> pending = needsOf(order(PATIENT, ELIGIBLE, 1));
+            needsOf(order(PATIENT, ELIGIBLE, 1));
+            assertEquals(List.of(LocalDate.of(2026, 12, 23), LocalDate.of(2027, 1, 23), LocalDate.of(2027, 2, 23),
+                    LocalDate.of(2027, 3, 23), LocalDate.of(2027, 4, 23), LocalDate.of(2027, 5, 23),
+                    LocalDate.of(2027, 6, 23), LocalDate.of(2027, 7, 23), LocalDate.of(2027, 8, 23),
+                    LocalDate.of(2027, 9, 23), LocalDate.of(2027, 10, 23), LocalDate.of(2027, 11, 23)), dueDates());
+        }
+
+        @Test
+        @DisplayName("TC07S-27 an interval of 3 months creates four pending needs")
+        void threeMonths() throws AccessDeniedException, ValidationException {
+            needsOf(order(PATIENT, ELIGIBLE, 3));
+            assertEquals(List.of(LocalDate.of(2027, 2, 23), LocalDate.of(2027, 5, 23), LocalDate.of(2027, 8, 23),
+                    LocalDate.of(2027, 11, 23)), dueDates());
+        }
+
+        @Test
+        @DisplayName("TC07S-28 an interval of 4 months creates three pending needs")
+        void fourMonths() throws AccessDeniedException, ValidationException {
+            needsOf(order(PATIENT, ELIGIBLE, 4));
+            assertEquals(List.of(LocalDate.of(2027, 3, 23), LocalDate.of(2027, 7, 23), LocalDate.of(2027, 11, 23)),
+                    dueDates());
+        }
+
+        @Test
+        @DisplayName("TC07S-29 an interval of 11 months creates one pending need")
+        void elevenMonths() throws AccessDeniedException, ValidationException {
+            needsOf(order(PATIENT, ELIGIBLE, 11));
+            assertEquals(List.of(LocalDate.of(2027, 10, 23)), dueDates());
+        }
+
+        @Test
+        @DisplayName("TC07S-30 an order of 31/01/2027 with 1 month has its needs on the last day of short months")
+        void monthEnd() throws AccessDeniedException, ValidationException {
+            FollowUpOrder created = serviceOn("2027-01-31").orderFollowUp(PHYSICIAN, order(PATIENT, ELIGIBLE, 1));
             assertAll(
-                    () -> assertEquals(12, pending.size()),
-                    () -> assertEquals(TODAY.plusMonths(1), pending.get(0).getDueDate()),
-                    () -> assertEquals(TODAY.plusMonths(12), pending.get(11).getDueDate()));
+                    () -> assertEquals(LocalDate.of(2027, 1, 31), created.getCreationDate()),
+                    () -> assertEquals(List.of(LocalDate.of(2027, 2, 28), LocalDate.of(2027, 3, 31),
+                            LocalDate.of(2027, 4, 30), LocalDate.of(2027, 5, 31), LocalDate.of(2027, 6, 30),
+                            LocalDate.of(2027, 7, 31), LocalDate.of(2027, 8, 31), LocalDate.of(2027, 9, 30),
+                            LocalDate.of(2027, 10, 31), LocalDate.of(2027, 11, 30), LocalDate.of(2027, 12, 31),
+                            LocalDate.of(2028, 1, 31)), dueDates()));
+        }
+
+        @Test
+        @DisplayName("TC07S-31 an order created on 29/02/2028 with 12 months has its need on 28/02/2029")
+        void leapDay() throws AccessDeniedException, ValidationException {
+            FollowUpOrder created = serviceOn("2028-02-29").orderFollowUp(PHYSICIAN, order(PATIENT, ELIGIBLE, 12));
+            assertAll(
+                    () -> assertEquals(LocalDate.of(2028, 2, 29), created.getCreationDate()),
+                    () -> assertEquals(List.of(LocalDate.of(2029, 2, 28)), dueDates()));
+        }
+
+        @Test
+        @DisplayName("TC07S-33 two follow-up orders in a row continue the ids of the needs, each need to its own order")
+        void twoFollowUpOrdersInARow() throws AccessDeniedException, ValidationException {
+            service.orderFollowUp(PHYSICIAN, validOrder());
+            service.orderFollowUp(PHYSICIAN, order("P-0002", ELIGIBLE, 12));
+            List<SchedulingNeed> pending = needs.findPending();
+            assertAll(
+                    () -> assertEquals(List.of("NEED-0001", "NEED-0002", "NEED-0003"),
+                            pending.stream().map(SchedulingNeed::getNeedId).toList()),
+                    () -> assertEquals(List.of("ORD-0001", "ORD-0001", "ORD-0002"),
+                            pending.stream().map(SchedulingNeed::getOrderId).toList()),
+                    () -> assertEquals(List.of(LocalDate.of(2027, 5, 23), LocalDate.of(2027, 11, 23),
+                            LocalDate.of(2027, 11, 23)), dueDates()));
+        }
+
+        @Test
+        @DisplayName("TC07S-34 a diagnostic order and a follow-up order share the counter of the needs")
+        void diagnosticAndFollowUpShareTheNeedCounter() throws AccessDeniedException, ValidationException {
+            service.orderDiagnosticProcedure(PHYSICIAN, diagnosticOrder());
+            service.orderFollowUp(PHYSICIAN, validOrder());
+            List<SchedulingNeed> pending = needs.findPending();
+            assertAll(
+                    () -> assertEquals(List.of("NEED-0001", "NEED-0002", "NEED-0003"),
+                            pending.stream().map(SchedulingNeed::getNeedId).toList()),
+                    () -> assertEquals(List.of("ORD-0001", "ORD-0002", "ORD-0002"),
+                            pending.stream().map(SchedulingNeed::getOrderId).toList()),
+                    () -> assertEquals(List.of(LocalDate.of(2026, 11, 23), LocalDate.of(2027, 5, 23),
+                            LocalDate.of(2027, 11, 23)), dueDates()));
         }
 
         @Test
@@ -335,17 +445,21 @@ class OrderFollowUpTest {
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = { "   " })
-        @DisplayName("TC07S-14 a blank indication or justification is rejected")
-        void blankTexts(String text) {
-            FollowUpOrder noIndication = new FollowUpOrder(null, PATIENT, ELIGIBLE, PHYSICIAN, text,
+        @DisplayName("TC07S-14 a blank clinical indication is rejected")
+        void blankIndication(String text) {
+            FollowUpOrder sent = new FollowUpOrder(null, PATIENT, ELIGIBLE, PHYSICIAN, text,
                     "Follow-up of a known lesion", null, 6);
-            FollowUpOrder noJustification = new FollowUpOrder(null, PATIENT, ELIGIBLE, PHYSICIAN, "Control of the nodule",
+            assertEquals(List.of(INDICATION_REQUIRED), errorsOf(() -> service.orderFollowUp(PHYSICIAN, sent)));
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = { "   " })
+        @DisplayName("TC07S-15 a blank justification is rejected")
+        void blankJustification(String text) {
+            FollowUpOrder sent = new FollowUpOrder(null, PATIENT, ELIGIBLE, PHYSICIAN, "Control of the nodule",
                     text, null, 6);
-            assertAll(
-                    () -> assertEquals(List.of(INDICATION_REQUIRED),
-                            errorsOf(() -> service.orderFollowUp(PHYSICIAN, noIndication))),
-                    () -> assertEquals(List.of(JUSTIFICATION_REQUIRED),
-                            errorsOf(() -> service.orderFollowUp(PHYSICIAN, noJustification))));
+            assertEquals(List.of(JUSTIFICATION_REQUIRED), errorsOf(() -> service.orderFollowUp(PHYSICIAN, sent)));
         }
 
         @Test
