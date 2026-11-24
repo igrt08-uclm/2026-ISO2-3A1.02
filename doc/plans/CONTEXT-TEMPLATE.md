@@ -3,8 +3,8 @@
 > Copy this file as `doc/plans/Cn-context.md`. The agent reads it first in step 1 of the cycle in
 > [AGENTS.md](../../AGENTS.md), instead of opening DECISIONS.md, the issues and the design every time (D-047).
 > Every line cites its source and nothing is written without one (rule 12). If a line disagrees with its source, the
-> source wins (rule 11): tell the member. Every pull request of the component updates this file, and the member who
-> merges it checks that it did.
+> source wins (rule 11): tell the member. Every pull request of the component updates the lines of its own sub-issue,
+> and the member who merges it checks that it did.
 
 | | |
 |---|---|

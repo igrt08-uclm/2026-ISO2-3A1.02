@@ -561,8 +561,8 @@ This file is also context for the AI agent: it must follow these decisions and n
     (rule 12).
   - In step 1 of the cycle the agent reads it first, and opens the sources only for what the task needs. If the file
     disagrees with a source, the source wins (rule 11) and the agent tells the member.
-  - Every pull request of the component updates the file (for example, the status of its sub-issue), and the member
-    who merges the pull request checks that it did. `develop` only changes through a pull request (D-001), so the file
+  - Every pull request of the component updates the file, but only the lines of its own sub-issue (for example, its
+    status), so that parallel branches do not conflict in it. The member who merges the pull request checks that it did. `develop` only changes through a pull request (D-001), so the file
     is not updated after the merge.
   - `doc/plans/C4-context.md` is the first one, as an example.
 - **Alternatives:** Reading all the sources in every session, as until now. Writing the summary in the component issue,

@@ -23,7 +23,7 @@ Every task that changes files follows this cycle. Do not skip steps, and do not 
    the sub-issue in `doc/plans/`. Open the contracts (section 6 of the component issue), the approved design
    (`doc/design/`) and the decisions only for what the task needs, or if the component has no context file yet. If
    the context file disagrees with a source, the source wins (rule 11): tell the member. The pull request updates the
-   context file, and the member who merges it checks that it did.
+   lines of its own sub-issue in the context file, and the member who merges it checks that it did.
    Check that the sub-issue is assigned to the member who asked for the work. If it is assigned to someone else, or
    its plan shows a step *In progress* by another member, stop and tell the member (D-041). Remind the member to move
    it to *In progress* on the project board.
