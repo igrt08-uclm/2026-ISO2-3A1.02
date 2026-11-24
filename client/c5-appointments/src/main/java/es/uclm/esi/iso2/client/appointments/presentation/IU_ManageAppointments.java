@@ -33,7 +33,8 @@ import javax.swing.table.DefaultTableModel;
 /**
  * Screen of UC13 (C5, {@code IU_ManageAppointments}): the admissions staff sees the pending scheduling needs of C4,
  * asks for the free slots of the room of a test type on a day, books a need in a free slot and moves or cancels the
- * appointments. It only talks to the contract {@link IAppointmentService} of {@code common}, never to the server classes.
+ * appointments. It only talks to the contract {@link IAppointmentService} of {@code common}, never to the server
+ * classes.
  */
 public class IU_ManageAppointments extends JPanel {
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -90,15 +91,8 @@ public class IU_ManageAppointments extends JPanel {
     private final JButton btnReschedule = new JButton("Move");
     private final JButton btnCancel = new JButton("Cancel appointment");
     private final JLabel lblStatus = new JLabel(" ");
+    private final Color textColor = lblStatus.getForeground();
 
-    /**
-     * Creates the screen.
-     *
-     * @param service the contract of C5 to manage the appointments
-     * @param requester the username of the admissions staff
-     * @param confirm asks the user a question and returns whether they accept (the tests pass a fake)
-     * @param onBack what to do when the user presses <em>Back</em>
-     */
     /**
      * Creates the screen using the system clock for the default day.
      *
@@ -143,8 +137,10 @@ public class IU_ManageAppointments extends JPanel {
         needTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         needTable.getSelectionModel().addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
-                slots.clear();
-                slotModel.setRowCount(0);
+                if (needTable.getSelectedRow() >= 0) {
+                    appointmentTable.clearSelection();
+                }
+                clearSlots();
             }
         });
         left.add(new JScrollPane(needTable), BorderLayout.CENTER);
@@ -186,8 +182,10 @@ public class IU_ManageAppointments extends JPanel {
         appointmentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         appointmentTable.getSelectionModel().addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
-                slots.clear();
-                slotModel.setRowCount(0);
+                if (appointmentTable.getSelectedRow() >= 0) {
+                    needTable.clearSelection();
+                }
+                clearSlots();
             }
         });
         bottom.add(new JScrollPane(appointmentTable), BorderLayout.CENTER);
@@ -224,12 +222,15 @@ public class IU_ManageAppointments extends JPanel {
             readNeeds = service.getPendingSchedulingNeeds(requester);
             readAppointments = service.getAppointments(requester);
         } catch (AccessDeniedException deniedException) {
+            clearSlots();
             showAccessDenied();
             return false;
         } catch (ValidationException validationException) {
+            clearSlots();
             showErrors(validationException.getErrors());
             return false;
         } catch (RuntimeException exception) {
+            clearSlots();
             showErrors(List.of("The data could not be read: " + exception.getMessage()));
             return false;
         }
@@ -245,7 +246,7 @@ public class IU_ManageAppointments extends JPanel {
         appointments.clear();
         appointments.addAll(readAppointments);
         displayAppointments();
-        lblStatus.setText(" ");
+        showInformation(" ");
         return true;
     }
 
@@ -266,6 +267,7 @@ public class IU_ManageAppointments extends JPanel {
         }
         PendingNeedView need = selectedNeed();
         if (need == null && testTypeId == null) {
+            clearSlots();
             showErrors(List.of("Select a pending need or an appointment before looking for slots."));
             return;
         }
@@ -276,6 +278,7 @@ public class IU_ManageAppointments extends JPanel {
         try {
             day = LocalDate.parse(txtDate.getText().trim(), DAY);
         } catch (DateTimeParseException invalid) {
+            clearSlots();
             showErrors(List.of("The day must be written as dd/MM/yyyy"));
             return;
         }
@@ -290,12 +293,17 @@ public class IU_ManageAppointments extends JPanel {
             if (slots.isEmpty()) {
                 showErrors(List.of("There are no free slots on that day for that test type."));
             } else {
-                lblStatus.setText(slots.size() == 1 ? "1 free slot." : slots.size() + " free slots.");
+                showInformation(slots.size() == 1 ? "1 free slot." : slots.size() + " free slots.");
             }
         } catch (AccessDeniedException deniedException) {
+            clearSlots();
             showAccessDenied();
         } catch (ValidationException validationException) {
+            clearSlots();
             showErrors(validationException.getErrors());
+        } catch (RuntimeException exception) {
+            clearSlots();
+            showErrors(List.of("The free slots could not be read: " + exception.getMessage()));
         }
     }
 
@@ -332,6 +340,8 @@ public class IU_ManageAppointments extends JPanel {
             showAccessDenied();
         } catch (ValidationException validationException) {
             showErrors(validationException.getErrors());
+        } catch (RuntimeException exception) {
+            showErrors(List.of("The appointment could not be booked: " + exception.getMessage()));
         }
     }
 
@@ -368,6 +378,8 @@ public class IU_ManageAppointments extends JPanel {
             showAccessDenied();
         } catch (ValidationException validationException) {
             showErrors(validationException.getErrors());
+        } catch (RuntimeException exception) {
+            showErrors(List.of("The appointment could not be moved: " + exception.getMessage()));
         }
     }
 
@@ -400,7 +412,26 @@ public class IU_ManageAppointments extends JPanel {
             showAccessDenied();
         } catch (ValidationException validationException) {
             showErrors(validationException.getErrors());
+        } catch (RuntimeException exception) {
+            showErrors(List.of("The appointment could not be cancelled: " + exception.getMessage()));
         }
+    }
+
+    /** Empties the table of free slots and the list behind it. */
+    private void clearSlots() {
+        slots.clear();
+        slotModel.setRowCount(0);
+    }
+
+    /**
+     * Shows a message of information (a count) in the default colour of the screen, so that an error before it does not
+     * leave its colour.
+     *
+     * @param message the message
+     */
+    private void showInformation(String message) {
+        lblStatus.setForeground(textColor);
+        lblStatus.setText(message);
     }
 
     /**
