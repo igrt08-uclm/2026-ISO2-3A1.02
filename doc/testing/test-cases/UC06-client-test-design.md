@@ -35,6 +35,9 @@ Every question "Discard the unsaved changes?" is answered by the test (Yes or No
 
 | Input | Parameter | Equivalence classes | Testing values |
 |---|---|---|---|
+| Select patient | Previous form | Edited after validation | Two texts, four red borders and two order rows |
+| Select patient | Failed lookup (**Conjeture**) | C3 unavailable, denied or unknown ID | TC06C-56, 61, 60 |
+| Select patient | Failed form read (**Conjeture**) | C2 offline, C4 rejects, denies or fails | TC06C-55, 57 to 59 |
 | Opening (constructor, `onSearch`) | state of C3 | Allows, with patients | the three patients |
 | | | Denies | `denyAll()` before opening |
 | | | Fails (Conjeture) | `IllegalStateException("The server cannot be reached")` |
@@ -74,6 +77,8 @@ the message area (green for success, red with `⚠` for errors), the order sent 
 questions asked and whether *Back* runs its action.
 
 ## 2. Combination of the values
+
+TC06C-55 to 61 vary one failed read or lookup at a time with the same previous patient, draft and validation borders.
 The inputs of the form only matter after an active patient is selected, so the suite is built with **each use**: every
 testing value of section 1 appears in at least one case, and the rest of the form takes a valid value (`CT-HEAD`,
 `URGENT · Urgent`, "Headache after a fall", "Rule out bleeding", Lucía). The pairs that the code combines in one
@@ -136,6 +141,11 @@ the selection of the table while Lucía's row is selected). Not covered: the `va
 the table (Swing only sends it while the mouse is dragged). The `catch` of `findPatient` that hid F-01
 was removed by `c227441`.
 
+Step 14 (`a2f6942`) separates patient lookup failures (TC06C-56, 60, 61) from failures loading the order form
+(TC06C-55, 57 to 59). TC06C-03 exercises both reads successfully. These exception paths add no compound decision.
+With TC06C-55 to 61, the module's coverage CSV reports 321/321 lines (100 %) and 83/84 branches (98.8 %).
+All 60 tests in `IU_OrderProcedureTest` passed.
+
 ## 4. Test cases
 
 | ID | Method/action | Input (and precondition) | Expected result | Test |
@@ -195,11 +205,40 @@ was removed by `c227441`.
 | TC06C-53 | *Place order* | Valid form of Lucía; C4 creates the order but every later reading of the orders fails with "The server cannot be reached" (Conjeture; `326d8ed`) | The order is sent once; "⚠ The orders could not be read: The server cannot be reached" in red; the orders of P-0001 are read twice (on selecting and after the order) (step 13; see section 5) | `tc06c53FailureReadingTheOrdersAfterAnOrder` |
 | TC06C-54 | *Place order* | Valid form of Lucía; C4 creates the order but the reading of the orders is denied (Conjeture; `326d8ed`) | The order is sent once; "⚠ You do not have permission to order procedures." in red; form disabled; *Back* enabled (Q8; see section 5) | `tc06c54DeniedReadingTheOrdersAfterAnOrder` |
 
+TC06C-55 to 61 start with Lucía selected and two orders. Submit with all four fields empty to mark them red, then
+type an indication and justification. Select Mario and confirm discarding the draft, except in TC06C-60, which calls
+`onSelectPatient("HC-9999999")`. Each failed lookup or read is a **Conjeture**. Source for all seven cases and
+their postcondition: step 14 of the client plan and `a2f6942`.
+
+**Reset** means no selected patient, all order controls disabled, both texts empty, no red borders and zero order rows.
+Each case also checks the red status message. Denied uses the Q8 message. The other messages are:
+
+- E1: “⚠ The orders could not be read: Catalogue offline”
+- E2: “⚠ The patient could not be read: Registry offline”
+- E3: “⚠ Patient unavailable”
+- E4: “⚠ The orders could not be read: Orders offline”
+- E5: “⚠ There is no patient with the identifier HC-9999999”
+
+| ID | Method | Input (and precondition) | Expected result | Test |
+|---|---|---|---|---|
+| TC06C-55 | Select | C2 types offline | Reset, E1 | `tc06c55TestTypeReadFails` |
+| TC06C-56 | Select | C3 lookup offline | Reset, E2 | `tc06c56PatientSearchFails` |
+| TC06C-57 | Select | C4 rejects read | Reset, E3 | `tc06c57OrderReadRejected` |
+| TC06C-58 | Select | C4 denies read | Reset, denied | `tc06c58OrderReadDenied` |
+| TC06C-59 | Select | C4 offline | Reset, E4 | `tc06c59OrderReadFails` |
+| TC06C-60 | Select | Unknown ID | Reset, E5 | `tc06c60UnknownPatientClearsDraft` |
+| TC06C-61 | Select | C3 denies lookup | Reset, denied | `tc06c61PatientLookupDenied` |
+
 Postcondition of every case: nothing is stored except by `orderDiagnosticProcedure` of the fake (TC06C-17, 18); after
 a rejected, denied or failed order, or an error of the client, no order is created and the list of the patient is the
 same; the screen is never shown.
 
 ## 5. Not covered / Not defined
+
+**Step 14 review.** The failed-selection expectations in TC06C-55 to 61 are defined by `a2f6942`.
+Design subsequently answered in issue #67 that a failed reload after creation should show the error (as in TC13C-46)
+and that Testing should drop or adapt the VIP case to configured priorities. Step 15 remains open at `ac200cf`.
+This review adds no expected value for the created order ID and changes no existing case.
 
 **Defects found** in the review of `feature/UC06-client` (#204). F-01 to F-04 are **fixed** by Implementation in
 `c227441` (F-01) and `4fd6204` (F-02 to F-04), steps 9 to 11 of `doc/plans/UC06-client.md`, and checked by TC06C-44 to

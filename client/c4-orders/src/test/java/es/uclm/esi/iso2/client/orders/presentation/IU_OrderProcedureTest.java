@@ -1119,4 +1119,125 @@ class IU_OrderProcedureTest {
                 () -> assertFalse(formEnabled(screen)),
                 () -> assertTrue(Screen.button(screen, "Back").isEnabled()));
     }
+
+    private IU_OrderProcedure draftWithMarkedFields() {
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        combo(screen, TEST_TYPE).setSelectedIndex(-1);
+        combo(screen, PRIORITY).setSelectedIndex(-1);
+        placeOrder(screen);
+        field(screen, INDICATION).setText("Persistent headache");
+        field(screen, JUSTIFICATION).setText("Rule out bleeding");
+        assertEquals(List.of(true, true, true, true), bordered(screen));
+        assertEquals(2, screen.getOrdersTable().getRowCount());
+        return screen;
+    }
+
+    private static void assertFailedSelection(IU_OrderProcedure screen, String message) {
+        assertAll(
+                () -> assertEquals(message, screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertEquals("", field(screen, INDICATION).getText()),
+                () -> assertEquals("", field(screen, JUSTIFICATION).getText()),
+                () -> assertEquals(List.of(false, false, false, false), bordered(screen)),
+                () -> assertEquals(0, screen.getOrdersTable().getRowCount()));
+    }
+
+    @Test
+    @DisplayName("TC06C-55 Reading test types fails after a valid selection")
+    void tc06c55TestTypeReadFails() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        parameters.failTestTypeReads(new IllegalStateException("Catalogue offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, "⚠ The orders could not be read: Catalogue offline");
+    }
+
+    @Test
+    @DisplayName("TC06C-56 Patient lookup fails after a valid selection")
+    void tc06c56PatientSearchFails() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        patients.failSearches(new IllegalStateException("Registry offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, "⚠ The patient could not be read: Registry offline");
+    }
+
+    @Test
+    @DisplayName("TC06C-57 Reading orders fails validation after a valid selection")
+    void tc06c57OrderReadRejected() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        orders.failReads(new ValidationException(List.of("Patient unavailable")));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, "⚠ Patient unavailable");
+    }
+
+    @Test
+    @DisplayName("TC06C-58 Reading orders is denied after a valid selection")
+    void tc06c58OrderReadDenied() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        orders.failReads(new AccessDeniedException(REQUESTER));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, DENIED);
+    }
+
+    @Test
+    @DisplayName("TC06C-59 Reading orders fails after a valid selection")
+    void tc06c59OrderReadFails() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        orders.failReads(new IllegalStateException("Orders offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, "⚠ The orders could not be read: Orders offline");
+    }
+
+    @Test
+    @DisplayName("TC06C-60 An unknown identifier clears the previous draft after a valid selection")
+    void tc06c60UnknownPatientClearsDraft() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+
+        // Act
+        screen.onSelectPatient("HC-9999999");
+
+        // Assert
+        assertFailedSelection(screen, "⚠ There is no patient with the identifier HC-9999999");
+    }
+
+    @Test
+    @DisplayName("TC06C-61 Patient lookup is denied after a valid selection")
+    void tc06c61PatientLookupDenied() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        patients.denyAll();
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, DENIED);
+    }
 }
