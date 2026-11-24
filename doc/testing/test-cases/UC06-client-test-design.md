@@ -178,7 +178,7 @@ All 60 tests in `IU_OrderProcedureTest` passed.
 | TC06C-26 | select row | Reading fails (Conjeture) | "⚠ The orders could not be read: The server cannot be reached"; form disabled | `tc06c26FailureWhileReadingTheOrders` |
 | TC06C-27 | constructor | Search of C3 fails (Conjeture) | "⚠ The patients could not be read: The server cannot be reached"; no row; the search box stays enabled | `tc06c27FailureWhileReadingThePatients` |
 | TC06C-28 | tables | Lucía selected | No cell of the two tables (9 + 8) is editable; the only buttons are *Search*, *Place order* and *Back*: nothing edits or cancels an order (D-039) | `tc06c28OrdersCannotBeEdited` |
-| TC06C-29 | `displayOrders` | An order without date of `PET-BODY` and priority `VIP` (not in C2), and an order that is not a `DiagnosticOrder` (Conjeture) | Rows `"" · PET-BODY · VIP · Staging` and `22/11/2026 · Head CT · "" · Control` (the id when the name is unknown) | `tc06c29UnusualOrdersAreListed` |
+| TC06C-29 | `displayOrders` | Two unusual orders (see below) | Rows A and B below | `tc06c29UnusualOrdersAreListed` |
 | TC06C-30 | *Back* | Lucía, empty form | Runs its action; no question (Q11) | `tc06c30BackWithEmptyForm` |
 | TC06C-31 | *Back* | Lucía, indication typed; answer No | "Discard the unsaved changes?" asked; *Back* does not run; the text is kept (Q11) | `tc06c31BackWithIndicationAnsweredNo` |
 | TC06C-32 | *Back* | Lucía, only the justification typed; answer Yes | The question asked; *Back* runs (Q11) | `tc06c32BackWithJustificationAnsweredYes` |
@@ -204,6 +204,12 @@ All 60 tests in `IU_OrderProcedureTest` passed.
 | TC06C-52 | select row | Lucía selected, the permission of C3 is revoked, then Mario is selected (Conjeture; `326d8ed`) | "⚠ You do not have permission to order procedures." in red; no patient selected; form disabled; orders table empty; *Back* enabled (Q8, step 13) | `tc06c52PermissionLostAfterAValidSelection` |
 | TC06C-53 | *Place order* | Valid form of Lucía; C4 creates the order but every later reading of the orders fails with "The server cannot be reached" (Conjeture; `326d8ed`) | The order is sent once; "⚠ The orders could not be read: The server cannot be reached" in red; the orders of P-0001 are read twice (on selecting and after the order) (step 13; see section 5) | `tc06c53FailureReadingTheOrdersAfterAnOrder` |
 | TC06C-54 | *Place order* | Valid form of Lucía; C4 creates the order but the reading of the orders is denied (Conjeture; `326d8ed`) | The order is sent once; "⚠ You do not have permission to order procedures." in red; form disabled; *Back* enabled (Q8; see section 5) | `tc06c54DeniedReadingTheOrdersAfterAnOrder` |
+
+TC06C-29 (**Conjeture**) displays an undated diagnostic order for the uncatalogued test type PET-BODY with the
+configured ROUTINE priority, followed by a non-diagnostic order for CT-HEAD. The expected rows are:
+
+- A: an empty date, `PET-BODY`, `ROUTINE · Routine`, `Staging`.
+- B: `22/11/2026`, `Head CT`, an empty priority, `Control`.
 
 TC06C-55 to 61 start with Lucía selected and two orders. Submit with all four fields empty to mark them red, then
 type an indication and justification. Select Mario and confirm discarding the draft, except in TC06C-60, which calls
@@ -236,9 +242,15 @@ same; the screen is never shown.
 ## 5. Not covered / Not defined
 
 **Step 14 review.** The failed-selection expectations in TC06C-55 to 61 are defined by `a2f6942`.
-Design subsequently answered in issue #67 that a failed reload after creation should show the error (as in TC13C-46)
-and that Testing should drop or adapt the VIP case to configured priorities. Step 15 remains open at `ac200cf`.
-This review adds no expected value for the created order ID and changes no existing case.
+**Changed expected values**
+
+- TC06C-29, priority column: `VIP` → `ROUTINE · Routine` for the configured priority `ROUTINE`.
+  Source: Design, #67, 24/11/2026.
+
+**Confirmed expected values**
+
+- TC06C-53/54: if reloading fails after an order is created, show the error, consistent with TC13C-46.
+  Both cases retain their expected messages. Source: Design, #67, 24/11/2026.
 
 **Defects found** in the review of `feature/UC06-client` (#204). F-01 to F-04 are **fixed** by Implementation in
 `c227441` (F-01) and `4fd6204` (F-02 to F-04), steps 9 to 11 of `doc/plans/UC06-client.md`, and checked by TC06C-44 to
@@ -257,8 +269,7 @@ and 19 and the priorities chosen in the other cases follow it.
   the form had no `setLabelFor` nor `setDisplayedMnemonic` (TC06C-49).
 - **F-05 (decided by Design, PR #204, 23/11/2026; fixed, `61e7246`) – The priority was shown only by its name.**
   *Usability decisions* says "the priority is shown by its name, with its id next to it"; the list and the table showed
-  only the name. Design decided `URGENT · Urgent` in the list and in the column *Priority* (TC06C-03, 06, 17); an order
-  whose priority is not in C2 (TC06C-29, `VIP`) is not defined by Design, so its expected value is not changed.
+  only the name. Design decided `URGENT · Urgent` in the list and in the column *Priority* (TC06C-03, 06, 17).
 
 **Not defined** (no expected result in the plan or the specification):
 - The order of the list of orders (the client shows them in the order of C4; newest first is not said).
@@ -267,14 +278,6 @@ and 19 and the priorities chosen in the other cases follow it.
 - Whether a priority or test type is chosen by default (the code selects the first item of each list; the default
   priority of the test type in C2 is not used).
 - What happens if *Place order* is pressed twice quickly.
-- **After an order created, a failed reading of the orders (`326d8ed`, step 13 of the plan).** Step 13 only says
-  that the reading of the orders after the order "goes in its own `try`"; neither the plan (Q7, Q8) nor #204 says what
-  the screen shows then. The code writes "⚠ The orders could not be read: …" (a `RuntimeException`, TC06C-53) or the
-  denied message (an `AccessDeniedException`, which the inner `try` does not catch, TC06C-54) in the same message area,
-  so "Order ORD-0003 created." is replaced and the user is not told that the order was created nor its id. The cases
-  assert only what is certain: the order was sent once and the error is shown. Not asserted: the success message, the
-  fields emptied and the rows of the orders table after the failure. Implementation or Design to decide whether the
-  success has to stay visible.
 - Q4 says the patient is read with `getPatient`; the code finds it with `searchPatients` by its identifier. The
   behaviour is the same for the user, so no case checks the call.
 

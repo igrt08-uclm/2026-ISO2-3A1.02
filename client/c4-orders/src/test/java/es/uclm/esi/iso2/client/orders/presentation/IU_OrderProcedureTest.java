@@ -700,10 +700,10 @@ class IU_OrderProcedureTest {
 
         // Act
         screen.displayOrders(List.of(new DiagnosticOrder("ORD-0004", "P-0001", "PET-BODY", REQUESTER, "Staging",
-                "Rule out metastasis", null, "VIP"), notDiagnostic));
+                "Rule out metastasis", null, "ROUTINE"), notDiagnostic));
 
         // Assert
-        assertEquals(List.of(List.of("", "PET-BODY", "VIP", "Staging"),
+        assertEquals(List.of(List.of("", "PET-BODY", "ROUTINE · Routine", "Staging"),
                 List.of("22/11/2026", "Head CT", "", "Control")), Screen.rows(screen.getOrdersTable()));
     }
 
