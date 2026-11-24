@@ -47,6 +47,8 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
 2. `IU_OrderFollowUp`.
 3. `IU_Welcome`, `Main` and the versions.
 4. Branch `feature/UC07-client-tests` for Adam and the pull request.
+- [x] F-02: *Search* disabled after a denied access (`5732b3c`).
+- [x] F-01: the denied message is kept when a patient is selected (`da9a75d`).
 
 ## Verification
 - [x] Every acceptance criterion of #70 that the screen can satisfy: the form offers only eligible test types, it
@@ -57,12 +59,11 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
 - [ ] `mvn -B verify` green with the tests of Adam (Testing).
 
 ## Status
-- **In progress:** nothing; steps 1 to 3 are done and pushed in `feature/UC07-client` (pull request #207).
+- **In progress:** nothing. **Next step:** Testing (Adam) adds the cases of F-01 and F-02 to `IU_OrderFollowUpTest`.
+  Still open for the group: the interval of 13 months or more.
 - **Done:** `da1ee8c` the screen, `74de1d5` the button *Order follow-up*, `Main` and the versions, `6c82beb` this plan.
   Correction of the review of 23/11/2026: the `JSpinner` of the interval goes from **0** to 120 months, because with a
   minimum of 1 the check `<= 0` of the screen never ran; the message of the design is now reachable (0 months) and the
   negative values are still impossible.
-- **Next step:** step 4, the branch `feature/UC07-client-tests` for Adam: the tests of `IU_OrderFollowUp` in a machine
-  with a display, and the manual walk of *Usability decisions*.
 - **Open questions:** none.
-- **Last update:** 23/11/2026, Ignacio — screen corrected after the review; the implementation is complete.
+- **Last update:** 24/11/2026, Ignacio (fixes F-01 and F-02 of the review of Testing, #207).
