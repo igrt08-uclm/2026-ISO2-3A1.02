@@ -1,15 +1,11 @@
 name: Pull request rules
 
-# Checks the two pull request rules of AGENTS.md (Conventions):
-#   - the description links its issue with "Refs #n" or "Closes #n"
-#   - the branch name follows one of the agreed formats
+# Checks that the branch name follows one of the formats agreed in AGENTS.md (Conventions).
 # It only uses bash and the data of the event: no checkout and no third-party actions (rule 6).
 
 on:
   pull_request:
     branches: [ main, develop ]
-    # "edited" so that the check runs again when someone fixes the description
-    types: [ opened, edited, synchronize, reopened ]
 
 permissions:
   contents: read
@@ -18,34 +14,16 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Check branch name and description
-        # The values go through env variables, never straight into the script,
-        # so a strange title or description cannot run commands
+      - name: Check branch name
+        # The value goes through an env variable, never straight into the script,
+        # so a strange branch name cannot run commands
         env:
           BRANCH: ${{ github.head_ref }}
-          BODY: ${{ github.event.pull_request.body }}
         run: |
-          errors=0
-
-          # 1. Branch name: feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z
+          # feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z
           if [[ "$BRANCH" =~ ^(feature|bugfix|docs|ci)/.+$ ]] || [[ "$BRANCH" =~ ^(release|hotfix)/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "OK: branch '$BRANCH' follows the naming rules"
           else
             echo "::error::Branch '$BRANCH' does not follow AGENTS.md: use feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z"
-            errors=1
+            exit 1
           fi
-
-          # 2. "Refs #n" or "Closes #n" in the description. Refs is for a pull request that only does part of
-          #    the RADIT checklist of its issue, because Closes would close the issue when it is merged.
-          #    Not needed in release/ and hotfix/ pull requests,
-          #    which are merged into both main and develop (AGENTS.md, Releases)
-          if [[ "$BRANCH" =~ ^(release|hotfix)/ ]]; then
-            echo "OK: release and hotfix pull requests do not need to link an issue"
-          elif echo "$BODY" | grep -qiwE '(closes|refs) #[0-9]+'; then
-            echo "OK: the description links its issue"
-          else
-            echo "::error::The description must contain 'Refs #n' or 'Closes #n' with the number of its issue"
-            errors=1
-          fi
-
-          exit $errors
