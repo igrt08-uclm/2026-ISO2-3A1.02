@@ -9,7 +9,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 │   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.4-SNAPSHOT), depends on common
 │   ├── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.1.2-SNAPSHOT), depends only on common
 │   ├── c3-patients/     server of C3 (artifactId `server-c3-patients`, version 1.0.1-SNAPSHOT), depends only on common
-│   └── c4-orders/       server of C4 (artifactId `server-c4-orders`, version 1.0.0-SNAPSHOT), depends only on common
+│   └── c4-orders/       server of C4 (artifactId `server-c4-orders`, version 1.1.0-SNAPSHOT), depends only on common
 └── client/              aggregator of the client submodules (one per component)
     ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.5-SNAPSHOT), depends on common, server-c1-access and,
     │                    because its `Main` starts the whole program, on server-c2-configuration, client-c2-configuration,

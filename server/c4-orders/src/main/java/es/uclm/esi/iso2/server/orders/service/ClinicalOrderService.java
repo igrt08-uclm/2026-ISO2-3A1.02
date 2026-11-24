@@ -9,6 +9,7 @@ import es.uclm.esi.iso2.common.configuration.domain.TestType;
 import es.uclm.esi.iso2.common.orders.contracts.IClinicalOrderService;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
+import es.uclm.esi.iso2.common.orders.domain.FollowUpOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeedStatus;
 import es.uclm.esi.iso2.common.patients.contracts.IPatientService;
@@ -41,10 +42,12 @@ public class ClinicalOrderService implements IClinicalOrderService {
     private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
     private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
     private static final String CREATED = "ORDER_CREATED";
+    private static final String FOLLOW_UP_CREATED = "FOLLOW_UP_ORDER_CREATED";
     private static final String ACCESS_DENIED = "ORDER_ACCESS_DENIED";
     private static final String ORDERS = "orders";
     private static final String ORDER = "ORDER:";
     private static final String SCHEDULING_NEED = "SCHEDULING_NEED:";
+    private static final int MAX_RECURRENCE_INTERVAL_MONTHS = 12;
 
     private final IClinicalOrderRepository orders;
     private final ISchedulingNeedRepository needs;
@@ -107,6 +110,23 @@ public class ClinicalOrderService implements IClinicalOrderService {
         orders.save(created);
         createSchedulingNeeds(created);
         auditRecorder.register(requester, CREATED, ORDER + created.getOrderId());
+        return created;
+    }
+
+    @Override
+    public FollowUpOrder orderFollowUp(String requester, FollowUpOrder order)
+            throws AccessDeniedException, ValidationException {
+        checkPermission(requester, ORDERS);
+        List<String> errors = validateFollowUp(requester, order);
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+        FollowUpOrder created = new FollowUpOrder(nextOrderId(), order.getPatientId(), order.getTestTypeId(),
+                requester, order.getIndication(), order.getJustification(), LocalDate.now(clock),
+                order.getRecurrenceIntervalMonths());
+        orders.save(created);
+        createFollowUpSchedulingNeeds(created);
+        auditRecorder.register(requester, FOLLOW_UP_CREATED, ORDER + created.getOrderId());
         return created;
     }
 
@@ -255,6 +275,67 @@ public class ClinicalOrderService implements IClinicalOrderService {
                 SchedulingNeedStatus.PENDING);
         needs.save(need);
         return List.of(need);
+    }
+
+    /**
+     * Every reason why the follow-up order cannot be created, in this order: order, patient, test type, recurrence
+     * interval, clinical indication and justification.
+     */
+    private List<String> validateFollowUp(String requester, FollowUpOrder order) throws AccessDeniedException {
+        List<String> errors = new ArrayList<>();
+        if (order == null) {
+            errors.add("The order is required");
+            return errors;
+        }
+        checkPatient(requester, order.getPatientId(), errors);
+        checkFollowUpTestType(requester, order.getTestTypeId(), errors);
+        if (order.getRecurrenceIntervalMonths() <= 0) {
+            errors.add("The recurrence interval must be a positive number of months");
+        } else if (order.getRecurrenceIntervalMonths() > MAX_RECURRENCE_INTERVAL_MONTHS) {
+            errors.add("The recurrence interval cannot be more than 12 months");
+        }
+        if (blank(order.getIndication())) {
+            errors.add("The clinical indication is required");
+        }
+        if (blank(order.getJustification())) {
+            errors.add("The justification is required");
+        }
+        return errors;
+    }
+
+    /** The test type must be given, exist in the catalogue of C2, be active and be eligible for follow-up. */
+    private void checkFollowUpTestType(String requester, String testTypeId, List<String> errors)
+            throws AccessDeniedException {
+        if (blank(testTypeId)) {
+            errors.add("The test type is required");
+            return;
+        }
+        try {
+            TestType testType = systemParameterService.getTestType(requester, testTypeId);
+            if (!testType.isActive()) {
+                errors.add("The test type " + testTypeId + " is not active");
+            } else if (!testType.isFollowUpEligible()) {
+                errors.add("The test type " + testTypeId + " is not eligible for follow-up");
+            }
+        } catch (ValidationException unknown) {
+            errors.addAll(unknown.getErrors());
+        }
+    }
+
+    /**
+     * A follow-up order generates the pending needs of the next 12 months at once, without a timer (D-040): one every
+     * {@code recurrenceIntervalMonths} months, starting one interval after the creation date.
+     */
+    private List<SchedulingNeed> createFollowUpSchedulingNeeds(FollowUpOrder order) {
+        List<SchedulingNeed> created = new ArrayList<>();
+        for (int month = order.getRecurrenceIntervalMonths(); month <= 12;
+                month += order.getRecurrenceIntervalMonths()) {
+            SchedulingNeed need = new SchedulingNeed(nextNeedId(), order.getOrderId(),
+                    order.getCreationDate().plusMonths(month), SchedulingNeedStatus.PENDING);
+            needs.save(need);
+            created.add(need);
+        }
+        return created;
     }
 
     /**

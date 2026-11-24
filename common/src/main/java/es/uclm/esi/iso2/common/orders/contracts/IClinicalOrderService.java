@@ -3,6 +3,7 @@ package es.uclm.esi.iso2.common.orders.contracts;
 import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
+import es.uclm.esi.iso2.common.orders.domain.FollowUpOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
 import es.uclm.esi.iso2.common.shared.ValidationException;
 import java.util.List;
@@ -27,6 +28,22 @@ public interface IClinicalOrderService {
      * @throws ValidationException with every reason if the order is not valid; nothing is saved
      */
     DiagnosticOrder orderDiagnosticProcedure(String requester, DiagnosticOrder order)
+            throws AccessDeniedException, ValidationException;
+
+    /**
+     * Creates a periodic follow-up order for an active patient and a test type eligible for follow-up, with its
+     * clinical indication, its justification and a positive recurrence interval, and the pending scheduling needs of
+     * the next 12 months (D-040). The server gives the {@code orderId}, takes the requester as the physician who asked
+     * for it and today as the creation date.
+     *
+     * @param requester the username of the physician who orders
+     * @param order the data of the order; its {@code orderId}, {@code requester} and {@code creationDate} are
+     *        ignored
+     * @return the created order, with its {@code orderId}, {@code requester} and {@code creationDate}
+     * @throws AccessDeniedException if the requester does not have {@code ORDER_PROCEDURES}
+     * @throws ValidationException with every reason if the order is not valid; nothing is saved
+     */
+    FollowUpOrder orderFollowUp(String requester, FollowUpOrder order)
             throws AccessDeniedException, ValidationException;
 
     /**

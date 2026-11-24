@@ -217,6 +217,10 @@ or nothing (rejected); an order is never changed after it is created (D-039).
 
 ## 5. Not covered / Not defined
 
+**Changed expected value (when UC07 joins, #205/#206):** TC06S-53 expected 6 operations (Q11 of UC06); UC07 adds
+`orderFollowUp`, so on the branches that carry UC07 it expects 7 operations. The second assertion (no operation
+changes an order, D-039) is the same.
+
 TC06S-41, 43 and 44 split into a/b/c: one id per test method (review of
 [#203](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/203), 24/11/2026)
 

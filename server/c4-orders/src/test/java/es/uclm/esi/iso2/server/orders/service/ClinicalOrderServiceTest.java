@@ -635,7 +635,8 @@ class ClinicalOrderServiceTest {
             List<String> forbidden = List.of("update", "edit", "modify", "cancel", "delete", "remove");
             List<String> names = Arrays.stream(IClinicalOrderService.class.getMethods()).map(Method::getName).toList();
             assertAll(
-                    () -> assertEquals(6, names.size()),
+                    () -> assertEquals(7, names.size(),
+                            "UC07 added orderFollowUp: C4 has seven operations and none of them changes an order"),
                     () -> assertFalse(names.stream().anyMatch(name -> forbidden.stream()
                             .anyMatch(prefix -> name.toLowerCase(Locale.ROOT).startsWith(prefix)))));
         }
