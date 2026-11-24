@@ -4,12 +4,12 @@ Radiodiagnostics and Medical Imaging Management System (SESCAM)
 Iteration 6 (Milestone 4) – Analysis discipline
 - C6 Patient portal ([#186](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/186)): UC01 ([#187](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/187)) and UC04 ([#190](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/190))
 
-Each entry records the context, the decision and the rationale. The numbering continues from [AN-C5-DECISIONS.md](AN-C5-DECISIONS.md); the rules of [AN-IT1-DECISIONS.md](AN-IT1-DECISIONS.md), [AN-C2-C3-DECISIONS.md](AN-C2-C3-DECISIONS.md), [AN-C4-DECISIONS.md](AN-C4-DECISIONS.md) and [AN-C5-DECISIONS.md](AN-C5-DECISIONS.md) still apply (BCE pattern D07, naming D08, `AuditLog` written by every use case D10, permission check shown explicitly D16). The decisions of the team are written `D-0xx`; the decisions of the analysis, `Dxx`.
+Each entry records the context, the decision and the rationale. The numbering continues from [AN-C5-DECISIONS.md](../AN-C5-DECISIONS.md); the rules of [AN-IT1-DECISIONS.md](../AN-IT1-DECISIONS.md), [AN-C2-C3-DECISIONS.md](../AN-C2-C3-DECISIONS.md), [AN-C4-DECISIONS.md](../AN-C4-DECISIONS.md) and [AN-C5-DECISIONS.md](../AN-C5-DECISIONS.md) still apply (BCE pattern D07, naming D08, `AuditLog` written by every use case D10, permission check shown explicitly D16). The decisions of the team are written `D-0xx`; the decisions of the analysis, `Dxx`.
 Status: **Agreed** = decided by the team · **To confirm** = proposed, pending team approval.
 
 Artefacts of this iteration (PlantUML, the official version since D-046):
-- [`analysis/UC01-patient-appointments-sequence.puml`](analysis/UC01-patient-appointments-sequence.puml)
-- [`analysis/UC04-patient-feedback-sequence.puml`](analysis/UC04-patient-feedback-sequence.puml)
+- [`UC01-patient-appointments-sequence.puml`](UC01-patient-appointments-sequence.puml)
+- [`UC04-patient-feedback-sequence.puml`](UC04-patient-feedback-sequence.puml)
 
 The alternative scenarios are drawn in the diagrams as `alt`/`else` fragments. The messages of the main flow keep consecutive numbers; the messages of an alternative scenario take the number of the step where it starts plus a letter (`3a`, `3b`…).
 
