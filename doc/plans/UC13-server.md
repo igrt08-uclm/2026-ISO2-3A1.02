@@ -77,7 +77,10 @@
   - Step 3 – D2 `6721cfd`: the seed appointments are on the first working day after the start (`nextWorkingDay`).
   - Step 4 – D3 `6ca690e`: the C4 seed needs use the clock of the service.
   - Step 5 – D4 `65273ef`: the C4 seed loads only when none of its eight ids exists.
-  - Step 6 – `4ce0879`: `TimeSlot` has no equals/hashCode (decision (b)).
+  - Step 6 – `4ce0879`: `TimeSlot` has no equals/hashCode (decision (b)); its Javadoc no longer says that a slot is
+    identified by its room and its start, so the class does not promise an identity it does not have.
+  - Seeds: checked on 24/11/2026 — the appointments are on the first working day after the start (`nextWorkingDay`)
+    and `OrderSeedData` takes the date from the clock of the service, as Adam asked.
 - **State for Adam (Testing):** to cover in `feature/UC13-server-tests`: the permission and `APPOINTMENT_ACCESS_DENIED`;
   the seven operations with their messages; the free slots for a schedule of a room (days, duration, occupied and
   cancelled appointments, range with `toDate` before `fromDate`); the booking of a pending need, of a need already booked,
@@ -85,4 +88,4 @@
   of a booked, cancelled and unknown appointment; the cancellation and the need pending again in C4; the four audit
   actions; the cases of D1, D2, D5, D6 (TC13S-70, 72, 73, 77, 78, 81).
 - **Next step:** Testing adds TC13S-67..76 and the cases of D1, D2, D5 and D6.
-- **Last update:** 23/11/2026, Ignacio (fixes of the review of Testing).
+- **Last update:** 24/11/2026, Ignacio (Javadoc of `TimeSlot` and the seed dates of the review of the pull request).
