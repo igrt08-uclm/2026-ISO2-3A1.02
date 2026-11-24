@@ -1,4 +1,5 @@
-Closes #
+Refs #
+<!-- Use Closes # only if this pull request completes the last box of the issue (rule 22). A docs/ or ci/ pull request without an issue: delete this line. -->
 
 ## Review checklist
 Annex A of the theory report. Mark as n/a what does not apply to this change.

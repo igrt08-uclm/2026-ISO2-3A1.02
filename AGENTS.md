@@ -108,6 +108,13 @@ A question that does not change any file does not need a plan.
       [agents/token-efficiency.md](agents/token-efficiency.md), never `mvn -q`.
     - Read [agents/token-efficiency.md](agents/token-efficiency.md) before your first build, before you delegate to a
       subagent and when you count tokens (rule 19).
+22. **The RADIT checklist of the issue** (D-048). When a pull request completes a discipline of its sub-issue and is
+    merged, propose to the member to tick that box and, after a "yes" (rule 8), tick it. `Closes #n` closes the issue
+    on merge, so use it only in the pull request that completes the last open box; in the others use `Refs #n`.
+23. **Shared documents only in a `docs/` branch** (D-048). `AGENTS.md`, `DECISIONS.md`, `agents/*.md` and the templates
+    of `.github/` are never changed in a `feature/` or `bugfix/` branch: the parallel branches conflict in them. A use
+    case branch changes only its own plan and test design. The versions in `agents/` are updated afterwards, in one
+    `docs/` pull request.
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
@@ -116,9 +123,9 @@ choose on your own: tell the member.
 | Topic | Convention | Source |
 |---|---|---|
 | Names | Use cases `UCxx`, functional requirements `FRxx` (1 FR = 1 UC) | D-002, D-015 |
-| Branches | `feature/UCxx-server`, `feature/UCxx-client`, `feature/short-description`, `bugfix/…`, `release/x.y.z`, `hotfix/x.y.z` | D-015, Kickoff p. 9, 19 |
+| Branches | `feature/UCxx-server`, `feature/UCxx-client`, `feature/short-description`, `bugfix/…`, `docs/…`, `ci/…`, `release/x.y.z`, `hotfix/x.y.z` | D-015, D-048, Kickoff p. 9, 19 |
 | Commits | Conventional Commits: `type(scope): summary (#issue)`, e.g. `feat(UC22): validate credentials against the SSO (#13)`, `fix(UC22): … (#13)`, `docs(UC22): plan for the server part (#13)` | Git practice p. 28, Kickoff p. 9 |
-| Pull requests | To `develop`, with `Closes #n` in the description; one sub-issue = one branch = one pull request | Kickoff p. 19 |
+| Pull requests | To `develop`. When the pull request belongs to an issue, the description has `Refs #n`, or `Closes #n` only in the one that finishes the issue (rule 22); a standalone `docs/` or `ci/` pull request may have none | D-048, Kickoff p. 19 |
 | Issues | Component issue → use case issue → client and server sub-issues, using the templates in `.github/ISSUE_TEMPLATE/`; the title of a use case issue carries its component and version, e.g. `UC20 – Server (C2 v1.1.0)` | D-015, D-018, D-032 |
 | Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); each component submodule (`server/cN`, `client/cN`) has its own version: MINOR per use case of that component, PATCH per fix. Always write the component with its version (`C2 1.1.0`); names and versions are in [agents/components.md](agents/components.md) | D-014, D-021, D-032, Maven practice p. 19 |
 | Releases | `release/0.x.0` from `develop`, merged into `main` and `develop`, annotated tag `v0.x.0` on `main` | Kickoff p. 9, Git practice p. 19 |
@@ -126,6 +133,24 @@ choose on your own: tell the member.
 | Language | Code, comments, commits, issues and documents in English | D-016 |
 | Tests | Test class `<Class>Test` in `src/test/java`, same package; one method per case of the member's table; `@DisplayName` in English; arrange, act, assert | D-034, S.04.01 |
 | Javadoc | Every class and public method, in English, written together with the code | D-034 |
+
+## Cross-agent handoff (Implementation ↔ Testing)
+To avoid several rounds between agents and the chat (D-048):
+
+1. **The pull request is the handoff channel, not WhatsApp.** Testing posts one comment on the pull request with all
+   the defects and the exact expected values or signatures, after the member's "yes" (rule 8). The agent of
+   Implementation reads it with `gh pr view <n> --comments` and shows its plan before changing anything (step 4).
+2. **One test update before one fix.** When a test expects an old or wrong behaviour, Testing pushes all the new
+   expectations in one commit and lists the red tests in the comment. Implementation then pulls and fixes the code in
+   one pass, and never edits a test (rule 17; error E-23 of the wiki).
+3. **Tests come from the approved specification and plan, not from code in progress.** An open question is not fixed in
+   an assertion. If Design has not decided the text of an error, the test checks the error state and the identifier or
+   keyword, not the whole sentence.
+4. **One use case at a time.** Finish and merge a use case (server, client and tests) before branching the next one of
+   the same component.
+5. **Build before every push** (step 5), with `mvn -B clean verify` after changing branch (error E-24 of the wiki). The
+   tests of the Swing client need JDK 21 and, on Linux, `fontconfig` and fonts (`doc/plans/UC06-client.md`). Never push
+   code for another member to build it for you.
 
 ## Where to find things
 | What | Where |
