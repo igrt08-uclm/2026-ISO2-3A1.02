@@ -122,19 +122,18 @@ Decisions of `IU_OrderFollowUp` and the cases that make each condition true (T) 
 | `hasUnsavedChanges` (MC/DC): `patient != null && (!indication.isBlank() \|\| !justification.isBlank())` | patient | TC07C-33 | TC07C-35 |
 | | indication | TC07C-33 | TC07C-32 |
 | | justification | TC07C-34 | TC07C-32 |
-| `catch` of every operation | `AccessDeniedException` | TC07C-24, 25, 26 | — |
+| `catch` of every operation | `AccessDeniedException` | TC07C-24, 25, 26, 46, 47, 48 | — |
 | | `ValidationException` | TC07C-21, 22, 27 | — |
 | | `RuntimeException` | TC07C-23, 28, 29 | — |
 
 `IU_Welcome`: `onOrderFollowUp != null && hasPermission(ORDER_PROCEDURES)`: (T,T) TC07C-40, (F,T) TC07C-43,
 (T,F) TC07C-42; the older constructor passes `null` (TC07C-44).
 
-Result of JaCoCo for `client-c4-orders` (`mvn -B verify`, commit `46a164b` plus the tests): `IU_OrderFollowUp` 98.8 %
-of the lines (247 of 250) and 97.1 % of the branches (68 of 70); the module 98.3 % of the lines (523 of 532) and
-95.2 % of the branches (139 of 146), above the 80 % / 70 % of D-033. Not covered in `IU_OrderFollowUp`: the `catch` of
-`findPatient` (3 lines), which is the path of F-01 and is not tested as an error (section 5); `row < 0` true in
-`selectedRowChanged` (a selection cleared by Swing while a row is selected) and the `valueIsAdjusting` branch of the
-listener of the table (Swing only sends it while the mouse is dragged).
+Result of JaCoCo for `client-c4-orders` (`mvn -B verify`, commit `8dd88e7` plus the tests, with the fixes of F-01 and
+F-02): `IU_OrderFollowUp` 100 % of the lines (248 of 248) and 97.1 % of the branches (68 of 70); the module 98.9 % of
+the lines (524 of 530) and 95.2 % of the branches (139 of 146), above the 80 % / 70 % of D-033. Not covered in
+`IU_OrderFollowUp`: `row < 0` true in `selectedRowChanged` (a selection cleared by Swing while a row is selected) and
+the `valueIsAdjusting` branch of the listener of the table (Swing only sends it while the mouse is dragged).
 
 ## 4. Test cases
 
@@ -185,6 +184,9 @@ listener of the table (Swing only sends it while the mouse is dragged).
 | TC07C-43 | `IU_Welcome` | `ORDER_PROCEDURES` but `null` action | *Order procedure* and *Log out* only (Javadoc of the constructor: "not at all if this is `null`") | `tc07c43WithoutTheActionNobodySeesTheButton` |
 | TC07C-44 | `IU_Welcome` | The constructor of UC06 with every permission | The buttons of UC06, no *Order follow-up* | `tc07c44OlderConstructorDoesNotShowTheButton` |
 | TC07C-45 | `onSelectPatient` | `HC-000000`: a part of every identifier (Conjeture) | "⚠ There is no patient with the identifier HC-000000"; no patient; no call to C4 | `tc07c45PartialIdentifier` |
+| TC07C-46 | `onSelectPatient` | C3 denies after opening, then Lucía is selected (F-01) | "⚠ You do not have permission to order procedures." in red; no patient selected; form, table, search box and *Search* disabled; *Back* enabled; no call to C4 | `tc07c46PermissionLostBeforeSelecting` |
+| TC07C-47 | `onSubmitOrder` | Valid form of Lucía, C4 denies the order (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled | `tc07c47SearchDisabledAfterDeniedOrder` |
+| TC07C-48 | `IU_OrderFollowUp` | C3 denies on opening (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled | `tc07c48SearchDisabledWhenDeniedOnOpening` |
 
 **Cases of UC06 run again in this branch** (`IU_OrderProcedureInUc07Test`). `feature/UC07-client` was created before
 the tests of UC06 were written, so `IU_OrderProcedure` (about half of the module) had no test here and the module did
@@ -203,28 +205,31 @@ screen is never shown.
 
 ## 5. Not covered / Not defined
 
-**Defects found** (the code differs from the plan; not written as failing tests, to be fixed by Implementation and
-then checked with new cases). Both were already found and fixed in the screen of UC06 (F-01 and F-02 of
+**Defects found** (the code differs from the plan; not written as failing tests: F-01 and F-02 were fixed by
+Implementation and then checked with new cases, F-03 is still open).
+F-01 and F-02 were already found and fixed in the screen of UC06 (F-01 and F-02 of
 `UC06-client-test-design.md`, commits `c227441` and `4fd6204`), but `IU_OrderFollowUp` was copied from the version
 before those fixes.
-- **F-01 – The denied access is hidden when the permission is lost while selecting.** With C3 denying after opening,
-  selecting Lucía shows "⚠ There is no patient with the identifier HC-0000001" instead of the denied message:
-  `findPatient` catches the `AccessDeniedException`, calls `handleDenied()` and returns `null`, and `onSelectPatient`
-  then writes its own error over it. The plan says "the screen explains a denied access". Expected after the fix:
-  "⚠ You do not have permission to order procedures.", no patient selected, only *Back* enabled.
-- **F-02 – *Search* stays enabled after the denied access.** `handleDenied()` disables the form, the table and the
-  search box, but not the button *Search*. The plan says "leaves only *Back* enabled". Expected after the fix: *Search*
-  disabled after a denied opening and after a denied order (TC07C-24, 25 would then also check it).
+- **F-01 – The denied access was hidden when the permission is lost while selecting.** Fixed in `da9a75d`, checked
+  by TC07C-46. With C3 denying after opening, selecting Lucía showed "⚠ There is no patient with the identifier
+  HC-0000001" instead of the denied message: `findPatient` caught the `AccessDeniedException`, called
+  `handleDenied()` and returned `null`, and `onSelectPatient` then wrote its own error over it. The plan says "the
+  screen explains a denied access". Now the exception reaches `onSelectPatient`: "⚠ You do not have permission to
+  order procedures.", no patient selected, only *Back* enabled.
+- **F-02 – *Search* stayed enabled after the denied access.** Fixed in `5732b3c`, checked by TC07C-46, 47 and 48.
+  `handleDenied()` disabled the form, the table and the search box, but not the button *Search*. The plan says
+  "leaves only *Back* enabled". Now *Search* is disabled after a denied opening, a denied selection and a denied
+  order. No existing expected value changed: TC07C-24 and 25 did not check the button and stay as they were.
 - **F-03 – "Discard the unsaved changes?" answered Yes does not discard the text when the new patient is inactive.**
   Lucía with the indication typed, then Inés, answer Yes: the indication stays in the (disabled) field, because
   `showPatientInactive` does not empty the form, and *Back* then asks the question again. The plan only says that
   leaving with the indication or the justification written "asks for confirmation"; the question of the code says the
-  changes are discarded. To confirm with Design (UC06 behaves the same way).
+  changes are discarded. Still to confirm with Design (UC06 behaves the same way); no case asserts it.
 
 **Not defined** (no expected result in the plan or the specification):
-- **An interval of 13 to 120 months** (open question of the team): the spinner allows it and the client sends it,
-  but D-040 generates the needs of the next 12 months, so an order of 13 months or more would generate none. No case
-  sends 13 or more until the team decides (reject it in the client, in the server, or accept it).
+- **An interval of 13 to 120 months** (still an open question of the team): the spinner allows it and the client
+  sends it, but D-040 generates the needs of the next 12 months, so an order of 13 months or more would generate none.
+  No case sends 13 or more until the team decides (reject it in the client, in the server, or accept it).
 - Values typed in the box of the spinner that the formatter of Swing reads in its own way: `6.5` is taken as 6 and
   `6,5` as 65 (with the locale `en_US`; with `es_ES` the separators are the other way round), while `+6` and `" 6 "`
   are refused. The plan only gives the range 0–120; no case asserts them.
