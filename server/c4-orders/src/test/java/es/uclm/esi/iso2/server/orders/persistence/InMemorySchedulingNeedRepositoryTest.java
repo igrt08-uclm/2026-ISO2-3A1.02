@@ -29,13 +29,13 @@ class InMemorySchedulingNeedRepositoryTest {
     }
 
     @Test
-    @DisplayName("TC06S-44 an unknown id gives null")
+    @DisplayName("TC06S-44a an unknown id gives null")
     void unknownId() {
         assertNull(repository.findById("NEED-9999"));
     }
 
     @Test
-    @DisplayName("TC06S-44 only the pending needs are returned, in the order of saving")
+    @DisplayName("TC06S-44b only the pending needs are returned, in the order of saving")
     void onlyPendingNeeds() {
         repository.save(need("NEED-0001", SchedulingNeedStatus.PENDING));
         repository.save(need("NEED-0002", SchedulingNeedStatus.BOOKED));
@@ -48,7 +48,7 @@ class InMemorySchedulingNeedRepositoryTest {
     }
 
     @Test
-    @DisplayName("TC06S-44 saving the same id twice replaces the need and keeps its place")
+    @DisplayName("TC06S-44c saving the same id twice replaces the need and keeps its place")
     void saveReplacesAndKeepsThePlace() {
         repository.save(need("NEED-0001", SchedulingNeedStatus.PENDING));
         repository.save(need("NEED-0002", SchedulingNeedStatus.PENDING));

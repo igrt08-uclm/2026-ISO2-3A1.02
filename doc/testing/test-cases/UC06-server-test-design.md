@@ -99,6 +99,8 @@ TC06S-55. The 2 lines still missed are the calls to `deny` in `checkPermission` 
 run in every denial case (TC06S-02, TC06S-03…), but `deny` always throws, and JaCoCo does not mark as covered a line
 whose call never returns.
 
+With cases 41, 43 and 44 split by method, the C4 server module covers 127/129 lines (98.4 %) and 46/46 branches.
+
 **Decision coverage** (each decision true and false):
 
 | Decision | True | False |
@@ -188,10 +190,16 @@ boundary value, EG = error guessing. Every exception case also checks that the r
 | TC06S-38 | both | EG: booked twice / made pending twice | "The scheduling need NEED-0001 is already booked" / "… already pending" (Q13) | `repeatedStatusChange` |
 | TC06S-39 | `markSchedulingNeedBooked` | EC/BV: `NEED-9999`, `null` | "There is no scheduling need with the id X" (Q13) | `unknownNeed` |
 | TC06S-40 | the four operations of C5 | EC: accepted calls | Nothing audited (Q7) | `c5OperationsAreNotAudited` |
-| TC06S-41 | `DiagnosticOrder`, `SchedulingNeed` | EC: constructor and getters; order without id, requester and date | The values given; `null` where not given | `orderKeepsItsData`, `orderWithoutServerData`, `needKeepsItsData` |
+| TC06S-41a | `DiagnosticOrder` | Full constructor data | All eight values returned | `orderKeepsItsData` |
+| TC06S-41b | `DiagnosticOrder` | Null ID, requester and date | All three remain null | `orderWithoutServerData` |
+| TC06S-41c | `SchedulingNeed` | Pending need with ID, order and date | All four values returned | `needKeepsItsData` |
 | TC06S-42 | `SchedulingNeedStatus` | EC: `values()` | `PENDING`, `BOOKED` | `statusValues` |
-| TC06S-43 | `InMemoryClinicalOrderRepository` | EC: unknown id; two patients; same id saved twice | `null`; only the orders of the patient; the second replaces the first | `unknownId`, `ordersOfOnePatient`, `saveReplaces` |
-| TC06S-44 | `InMemorySchedulingNeedRepository` | EC: unknown id; pending and booked; same id saved twice | `null`; only the pending ones in the order of saving; replaced in its place | `unknownId`, `onlyPendingNeeds`, `saveReplacesAndKeepsThePlace` |
+| TC06S-43a | `findById` | Unknown ORD-9999 | null | `unknownId` |
+| TC06S-43b | `findByPatient` | Two patients + unknown | Own orders only, unknown gets none | `ordersOfOnePatient` |
+| TC06S-43c | `save` | Same order ID, different patient | Second order replaces first | `saveReplaces` |
+| TC06S-44a | `findById` | Unknown NEED-9999 | null | `unknownId` |
+| TC06S-44b | `findPending` | Pending, booked, pending | First and third, in save order | `onlyPendingNeeds` |
+| TC06S-44c | `save` | First need booked then pending | Two needs, first still first | `saveReplacesAndKeepsThePlace` |
 | TC06S-45 | `getOrdersOfPatient` | EC/BV: `lmartin`, `admin`, `jfernandez`, `pnavarro`, `nobody`, `null`, `""`; `P-0001` has an order | `AccessDeniedException`; only `ORDER_ACCESS_DENIED` on `orders` (Q7, Q12, Cases to cover 1) | `readingOrdersWithoutPermissionIsDenied` |
 | TC06S-46 | `orderDiagnosticProcedure` | EG: `admin` with a `null` order, with `P-9999`, with a blank indication | `AccessDeniedException`, not `ValidationException`; only the denial on `orders` each time; C2 and C3 not called; nothing saved (Q4) | `permissionBeforeValidation` |
 | TC06S-47 | `getOrder`, `markSchedulingNeedBooked`, `markSchedulingNeedPending` | EC (MC/DC of A and B): `mgarcia`, `lmartin`; one order | The order `ORD-0001`; `NEED-0001` booked, then pending; nothing audited (Q7, Q12) | `eitherPermissionIsAcceptedInC5Operations` |
@@ -212,6 +220,9 @@ or nothing (rejected); an order is never changed after it is created (D-039).
 **Changed expected value (when UC07 joins, #205/#206):** TC06S-53 expected 6 operations (Q11 of UC06); UC07 adds
 `orderFollowUp`, so on the branches that carry UC07 it expects 7 operations. The second assertion (no operation
 changes an order, D-039) is the same.
+
+TC06S-41, 43 and 44 split into a/b/c: one id per test method (review of
+[#203](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/203), 24/11/2026)
 
 - **Not defined, so not tested:** a maximum length of the indication and the justification (Q5 says none, pending
   Requirements: plan open question 2); whether the spaces at the ends are kept (TC06S-11 tests the code, pending open

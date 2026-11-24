@@ -18,7 +18,7 @@ class OrdersDomainTest {
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 23);
 
     @Test
-    @DisplayName("TC06S-41 an order keeps the data given to its constructor")
+    @DisplayName("TC06S-41a an order keeps the data given to its constructor")
     void orderKeepsItsData() {
         DiagnosticOrder order = new DiagnosticOrder("ORD-0001", "P-0001", "TT-01", "mgarcia", "Chest pain",
                 "Rule out pneumonia", TODAY, "URGENT");
@@ -34,7 +34,7 @@ class OrdersDomainTest {
     }
 
     @Test
-    @DisplayName("TC06S-41 an order created without id, requester or date keeps them null")
+    @DisplayName("TC06S-41b an order created without id, requester or date keeps them null")
     void orderWithoutServerData() {
         DiagnosticOrder order = new DiagnosticOrder(null, "P-0001", "TT-01", null, "Chest pain",
                 "Rule out pneumonia", null, "URGENT");
@@ -45,7 +45,7 @@ class OrdersDomainTest {
     }
 
     @Test
-    @DisplayName("TC06S-41 a scheduling need keeps the data given to its constructor")
+    @DisplayName("TC06S-41c a scheduling need keeps the data given to its constructor")
     void needKeepsItsData() {
         SchedulingNeed need = new SchedulingNeed("NEED-0001", "ORD-0001", TODAY, SchedulingNeedStatus.PENDING);
         assertAll(
