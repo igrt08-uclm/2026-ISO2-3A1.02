@@ -16,6 +16,7 @@ import java.util.List;
 class FakeSystemParameterService implements ISystemParameterService {
     private final List<TestType> testTypes = new ArrayList<>();
     private final List<Priority> priorities = new ArrayList<>();
+    private RuntimeException testTypeReadFailure;
 
     /**
      * The usual data: the six active test types and the three active priorities of the seed data of C2, plus the
@@ -52,8 +53,15 @@ class FakeSystemParameterService implements ISystemParameterService {
         return priorities;
     }
 
+    void failTestTypeReads(RuntimeException failure) {
+        testTypeReadFailure = failure;
+    }
+
     @Override
     public List<TestType> getTestTypes(String requester) {
+        if (testTypeReadFailure != null) {
+            throw testTypeReadFailure;
+        }
         return List.copyOf(testTypes);
     }
 
