@@ -206,7 +206,7 @@ and 19 and the priorities chosen in the other cases follow it.
   border"; the screen only wrote the message (TC06C-46 to 48).
 - **F-04 (fixed, `4fd6204`) – No Alt keys for the fields.** Q10 gives Alt+T, Alt+R, Alt+C and Alt+J; the labels of
   the form had no `setLabelFor` nor `setDisplayedMnemonic` (TC06C-49).
-- **F-05 (decided by Design, PR #204, 23/11/2026; fix pending, step 12) – The priority is shown only by its name.**
+- **F-05 (decided by Design, PR #204, 23/11/2026; fixed, `61e7246`) – The priority was shown only by its name.**
   *Usability decisions* says "the priority is shown by its name, with its id next to it"; the list and the table showed
   only the name. Design decided `URGENT · Urgent` in the list and in the column *Priority* (TC06C-03, 06, 17); an order
   whose priority is not in C2 (TC06C-29, `VIP`) is not defined by Design, so its expected value is not changed.
