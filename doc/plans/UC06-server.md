@@ -792,7 +792,7 @@ flowchart TD
           ClinicalOrder getOrder(String requester, String orderId) throws AccessDeniedException, ValidationException;
 
           /**
-           * Marks a booked scheduling need as pending again, when C5 cancels its appointment (D41).
+           * Marks a booked scheduling need as pending again, when C5 cancels its appointment (D-041).
            *
            * @param requester the username of the user who cancels
            * @param needId the id of the scheduling need
@@ -805,7 +805,7 @@ flowchart TD
       ```
   - `ClinicalOrderService.java`:
     - imports: add `import java.util.Locale;` after `import java.util.List;`.
-    - class Javadoc: after the sentence that ends "…with its clinical indication and justification; every error is returned together." add the sentence ` Reading the orders of a patient also needs {@code ORDER_PROCEDURES}; the operations that C5 uses (the pending needs, one order, and marking a need as booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D37, D41), and they are not audited.` (wrap at 120 characters).
+    - class Javadoc: after the sentence that ends "…with its clinical indication and justification; every error is returned together." add the sentence ` Reading the orders of a patient also needs {@code ORDER_PROCEDURES}; the operations that C5 uses (the pending needs, one order, and marking a need as booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D-037, D-041), and they are not audited.` (wrap at 120 characters).
     - constants: after `ORDER_PROCEDURES` add `private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";`; after `ORDER` add `private static final String SCHEDULING_NEED = "SCHEDULING_NEED:";`.
     - after the method `orderDiagnosticProcedure` add:
       ```java
@@ -917,7 +917,10 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 
 ## Verification
 - [ ] Every acceptance criterion of #68 is checked with Adam's tests (the tests are in the pull request #203, not in
-      this branch): an order is only created for an active patient and an active test type, with one of the configured priorities; every created order appears as a pending scheduling need for C5 and its creation is registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
+      this branch): an order is only created for an active patient and an active test type, with one of the
+      configured priorities; every created order appears as a pending scheduling need for C5 and its creation is
+      registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of
+      #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
 - [x] `server-c4-orders` depends only on `common`; no file of `client/`, of C1, C2 or C3 changed (`git diff --stat develop...HEAD`).
 - [ ] `mvn -B verify` (full build) is green with Adam's tests (pull request #203), the coverage check of
       `server-c4-orders` and of `common` included.
