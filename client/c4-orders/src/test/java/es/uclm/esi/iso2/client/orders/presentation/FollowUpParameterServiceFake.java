@@ -16,6 +16,7 @@ import java.util.List;
 class FollowUpParameterServiceFake implements ISystemParameterService {
     private final List<TestType> testTypes = new ArrayList<>();
     private final List<Priority> priorities = new ArrayList<>();
+    private RuntimeException testTypeReadFailure;
 
     /**
      * The usual data: the six active test types of the seed data of C2 with their eligibility for follow-up (only
@@ -54,8 +55,15 @@ class FollowUpParameterServiceFake implements ISystemParameterService {
         return priorities;
     }
 
+    void failTestTypeReads(RuntimeException failure) {
+        testTypeReadFailure = failure;
+    }
+
     @Override
     public List<TestType> getTestTypes(String requester) {
+        if (testTypeReadFailure != null) {
+            throw testTypeReadFailure;
+        }
         return List.copyOf(testTypes);
     }
 

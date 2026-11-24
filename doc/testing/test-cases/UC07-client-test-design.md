@@ -39,6 +39,8 @@ Every question "Discard the unsaved changes?" is answered by the test (Yes or No
 
 | Input | Parameter | Equivalence classes | Testing values |
 |---|---|---|---|
+| Select or search | Previous form | Active patient with a draft and orders | Lucía, both texts filled, two orders |
+| Select | Read failure (**Conjeture**) | C2, C3 or C4 unavailable, denied or rejected | TC07C-49 to 53, 55 |
 | Opening (constructor, `onSearch`) | state of C3 | Allows, with patients | the three patients |
 | | | Denies | `denyAll()` before opening |
 | | | Fails (Conjeture) | `IllegalStateException("The server cannot be reached")` |
@@ -80,6 +82,8 @@ enabled state of the form, the text and colour of the message area (green for su
 follow-up order sent to `orderFollowUp`, the questions asked and whether *Back* runs its action.
 
 ## 2. Combination of the values
+
+TC07C-49 to 57 hold Lucía's draft constant and vary the result of the next lookup, read or search.
 The inputs of the form only matter after an active patient is selected, so the suite is built with **each use**: every
 testing value of section 1 appears in at least one case, and the rest of the form takes a valid value (`MRI-KNEE`,
 6 months, "Meniscus repair", "Check the evolution", Lucía). The pairs that the code combines in one decision are also
@@ -98,7 +102,7 @@ Decisions of `IU_OrderFollowUp` and the cases that make each condition true (T) 
 | `onSearch`, `onSelectPatient`, `onSubmitOrder`: `denied` | — | TC07C-24 | every other case |
 | `displayPatients`: `getDateOfBirth() == null` | — | TC07C-01 (Inés) | TC07C-01 (Lucía) |
 | `displayPatients`: `size() == 1` | — | TC07C-02 (mario) | TC07C-01 (3), TC07C-02 (0) |
-| `selectedRowChanged`: `row < 0 \|\| row == lastPatientRow` | `row < 0` | — (see below) | TC07C-03 |
+| `selectedRowChanged`: `row < 0 \|\| row == lastPatientRow` | `row < 0` | TC07C-56 | TC07C-03 |
 | | `row == lastPatientRow` | TC07C-36 (row given back) | TC07C-38 |
 | `selectedRowChanged`: `hasUnsavedChanges() && !confirm` | unsaved | TC07C-36, 37 | TC07C-38 |
 | | `!confirm` | TC07C-36 (No) | TC07C-37 (Yes) |
@@ -134,6 +138,13 @@ F-02): `IU_OrderFollowUp` 100 % of the lines (248 of 248) and 97.1 % of the bran
 the lines (524 of 530) and 95.2 % of the branches (139 of 146), above the 80 % / 70 % of D-033. Not covered in
 `IU_OrderFollowUp`: `row < 0` true in `selectedRowChanged` (a selection cleared by Swing while a row is selected) and
 the `valueIsAdjusting` branch of the listener of the table (Swing only sends it while the mouse is dragged).
+
+After R-01, TC07C-56 exercises the negative row index when a new search clears Lucía's selection. TC07C-54
+and 57 exercise the unknown and inactive patient branches with a draft. TC07C-49 to 53 and 55 exercise read
+exceptions; TC07C-03 exercises successful reads. R-01 adds no compound decision.
+
+With TC07C-49 to 57, the coverage report shows 270/270 lines and 69/70 branches for `IU_OrderFollowUp` itself.
+The module covers 546/552 lines (98.9 %) and 140/146 branches (95.9 %).
 
 ## 4. Test cases
 
@@ -188,6 +199,32 @@ the `valueIsAdjusting` branch of the listener of the table (Swing only sends it 
 | TC07C-47 | `onSubmitOrder` | Valid form of Lucía, C4 denies the order (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled | `tc07c47SearchDisabledAfterDeniedOrder` |
 | TC07C-48 | `IU_OrderFollowUp` | C3 denies on opening (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled | `tc07c48SearchDisabledWhenDeniedOnOpening` |
 
+TC07C-49 to 57 start with Lucía selected, two orders, indication “Meniscus repair” and justification
+“Check the evolution”. Every case expects both texts empty, the form disabled and zero order rows after the action.
+The selection is empty except in TC07C-57, where the inactive patient is selected. Source for all nine cases:
+R-01 in the client plan (`6a8179b`) and `9583556`.
+
+| ID | Method | Input (and precondition) | Expected result | Test |
+|---|---|---|---|---|
+| TC07C-49 | Select | C2 offline | Orders read error (catalogue) | `tc07c49TestTypesOffline` |
+| TC07C-50 | Select | C3 offline | Patient read error | `tc07c50PatientLookupFails` |
+| TC07C-51 | Select | C4 rejects | Validation error | `tc07c51OrderReadRejected` |
+| TC07C-52 | Select | C4 denies | Denied | `tc07c52OrderReadDenied` |
+| TC07C-53 | Select | C4 offline | Orders read error (orders) | `tc07c53OrderReadFails` |
+| TC07C-54 | Select | Unknown ID | Unknown patient | `tc07c54UnknownPatient` |
+| TC07C-55 | Select | C3 denies | Denied | `tc07c55PatientLookupDenied` |
+| TC07C-56 | Search | Search Mario | Only Mario listed | `tc07c56SearchClearsDraft` |
+| TC07C-57 | Select | Select Inés | Inés selected, inactive error | `tc07c57InactivePatientClearsDraft` |
+
+The error messages for TC07C-49 to 55 appear in red:
+
+- TC07C-49: “⚠ The orders could not be read: Catalogue offline”.
+- TC07C-53: “⚠ The orders could not be read: Orders offline”.
+- TC07C-50: “⚠ The patient could not be read: Registry offline”.
+- TC07C-51: “⚠ Patient unavailable”.
+- TC07C-52 and 55: “⚠ You do not have permission to order procedures.”
+- TC07C-54: “⚠ There is no patient with the identifier HC-9999999”.
+
 **Cases of UC06 run again in this branch** (`IU_OrderProcedureInUc07Test`). `feature/UC07-client` was created before
 the tests of UC06 were written, so `IU_OrderProcedure` (about half of the module) had no test here and the module did
 not reach D-033. The class runs, with the fakes of UC07, the cases of `UC06-client-test-design.md` whose expected
@@ -205,8 +242,7 @@ screen is never shown.
 
 ## 5. Not covered / Not defined
 
-**Defects found** (the code differs from the plan; not written as failing tests: F-01 and F-02 were fixed by
-Implementation and then checked with new cases, F-03 is still open).
+**Defects found during review**
 F-01 and F-02 were already found and fixed in the screen of UC06 (F-01 and F-02 of
 `UC06-client-test-design.md`, commits `c227441` and `4fd6204`), but `IU_OrderFollowUp` was copied from the version
 before those fixes.
@@ -220,13 +256,13 @@ before those fixes.
   `handleDenied()` disabled the form, the table and the search box, but not the button *Search*. The plan says
   "leaves only *Back* enabled". Now *Search* is disabled after a denied opening, a denied selection and a denied
   order. No existing expected value changed: TC07C-24 and 25 did not check the button and stay as they were.
-- **F-03 – "Discard the unsaved changes?" answered Yes does not discard the text when the new patient is inactive.**
-  Lucía with the indication typed, then Inés, answer Yes: the indication stays in the (disabled) field, because
-  `showPatientInactive` does not empty the form, and *Back* then asks the question again. The plan only says that
-  leaving with the indication or the justification written "asks for confirmation"; the question of the code says the
-  changes are discarded. Still to confirm with Design (UC06 behaves the same way); no case asserts it.
+- **F-03 – Switching to an inactive patient kept the previous draft.** In `9583556`, confirming the switch clears
+  the draft before displaying the inactive patient. TC07C-57 checks this transition.
 
 **Not defined** (no expected result in the plan or the specification):
+- R-01 defines the reset when a selected patient's lookup fails and when a new search displays its results.
+  It gives no separate expected draft or order-table state for a failed search of the patient list before results
+  reach `displayPatients`. TC07C-56 checks the successful list refresh.
 - **An interval of 13 to 120 months** (still an open question of the team): the spinner allows it and the client
   sends it, but D-040 generates the needs of the next 12 months, so an order of 13 months or more would generate none.
   No case sends 13 or more until the team decides (reject it in the client, in the server, or accept it).

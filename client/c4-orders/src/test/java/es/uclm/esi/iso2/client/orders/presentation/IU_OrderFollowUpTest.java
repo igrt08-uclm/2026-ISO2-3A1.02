@@ -959,4 +959,153 @@ class IU_OrderFollowUpTest {
                 () -> assertFalse(screen.getPlaceOrderButton().isEnabled()),
                 () -> assertTrue(FollowUpScreen.button(screen, "Back").isEnabled()));
     }
+
+    private static void assertDraftCleared(IU_OrderFollowUp screen) {
+        assertAll(
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertEquals("", field(screen, INDICATION).getText()),
+                () -> assertEquals("", field(screen, JUSTIFICATION).getText()),
+                () -> assertEquals(0, screen.getOrdersTable().getRowCount()));
+    }
+
+    private static void assertSelectionFailure(IU_OrderFollowUp screen, String message) {
+        assertAll(
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertDraftCleared(screen),
+                () -> assertEquals(message, screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)));
+    }
+
+    @Test
+    @DisplayName("TC07C-49 Reading test types fails after a valid selection")
+    void tc07c49TestTypesOffline() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        parameters.failTestTypeReads(new IllegalStateException("Catalogue offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertSelectionFailure(screen, "⚠ The orders could not be read: Catalogue offline");
+    }
+
+    @Test
+    @DisplayName("TC07C-50 Patient lookup fails after a valid selection")
+    void tc07c50PatientLookupFails() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        patients.failSearches(new IllegalStateException("Registry offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertSelectionFailure(screen, "⚠ The patient could not be read: Registry offline");
+    }
+
+    @Test
+    @DisplayName("TC07C-51 Order read fails validation after a valid selection")
+    void tc07c51OrderReadRejected() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        orders.failReads(new ValidationException(List.of("Patient unavailable")));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertSelectionFailure(screen, "⚠ Patient unavailable");
+    }
+
+    @Test
+    @DisplayName("TC07C-52 Order read is denied after a valid selection")
+    void tc07c52OrderReadDenied() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        orders.denyAll();
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertSelectionFailure(screen, DENIED);
+    }
+
+    @Test
+    @DisplayName("TC07C-53 Order read fails after a valid selection")
+    void tc07c53OrderReadFails() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        orders.failReads(new IllegalStateException("Orders offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertSelectionFailure(screen, "⚠ The orders could not be read: Orders offline");
+    }
+
+    @Test
+    @DisplayName("TC07C-54 Patient identifier is unknown after a valid selection")
+    void tc07c54UnknownPatient() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+
+        // Act
+        screen.onSelectPatient("HC-9999999");
+
+        // Assert
+        assertSelectionFailure(screen, "⚠ There is no patient with the identifier HC-9999999");
+    }
+
+    @Test
+    @DisplayName("TC07C-55 Patient lookup is denied after a valid selection")
+    void tc07c55PatientLookupDenied() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        patients.denyAll();
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertSelectionFailure(screen, DENIED);
+    }
+
+    @Test
+    @DisplayName("TC07C-56 Searching for Mario discards the previous selection, draft and orders")
+    void tc07c56SearchClearsDraft() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        screen.getSearchField().setText("mario");
+
+        // Act
+        FollowUpScreen.button(screen, "Search").doClick();
+
+        // Assert
+        assertAll(
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertDraftCleared(screen),
+                () -> assertEquals(List.of(List.of("HC-0000002", "Mario Demo Simulado", "02/11/1975")),
+                        FollowUpScreen.rows(screen.getPatientsTable())));
+    }
+
+    @Test
+    @DisplayName("TC07C-57 Selecting an inactive patient discards the previous patient's draft and orders")
+    void tc07c57InactivePatientClearsDraft() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+
+        // Act
+        select(screen, INES);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of(DISCARD), questions),
+                () -> assertEquals("P-0009", screen.getSelectedPatient().getPatientId()),
+                () -> assertDraftCleared(screen),
+                () -> assertEquals("⚠ The patient P-0009 is not active, so no order can be placed.",
+                        screen.getStatusMessage()));
+    }
 }
