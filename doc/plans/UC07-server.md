@@ -110,7 +110,10 @@ flowchart TD
   `orderFollowUp`), `b6d1e74` step 2 (`orderFollowUp`, `validateFollowUp`, `checkFollowUpTestType` and
   `createFollowUpSchedulingNeeds`); `6c85236` step 5 (the Javadoc of `orderFollowUp` under 120 characters).
 - **State for Adam (Testing):** `server-c4-orders` has no tests in this branch, so JaCoCo skips the module; the coverage of `common` is 200/239 lines and 14/14 branches. The cases to cover: permission denied (with `ORDER_ACCESS_DENIED`), the ten messages of Q3, the order created with `ORD-nnnn` and `FOLLOW_UP_ORDER_CREATED`, the needs of D-040 for an interval of 12, 6, 5 and 1 months (one, two, two and twelve needs, `dueDate = creationDate.plusMonths(k * interval)`, all `PENDING`), that the diagnostic counter and the follow-up counter are shared, and that the follow-up orders appear in `getOrdersOfPatient`.
-- **Next step:** nothing in this branch once step 5 is committed; then the client (#70).
-- **Open questions:** the interval of 13 months or more: the order is accepted with zero needs today, and the team has to
-  decide whether to reject it (see *Review of the Testing*).
-- **Last update:** 23/11/2026, Ignacio — step 5 committed; the branch is ready for Testing.
+- **Next step:** step 6, the rejection of the interval of 13 months or more; then the client (#70).
+- **Interval of 13 months or more: decided by David on 24/11/2026.** `validateFollowUp` rejects it with `The
+  recurrence interval cannot be more than 12 months`, in the same format as the message of 0 months, and the screen
+  keeps its spinner from 0 to 12 (TC07C-17 and 18), so the client adds no check of its own: it would be unreachable
+  from the spinner and untested (rule 5). Testing covers the rejection in the service (TC07S-35 and 36) and Adam
+  fixed that text, proposed by Implementation and confirmed by him; the final wording is Design's (#219).
+- **Last update:** 24/11/2026, Ignacio — step 6: the service rejects an interval of more than 12 months.
