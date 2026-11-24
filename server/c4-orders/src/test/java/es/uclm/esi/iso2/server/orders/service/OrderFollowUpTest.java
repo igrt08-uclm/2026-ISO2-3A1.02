@@ -62,6 +62,7 @@ class OrderFollowUpTest {
     private static final String INDICATION_REQUIRED = "The clinical indication is required";
     private static final String JUSTIFICATION_REQUIRED = "The justification is required";
     private static final String INTERVAL_REQUIRED = "The recurrence interval must be a positive number of months";
+    private static final String INTERVAL_TOO_LONG = "The recurrence interval cannot be more than 12 months";
 
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-11-23T10:00:00Z"), ZoneOffset.UTC);
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 23);
@@ -367,6 +368,40 @@ class OrderFollowUpTest {
     @Nested
     @DisplayName("4. A rejected follow-up order")
     class RejectedFollowUpOrder {
+
+        @Test
+        @DisplayName("TC07S-35 an interval of 13 months is rejected without saving the order or its needs")
+        void thirteenMonths() {
+            // Arrange
+            FollowUpOrder sent = order(PATIENT, ELIGIBLE, 13);
+
+            // Act
+            List<String> errors = errorsOf(() -> service.orderFollowUp(PHYSICIAN, sent));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(INTERVAL_TOO_LONG), errors),
+                    () -> assertTrue(orders.findByPatient(PATIENT).isEmpty()),
+                    () -> assertTrue(needs.findPending().isEmpty()),
+                    () -> assertTrue(audit.entries().isEmpty()));
+        }
+
+        @Test
+        @DisplayName("TC07S-36 an interval of 120 months is rejected without saving the order or its needs")
+        void oneHundredTwentyMonths() {
+            // Arrange
+            FollowUpOrder sent = order(PATIENT, ELIGIBLE, 120);
+
+            // Act
+            List<String> errors = errorsOf(() -> service.orderFollowUp(PHYSICIAN, sent));
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(List.of(INTERVAL_TOO_LONG), errors),
+                    () -> assertTrue(orders.findByPatient(PATIENT).isEmpty()),
+                    () -> assertTrue(needs.findPending().isEmpty()),
+                    () -> assertTrue(audit.entries().isEmpty()));
+        }
 
         @Test
         @DisplayName("TC07S-04 a null order gives only its message")

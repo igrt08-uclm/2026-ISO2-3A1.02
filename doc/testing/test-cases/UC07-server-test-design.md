@@ -6,7 +6,7 @@ come from #69, #71, the answers Q2 to Q7 of `doc/plans/UC07-server.md` (and its 
 `doc/AN-C4-DECISIONS.md:44-60`, D-039 and D-040; nothing that those sources do not define is used as an expected
 result (section 5).
 
-Code under test (`server-c4-orders` 1.1.0-SNAPSHOT, commit `b6d1e74` of `feature/UC07-server`): the operation added by
+Code under test (`server-c4-orders` 1.1.0-SNAPSHOT, through `6e8dd58` of `feature/UC07-server`): the operation added by
 UC07, `IClinicalOrderService.orderFollowUp(String requester, FollowUpOrder order)`, implemented by
 `ClinicalOrderService.orderFollowUp` with the private `validateFollowUp`, `checkFollowUpTestType` and
 `createFollowUpSchedulingNeeds` (and the `checkPermission`, `checkPatient`, `blank`, `nextOrderId` and `nextNeedId` that
@@ -50,9 +50,9 @@ test values, as in UC06. The valid order is `P-0001` / `TT-02`, indication "Cont
 | | | Blank | `null`, `""`, `"   "` |
 | | priority | Not a parameter: `FollowUpOrder` has no priority (Q2, design of #201) | — (section 5) |
 | | `order.recurrenceIntervalMonths` (`int`) | Not positive (invalid, Q3) | `0` (Limit Val.), `-1` (Conjeture, Limit Val. of the negatives), `-6` |
-| | | Positive, divides 12 | `1` (Limit Val.), `3`, `4`, `6`, `12` (Limit Val.) |
-| | | Positive, does not divide 12 | `5`, `11` (Limit Val.: last value with one need below 12) |
-| | | Positive, greater than 12 | `13` (Limit Val.) — **Not defined** (section 5) |
+| | | Valid, 1 to 12, divides 12 | `1` (**Limit Val.**), `3`, `4`, `6`, `12` (**Limit Val.**) |
+| | | Valid, 1 to 12, does not divide 12 | `5`, `11` |
+| | | Invalid, above 12 | `13` (**Limit Val.**, first rejected), `120` (former client maximum) |
 | | `order.indication`, `order.justification` | Not blank | "Control of the nodule" / "Follow-up of a known lesion" |
 | | | Blank | `null`, `""` (Limit Val.), `"   "` |
 | | creation date (the `Clock` of the service, not a parameter of the call) | A day that exists in every month | 23/11/2026 |
@@ -86,9 +86,8 @@ in the order order, patient, test type, interval, indication, justification; not
 
 ## 3. Coverage (white box)
 
-Measured with JaCoCo in `mvn -B verify` (D-033: 80 % of lines, 70 % of branches of the bundle): `ClinicalOrderService`
-152 of 157 lines and 62 of 62 branches, with the UC06 tests of the same module. The 5 missed lines are the constructor
-that uses the system clock (not called: the tests need the fixed clock).
+With the interval limit in `6e8dd58`, `ClinicalOrderService` covers 157/159 lines and 64/64 branches.
+The C4 server module covers 173/175 lines (98.9 %) and 66/66 branches (100 %), above the D-033 thresholds.
 
 **Decision coverage** of the code of UC07 (each decision true and false):
 
@@ -103,13 +102,14 @@ that uses the system clock (not called: the tests need the fixed clock).
 | `!testType.isActive()` | TC07S-10 | TC07S-01, TC07S-11 |
 | `!testType.isFollowUpEligible()` (only when active) | TC07S-11 | TC07S-01 |
 | `getRecurrenceIntervalMonths() <= 0` | TC07S-12 (0), TC07S-13 (-1, -6) | TC07S-20 (1), TC07S-01 |
+| Positive interval exceeds 12 months | TC07S-35 (13), TC07S-36 (120) | TC07S-18 (12) |
 | `blank(indication)` / `blank(justification)` | TC07S-14 / TC07S-15 | TC07S-01 |
 | `month <= 12` (loop of `createFollowUpSchedulingNeeds`) | every iteration of TC07S-17 to TC07S-20, TC07S-27 to TC07S-31 | after the last one: TC07S-18 (month 24), TC07S-29 (month 22), TC07S-20 (month 13) |
 | `findById(id) != null` (counters, shared with UC06) | TC06S-09 | TC07S-01, TC07S-33, TC07S-34 |
 
 Loop boundaries of `createFollowUpSchedulingNeeds`: one iteration (12, 11: TC07S-18, TC07S-29), two (6, 5), three (4),
-four (3) and twelve (1: TC07S-20, TC07S-30), the maximum. Zero iterations happen only with an interval greater than 12
-(13), whose expected result is not defined (section 5).
+four (3) and twelve (1: TC07S-20, TC07S-30), the maximum. For 13 and 120 months validation rejects the order
+before scheduling (TC07S-35/36).
 
 **Condition/decision and MC/DC** of the compound decisions (Java evaluates them with short circuit; "–" = not
 evaluated). A = `hasPermission(requester, ORDER_PROCEDURES)`:
@@ -174,7 +174,12 @@ are literal dates (D-040, Q4), never computed in the test.
 | TC07S-32 | `orderFollowUp` | EG: `admin` with a `null` order, and with `P-9999` / `TT-01` / interval 0 / blank indication and justification | `AccessDeniedException`, not `ValidationException`; only the denial on `orders`; C2 and C3 not called; nothing saved (Q3) | `permissionBeforeValidation` |
 | TC07S-33 | `orderFollowUp` | EG: interval 6 for `P-0001`, then interval 12 for `P-0002` | `NEED-0001`, `NEED-0002` of `ORD-0001` (23/05/2027, 23/11/2027) and `NEED-0003` of `ORD-0002` (23/11/2027) (Q4, Q5) | `twoFollowUpOrdersInARow` |
 | TC07S-34 | `orderDiagnosticProcedure`, `orderFollowUp` | EG: a diagnostic order, then a follow-up with interval 6 | `NEED-0001` of `ORD-0001` due 23/11/2026 (UC06), `NEED-0002` and `NEED-0003` of `ORD-0002` due 23/05/2027 and 23/11/2027 (Q4: same counter as UC06) | `diagnosticAndFollowUpShareTheNeedCounter` |
+| TC07S-35 | `orderFollowUp` | BV: 13 months, otherwise valid | Upper-limit rejection | `thirteenMonths` |
+| TC07S-36 | `orderFollowUp` | EC: 120 months, otherwise valid | Upper-limit rejection | `oneHundredTwentyMonths` |
 | TC06S-53 | `IClinicalOrderService` | EG: its methods, by reflection | 7 operations after UC07 adds `orderFollowUp`; none starts with `update`, `edit`, `modify`, `cancel`, `delete` or `remove` (D-039, D-022) | `ClinicalOrderServiceTest.contractHasNoOperationToChangeAnOrder` |
+
+Both expect a `ValidationException` with the single message “The recurrence interval cannot be more than 12 months”,
+an empty order list for the patient, no pending needs and no audit entry (section 5).
 
 Postcondition of every case: a denied call saves nothing and registers only `ORDER_ACCESS_DENIED`; a rejected call saves
 nothing, creates no need and registers nothing; a created order is never changed afterwards and its needs stay
@@ -182,10 +187,11 @@ nothing, creates no need and registers nothing; a created order is never changed
 
 ## 5. Not covered / Not defined
 
-- **Interval greater than 12 months (13), Not defined:** D-040 and Q4 say that the needs of the next 12 months are
-  generated, but not whether an interval of 13 is rejected, creates an order with no needs or creates one need. The
-  code creates the order with no need (the loop does not run). No test asserts it: it is an open question of the team,
-  and the case is added when Requirements answers it. A maximum interval is not defined either.
+- Interval of 13 months or more: decided by David in
+  [#207](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/207) (24/11/2026), rejected;
+  the server change is `6e8dd58`.
+  “The recurrence interval cannot be more than 12 months”:
+  message proposed by Implementation and Testing; to be confirmed by Design (#219: messages are Design's).
 - **Priority of a follow-up order, Not defined:** `FollowUpOrder` has no priority (Q2) and the needs of C5 have none, so
   there is nothing to test; if Requirements adds one, it is a change of the contract.
 - **Month-end dates:** they follow Q4 (`creationDate.plusMonths(k * n)` from the creation date, not from the previous
@@ -197,4 +203,4 @@ nothing, creates no need and registers nothing; a created order is never changed
 - **Not covered here:** the constructor with the system clock (a test with it would depend on the day it is run); the
   client of UC07 (#70); the cases of UC06, which are in `UC06-server-test-design.md` of `feature/UC06-server-tests`; UC13 and UC15 of C5, which book
   the needs; editing or cancelling an order (D-039).
-- **Defects found:** none; every expected result of section 4 passes against `b6d1e74`.
+- **Defects found:** none; every expected result of section 4 passes against `6e8dd58`.
