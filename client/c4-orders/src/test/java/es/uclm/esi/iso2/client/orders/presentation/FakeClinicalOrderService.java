@@ -4,6 +4,7 @@ import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
 import es.uclm.esi.iso2.common.orders.contracts.IClinicalOrderService;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
+import es.uclm.esi.iso2.common.orders.domain.FollowUpOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
 import es.uclm.esi.iso2.common.shared.ValidationException;
 import java.time.LocalDate;
@@ -134,6 +135,12 @@ class FakeClinicalOrderService implements IClinicalOrderService {
 
     @Override
     public void markSchedulingNeedBooked(String requester, String needId) {
+        throw new UnsupportedOperationException("Not used by UC06");
+    }
+
+    @Override
+    public FollowUpOrder orderFollowUp(String requester, FollowUpOrder order)
+            throws AccessDeniedException, ValidationException {
         throw new UnsupportedOperationException("Not used by UC06");
     }
 
