@@ -6,6 +6,7 @@ import es.uclm.esi.iso2.common.access.contracts.IRoleManagementService;
 import es.uclm.esi.iso2.common.access.domain.Permission;
 import es.uclm.esi.iso2.common.access.domain.Role;
 import es.uclm.esi.iso2.common.access.domain.UserAccount;
+import es.uclm.esi.iso2.common.appointments.domain.Appointment;
 import es.uclm.esi.iso2.common.configuration.contracts.ISystemParameterService;
 import es.uclm.esi.iso2.common.configuration.domain.AppointmentPolicy;
 import es.uclm.esi.iso2.common.configuration.domain.Priority;
@@ -21,6 +22,7 @@ import es.uclm.esi.iso2.common.patients.contracts.IPatientService;
 import es.uclm.esi.iso2.common.patients.domain.Patient;
 import es.uclm.esi.iso2.common.patients.domain.Sex;
 import es.uclm.esi.iso2.common.shared.ValidationException;
+import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,6 +41,24 @@ import java.util.Set;
  * count the calls, so a test can check when a service of another component is not reached.
  */
 final class TestDoubles {
+    /** Stores appointments normally until a test requests a save failure. */
+    static final class AppointmentRepositoryFake extends InMemoryAppointmentRepository {
+        private boolean rejectSaves;
+
+        void rejectSaves() {
+            rejectSaves = true;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void save(Appointment appointment) {
+            if (rejectSaves) {
+                throw new IllegalStateException("Appointment storage unavailable");
+            }
+            super.save(appointment);
+        }
+    }
+
     private TestDoubles() {
     }
 
@@ -192,14 +212,19 @@ final class TestDoubles {
                 new Schedule("Room 2", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(13, 0), true),
                 new Schedule("Room 4", Set.of(DayOfWeek.TUESDAY), LocalTime.of(9, 0), LocalTime.of(11, 0), false));
 
+        private final List<TestType> testTypes = new ArrayList<>(TEST_TYPES);
         private final Set<String> deniedRequesters = new HashSet<>();
         private boolean deniesSchedules;
         private int calls;
 
+        void addTestType(TestType type) {
+            testTypes.add(type);
+        }
+
         @Override
         public TestType getTestType(String requester, String testTypeId) throws ValidationException {
             calls++;
-            return TEST_TYPES.stream()
+            return testTypes.stream()
                     .filter(testType -> testType.getId().equals(testTypeId))
                     .findFirst()
                     .orElseThrow(() -> new ValidationException(
@@ -333,6 +358,11 @@ final class TestDoubles {
         private final Map<String, SchedulingNeed> needs = new LinkedHashMap<>();
         private final Map<String, ClinicalOrder> orders = new LinkedHashMap<>();
         private int pendingCalls;
+        private ValidationException pendingRejection;
+
+        void rejectPendingWith(ValidationException rejection) {
+            pendingRejection = rejection;
+        }
 
         void addNeed(SchedulingNeed need) {
             needs.put(need.getNeedId(), need);
@@ -389,6 +419,9 @@ final class TestDoubles {
         @Override
         public void markSchedulingNeedPending(String requester, String needId)
                 throws AccessDeniedException, ValidationException {
+            if (pendingRejection != null) {
+                throw pendingRejection;
+            }
             changeStatus(needId, SchedulingNeedStatus.PENDING, "pending");
         }
 

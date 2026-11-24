@@ -12,7 +12,7 @@ Ignacio, 23/11/2026); nothing that those sources do not define is used as an exp
 first version of the cases (TC13S-01 to TC13S-32) was written by Ignacio Romero Torres on 23/11/2026; their ids and
 expected results are kept, except the four changes of section 5.
 
-Code under test (`server-c5-appointments` 1.0.0-SNAPSHOT, `feature/UC13-server` up to `b3e7e58`, merged into this
+Code under test (`server-c5-appointments` 1.0.0-SNAPSHOT, `feature/UC13-server` up to `b040e99`, merged into this
 branch: `bcb06ae`, the plan `c775ff4` and the fixes of the defects of section 5, `c5f512d` (D1), `6a56ef9` (D5),
 `6721cfd` (D2) and `53ecd94` (D6)): the seven operations of `IAppointmentService` and `loadSeedData` implemented by
 `AppointmentService` (with the private `checkPermission`, `readActiveTestType`, `findPendingNeed`, `findAppointment`,
@@ -49,6 +49,10 @@ The names, the rooms and the ids of C2 and C3 are invented test values.
 
 | Method | Parameter | Equivalence classes | Testing values |
 |---|---|---|---|
+| Book / cancel | Repository | Save succeeds / fails (**Conjeture**) | Normal store / rejected save |
+| Cancel | C4 rejection | Every message ends in `is already pending` / other / mixed | TC13S-92 / 93 / 94 |
+| Free slots | Inclusive days | At / above maximum (**Limit Val.**) | 31 / 32 |
+| Free slots | Active type duration | Zero / positive (**Limit Val.**) | 0 / 15 minutes |
 | all seven | `requester` | Admissions staff, active, with `MANAGE_APPOINTMENTS` | `lmartin` |
 | | | Active without `MANAGE_APPOINTMENTS` (physician, administrator) | `mgarcia`, `admin` |
 | | | Inactive | `pnavarro` |
@@ -119,10 +123,12 @@ patient, the test type, the room and the physician of the order (Q6 of C5-design
 registers `APPOINTMENT_BOOKED`. `rescheduleAppointment` keeps the id and the need, sets the new slot and `RESCHEDULED`
 and registers `APPOINTMENT_RESCHEDULED`. `cancelAppointment` sets `CANCELLED`, puts the need back to `PENDING` (D41)
 and registers `APPOINTMENT_CANCELLED`. The reads register `APPOINTMENT_ACCESSED`. Exceptions: `AccessDeniedException`
-with the requester, registered as `APPOINTMENT_ACCESS_DENIED` (D38); `ValidationException` with every reason; nothing
-is saved.
+with the requester, registered as `APPOINTMENT_ACCESS_DENIED` (D38), and `ValidationException` with every reason.
+When C4 rejects a cancellation after the save, the repository already holds the cancelled appointment (`d933b30`).
 
 ## 2. Combination of the values
+
+TC13S-90 to 97 vary one save, C4 response, range or duration at a time using the same permitted requester.
 
 - **Requester × operation (all pairs).** Each of the six denied requester values with each of the seven operations
   (TC13S-01): 6 × 7 = 42 combinations, the maximum; the permitted requester `lmartin` is used in every other case.
@@ -145,12 +151,12 @@ is saved.
 
 ## 3. Coverage (white box)
 
-Measured with JaCoCo in `mvn -B -ntp clean verify` on `feature/UC13-server` up to `b3e7e58` merged into this
-branch, with every case of section 4 in the suite and no disabled test (D-033: 80 % of lines, 70 % of branches of
-the bundle): `AppointmentService` 196 of 199 lines and 120 of 120 branches; `AppointmentSeedData` 7 of 7 lines;
-`InMemoryAppointmentRepository` 26 of 26 lines and 4 of 4 branches; the bundle 229 of 232 lines (98.7 %) and 124 of
-124 branches (100 %). `common`: 252 of 287 lines (87.8 %) and 14 of 14 branches. The only missed lines are the
-constructor with the system clock (lines 95-97, section 5).
+Coverage through `b040e99` with TC13S-90 to 97:
+- `AppointmentService`: 203/206 lines and 126/126 branches. The three missed lines belong to the system-clock
+  constructor (section 5).
+- `AppointmentSeedData`: 7/7 lines. `InMemoryAppointmentRepository`: 26/26 lines and 4/4 branches.
+- `server-c5-appointments`: 236/239 lines (98.7 %) and 130/130 branches (100 %).
+- `common`: 252/287 lines (87.8 %) and 14/14 branches (100 %).
 
 **Decision coverage** (each decision true and false):
 
@@ -158,6 +164,9 @@ constructor with the system clock (lines 95-97, section 5).
 |---|---|---|
 | `!hasPermission(requester, MANAGE_APPOINTMENTS)` in `checkPermission` | TC13S-01, TC13S-02 | every other case |
 | `blank(testTypeId)` / `!testType.isActive()` in `readActiveTestType` | TC13S-33 / TC13S-08, TC13S-51 | TC13S-03 |
+| Last day beyond first + 30 days | TC13S-96 | TC13S-95 |
+| Duration at most zero | TC13S-97 | TC13S-95 |
+| Every C4 message ends in `is already pending` | TC13S-27, 92 | TC13S-93, 94 |
 | `toDate.isBefore(fromDate)` | TC13S-06 | TC13S-03 (equal dates), TC13S-38 |
 | `!day.isAfter(toDate)` (loop of days) | 1 iteration TC13S-03, 2 TC13S-38, 8 TC13S-39 | after the last day |
 | `!daysOfWeek.contains(day)` in `addFreeSlotsOfTheDay` | TC13S-04, TC13S-38 (Wednesday) | TC13S-03 |
@@ -325,10 +334,30 @@ guessing. Dates are 2026 unless written; times are on 24/11/2026 (Tuesday) unles
 | TC13S-88 | `rescheduleAppointment` | EC: `APT-0001` at 09:00 to 10:00-10:30 | `The duration of the slot must match the duration of the test type TT-01` | `SlotRules.rescheduleWithAWrongDuration` | still `BOOKED` |
 | TC13S-89 | `nextWorkingDay` | BV: Monday 23/11, Thursday 26/11, Friday 27/11; EC: Saturday 28/11, Sunday 29/11/2026 | Tuesday 24/11, Friday 27/11, Monday 30/11, Monday 30/11, Monday 30/11 (the first working day after the start, Testing, #208; `6721cfd`) | `SeedData.nextWorkingDay` | — |
 
-Postcondition of every case: a denied call saves nothing and registers only `APPOINTMENT_ACCESS_DENIED`; a rejected
-call saves nothing, does not change the need in C4 and registers nothing; no appointment is ever deleted (D-022).
+The following cases use the review of #208 in the server plan (`b040e99`) and the corresponding change (`d933b30`).
+The range includes both dates. TC13S-95 starts on Sunday and ends on the fifth scheduled Tuesday (eight slots each).
+For TC13S-97 the room has no Wednesday schedule, so even a missing duration check cannot start an unbounded loop.
+
+| ID | Method | Input (and precondition) | Expected result | Test | Postcondition |
+|---|---|---|---|---|---|
+| TC13S-90 | Book | Save fails | Storage error | `Booking.bookingSaveFails` | No appointment, need pending |
+| TC13S-91 | Cancel | Save fails | Storage error | `Cancelling.cancelSaveFails` | Appointment and need booked |
+| TC13S-92 | Cancel | Two already-pending messages | Success | `Cancelling.allPending` | Cancelled |
+| TC13S-93 | Cancel | Unrelated C4 error | Same exception | `Cancelling.otherError` | Cancelled |
+| TC13S-94 | Cancel | One suffix, one mid-message match | Same exception | `Cancelling.mixedErrors` | Cancelled |
+| TC13S-95 | Free slots | 31 days | 40 slots, last ends at 11:00 on day 31 | `FreeSlots.accepts31Days` | Read only |
+| TC13S-96 | Free slots | 32 days | Range error below | `FreeSlots.rejects32Days` | Read only |
+| TC13S-97 | Free slots | Active TT-ZERO, zero minutes | Duration error below | `FreeSlots.zeroDuration` | Read only |
+
+TC13S-96 expects “The range cannot be longer than 31 days”. TC13S-97 expects “The test type TT-ZERO has no duration”.
+
+Validation before saving leaves the appointment and need untouched. TC13S-93 and 94 exercise rejection after saving.
+Permission denial registers `APPOINTMENT_ACCESS_DENIED`. No appointment is deleted (D-022).
 
 ## 5. Not covered / Not defined
+
+- TC13S-90 to 97 add expectations from `d933b30` and the review recorded in `b040e99`. The review defines the
+  save order and propagated errors. Recovery or retry after a successful save followed by a C4 failure is unspecified.
 
 - **Changed expected values after merging `bcb06ae` (#208):** none. No double of C2 threw `AccessDeniedException`
   before, so no case depended on the `catch` that Javier's decision removed; the rethrow is now TC13S-67 to TC13S-69.
@@ -353,7 +382,7 @@ call saves nothing, does not change the need in C4 and registers nothing; no app
     09:15-09:30; expected `The slot 24/11/2026 09:10 is not free` -> `The slot 24/11/2026 09:15 is not free`. Two
     slots of 15 minutes on the same grid never overlap in part, so the existing appointment is off the grid and the
     new slot is on it, which keeps the overlap as the only reason.
-- **Changed expected values after merging the fixes up to `b3e7e58` (D1, D2, D5, D6):** none. TC13S-70, TC13S-72,
+- **Changed expected values after the earlier merge at `b3e7e58` (D1, D2, D5, D6):** none. TC13S-70, TC13S-72,
   TC13S-73, TC13S-77, TC13S-78 and TC13S-81 are back with the ids and expected values they had while out of the
   suite; TC13S-89 (`nextWorkingDay`) is new, with the rule of #208 (D is the first working day after the start).
 - **New cases of the decided rules (TC13S-77 to TC13S-88).** One case or more per rule, alone, with a slot that is
@@ -406,11 +435,11 @@ call saves nothing, does not change the need in C4 and registers nothing; no app
 - **TC13S-17 changed its input:** the first version used a slot of 23/11/2026, which was also outside the schedule
   (Monday), so it did not isolate the past. It now uses a clock at 10:00 and a slot of 09:00 inside the schedule; the
   expected result is the same rule, with the date of the new slot, and it is now the only message.
-- **Not covered here:** the constructor with the system clock (lines 95-97; a test with it would depend on the day it
+- **Not covered here:** the constructor with the system clock (a test with it would depend on the day it
   is run); the times of the seed appointments, which #208 does not fix in this design; the client of UC13 (#130); UC15
   (#134) and UC14 (#137); the order of the free slots of a room with two schedules, which cannot happen because C2
   keeps one schedule per room (its key is the resource).
 - **Defects found:** D1, D2, D5 and D6 (C5), fixed in `c5f512d`, `6721cfd`, `6a56ef9` and `53ecd94`; their cases
   (TC13S-70, TC13S-72, TC13S-73, TC13S-77, TC13S-78, TC13S-81) are back in the suite with no expected value changed,
   and TC13S-89 is new. D3 and D4 (C4, by reading), fixed in `6ca690e` and `65273ef`, tested in the C4 test branch.
-  Every case of section 4 passes against `feature/UC13-server` up to `b3e7e58`, with no test disabled.
+  Every case of section 4 passes against `feature/UC13-server` up to `b040e99`, with no test disabled.

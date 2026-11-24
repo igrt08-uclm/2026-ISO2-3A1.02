@@ -13,11 +13,12 @@ import es.uclm.esi.iso2.common.appointments.domain.Appointment;
 import es.uclm.esi.iso2.common.appointments.domain.AppointmentStatus;
 import es.uclm.esi.iso2.common.appointments.domain.PendingNeedView;
 import es.uclm.esi.iso2.common.appointments.domain.TimeSlot;
+import es.uclm.esi.iso2.common.configuration.domain.TestType;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeedStatus;
 import es.uclm.esi.iso2.common.shared.ValidationException;
-import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
+import es.uclm.esi.iso2.server.appointments.service.TestDoubles.AppointmentRepositoryFake;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakeClinicalOrderService;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakePatientService;
 import es.uclm.esi.iso2.server.appointments.service.TestDoubles.FakeRoleManagementService;
@@ -80,7 +81,7 @@ class AppointmentServiceTest {
     private FakePatientService patients;
     private FakeSystemParameterService parameters;
     private FakeClinicalOrderService orders;
-    private InMemoryAppointmentRepository appointments;
+    private AppointmentRepositoryFake appointments;
     private AppointmentService service;
 
     @BeforeEach
@@ -90,7 +91,7 @@ class AppointmentServiceTest {
         patients = new FakePatientService();
         parameters = new FakeSystemParameterService();
         orders = new FakeClinicalOrderService();
-        appointments = new InMemoryAppointmentRepository();
+        appointments = new AppointmentRepositoryFake();
         service = new AppointmentService(appointments, orders, patients, parameters, roles, audit, CLOCK);
         orders.addOrder(new DiagnosticOrder(ORDER, PATIENT, TEST_TYPE, PHYSICIAN, "Chest pain", "Rule out pneumonia",
                 LocalDate.of(2026, 11, 23), "URGENT"));
@@ -182,6 +183,50 @@ class AppointmentServiceTest {
     @Nested
     @DisplayName("2. The free slots of D40")
     class FreeSlots {
+
+        @Test
+        @DisplayName("TC13S-95 31 inclusive days include slots on the final Tuesday")
+        void accepts31Days() throws AccessDeniedException, ValidationException {
+            // Arrange
+            LocalDate first = TUESDAY.plusDays(5);
+            LocalDate last = first.plusDays(30);
+
+            // Act
+            List<TimeSlot> slots = service.getFreeSlots(STAFF, TEST_TYPE, first, last);
+
+            // Assert
+            assertEquals(40, slots.size());
+            assertEquals(at(last, 11, 0), slots.getLast().getEnd());
+        }
+
+        @Test
+        @DisplayName("TC13S-96 32 inclusive days are rejected")
+        void rejects32Days() {
+            // Arrange
+            LocalDate last = TUESDAY.plusDays(31);
+
+            // Act
+            List<String> errors = errorsOf(() -> service.getFreeSlots(STAFF, TEST_TYPE, TUESDAY, last));
+
+            // Assert
+            assertEquals(List.of("The range cannot be longer than 31 days"), errors);
+        }
+
+        @Test
+        @DisplayName("TC13S-97 an active test type with zero duration is rejected")
+        void zeroDuration() {
+            // Arrange
+            parameters.addTestType(new TestType("TT-ZERO", "Zero duration", "X-ray", ROOM, 0, null, false,
+                    false, null, "ROUTINE", false, true));
+            LocalDate wednesday = TUESDAY.plusDays(1);
+
+            // Act
+            List<String> errors = errorsOf(() -> service.getFreeSlots(STAFF, "TT-ZERO", wednesday, wednesday));
+
+            // Assert
+            assertEquals(List.of("The test type TT-ZERO has no duration"), errors);
+        }
+
 
         @Test
         @DisplayName("TC13S-03 the slots of the schedule of the room, one every duration")
@@ -325,6 +370,21 @@ class AppointmentServiceTest {
     @Nested
     @DisplayName("3. Booking")
     class Booking {
+
+        @Test
+        @DisplayName("TC13S-90 a failed save leaves the need pending")
+        void bookingSaveFails() {
+            // Arrange
+            appointments.rejectSaves();
+
+            // Act
+            assertThrows(IllegalStateException.class, AppointmentServiceTest.this::bookFirst);
+
+            // Assert
+            assertTrue(appointments.findAll().isEmpty());
+            assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus());
+        }
+
 
         @Test
         @DisplayName("TC13S-09 the booking keeps the need, the patient and the physician of the order")
@@ -673,6 +733,74 @@ class AppointmentServiceTest {
     @Nested
     @DisplayName("5. Cancelling")
     class Cancelling {
+
+        @Test
+        @DisplayName("TC13S-91 a failed save leaves the appointment and need booked")
+        void cancelSaveFails() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            appointments.rejectSaves();
+
+            // Act
+            assertThrows(IllegalStateException.class, () -> service.cancelAppointment(STAFF, id));
+
+            // Assert
+            assertEquals(AppointmentStatus.BOOKED, appointments.findById(id).getStatus());
+            assertEquals(SchedulingNeedStatus.BOOKED, orders.need(NEEDED).getStatus());
+        }
+
+        @Test
+        @DisplayName("TC13S-92 cancellation accepts multiple already-pending errors")
+        void allPending() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            orders.forceStatus(NEEDED, SchedulingNeedStatus.PENDING);
+            orders.rejectPendingWith(new ValidationException(List.of(
+                    "The scheduling need " + NEEDED + " is already pending", "The need is already pending")));
+
+            // Act
+            Appointment result = service.cancelAppointment(STAFF, id);
+
+            // Assert
+            assertEquals(AppointmentStatus.CANCELLED, result.getStatus());
+            assertEquals(AppointmentStatus.CANCELLED, appointments.findById(id).getStatus());
+        }
+
+        @Test
+        @DisplayName("TC13S-93 cancellation propagates an unrelated validation error after saving")
+        void otherError() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            ValidationException rejection = new ValidationException(List.of("The scheduling need is missing"));
+            orders.rejectPendingWith(rejection);
+
+            // Act
+            ValidationException thrown = assertThrows(ValidationException.class,
+                    () -> service.cancelAppointment(STAFF, id));
+
+            // Assert
+            assertSame(rejection, thrown);
+            assertEquals(AppointmentStatus.CANCELLED, appointments.findById(id).getStatus());
+        }
+
+        @Test
+        @DisplayName("TC13S-94 cancellation propagates mixed errors even when the first says already pending")
+        void mixedErrors() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            ValidationException rejection = new ValidationException(List.of(
+                    "The need is already pending", "The need is already pending elsewhere"));
+            orders.rejectPendingWith(rejection);
+
+            // Act
+            ValidationException thrown = assertThrows(ValidationException.class,
+                    () -> service.cancelAppointment(STAFF, id));
+
+            // Assert
+            assertSame(rejection, thrown);
+            assertEquals(AppointmentStatus.CANCELLED, appointments.findById(id).getStatus());
+        }
+
 
         @Test
         @DisplayName("TC13S-25 cancelling frees the slot, leaves the need pending and is audited")
