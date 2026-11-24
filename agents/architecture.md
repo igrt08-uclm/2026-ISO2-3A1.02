@@ -9,7 +9,8 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 │   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.4-SNAPSHOT), depends on common
 │   ├── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.1.2-SNAPSHOT), depends only on common
 │   ├── c3-patients/     server of C3 (artifactId `server-c3-patients`, version 1.0.1-SNAPSHOT), depends only on common
-│   └── c4-orders/       server of C4 (artifactId `server-c4-orders`, version 1.1.0-SNAPSHOT), depends only on common
+│   ├── c4-orders/       server of C4 (artifactId `server-c4-orders`, version 1.1.0-SNAPSHOT), depends only on common
+│   └── c5-appointments/ server of C5 (artifactId `server-c5-appointments`, version 1.0.0-SNAPSHOT), depends only on common
 └── client/              aggregator of the client submodules (one per component)
     ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.6-SNAPSHOT), depends on common, server-c1-access and,
     │                    because its `Main` starts the whole program, on server-c2-configuration, client-c2-configuration,
@@ -22,7 +23,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
   is created in its own iteration; for now `common` only has `es.uclm.esi.iso2.common.access` (C1).
 - Client and server talk through **interfaces (contracts)** in `common` (D-016, #35): the server implements them and
   the client uses them. The communication is simulated with direct Java calls, not a network. The version of
-  `common` is set once in the `<dependencyManagement>` of the parent pom.
+  `common` is set once in the `<dependencyManagement>` of the parent pom. `common` is at `1.8.0` after UC07 and UC13.
 - The client starts the whole program: only `es.uclm.esi.iso2.client.Main` imports `server`, to create the services.
   The screens (`IU_` classes, Swing, D-030) only use `common`.
 - External hospital systems (SSO, EHR, admissions, RIS/PACS) are simulated behind interfaces. The SSO is `IAuthenticatorSystem`,

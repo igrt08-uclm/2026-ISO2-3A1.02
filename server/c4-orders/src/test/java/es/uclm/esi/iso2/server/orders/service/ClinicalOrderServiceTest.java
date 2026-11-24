@@ -671,4 +671,73 @@ class ClinicalOrderServiceTest {
                     () -> assertEquals(SchedulingNeedStatus.PENDING, pending.get(0).getStatus()));
         }
     }
+
+    @Nested
+    @DisplayName("8. Seed data (D3, D4)")
+    class SeedData {
+
+        @Test
+        @DisplayName("loadSeedData populates four orders and needs dated by the service clock without auditing (D3)")
+        void seedDataUsesServiceClockAndIsNotAudited() throws AccessDeniedException {
+            service.loadSeedData();
+            List<SchedulingNeed> pending = service.getPendingSchedulingNeeds(ADMISSIONS);
+            assertAll(
+                    () -> assertEquals(TODAY, orders.findById("ORD-0001").getCreationDate()),
+                    () -> assertEquals(TODAY, orders.findById("ORD-0002").getCreationDate()),
+                    () -> assertEquals(TODAY, orders.findById("ORD-0003").getCreationDate()),
+                    () -> assertEquals(TODAY, orders.findById("ORD-0004").getCreationDate()),
+                    () -> assertEquals(SchedulingNeedStatus.BOOKED, needs.findById("NEED-0001").getStatus()),
+                    () -> assertEquals(TODAY, needs.findById("NEED-0001").getDueDate()),
+                    () -> assertEquals(TODAY, needs.findById("NEED-0002").getDueDate()),
+                    () -> assertEquals(TODAY, needs.findById("NEED-0003").getDueDate()),
+                    () -> assertEquals(TODAY, needs.findById("NEED-0004").getDueDate()),
+                    () -> assertEquals(2, pending.size()),
+                    () -> assertEquals(List.of("NEED-0002", "NEED-0004"),
+                            pending.stream().map(SchedulingNeed::getNeedId).toList()),
+                    () -> assertTrue(audit.entries().isEmpty()));
+        }
+
+        @Test
+        @DisplayName("loadSeedData is idempotent when called twice and next ids continue at ORD-0005 and NEED-0005")
+        void seedDataIsIdempotentAndIdsContinue() throws AccessDeniedException, ValidationException {
+            service.loadSeedData();
+            service.loadSeedData();
+            DiagnosticOrder created = service.orderDiagnosticProcedure(PHYSICIAN, validOrder());
+            List<SchedulingNeed> pending = service.getPendingSchedulingNeeds(ADMISSIONS);
+            assertAll(
+                    () -> assertEquals("ORD-0005", created.getOrderId()),
+                    () -> assertEquals("NEED-0005", pending.get(pending.size() - 1).getNeedId()),
+                    () -> assertEquals(3, pending.size()));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { "ORD-0001", "ORD-0002", "ORD-0003", "ORD-0004" })
+        @DisplayName("loadSeedData skips loading if any seed order id already exists (D4)")
+        void seedSkippedWhenOrderIdExists(String existingOrderId) {
+            orders.save(new DiagnosticOrder(existingOrderId, PATIENT, "TT-01", PHYSICIAN, "Existing", "Keep",
+                    TODAY.minusDays(1), "ROUTINE"));
+            service.loadSeedData();
+            for (String id : List.of("ORD-0001", "ORD-0002", "ORD-0003", "ORD-0004")) {
+                if (!id.equals(existingOrderId)) {
+                    assertNull(orders.findById(id));
+                }
+            }
+            assertNull(needs.findById("NEED-0001"));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { "NEED-0001", "NEED-0002", "NEED-0003", "NEED-0004" })
+        @DisplayName("loadSeedData skips loading if any seed need id already exists (D4)")
+        void seedSkippedWhenNeedIdExists(String existingNeedId) {
+            needs.save(new SchedulingNeed(existingNeedId, "ORD-9999", TODAY.minusDays(1),
+                    SchedulingNeedStatus.PENDING));
+            service.loadSeedData();
+            for (String id : List.of("NEED-0001", "NEED-0002", "NEED-0003", "NEED-0004")) {
+                if (!id.equals(existingNeedId)) {
+                    assertNull(needs.findById(id));
+                }
+            }
+            assertNull(orders.findById("ORD-0001"));
+        }
+    }
 }
