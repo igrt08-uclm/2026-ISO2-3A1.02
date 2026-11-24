@@ -31,13 +31,13 @@ class InMemoryClinicalOrderRepositoryTest {
     }
 
     @Test
-    @DisplayName("TC06S-43 an unknown id gives null")
+    @DisplayName("TC06S-43a an unknown id gives null")
     void unknownId() {
         assertNull(repository.findById("ORD-9999"));
     }
 
     @Test
-    @DisplayName("TC06S-43 the orders of one patient are returned and the others are not")
+    @DisplayName("TC06S-43b the orders of one patient are returned and the others are not")
     void ordersOfOnePatient() {
         ClinicalOrder first = order("ORD-0001", "P-0001");
         ClinicalOrder other = order("ORD-0002", "P-0002");
@@ -52,7 +52,7 @@ class InMemoryClinicalOrderRepositoryTest {
     }
 
     @Test
-    @DisplayName("TC06S-43 saving the same id twice replaces the order")
+    @DisplayName("TC06S-43c saving the same id twice replaces the order")
     void saveReplaces() {
         ClinicalOrder first = order("ORD-0001", "P-0001");
         ClinicalOrder second = order("ORD-0001", "P-0002");
