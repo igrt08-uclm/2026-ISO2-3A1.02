@@ -25,7 +25,8 @@ public class IU_Welcome extends JPanel {
     private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
     private static final String CONFIGURE_INTEGRATIONS = "CONFIGURE_INTEGRATIONS";
     private static final String MANAGE_PATIENTS = "MANAGE_PATIENTS";
-    private static final int COLUMNS = 6;
+    private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
+    private static final int COLUMNS = 7;
 
     /**
      * Creates the welcome screen with the button <em>Log out</em>. It passes no action and an empty list of
@@ -122,6 +123,30 @@ public class IU_Welcome extends JPanel {
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
             Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
             Runnable onManagePatients) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, onConfigureIntegrations,
+                onManagePatients, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Order procedure</em> of UC06.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructors)
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructors)
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructors)
+     * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em> (see the other
+     *                                constructors)
+     * @param onManagePatients is run when the user presses <em>Manage patients</em> (see the other constructors)
+     * @param onOrderProcedure is run when the user presses <em>Order procedure</em>; the button is only shown to a
+     *                         user with the permission {@code ORDER_PROCEDURES}, and not at all if this is
+     *                         {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
+            Runnable onManagePatients, Runnable onOrderProcedure) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -165,7 +190,13 @@ public class IU_Welcome extends JPanel {
             btnManagePatients.addActionListener(event -> onManagePatients.run());
             addButton(btnManagePatients, 4);
         }
-        addButton(btnLogout, 5);
+        if (onOrderProcedure != null && hasPermission(permissions, ORDER_PROCEDURES)) {
+            JButton btnOrderProcedure = new JButton("Order procedure");
+            btnOrderProcedure.setMnemonic('O');
+            btnOrderProcedure.addActionListener(event -> onOrderProcedure.run());
+            addButton(btnOrderProcedure, 5);
+        }
+        addButton(btnLogout, 6);
     }
 
     private static boolean hasPermission(List<Permission> permissions, String code) {

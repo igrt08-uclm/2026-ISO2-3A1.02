@@ -1,0 +1,38 @@
+@startuml Component_7
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 7 – Execution and Reports (Client & Server Use Cases)
+
+!includesub _actors.puml!User
+!includesub _actors.puml!Patient
+!includesub _actors.puml!Physician
+!includesub _actors.puml!RisPacs
+!includesub _actors.puml!Client
+!includesub _actors.puml!Server
+
+Patient --|> User
+Physician --|> Patient
+
+package "C7 Client" {
+  usecase "Record procedure execution details and document incidents (Client)" as UC10_C
+  usecase "Write, edit and review diagnostic reports (Client)" as UC09_C
+}
+
+package "C7 Server" {
+  usecase "Record procedure execution details and document incidents (Server)" as UC10_S
+  usecase "Write, edit and review diagnostic reports (Server)" as UC09_S
+}
+
+Physician -- UC10_C
+Physician -- UC09_C
+
+UC10_C -- ServerActor
+UC09_C -- ServerActor
+
+ClientActor -- UC10_S
+ClientActor -- UC09_S
+
+UC09_S -- RisPacs
+
+@enduml
