@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>client-c1-access</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.2.6-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
@@ -38,6 +38,14 @@
     <dependency>
       <groupId>es.uclm.esi.iso2</groupId>
       <artifactId>client-c3-patients</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>es.uclm.esi.iso2</groupId>
+      <artifactId>server-c4-orders</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>es.uclm.esi.iso2</groupId>
+      <artifactId>client-c4-orders</artifactId>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

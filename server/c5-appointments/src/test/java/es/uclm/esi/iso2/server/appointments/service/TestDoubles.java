@@ -16,6 +16,7 @@ import es.uclm.esi.iso2.common.configuration.domain.TestType;
 import es.uclm.esi.iso2.common.orders.contracts.IClinicalOrderService;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.DiagnosticOrder;
+import es.uclm.esi.iso2.common.orders.domain.FollowUpOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeedStatus;
 import es.uclm.esi.iso2.common.patients.contracts.IPatientService;
@@ -439,6 +440,12 @@ final class TestDoubles {
 
         @Override
         public DiagnosticOrder orderDiagnosticProcedure(String requester, DiagnosticOrder order)
+                throws AccessDeniedException, ValidationException {
+            throw new UnsupportedOperationException("Not used by C5");
+        }
+
+        @Override
+        public FollowUpOrder orderFollowUp(String requester, FollowUpOrder order)
                 throws AccessDeniedException, ValidationException {
             throw new UnsupportedOperationException("Not used by C5");
         }
