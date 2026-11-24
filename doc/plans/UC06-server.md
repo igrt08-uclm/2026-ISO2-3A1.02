@@ -792,7 +792,7 @@ flowchart TD
           ClinicalOrder getOrder(String requester, String orderId) throws AccessDeniedException, ValidationException;
 
           /**
-           * Marks a booked scheduling need as pending again, when C5 cancels its appointment (D41).
+           * Marks a booked scheduling need as pending again, when C5 cancels its appointment (D-041).
            *
            * @param requester the username of the user who cancels
            * @param needId the id of the scheduling need
@@ -805,7 +805,7 @@ flowchart TD
       ```
   - `ClinicalOrderService.java`:
     - imports: add `import java.util.Locale;` after `import java.util.List;`.
-    - class Javadoc: after the sentence that ends "…with its clinical indication and justification; every error is returned together." add the sentence ` Reading the orders of a patient also needs {@code ORDER_PROCEDURES}; the operations that C5 uses (the pending needs, one order, and marking a need as booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D37, D41), and they are not audited.` (wrap at 120 characters).
+    - class Javadoc: after the sentence that ends "…with its clinical indication and justification; every error is returned together." add the sentence ` Reading the orders of a patient also needs {@code ORDER_PROCEDURES}; the operations that C5 uses (the pending needs, one order, and marking a need as booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D-037, D-041), and they are not audited.` (wrap at 120 characters).
     - constants: after `ORDER_PROCEDURES` add `private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";`; after `ORDER` add `private static final String SCHEDULING_NEED = "SCHEDULING_NEED:";`.
     - after the method `orderDiagnosticProcedure` add:
       ```java
@@ -891,7 +891,7 @@ flowchart TD
   - Not changed: `agents/architecture.md:20` (open question).
   - No build (documents only).
   - Commit: `git add agents/architecture.md agents/components.md`, then `git commit -m "docs(UC06): versions of server-c4-orders and common in agents (#68)"`
-- [ ] **7. Hand over to Adam.** Tick steps 1-6 with their hashes, fill in *State for Adam* (date, hashes, what the full build printed) and **Status**, then `git add doc/plans/UC06-server.md` and `git commit -m "docs(UC06): state of UC06-server for Adam (#68)"`. **No push**: Javier pushes and tells Adam.
+- [x] **7. Hand over to Adam.** Tick steps 1-6 with their hashes, fill in *State for Adam* (date, hashes, what the full build printed) and **Status**, then `git add doc/plans/UC06-server.md` and `git commit -m "docs(UC06): state of UC06-server for Adam (#68)"`. **No push**: Javier pushes and tells Adam.
 
 ## State for Adam
 **Ready on 23/11/2026**, branch `feature/UC06-server`, steps 1 to 6 committed: `69f588c` (module and poms), `7b949bb` (domain and contract in `common`), `2d85d02` (in-memory repositories), `ef85719` (`orderDiagnosticProcedure`), `488c9ef` (reads and operations for C5), `92d38bb` (`agents/`). `mvn -B verify` is green for `common` and `server/c4-orders` (coverage of `common` 200/235 lines, 14/14 branches); the full build has to be repeated on a machine with a desktop because the Swing tests need fonts. What is already known:
@@ -916,15 +916,26 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 10. **Classes:** `ClinicalOrder` (through `DiagnosticOrder`), `DiagnosticOrder`, `SchedulingNeed` and `SchedulingNeedStatus` (getters, values); `InMemoryClinicalOrderRepository` and `InMemorySchedulingNeedRepository` (`findById` unknown → `null`, `findByPatient`, `findPending`, `save` replaces).
 
 ## Verification
-- [ ] Every acceptance criterion of #68 is checked with Adam's tests: an order is only created for an active patient and an active test type, with one of the configured priorities; every created order appears as a pending scheduling need for C5 and its creation is registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
-- [ ] `server-c4-orders` depends only on `common`; no file of `client/`, of C1, C2 or C3 changed (`git diff --stat develop...HEAD`).
-- [ ] `mvn -B verify` (full build) is green with Adam's tests, the coverage check of `server-c4-orders` and of `common` included.
-- [ ] The CI of the pull request (`Closes #68`) is green.
+- [ ] Every acceptance criterion of #68 is checked with Adam's tests (the tests are in the pull request #203, not in
+      this branch): an order is only created for an active patient and an active test type, with one of the
+      configured priorities; every created order appears as a pending scheduling need for C5 and its creation is
+      registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of
+      #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
+- [x] `server-c4-orders` depends only on `common`; no file of `client/`, of C1, C2 or C3 changed (`git diff --stat develop...HEAD`).
+- [ ] `mvn -B verify` (full build) is green with Adam's tests (pull request #203), the coverage check of
+      `server-c4-orders` and of `common` included.
+- [x] The CI of the pull request (`Closes #68`) is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** step 7 is done: the code of steps 1 to 6 is committed and the branch is ready for the tests. Steps 2 to 6 were done by Ignacio on 23/11/2026 following this plan; the tests branch `feature/UC06-server-tests` forks from `92d38bb`, with the test design in `doc/testing/test-cases/UC06-server-test-design.md`.
-- **Build of steps 2 to 6 (23/11/2026):** `mvn -B verify` of `common` and `server/c4-orders` gives `BUILD SUCCESS`; `common` covers 200/235 lines (85 %) and 14/14 branches. The Swing tests of the `client/` modules cannot run in the environment of that session (it has no fontconfig), so the full build of the eleven modules has to be repeated on a machine with a desktop.
+- **In progress:** nothing; steps 1 to 7 are done.
+- **Next step:** Testing (Adam) runs his tests of `feature/UC06-server-tests` against this branch and confirms the
+  coverage of `server-c4-orders`; the pull request #202 (`Closes #68`) is then merged.
+- **Tests branch:** `feature/UC06-server-tests` forks from `92d38bb`, with the test design in
+  `doc/testing/test-cases/UC06-server-test-design.md`; steps 2 to 6 were done by Ignacio on 23/11/2026.
+- **Build of the branch (24/11/2026):** `mvn -B -ntp clean verify` gives `BUILD SUCCESS` with the eight modules of
+  this branch, every one `Failures: 0, Errors: 0` (52, 182, 171, 151, 124, 112 and 98 tests) and "All coverage checks
+  have been met" 7 times; `common` covers 200/235 lines (85 %) and 14/14 branches. `server-c4-orders` still has no
+  tests, so JaCoCo skips its check until Adam's tests exist.
 - **Open questions:**
   1. Javier (with Adam): seed data of C4 (`loadSeedData()`, in the design): needed or not, and which. If they are, a step is added (Q8).
   2. Requirements (David and Ignacio): are the clinical indication and the justification required, and with a maximum length (Q5)? Which `dueDate` has the need of a diagnostic order: the date of the order, or one that depends on the priority (Q6)? Does a deactivated priority count as a "configured tier" (Q4)?
@@ -933,4 +944,5 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
   5. `agents/architecture.md:20` says that `common` only has the package of C1; it is out of date and not changed here (rule 2).
   6. The texts of the order are saved as they are sent (C3 removes the spaces at the ends, `PatientService.java:249`); not decided, kept as the smallest change.
   7. #68 is assigned to the seven members of the team; D-041 asks that only the member who works on it is assigned.
-- **Last update:** 22/11/2026, Javier — plan written, pending approval.
+- **Last update:** 24/11/2026, Ignacio — step 7 done: steps 1 to 6 ticked with their hashes, the final checkboxes
+  checked and the build of the branch green.
