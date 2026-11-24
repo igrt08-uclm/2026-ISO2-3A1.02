@@ -6,6 +6,7 @@ import es.uclm.esi.iso2.client.access.presentation.IU_ManageRoles;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ConfigureParameters;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ManageIntegrations;
+import es.uclm.esi.iso2.client.orders.presentation.IU_OrderFollowUp;
 import es.uclm.esi.iso2.client.orders.presentation.IU_OrderProcedure;
 import es.uclm.esi.iso2.client.patients.presentation.IU_ManagePatients;
 import es.uclm.esi.iso2.common.access.contracts.IAuthenticationService;
@@ -94,7 +95,7 @@ public final class Main {
         show(new IU_Welcome(user, this::showLogin, () -> showAudit(user),
                 roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user),
                 () -> showConfigureSystem(user), () -> showManageIntegrations(user), () -> showManagePatients(user),
-                () -> showOrderProcedure(user)));
+                () -> showOrderProcedure(user), () -> showOrderFollowUp(user)));
     }
 
     private void showManageRoles(UserAccount user) {
@@ -118,6 +119,13 @@ public final class Main {
     private void showOrderProcedure(UserAccount user) {
         window.setTitle(APPLICATION_TITLE + " - Order procedure");
         show(new IU_OrderProcedure(clinicalOrderService, patientService, systemParameterService, user.getUsername(),
+                this::confirm,
+                () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
+    }
+
+    private void showOrderFollowUp(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Order follow-up");
+        show(new IU_OrderFollowUp(clinicalOrderService, patientService, systemParameterService, user.getUsername(),
                 this::confirm,
                 () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
     }
