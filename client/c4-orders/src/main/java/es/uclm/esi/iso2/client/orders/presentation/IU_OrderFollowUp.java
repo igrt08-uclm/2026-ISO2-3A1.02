@@ -36,8 +36,8 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  * Screen of UC07 (C4, {@code IU_OrderFollowUp}): the physician chooses a patient, fills in the form of a periodic
- * follow-up order —test type eligible for follow-up, clinical indication, justification and recurrence interval— and
- * sees the orders that the patient already has. It only talks to the contracts of {@code common}
+ * follow-up order —test type eligible for follow-up, clinical indication, justification and recurrence
+ * interval— and sees the orders that the patient already has. It only talks to the contracts of {@code common}
  * ({@link IClinicalOrderService}, {@link IPatientService} and {@link ISystemParameterService}), never to the server
  * classes. The screen is a {@link JPanel} so that the tests can create it without a display.
  */
@@ -290,8 +290,8 @@ public class IU_OrderFollowUp extends JPanel {
     }
 
     /**
-     * Shows the form for the patient that is selected: only the active test types eligible for follow-up are offered, and
-     * the orders that the patient already has are listed.
+     * Shows the form for the patient that is selected: only the active test types eligible for follow-up are
+     * offered, and the orders that the patient already has are listed.
      *
      * @param testTypes the test types of the catalogue
      * @param orders the orders of the patient
@@ -393,7 +393,8 @@ public class IU_OrderFollowUp extends JPanel {
     public void showPatientInactive(Patient patient) {
         orderModel.setRowCount(0);
         setFormEnabled(false);
-        showOperationResultError("The patient " + patient.getPatientId() + " is not active, so no order can be placed.");
+        showOperationResultError(
+                "The patient " + patient.getPatientId() + " is not active, so no order can be placed.");
     }
 
     /**
