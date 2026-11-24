@@ -143,8 +143,9 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [x] 14. Forget the previous patient when a selection fails: `clearSelection` empties the form, its texts, its
   borders and the orders, and the patient is only selected when its types and its orders were read — `a2f6942`
   `fix(UC06): forget the previous patient when a selection fails (#204)`.
-- [ ] 15. Keep the id of the created order when the reload fails: TC06C-53 expects the error to replace the success,
-  so this waits for the new expected value of Testing; the message is not changed until then.
+- [x] 15. The reload after creating an order: decided by Design (#67, Marcos), no change. When the reload fails the
+  error replaces the success, exactly as TC13C-46 does and as TC06C-53 and TC06C-54 expect; the id of the created
+  order is not kept in the success line. The code already behaved this way (`ac200cf`).
 
 ## Verification
 - [ ] Every acceptance criterion of #67: the physician creates an order for an active patient with an active test type and a configured priority and sees it in the list of the patient; invalid data is rejected with a message and nothing is created; deactivated test types are not offered; an inactive patient is not allowed to be ordered for; the denied access is explained.
@@ -156,14 +157,15 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 
 ## Status
 - **In progress:** nothing; the fixes of the review of Testing and of the review of the pull request are done (steps 9
-  to 14).
+  to 15).
 - **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7); step 8 is Testing's commit `6883914` (test design and 43 headless tests), step 9 `90c3fd8` (the answers of Testing and `agents/components.md`), step 10 `c227441` (F-01 and F-02) and step 11 `4fd6204` (F-03 and F-04). Of the five defects of the review only F-05 is open, and it is blocked outside this branch.
-- **Next step:** Testing (Adam) adds the cases of step 13 (clear the form and the orders when there is no patient);
-  nothing else of the review is pending in this branch.
+- **Next step:** nothing in this branch. Testing (Adam) added the cases of steps 13 and 14 (`16918a7`, TC06C-55 to
+  TC06C-61) and they pass; the message of the reload is decided by Design (step 15).
 - **Tests of Testing:** they are headless (they build the screen and never show it), so they need no display and no desktop, but they do need fontconfig and fonts in the machine. `mvn -B verify` is green in the local machine (Maven 3.9.9, JDK 21, 23/11/2026): BUILD SUCCESS, all coverage checks met, 38 tests of `IU_OrderProcedureTest` and 104 of `client-c1-access`. Two traps of the environment, not of the code: without fonts the Swing components throw `Fontconfig head is null` (it happened in a container that had no `libfontconfig`), and with Maven 3.8.7 the old Surefire does not run JUnit 6 and reports 0 tests, which makes JaCoCo fail — the build needs Maven 3.9.x.
 - **Deviations:** steps 3 to 5 are one commit; `agents/components.md` still says 1.2.4 for `client-c1-access` (fixed in step 9); `IClinicalOrderService.getOrdersOfPatient` returns `ClinicalOrder`, which has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder` — the contract of `common` is not changed here, to keep #202 as it was reviewed; `onSelectPatient` takes the health-card identifier (Q4).
 - **Not checked here:** the application was not started and the tests of the client could not run in this container (no fonts). The manual usability check is Testing's.
 - **Open questions:** TC06C-29 (the priority VIP) is still open for Design: the case and the *Usability decisions* do
   not agree on whether a VIP priority is offered, and this plan does not decide it. Everything else of the review is
   closed; F-05 is decided (`id · name`), implemented in step 12 and its expected values are in `7967dcc`.
-- **Last update:** 24/11/2026, Ignacio — steps 12 to 14 done; `mvn -B -ntp verify` green with the tests of Adam.
+- **Last update:** 24/11/2026, Ignacio — step 15 closed as decided by Design (#67, Marcos): the error replaces the
+  success when the reload fails, no change. `mvn -B -ntp verify` green with the tests of Adam.
