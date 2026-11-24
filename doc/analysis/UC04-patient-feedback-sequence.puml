@@ -1,0 +1,77 @@
+@startuml UC04_PatientFeedback_Sequence
+!include ../design/common/_style.puml
+
+title UC04 – Submit incident reports and satisfaction surveys (Analysis Sequence Diagram)
+
+actor "Patient" as Patient
+boundary "IU_PatientFeedback" as IU
+control "Control_PatientFeedback" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Appointment" as Appt
+entity "IncidentReport" as Incident
+entity "SatisfactionSurvey" as Survey
+entity "AuditLog" as Audit
+
+== Choose an appointment ==
+Patient -> IU : 1: openFeedback()
+IU -> Ctrl : 2: obtainMyAppointments()
+Ctrl -> UserAcc : 3: hasPermission(patient, USE_PATIENT_PORTAL)
+alt permission granted
+  Ctrl -> UserAcc : 4: getLinkedPatient(patient)
+  Ctrl -> Appt : 5: getAppointmentsByPatient(patientId)
+  Ctrl -> Audit : 6: register(patient, APPOINTMENTS_ACCESSED, patientId)
+  Ctrl --> IU : 7: showAppointments(appointments)
+else no permission
+  Ctrl -> Audit : 3a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+  Ctrl --> IU : 3b: showError(accessDenied)
+end
+
+== Submit incident report ==
+Patient -> IU : 8: enterIncidentReport(appointmentId, description)
+IU -> Ctrl : 9: submitIncidentReport(appointmentId, description)
+Ctrl -> UserAcc : 10: hasPermission(patient, USE_PATIENT_PORTAL)
+alt permission granted
+  Ctrl -> UserAcc : 11: getLinkedPatient(patient)
+  Ctrl -> Appt : 12: belongsTo(appointmentId, patientId)
+  Ctrl -> Incident : 13: validate(description)
+  alt valid report
+    Ctrl -> Incident : 14: create(patientId, appointmentId, description)
+    Ctrl -> Audit : 15: register(patient, INCIDENT_REPORTED, reportId)
+    Ctrl --> IU : 16: showConfirmation(report)
+  else appointment not found or not own
+    Ctrl --> IU : 16a: showError(reason)
+  else mandatory field missing
+    Ctrl --> IU : 16b: showError(missingFields)
+  end
+else no permission
+  Ctrl -> Audit : 10a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+  Ctrl --> IU : 10b: showError(accessDenied)
+end
+
+== Submit satisfaction survey ==
+Patient -> IU : 17: enterSurvey(appointmentId, ratings, comments)
+IU -> Ctrl : 18: submitSatisfactionSurvey(appointmentId, ratings, comments)
+Ctrl -> UserAcc : 19: hasPermission(patient, USE_PATIENT_PORTAL)
+alt permission granted
+  Ctrl -> UserAcc : 20: getLinkedPatient(patient)
+  Ctrl -> Appt : 21: belongsTo(appointmentId, patientId)
+  Ctrl -> Appt : 22: isPast(appointmentId)
+  Ctrl -> Survey : 23: existsFor(appointmentId)
+  Ctrl -> Survey : 24: validate(ratings, comments)
+  alt valid survey
+    Ctrl -> Survey : 25: create(patientId, appointmentId, ratings, comments)
+    Ctrl -> Audit : 26: register(patient, SURVEY_SUBMITTED, surveyId)
+    Ctrl --> IU : 27: showConfirmation(survey)
+  else appointment not found or not own
+    Ctrl --> IU : 27a: showError(reason)
+  else appointment not past yet, or it already has a survey
+    Ctrl --> IU : 27b: showError(reason)
+  else mandatory field missing
+    Ctrl --> IU : 27c: showError(missingFields)
+  end
+else no permission
+  Ctrl -> Audit : 19a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+  Ctrl --> IU : 19b: showError(accessDenied)
+end
+
+@enduml

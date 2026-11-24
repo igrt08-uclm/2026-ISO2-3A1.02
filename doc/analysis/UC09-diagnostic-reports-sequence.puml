@@ -1,0 +1,125 @@
+@startuml UC09_DiagnosticReports_Sequence
+!include ../design/common/_style.puml
+
+title UC09 – Write, edit and review diagnostic reports (Analysis Sequence Diagram)
+
+actor "Physician (author)" as Author
+actor "Physician (reviewer)" as Reviewer
+boundary "IU_DiagnosticReports" as IU
+control "Control_DiagnosticReports" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Patient" as Patient
+entity "ProcedureExecution" as Exec
+entity "DiagnosticReport" as Report
+entity "Addendum" as Addendum
+entity "AuditLog" as Audit
+boundary "IU_HospitalSystem" as HospIU
+actor "RIS/PACS" as RisPacs
+
+== Executed procedures of own patients ==
+Author -> IU : 1: openReports()
+IU -> Ctrl : 2: obtainReportableProcedures()
+Ctrl -> UserAcc : 3: hasPermission(physician, WRITE_REPORTS)
+alt permission granted
+  Ctrl -> Patient : 4: getAssignedPatients(physician)
+  Ctrl -> Exec : 5: getPerformedExecutions(patientIds)
+  Ctrl -> Report : 6: getReports(executionIds)
+  Ctrl -> Audit : 7: register(physician, REPORTS_ACCESSED, patientIds)
+  Ctrl --> IU : 8: showProcedures(executions, reports)
+else no permission
+  Ctrl -> Audit : 3a: register(physician, ACCESS_DENIED, WRITE_REPORTS)
+  Ctrl --> IU : 3b: showError(accessDenied)
+end
+
+== Open the report and the images ==
+Author -> IU : 9: selectProcedure(executionId)
+IU -> Ctrl : 10: openReport(executionId)
+Ctrl -> UserAcc : 11: hasPermission(physician, WRITE_REPORTS)
+alt permission granted
+  Ctrl -> Exec : 12: getExecution(executionId)
+  Ctrl -> HospIU : 13: getStudy(studyId)
+  HospIU -> RisPacs : 14: retrieveStudy(studyId)
+  Ctrl -> Report : 15: getReport(executionId)
+  Ctrl --> IU : 16: showReportForm(execution, images, report)
+else no permission
+  Ctrl -> Audit : 11a: register(physician, ACCESS_DENIED, WRITE_REPORTS)
+  Ctrl --> IU : 11b: showError(accessDenied)
+end
+
+== Write or edit the draft ==
+Author -> IU : 17: enterReport(executionId, findings, impression, imageReferences)
+IU -> Ctrl : 18: saveReport(executionId, findings, impression, imageReferences)
+Ctrl -> UserAcc : 19: hasPermission(physician, WRITE_REPORTS)
+alt permission granted
+  Ctrl -> Exec : 20: isPerformed(executionId)
+  Ctrl -> Patient : 21: isAssignedTo(patientId, physician)
+  Ctrl -> Report : 22: isEditable(executionId)
+  Ctrl -> Report : 23: validate(findings, impression, imageReferences)
+  alt valid report
+    Ctrl -> Report : 24: save(executionId, physician, findings, impression, imageReferences)
+    note right : creates the report as DRAFT,\nor updates its draft
+    Ctrl -> Audit : 25: register(physician, REPORT_SAVED, reportId)
+    Ctrl --> IU : 26: showConfirmation(report)
+  else procedure not executed or patient not assigned
+    Ctrl --> IU : 26a: showError(reason)
+  else report already validated
+    Ctrl --> IU : 26b: showError(reportValidated)
+  else mandatory field missing
+    Ctrl --> IU : 26c: showError(missingFields)
+  end
+else no permission
+  Ctrl -> Audit : 19a: register(physician, ACCESS_DENIED, WRITE_REPORTS)
+  Ctrl --> IU : 19b: showError(accessDenied)
+end
+
+== Validate the report (second opinion) ==
+Reviewer -> IU : 27: openReportsToValidate()
+IU -> Ctrl : 28: obtainReportsToValidate()
+Ctrl -> UserAcc : 29: hasPermission(reviewer, WRITE_REPORTS)
+alt permission granted
+  Ctrl -> Report : 30: getDraftReports(notAuthoredBy = reviewer)
+  Ctrl -> Audit : 31: register(reviewer, REPORTS_ACCESSED, reportIds)
+  Ctrl --> IU : 32: showReports(reports)
+  Reviewer -> IU : 33: validateReport(reportId)
+  IU -> Ctrl : 34: validate(reportId)
+  Ctrl -> UserAcc : 35: hasPermission(reviewer, WRITE_REPORTS)
+  Ctrl -> Report : 36: getReport(reportId)
+  alt draft and reviewer is not the author
+    Ctrl -> Report : 37: markValidated(reportId, reviewer)
+    Ctrl -> Audit : 38: register(reviewer, REPORT_VALIDATED, reportId)
+    Ctrl --> IU : 39: showConfirmation(report)
+  else reviewer is the author
+    Ctrl --> IU : 39a: showError(ownReport)
+  else report already validated
+    Ctrl --> IU : 39b: showError(reportValidated)
+  end
+else no permission
+  Ctrl -> Audit : 29a: register(reviewer, ACCESS_DENIED, WRITE_REPORTS)
+  Ctrl --> IU : 29b: showError(accessDenied)
+end
+
+== Add an addendum to a validated report ==
+Author -> IU : 40: enterAddendum(reportId, text)
+IU -> Ctrl : 41: addAddendum(reportId, text)
+Ctrl -> UserAcc : 42: hasPermission(physician, WRITE_REPORTS)
+alt permission granted
+  Ctrl -> Report : 43: getReport(reportId)
+  Ctrl -> Patient : 44: isAssignedTo(patientId, physician)
+  Ctrl -> Addendum : 45: validate(text)
+  alt validated report, patient assigned and text given
+    Ctrl -> Addendum : 46: create(reportId, physician, text)
+    Ctrl -> Audit : 47: register(physician, ADDENDUM_ADDED, reportId)
+    Ctrl --> IU : 48: showConfirmation(addendum)
+  else report still a draft (it is edited instead)
+    Ctrl --> IU : 48a: showError(reportNotValidated)
+  else patient not assigned
+    Ctrl --> IU : 48b: showError(reason)
+  else mandatory field missing
+    Ctrl --> IU : 48c: showError(missingFields)
+  end
+else no permission
+  Ctrl -> Audit : 42a: register(physician, ACCESS_DENIED, WRITE_REPORTS)
+  Ctrl --> IU : 42b: showError(accessDenied)
+end
+
+@enduml

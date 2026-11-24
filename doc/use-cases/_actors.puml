@@ -28,6 +28,10 @@ actor "Authenticator System" as AuthSystem
 actor "SSO" as SSO
 !endsub
 
+!startsub RisPacs
+actor "RIS/PACS" as RisPacs
+!endsub
+
 !startsub Client
 actor "Client" as ClientActor
 !endsub
