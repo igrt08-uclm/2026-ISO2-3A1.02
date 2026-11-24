@@ -68,8 +68,8 @@ public class IU_OrderFollowUp extends JPanel {
     private final JLabel lblPatientsFound = new JLabel(" ");
 
     private final JComboBox<Option> cmbTestType = new JComboBox<>();
-    /** From 0 to 120 months, so that a 0 can be chosen and the screen shows the reason why it is not valid. */
-    private final JSpinner spnInterval = new JSpinner(new SpinnerNumberModel(6, 0, 120, 1));
+    /** From 0 to 12 months, so that a 0 can be chosen and the screen shows the reason why it is not valid. */
+    private final JSpinner spnInterval = new JSpinner(new SpinnerNumberModel(6, 0, 12, 1));
     private final JTextField txtIndication = new JTextField(20);
     private final JTextField txtJustification = new JTextField(20);
     private final JButton btnSearch = new JButton("Search");
