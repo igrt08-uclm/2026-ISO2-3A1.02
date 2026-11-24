@@ -424,8 +424,7 @@ public class IU_OrderProcedure extends JPanel {
             try {
                 displayOrders(orderService.getOrdersOfPatient(requester, selectedPatient.getPatientId()));
             } catch (RuntimeException exception) {
-                showOperationResultError("The order " + created.getOrderId()
-                        + " was created, but the orders could not be read: " + exception.getMessage());
+                showOperationResultError("The orders could not be read: " + exception.getMessage());
             }
         } catch (ValidationException validationException) {
             showValidationErrors(validationException.getErrors());

@@ -141,9 +141,10 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [x] 12. F-05 in `IU_OrderProcedure`: the priority as `id · name` in the list and in the table — `61e7246` `fix(UC06): show the id of the priority next to its name (F-05, Denis) (#67)`; Testing uploaded the expected values in `7967dcc`.
 - [x] 13. Clear the selection, the form and the orders when there is no patient: `displayPatients` after a search and the failed selection in `onSelectPatient`; the read of the orders after creating one goes in its own `try` — `326d8ed` `fix(UC06): clear the form and the orders when no patient is selected (#204)`.
 - [x] 14. Forget the previous patient when a selection fails: `clearSelection` empties the form, its texts, its
-  borders and the orders, the patient is only selected when its types and its orders were read, and a failed reload
-  after creating an order keeps the id of the created order — `a2f6942` `fix(UC06): forget the previous patient when a
-  selection fails (#204)`.
+  borders and the orders, and the patient is only selected when its types and its orders were read — `a2f6942`
+  `fix(UC06): forget the previous patient when a selection fails (#204)`.
+- [ ] 15. Keep the id of the created order when the reload fails: TC06C-53 expects the error to replace the success,
+  so this waits for the new expected value of Testing; the message is not changed until then.
 
 ## Verification
 - [ ] Every acceptance criterion of #67: the physician creates an order for an active patient with an active test type and a configured priority and sees it in the list of the patient; invalid data is rejected with a message and nothing is created; deactivated test types are not offered; an inactive patient is not allowed to be ordered for; the denied access is explained.
