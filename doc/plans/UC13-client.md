@@ -47,7 +47,12 @@
   - `89f2344`: F-01, the confirmation is kept after reloading the data.
   - `69bed6c`: F-05, an injectable clock for the default day.
 - **Next step:** Testing adds TC13C-43, 44 and the clock cases.
+- **Review of the pull request (#210, 24/11/2026):** three items are blocked by the expected values of Testing,
+  which assert the current behaviour (rule 17: this branch does not change a test): the names instead of the ids in
+  the table of appointments (TC13C-01, 09, 20 and 40 expect `P-0003` and `XRAY-CHEST`), removing `isCancelled`
+  (TC13C-32 calls it) and a key for *Book* that is not Alt+B of *Back* (TC13C-29 expects both Alt+B, N-02). Testing
+  uploads the new values first and then the code is changed.
 - **Open questions:** N-03 and N-04 are resolved (decided by the group, see *Decisions*). Still open: N-01, N-02, N-05,
   N-06, N-07, N-08 (Adam, #210). The wiring of `Main` will have to be rebased when the clients of UC06 (#204) and
   UC07 (#207) are merged, because all three add a button to `IU_Welcome` on the same branch point.
-- **Last update:** 23/11/2026, Ignacio (fixes F-01 and F-05 of the review of Testing).
+- **Last update:** 24/11/2026, Ignacio (review of the pull request; the three items of the client wait for Testing).
