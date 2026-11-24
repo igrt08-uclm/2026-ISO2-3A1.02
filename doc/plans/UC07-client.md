@@ -49,6 +49,8 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
 4. Branch `feature/UC07-client-tests` for Adam and the pull request.
 - [x] F-02: *Search* disabled after a denied access (`5732b3c`).
 - [x] F-01: the denied message is kept when a patient is selected (`da9a75d`).
+- [x] R-01: `clearSelection` forgets the patient, its texts and its orders when the search fails, returns nobody or
+  the reads of the types and the orders fail; the patient is only selected when the reads went well (`9583556`).
 
 ## Verification
 - [x] Every acceptance criterion of #70 that the screen can satisfy: the form offers only eligible test types, it
@@ -59,7 +61,8 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
 - [ ] `mvn -B verify` green with the tests of Adam (Testing).
 
 ## Status
-- **In progress:** nothing. **Next step:** Testing (Adam) adds the cases of F-01 and F-02 to `IU_OrderFollowUpTest`.
+- **In progress:** nothing. The review of the pull request added R-01. **Next step:** Testing (Adam) adds the cases
+  of F-01, F-02 and R-01 to `IU_OrderFollowUpTest`.
   Still open for the group: the interval of 13 months or more.
 - **Done:** `da1ee8c` the screen, `74de1d5` the button *Order follow-up*, `Main` and the versions, `6c82beb` this plan.
   Correction of the review of 23/11/2026: the `JSpinner` of the interval goes from **0** to 120 months, because with a
@@ -72,4 +75,5 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
   2. The defects of the review of Testing: F-01, the denied access was hidden when a patient was selected (the
      “There is no patient with the identifier …” message overwrote it), fixed in `da9a75d`; F-02, *Search* stayed
      enabled after a denial, fixed in `5732b3c`. Nothing is pending in the code; Testing adds the cases.
-- **Last update:** 24/11/2026, Ignacio (fixes F-01 and F-02 of the review of Testing, #207).
+- **Last update:** 24/11/2026, Ignacio (F-01 and F-02 of the review of Testing, and R-01 of the review of the pull
+  request, #207).
