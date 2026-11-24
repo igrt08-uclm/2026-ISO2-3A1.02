@@ -23,6 +23,9 @@
 - **Tests:** the tests of the screen are Adam's (rule 17) and go in `feature/UC13-client-tests`; this branch is the
   implementation. The screen exposes `getNeedsTable`, `getSlotsTable`, `getAppointmentsTable` and `getStatusMessage` for
   them.
+- **Move asks for confirmation (N-08): decided by the group.** *Move* asks "Move the appointment … to …?" before
+  calling C5, like *Book* and *Cancel appointment*. Recorded by Ignacio, 24/11/2026; the code already did it and
+  TC13C-20 and TC13C-45 check it.
 - **Slots emptying (N-03, N-04): decided by the group.** After a booking, a move or a cancellation the slots table is emptied, and selecting a need or an appointment empties the slots, so a slot of another test type cannot be reused. Recorded by Ignacio, 23/11/2026, in answer to Adam's comment on #210 (commit 844405d).
 
 ## Files
@@ -47,12 +50,18 @@
   - `89f2344`: F-01, the confirmation is kept after reloading the data.
   - `69bed6c`: F-05, an injectable clock for the default day.
 - **Next step:** Testing adds TC13C-43, 44 and the clock cases.
-- **Review of the pull request (#210, 24/11/2026):** three items are blocked by the expected values of Testing,
-  which assert the current behaviour (rule 17: this branch does not change a test): the names instead of the ids in
-  the table of appointments (TC13C-01, 09, 20 and 40 expect `P-0003` and `XRAY-CHEST`), removing `isCancelled`
-  (TC13C-32 calls it) and a key for *Book* that is not Alt+B of *Back* (TC13C-29 expects both Alt+B, N-02). Testing
-  uploads the new values first and then the code is changed.
-- **Open questions:** N-03 and N-04 are resolved (decided by the group, see *Decisions*). Still open: N-01, N-02, N-05,
-  N-06, N-07, N-08 (Adam, #210). The wiring of `Main` will have to be rebased when the clients of UC06 (#204) and
-  UC07 (#207) are merged, because all three add a button to `IU_Welcome` on the same branch point.
-- **Last update:** 24/11/2026, Ignacio (review of the pull request; the three items of the client wait for Testing).
+- **Review of the pull request (#210, 24/11/2026):** fixed in `ebf611a`: the two tables clear each other's selection,
+  so *Find slots* and *Book* can no longer mix the test type of an appointment with the need of another one; the
+  failures of `getFreeSlots`, `bookAppointment`, `rescheduleAppointment` and `cancelAppointment` are caught; the slots
+  are emptied when `loadData` fails and when *Find slots* rejects its input; the count of slots restores the colour;
+  the duplicated Javadoc is gone; the imports of `Main` are back in alphabetical order; the line 36 is wrapped; the
+  row *Common* is in `agents/components.md`; `common` is `1.8.0-SNAPSHOT`. **Pending, for Testing:** the names instead
+  of the ids (TC13C-01, 09, 20 and 40), removing `isCancelled` (TC13C-32) and the keys Alt+F/B/M/C/K and Alt+D
+  (TC13C-29 expects Alt+B on *Back*); the code changes with the new values, not before (rule 17).
+- **Open questions:** N-03, N-04 and N-08 are resolved (decided by the group, see *Decisions*). N-02 has an agreement
+  (Alt+F, Alt+B, Alt+M, Alt+C, Alt+K and Alt+D) that waits for TC13C-29. Still open: N-01, N-05, N-06, N-07 (Adam,
+  #210) and F-06 for Design (the `onSelectNeed` of `C5-design.md`, which the screen does not have). The wiring of
+  `Main` and the constructors of `IU_Welcome` will have to be rebased when the clients of UC06 (#204) and UC07 (#207)
+  are merged, because the three add a button and a full constructor on the same branch point.
+- **Last update:** 24/11/2026, Ignacio (fixes of the review of the pull request; the keys, the names and
+  `isCancelled` wait for Testing).
