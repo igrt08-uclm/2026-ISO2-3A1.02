@@ -113,8 +113,9 @@ A question that does not change any file does not need a plan.
     on merge, so use it only in the pull request that completes the last open box; in the others use `Refs #n`.
 23. **Shared documents only in a `docs/` branch** (D-048). `AGENTS.md`, `DECISIONS.md`, `agents/*.md` and the templates
     of `.github/` are never changed in a `feature/` or `bugfix/` branch: the parallel branches conflict in them. A use
-    case branch changes only its own plan and test design. The versions in `agents/` are updated afterwards, in one
-    `docs/` pull request.
+    case branch changes only its own plan and test design and, if its component has a context file (D-047), the lines
+    of its own sub-issue in `doc/plans/Cn-context.md`. The versions in `agents/` are updated afterwards, in one `docs/`
+    pull request.
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
