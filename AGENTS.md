@@ -139,7 +139,7 @@ discipline** once, in a single thread (either the sub-issue or its pull request,
 | Requirements, priorities, actor scope, acceptance criteria | **Requirements / Analysis** |
 | Domain rules, limits and validations (how many months, which patient is active) | **Design** |
 | Public interfaces (`common`), DTO fields and views, screen flows | **Design** |
-| The text a user reads: messages, labels, confirmation questions, the key of a button | **Design** |
+| The text a user reads: messages, labels, confirmation questions | **Design** |
 | Internal implementation: exception handling inside a class, logging, collections, code layout,
   unique mnemonics (`Alt+<key>`) and the other ergonomics of the threshold in rule 1 | **Implementation** |
 | Seed data tuples, test cases (S.04.01 / T.04), expected test results | **Testing** |
