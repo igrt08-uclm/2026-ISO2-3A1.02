@@ -901,4 +901,62 @@ class IU_OrderFollowUpTest {
                 () -> assertFalse(formEnabled(screen)),
                 () -> assertTrue(orders.requesters().isEmpty()));
     }
+
+    @Test
+    @DisplayName("TC07C-46 The permission of C3 is lost after opening: selecting a patient shows the denied message")
+    void tc07c46PermissionLostBeforeSelecting() {
+        // Arrange
+        IU_OrderFollowUp screen = open();
+        patients.denyAll();
+
+        // Act
+        select(screen, LUCIA);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertFalse(screen.getPatientsTable().isEnabled()),
+                () -> assertFalse(screen.getSearchField().isEnabled()),
+                () -> assertFalse(FollowUpScreen.button(screen, "Search").isEnabled()),
+                () -> assertTrue(FollowUpScreen.button(screen, "Back").isEnabled()),
+                () -> assertTrue(orders.requesters().isEmpty()));
+    }
+
+    @Test
+    @DisplayName("TC07C-47 After a denied order the button Search is disabled and only Back stays enabled")
+    void tc07c47SearchDisabledAfterDeniedOrder() {
+        // Arrange
+        IU_OrderFollowUp screen = validFormOfLucia();
+        orders.denyAll();
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertFalse(FollowUpScreen.button(screen, "Search").isEnabled()),
+                () -> assertFalse(screen.getPlaceOrderButton().isEnabled()),
+                () -> assertTrue(FollowUpScreen.button(screen, "Back").isEnabled()));
+    }
+
+    @Test
+    @DisplayName("TC07C-48 Denied on opening, the button Search is disabled and only Back stays enabled")
+    void tc07c48SearchDisabledWhenDeniedOnOpening() {
+        // Arrange
+        patients.denyAll();
+
+        // Act
+        IU_OrderFollowUp screen = open();
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertFalse(FollowUpScreen.button(screen, "Search").isEnabled()),
+                () -> assertFalse(screen.getPlaceOrderButton().isEnabled()),
+                () -> assertTrue(FollowUpScreen.button(screen, "Back").isEnabled()));
+    }
 }
