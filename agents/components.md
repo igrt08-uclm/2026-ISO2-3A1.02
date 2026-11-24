@@ -32,7 +32,7 @@ differ if a use case changes only one of them. `common` keeps one package per co
 |---|---|---|
 | C1 Access and security | `c1-access` | UC22 → 1.0.0, UC19 → 1.1.0, UC18 → 1.2.0 |
 | C2 Configuration and integrations | `c2-configuration` | UC17 → 1.0.0, UC20 → 1.1.0 |
-| C3 Patients | `c3-patients` | UC12 register and modify → 1.0.0 (pom now 1.0.1-SNAPSHOT), UC12 discharge → 1.1.0 (It8) |
+| C3 Patients | `c3-patients` | UC12 register and modify → 1.0.0 (now 1.0.1-SNAPSHOT), UC12 discharge → 1.1.0 (It8) |
 | C4 Clinical orders | `c4-orders` | UC06 → 1.0.0, UC07 → 1.1.0, UC08 → 1.2.0 (It9) |
 | C5 Appointment planning | `c5-appointments` | UC13 → 1.0.0, UC15 → 1.1.0, UC14 → 1.2.0 |
 | C6 Patient portal | `c6-portal` | UC01 → 1.0.0, UC04 → 1.1.0, UC03 → 1.2.0 and UC05 → 1.3.0 (It8) |
