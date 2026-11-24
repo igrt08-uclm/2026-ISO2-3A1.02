@@ -72,6 +72,7 @@ public class IU_OrderFollowUp extends JPanel {
     private final JSpinner spnInterval = new JSpinner(new SpinnerNumberModel(6, 0, 120, 1));
     private final JTextField txtIndication = new JTextField(20);
     private final JTextField txtJustification = new JTextField(20);
+    private final JButton btnSearch = new JButton("Search");
     private final JButton btnPlaceOrder = new JButton("Place order");
 
     private final DefaultTableModel orderModel = new DefaultTableModel(
@@ -126,7 +127,6 @@ public class IU_OrderFollowUp extends JPanel {
     private JSplitPane buildBody() {
         JPanel left = new JPanel(new BorderLayout(4, 4));
         JPanel searchRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        JButton btnSearch = new JButton("Search");
         btnSearch.setMnemonic('H');
         searchRow.add(new JLabel("Search"));
         searchRow.add(txtSearch);
@@ -428,6 +428,7 @@ public class IU_OrderFollowUp extends JPanel {
         setFormEnabled(false);
         patientTable.setEnabled(false);
         txtSearch.setEnabled(false);
+        btnSearch.setEnabled(false);
         showOperationResultError(DENIED_MESSAGE);
     }
 
