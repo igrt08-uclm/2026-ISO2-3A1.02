@@ -27,7 +27,7 @@ shown. Three hand-written fakes, in memory:
   ORD-0002 (`MRI-KNEE`, `URGENT`, "Knee pain after a fall", 21/11/2026); the others have none. It does not validate
   (so it shows that nothing is sent when the client rejects the form), records every order sent, every requester and
   every reading, gives the ids ORD-0003…, and can deny every call (`AccessDeniedException`), reject the next order
-  (`ValidationException`), fail the next order or every reading.
+  (`ValidationException`), fail the next order, or fail or deny every reading (TC06C-54).
 
 Every question "Discard the unsaved changes?" is answered by the test (Yes or No), which also records it.
 
@@ -82,7 +82,8 @@ decision are also covered **pairwise** (all the combinations of two values): bla
 text (TC06C-30 to 36). Maximum number of test cases: the free texts have no maximum (any `String`, no maximum length, Q5
 of the server plan), so the domain is divided into the classes of section 1; with them the full product of the form
 would be 4 patients × 3 test-type classes × 3 priority classes × 4 × 4 texts = 576 cases, which each use plus the pairs
-above reduce to the 43 of section 4; the fixes F-01 to F-04 add TC06C-44 to 49.
+above reduce to the 43 of section 4; the fixes F-01 to F-04 add TC06C-44 to 49, and the fix `326d8ed` (step 13 of
+the plan) adds TC06C-50 to 54.
 
 ## 3. Coverage (white box)
 Decisions of `IU_OrderProcedure` and the cases that make each condition true (T) and false (F):
@@ -93,11 +94,11 @@ Decisions of `IU_OrderProcedure` and the cases that make each condition true (T)
 | `onSelectPatient` → `findPatient`: C3 denies after opening (F-01) | — | TC06C-44 | TC06C-03 |
 | `displayPatients`: `getDateOfBirth() == null` | — | TC06C-01 (Inés) | TC06C-01 (Lucía) |
 | `displayPatients`: `size() == 1` | — | TC06C-02 (mario) | TC06C-01 (3), TC06C-02 (0) |
-| `selectedRowChanged`: `row < 0 \|\| row == lastPatientRow` | `row < 0` | — (see below) | TC06C-03 |
+| `selectedRowChanged`: `row < 0 \|\| row == lastPatientRow` | `row < 0` | TC06C-50 (the search clears the row of Lucía) | TC06C-03 |
 | | `row == lastPatientRow` | TC06C-34 (row given back) | TC06C-36 |
 | `selectedRowChanged`: `hasUnsavedChanges() && !confirm` | unsaved | TC06C-34, 35 | TC06C-36 |
 | | `!confirm` | TC06C-34 (No) | TC06C-35 (Yes) |
-| `onSelectPatient`: `patient == null` | — | TC06C-10, 43 | TC06C-03 |
+| `onSelectPatient`: `patient == null` | — | TC06C-10, 43, 51 | TC06C-03 |
 | `onSelectPatient`: `!patient.isActive()` | — | TC06C-09 | TC06C-03 |
 | `findPatient`: `identifier.equals(...)` | — | TC06C-03 | TC06C-43 |
 | `displayOrderForm`: `testType.isActive()` / `priority.isActive()` | — | TC06C-05, 06 | TC06C-05 (`XRAY-OLD`), 06 (`OLD-TIER`) |
@@ -121,14 +122,18 @@ Decisions of `IU_OrderProcedure` and the cases that make each condition true (T)
 | `catch` of every operation | `AccessDeniedException` | TC06C-22, 23, 24 | — |
 | | `ValidationException` | TC06C-19, 20, 25 | — |
 | | `RuntimeException` | TC06C-21, 26, 27 | — |
+| `onSubmitOrder`: reading of the orders after the order, in its own `try` (`326d8ed`) | `RuntimeException` | TC06C-53 | TC06C-17 |
+| | `AccessDeniedException` (not caught by the inner `try`) | TC06C-54 | TC06C-17 |
 
 `IU_Welcome`: `onOrderProcedure != null && hasPermission(ORDER_PROCEDURES)`: (T,T) TC06C-38, (F,T) TC06C-41,
 (T,F) TC06C-40; the older constructor passes `null` (TC06C-42).
 
 Result of JaCoCo for `client-c4-orders` (`mvn -B verify`, with TC06C-44 to 49 and the fixes `c227441`, `4fd6204`): 100 %
-of the lines (295 of 295) and 97.6 % of the branches (82 of 84), above the 80 % / 70 % of D-033. Not covered: `row < 0`
-true in `selectedRowChanged` (a selection cleared by Swing while a row is selected) and the `valueIsAdjusting` branch of
-the listener of the table (Swing only sends it while the mouse is dragged). The `catch` of `findPatient` that hid F-01
+of the lines (295 of 295) and 97.6 % of the branches (82 of 84), above the 80 % / 70 % of D-033. With TC06C-50 to 54 and
+the fix `326d8ed` (`mvn -B -ntp clean verify`, 53 tests of `IU_OrderProcedureTest`): 100 % of the lines (308 of 308) and
+98.8 % of the branches (83 of 84). `row < 0` in `selectedRowChanged` is now true in TC06C-50 (`displayPatients` clears
+the selection of the table while Lucía's row is selected). Not covered: the `valueIsAdjusting` branch of the listener of
+the table (Swing only sends it while the mouse is dragged). The `catch` of `findPatient` that hid F-01
 was removed by `c227441`.
 
 ## 4. Test cases
@@ -184,6 +189,11 @@ was removed by `c227441`.
 | TC06C-47 | *Place order*, select row | Lucía, indication and justification empty: then the indication typed and ordered again; both typed and ordered (success); Mario selected (F-03) | Before: indication and justification bordered. Then only the justification; after the success none; after selecting Mario none (Q6, answer of Testing) | `tc06c47BordersClearedBeforeANewValidation`, `tc06c47BordersClearedAfterASuccess`, `tc06c47BordersClearedOnReload` |
 | TC06C-48 | *Place order* | Valid form; C4 rejects with 2 errors (F-03) | The two messages in the message area; no field bordered (Q6, answer of Testing: the server's messages only appear in the message area) | `tc06c48ServerErrorsDoNotBorderTheFields` |
 | TC06C-49 | labels | Open the screen (F-04) | The labels *Test type*, *Priority*, *Clinical indication*, *Justification* show Alt+T, Alt+R, Alt+C, Alt+J and their `labelFor` is their own list or field (Q10) | `tc06c49FieldMnemonics` |
+| TC06C-50 | select row, *Search* | Lucía selected (form enabled, 2 orders), then search `mario` (`326d8ed`) | No patient selected; form disabled; orders table empty; only Mario listed (step 13 of the plan) | `tc06c50SearchClearsTheSelectedPatient` |
+| TC06C-51 | select row, `onSelectPatient` | Lucía selected, then `HC-9999999` (Conjeture; `326d8ed`) | "⚠ There is no patient with the identifier HC-9999999" in red; no patient selected; form disabled; orders table empty (step 13) | `tc06c51UnknownPatientAfterAValidSelection` |
+| TC06C-52 | select row | Lucía selected, the permission of C3 is revoked, then Mario is selected (Conjeture; `326d8ed`) | "⚠ You do not have permission to order procedures." in red; no patient selected; form disabled; orders table empty; *Back* enabled (Q8, step 13) | `tc06c52PermissionLostAfterAValidSelection` |
+| TC06C-53 | *Place order* | Valid form of Lucía; C4 creates the order but every later reading of the orders fails with "The server cannot be reached" (Conjeture; `326d8ed`) | The order is sent once; "⚠ The orders could not be read: The server cannot be reached" in red; the orders of P-0001 are read twice (on selecting and after the order) (step 13; see section 5) | `tc06c53FailureReadingTheOrdersAfterAnOrder` |
+| TC06C-54 | *Place order* | Valid form of Lucía; C4 creates the order but the reading of the orders is denied (Conjeture; `326d8ed`) | The order is sent once; "⚠ You do not have permission to order procedures." in red; form disabled; *Back* enabled (Q8; see section 5) | `tc06c54DeniedReadingTheOrdersAfterAnOrder` |
 
 Postcondition of every case: nothing is stored except by `orderDiagnosticProcedure` of the fake (TC06C-17, 18); after
 a rejected, denied or failed order, or an error of the client, no order is created and the list of the patient is the
@@ -218,6 +228,14 @@ and 19 and the priorities chosen in the other cases follow it.
 - Whether a priority or test type is chosen by default (the code selects the first item of each list; the default
   priority of the test type in C2 is not used).
 - What happens if *Place order* is pressed twice quickly.
+- **After an order created, a failed reading of the orders (`326d8ed`, step 13 of the plan).** Step 13 only says
+  that the reading of the orders after the order "goes in its own `try`"; neither the plan (Q7, Q8) nor #204 says what
+  the screen shows then. The code writes "⚠ The orders could not be read: …" (a `RuntimeException`, TC06C-53) or the
+  denied message (an `AccessDeniedException`, which the inner `try` does not catch, TC06C-54) in the same message area,
+  so "Order ORD-0003 created." is replaced and the user is not told that the order was created nor its id. The cases
+  assert only what is certain: the order was sent once and the error is shown. Not asserted: the success message, the
+  fields emptied and the rows of the orders table after the failure. Implementation or Design to decide whether the
+  success has to stay visible.
 - Q4 says the patient is read with `getPatient`; the code finds it with `searchPatients` by its identifier. The
   behaviour is the same for the user, so no case checks the call.
 

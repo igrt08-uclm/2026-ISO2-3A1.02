@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import es.uclm.esi.iso2.common.access.contracts.AccessDeniedException;
 import es.uclm.esi.iso2.common.configuration.domain.Priority;
 import es.uclm.esi.iso2.common.configuration.domain.TestType;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
@@ -1022,5 +1023,100 @@ class IU_OrderProcedureTest {
                 () -> assertEquals(KeyEvent.VK_J, Screen.label(screen, JUSTIFICATION).getDisplayedMnemonic()),
                 () -> assertEquals(field(screen, JUSTIFICATION),
                         Screen.label(screen, JUSTIFICATION).getLabelFor()));
+    }
+
+    @Test
+    @DisplayName("TC06C-50 A search after a patient was selected clears the patient, disables the form, empties orders")
+    void tc06c50SearchClearsTheSelectedPatient() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+
+        // Act
+        screen.getSearchField().setText("mario");
+        Screen.button(screen, "Search").doClick();
+
+        // Assert
+        assertAll(
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertEquals(0, screen.getOrdersTable().getRowCount()),
+                () -> assertEquals(List.of(List.of("HC-0000002", "Mario Demo Simulado", "02/11/1975")),
+                        Screen.rows(screen.getPatientsTable())));
+    }
+
+    @Test
+    @DisplayName("TC06C-51 An unknown identifier after a valid selection: error, no patient, form off, no orders")
+    void tc06c51UnknownPatientAfterAValidSelection() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+
+        // Act
+        screen.onSelectPatient("HC-9999999");
+
+        // Assert
+        assertAll(
+                () -> assertEquals("⚠ There is no patient with the identifier HC-9999999", screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertEquals(0, screen.getOrdersTable().getRowCount()));
+    }
+
+    @Test
+    @DisplayName("TC06C-52 The permission of C3 is lost after a valid selection: denied, no patient, no orders")
+    void tc06c52PermissionLostAfterAValidSelection() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        patients.denyAll();
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertNull(screen.getSelectedPatient()),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertEquals(0, screen.getOrdersTable().getRowCount()),
+                () -> assertTrue(Screen.button(screen, "Back").isEnabled()));
+    }
+
+    @Test
+    @DisplayName("TC06C-53 The order is created but the orders cannot be read again: sent once, the error is shown")
+    void tc06c53FailureReadingTheOrdersAfterAnOrder() {
+        // Arrange
+        IU_OrderProcedure screen = validFormOfLucia();
+        orders.failReads(new IllegalStateException("The server cannot be reached"));
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(1, orders.sent().size()),
+                () -> assertEquals("⚠ The orders could not be read: The server cannot be reached",
+                        screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertEquals(List.of("P-0001", "P-0001"), orders.reads()));
+    }
+
+    @Test
+    @DisplayName("TC06C-54 The order is created but reading the orders is denied: sent once, the denied message")
+    void tc06c54DeniedReadingTheOrdersAfterAnOrder() {
+        // Arrange
+        IU_OrderProcedure screen = validFormOfLucia();
+        orders.failReads(new AccessDeniedException(REQUESTER));
+
+        // Act
+        placeOrder(screen);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(1, orders.sent().size()),
+                () -> assertEquals(DENIED, screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)),
+                () -> assertFalse(formEnabled(screen)),
+                () -> assertTrue(Screen.button(screen, "Back").isEnabled()));
     }
 }
