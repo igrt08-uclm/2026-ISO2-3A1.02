@@ -65,5 +65,11 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
   Correction of the review of 23/11/2026: the `JSpinner` of the interval goes from **0** to 120 months, because with a
   minimum of 1 the check `<= 0` of the screen never ran; the message of the design is now reachable (0 months) and the
   negative values are still impossible.
-- **Open questions:** none.
+- **Open questions:**
+  1. Interval of 13 months or more: today the screen accepts it, the server creates the order with 0 scheduling needs
+     and the user gets no warning. Proposal (Javier): reject it with a message and limit the spinner to 12 months.
+     David decides it, and Testing then changes TC07C-17 and 18, which expect 0 to 120 months.
+  2. The defects of the review of Testing: F-01, the denied access was hidden when a patient was selected (the
+     “There is no patient with the identifier …” message overwrote it), fixed in `da9a75d`; F-02, *Search* stayed
+     enabled after a denial, fixed in `5732b3c`. Nothing is pending in the code; Testing adds the cases.
 - **Last update:** 24/11/2026, Ignacio (fixes F-01 and F-02 of the review of Testing, #207).
