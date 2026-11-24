@@ -28,6 +28,8 @@ Answered by the approval of this plan; the proposals are accepted as written.
 - **Q1 – Versions (rule 9).** **A:** `common` goes from `1.6.0-SNAPSHOT` to `1.7.0-SNAPSHOT` (a class and an operation
   are added: MINOR, D-036) and `server-c4-orders` from `1.0.0-SNAPSHOT` to `1.1.0-SNAPSHOT` (one use case: MINOR, D-014).
   Both versions are changed in the module pom and in the `<dependencyManagement>` of the parent.
+  **Superseded:** `common` is now `1.8.0-SNAPSHOT`, changed in UC13-server (#208, `b040e99`); the `1.7.0-SNAPSHOT` of
+  this step is the base of that change, not the current version of the branch.
 - **Q2 – `FollowUpOrder`.** **A:** a data class with no logic, like `DiagnosticOrder`: it adds `recurrenceIntervalMonths`
   and its getter, and inherits everything else from `ClinicalOrder`. The server gives the `orderId`, the `requester` and
   the `creationDate`; the interval is the number of months between one procedure and the next.
@@ -67,7 +69,7 @@ Answered by the approval of this plan; the proposals are accepted as written.
 ## Files
 | File | Action | What | Step |
 |---|---|---|---|
-| `common/pom.xml`, `pom.xml` | change | `common` `1.7.0-SNAPSHOT` and `server-c4-orders` `1.1.0-SNAPSHOT` (Q1) — **rule 9** | 1 |
+| `common/pom.xml`, `pom.xml` | change | `common` `1.7.0-SNAPSHOT` (superseded by `1.8.0-SNAPSHOT`, #208) and `server-c4-orders` `1.1.0-SNAPSHOT` (Q1) — **rule 9** | 1 |
 | `server/c4-orders/pom.xml` | change | `1.1.0-SNAPSHOT` (Q1) — **rule 9** | 1 |
 | `common/.../common/orders/domain/FollowUpOrder.java` | create | the entity of the design (Q2) | 1 |
 | `common/.../common/orders/contracts/IClinicalOrderService.java` | change | `orderFollowUp` (Q1, Q3) | 1 |
@@ -103,7 +105,8 @@ flowchart TD
 
 ## Status
 - **In progress:** nothing; step 5 is done.
-- **Done:** `3891ee9` step 1 (`common` `1.7.0-SNAPSHOT`, `server-c4-orders` `1.1.0-SNAPSHOT`, `FollowUpOrder` and
+- **Done:** `3891ee9` step 1 (`common` `1.7.0-SNAPSHOT`, raised to `1.8.0-SNAPSHOT` in #208, `server-c4-orders`
+  `1.1.0-SNAPSHOT`, `FollowUpOrder` and
   `orderFollowUp`), `b6d1e74` step 2 (`orderFollowUp`, `validateFollowUp`, `checkFollowUpTestType` and
   `createFollowUpSchedulingNeeds`); `6c85236` step 5 (the Javadoc of `orderFollowUp` under 120 characters).
 - **State for Adam (Testing):** `server-c4-orders` has no tests in this branch, so JaCoCo skips the module; the coverage of `common` is 200/239 lines and 14/14 branches. The cases to cover: permission denied (with `ORDER_ACCESS_DENIED`), the ten messages of Q3, the order created with `ORD-nnnn` and `FOLLOW_UP_ORDER_CREATED`, the needs of D-040 for an interval of 12, 6, 5 and 1 months (one, two, two and twelve needs, `dueDate = creationDate.plusMonths(k * interval)`, all `PENDING`), that the diagnostic counter and the follow-up counter are shared, and that the follow-up orders appear in `getOrdersOfPatient`.
