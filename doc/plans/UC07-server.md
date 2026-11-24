@@ -56,6 +56,14 @@ Answered by the approval of this plan; the proposals are accepted as written.
   Testing. One step = one commit, and code commits carry the body "Tests pending Adam (#71).". Then the branch
   `feature/UC07-server-tests` with the design and the tests, as with UC06.
 
+## Review of the Testing (23/11/2026)
+- **Line over 120 characters.** The Javadoc of `orderFollowUp` (`IClinicalOrderService.java:34`) had a line of 121
+  characters; step 5 wraps it, with no change of behaviour.
+- **Interval of 13 months or more — open question for the team.** With `n > 12` there is no `k >= 1` with `k * n <= 12`,
+  so the order is accepted and creates **no** scheduling needs; the spinner of the client allows up to 120 months, so a
+  physician can reach it. Should the order be rejected, or accepted with zero needs? D-040 only says "the needs of the
+  next 12 months". Nothing is implemented until the team decides (rules 1 and 2).
+
 ## Files
 | File | Action | What | Step |
 |---|---|---|---|
@@ -66,6 +74,7 @@ Answered by the approval of this plan; the proposals are accepted as written.
 | `server/c4-orders/.../server/orders/service/ClinicalOrderService.java` | change | `orderFollowUp`, `validateFollowUp`, `createFollowUpSchedulingNeeds` (Q3-Q6) | 2 |
 | `agents/architecture.md`, `agents/components.md` | change | versions only (Q1) — **rule 9** | 3 |
 | `doc/plans/UC07-server.md` | create/update | this plan | 3 |
+| `common/.../common/orders/contracts/IClinicalOrderService.java` | change | wrap the signature of `orderDiagnosticProcedure` (review) | 5 |
 
 No other file changes: nothing under `src/test` (rule 17), nothing of `client/`, of C1, C2, C3 or C5, no `DECISIONS.md`.
 Every class and public method has its Javadoc in English (rule 18); the methods with `@Override` have none.
@@ -93,9 +102,12 @@ flowchart TD
 - [ ] The CI of the pull request is green.
 
 ## Status
-- **In progress:** nothing; steps 1 to 4 are done.
-- **Done:** `3891ee9` step 1 (`common` `1.7.0-SNAPSHOT`, `server-c4-orders` `1.1.0-SNAPSHOT`, `FollowUpOrder` and `orderFollowUp`), `b6d1e74` step 2 (`orderFollowUp`, `validateFollowUp`, `checkFollowUpTestType` and `createFollowUpSchedulingNeeds`).
+- **In progress:** nothing; step 5 is done.
+- **Done:** `3891ee9` step 1 (`common` `1.7.0-SNAPSHOT`, `server-c4-orders` `1.1.0-SNAPSHOT`, `FollowUpOrder` and
+  `orderFollowUp`), `b6d1e74` step 2 (`orderFollowUp`, `validateFollowUp`, `checkFollowUpTestType` and
+  `createFollowUpSchedulingNeeds`); `6c85236` step 5 (the Javadoc of `orderFollowUp` under 120 characters).
 - **State for Adam (Testing):** `server-c4-orders` has no tests in this branch, so JaCoCo skips the module; the coverage of `common` is 200/239 lines and 14/14 branches. The cases to cover: permission denied (with `ORDER_ACCESS_DENIED`), the ten messages of Q3, the order created with `ORD-nnnn` and `FOLLOW_UP_ORDER_CREATED`, the needs of D-040 for an interval of 12, 6, 5 and 1 months (one, two, two and twelve needs, `dueDate = creationDate.plusMonths(k * interval)`, all `PENDING`), that the diagnostic counter and the follow-up counter are shared, and that the follow-up orders appear in `getOrdersOfPatient`.
-- **Next step:** the branch `feature/UC07-server-tests` with the design of the cases and the JUnit tests (rule 17), and after that the client (#70).
-- **Open questions:** none.
-- **Last update:** 23/11/2026, Ignacio — steps 1 to 4 committed; the branch is ready for Testing.
+- **Next step:** nothing in this branch once step 5 is committed; then the client (#70).
+- **Open questions:** the interval of 13 months or more: the order is accepted with zero needs today, and the team has to
+  decide whether to reject it (see *Review of the Testing*).
+- **Last update:** 23/11/2026, Ignacio — step 5 committed; the branch is ready for Testing.
