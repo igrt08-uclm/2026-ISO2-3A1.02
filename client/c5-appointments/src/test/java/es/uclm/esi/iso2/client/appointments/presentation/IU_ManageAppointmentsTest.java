@@ -9,7 +9,10 @@ import es.uclm.esi.iso2.common.appointments.domain.AppointmentStatus;
 import es.uclm.esi.iso2.common.shared.ValidationException;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +63,16 @@ class IU_ManageAppointmentsTest {
             questions.add(question);
             return answer;
         }, () -> backs++);
+    }
+
+    /** Opens the screen with a clock fixed at 09:00 of Monday 30/11/2026 in Europe/Madrid (F-05). */
+    private IU_ManageAppointments openOnMonday() {
+        ZoneId madrid = ZoneId.of("Europe/Madrid");
+        Clock monday = Clock.fixed(LocalDateTime.of(2026, 11, 30, 9, 0).atZone(madrid).toInstant(), madrid);
+        return new IU_ManageAppointments(service, REQUESTER, question -> {
+            questions.add(question);
+            return answer;
+        }, () -> backs++, monday);
     }
 
     private static void select(JTable table, int row) {
@@ -852,5 +865,114 @@ class IU_ManageAppointmentsTest {
                 () -> assertTrue(service.changes().isEmpty()),
                 () -> assertEquals("BOOKED", Screen.cell(screen.getAppointmentsTable(), APT_0001, "Status")),
                 () -> assertEquals("2 free slots.", screen.getStatusMessage()));
+    }
+
+    @Test
+    @DisplayName("TC13C-43 After a booking the confirmation stays and is shown in green (F-01)")
+    void tc13c43BookingConfirmationIsShown() {
+        // Arrange
+        IU_ManageAppointments screen = needAndSlot(LUCIA, 1);
+
+        // Act
+        click(screen, "Book");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("book NEED-0001 XRAY-1 2026-11-30T09:15 2026-11-30T09:30"),
+                        service.changes()),
+                () -> assertEquals("Appointment APT-0004 booked on 30/11/2026 09:15.", screen.getStatusMessage()),
+                () -> assertEquals(GREEN, statusColour(screen)));
+    }
+
+    @Test
+    @DisplayName("TC13C-44 After a move and after a cancellation the confirmation stays and is shown in green (F-01)")
+    void tc13c44MoveAndCancelConfirmationsAreShown() {
+        // Arrange
+        IU_ManageAppointments moving = appointmentAndSlot(APT_0001, 0);
+        IU_ManageAppointments cancelling = open();
+        select(cancelling.getAppointmentsTable(), APT_0003);
+
+        // Act
+        click(moving, "Move");
+        String moved = moving.getStatusMessage();
+        Color movedColour = statusColour(moving);
+        click(cancelling, "Cancel appointment");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("reschedule APT-0001 XRAY-1 2026-11-30T09:00", "cancel APT-0003"),
+                        service.changes()),
+                () -> assertEquals("Appointment APT-0001 moved to 30/11/2026 09:00.", moved),
+                () -> assertEquals(GREEN, movedColour),
+                () -> assertEquals("Appointment APT-0003 cancelled.", cancelling.getStatusMessage()),
+                () -> assertEquals(GREEN, statusColour(cancelling)));
+    }
+
+    @Test
+    @DisplayName("TC13C-46 The reading fails after a booking: one booking sent and the error in red, no confirmation")
+    void tc13c46ReloadFailsAfterBooking() {
+        // Arrange
+        IU_ManageAppointments screen = needAndSlot(LUCIA, 1);
+        service.failReads(new IllegalStateException("The server cannot be reached"));
+
+        // Act
+        click(screen, "Book");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("book NEED-0001 XRAY-1 2026-11-30T09:15 2026-11-30T09:30"),
+                        service.changes()),
+                () -> assertEquals("⚠ The data could not be read: The server cannot be reached",
+                        screen.getStatusMessage()),
+                () -> assertEquals(RED, statusColour(screen)));
+    }
+
+    @Test
+    @DisplayName("TC13C-47 With the clock fixed on Monday 30/11/2026 the day starts as that day and finds its slots")
+    void tc13c47DayStartsAsTheDayOfTheClock() {
+        // Arrange
+        IU_ManageAppointments screen = openOnMonday();
+        String shown = Screen.field(screen, "Day").getText();
+        select(screen.getNeedsTable(), LUCIA);
+
+        // Act
+        click(screen, "Find slots");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(DAY, shown),
+                () -> assertEquals(List.of("XRAY-CHEST 2026-11-30 2026-11-30"), service.slotQueries()));
+    }
+
+    @Test
+    @DisplayName("TC13C-48 With a fixed clock the day written by the user is kept after a reload")
+    void tc13c48DayWrittenIsKeptWithAFixedClock() {
+        // Arrange
+        IU_ManageAppointments screen = openOnMonday();
+        Screen.field(screen, "Day").setText("01/12/2026");
+
+        // Act
+        screen.loadData();
+
+        // Assert
+        assertAll(
+                () -> assertEquals("01/12/2026", Screen.field(screen, "Day").getText()),
+                () -> assertEquals(List.of("needs", "appointments", "needs", "appointments"), service.calls()));
+    }
+
+    @Test
+    @DisplayName("TC13C-49 The four-parameter constructor uses the system clock: the day starts as today")
+    void tc13c49FourParameterConstructorUsesTheSystemClock() {
+        // Arrange
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String before = format.format(LocalDate.now());
+
+        // Act
+        IU_ManageAppointments screen = open();
+        String shown = Screen.field(screen, "Day").getText();
+        String after = format.format(LocalDate.now());
+
+        // Assert
+        assertTrue(shown.equals(before) || shown.equals(after), shown);
     }
 }

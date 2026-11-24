@@ -9,7 +9,8 @@ section *Decisions* of `doc/plans/UC13-client.md` and the decisions of Design in
 (`IU_ManageAppointments`, commit `fb67a1e`).
 
 Code under test (`client-c5-appointments` 1.0.0-SNAPSHOT, branch `feature/UC13-client`, first `87b56ce`, reviewed
-again at `844405d`, which fixes F-02, F-03 and F-04, see section 5): the screen
+again at `844405d`, which fixes F-02, F-03 and F-04, and at `14de119`, which fixes F-01 (`89f2344`) and F-05
+(`69bed6c`), see section 5): the screen
 `IU_ManageAppointments` (its public methods `loadData`, `onFindSlots`, `onBookSlot`, `onRescheduleAppointment`,
 `onCancelAppointment`, `showErrors`, `showAccessDenied`, `showConfirmation`, `isCancelled`, the actions *Find slots*,
 *Book*, *Move*, *Cancel appointment*, *Back* and the selection of a row), and the button *Manage appointments* of
@@ -75,15 +76,15 @@ slot for *Book* (TC13C-09, 11), appointment × slot for *Move* (TC13C-20, 21), n
 cases: the day is free text with no maximum, so the domain is divided into the classes of section 1; with them the
 full product of the actions would be 3 day classes × 4 selections × 2 answers × 4 answers of C5 = 96 cases per action,
 which each use plus the pairs above reduce to the 32 cases of the screen and the 5 of `IU_Welcome` (TC13C-33 to 37).
-The review of `844405d` adds TC13C-38 to 42 (fixes F-02 to F-04) and TC13C-45 (question of *Move*); TC13C-43 and 44
-(F-01) are kept outside the branch until F-01 is fixed.
+The review of `844405d` adds TC13C-38 to 42 (fixes F-02 to F-04) and TC13C-45 (question of *Move*); the review of
+`14de119` adds TC13C-43, 44 and 46 (fix of F-01) and TC13C-47 to 49 (fix of F-05, the injected `Clock`).
 
 ## 3. Coverage (white box)
-Decisions of `IU_ManageAppointments` (`844405d`) and the cases that make each condition true (T) and false (F):
+Decisions of `IU_ManageAppointments` (`14de119`) and the cases that make each condition true (T) and false (F):
 
 | Decision | Condition | T | F |
 |---|---|---|---|
-| `loadData`: `txtDate.getText().isEmpty()` | — | TC13C-01, 02 (opening) | TC13C-02 (reload) |
+| `loadData`: `txtDate.getText().isEmpty()` | — | TC13C-01, 02, 47, 49 (opening) | TC13C-02, 48 (reload) |
 | `loadData`: `getOrderDate() == null` | — | — (see below) | TC13C-01, 41 |
 | `loadData`: `getDueDate() == null` | — | TC13C-01 (Mario) | TC13C-01 (Lucía) |
 | `loadData`: `catch` | `AccessDeniedException` | TC13C-15, 16 | — |
@@ -101,13 +102,16 @@ Decisions of `IU_ManageAppointments` (`844405d`) and the cases that make each co
 | | slot | TC13C-11 (need only) | TC13C-09 |
 | `onBookSlot()`: `!confirm` | — | TC13C-10 | TC13C-09 |
 | `onBookSlot(String, TimeSlot)`: `catch` | denied / validation | TC13C-14 / TC13C-12, 13 | TC13C-09 |
+| `onBookSlot(String, TimeSlot)`: `loadData()` (F-01) | — | TC13C-09, 43 | TC13C-46 |
 | `onReschedule()`: `appointment == null \|\| slot == null` | appointment | TC13C-21 (slot only) | TC13C-20 |
 | | slot | TC13C-21 (appointment only) | TC13C-20 |
 | `onReschedule()`: `!confirm` | — | TC13C-45 | TC13C-20, 40 |
 | `onRescheduleAppointment`: `catch` | denied / validation | TC13C-23 / TC13C-22 | TC13C-20 |
+| `onRescheduleAppointment`: `loadData()` (F-01) | — | TC13C-20, 44 | — (see below) |
 | `onCancel()`: `appointment == null` | — | TC13C-26 | TC13C-24 |
 | `onCancel()`: `!confirm` | — | TC13C-25 | TC13C-24 |
 | `onCancelAppointment`: `catch` | denied / validation | TC13C-27 | TC13C-24 |
+| `onCancelAppointment`: `loadData()` (F-01) | — | TC13C-24, 44 | — (see below) |
 | `showErrors`: `size() == 1` | — | TC13C-12 | TC13C-13, 31 |
 | `selectedNeed`, `selectedSlot`, `selectedAppointment`: `row < 0 \|\| row >= size()` | `row < 0` | TC13C-06, 11, 21, 26 | TC13C-09, 20, 24 |
 | | `row >= size()` | — (see below) | TC13C-09, 20, 24 |
@@ -117,9 +121,11 @@ Decisions of `IU_ManageAppointments` (`844405d`) and the cases that make each co
 `IU_Welcome`: `onManageAppointments != null && hasPermission(MANAGE_APPOINTMENTS)`: (T,T) TC13C-33, (F,T) TC13C-36,
 (T,F) TC13C-35; the older constructor passes `null` (TC13C-37).
 
-Result of JaCoCo for `client-c5-appointments` (`mvn -B verify`, `844405d` with these tests): 100 % of the lines (252 of
-252) and 90.0 % of the branches (54 of 60), above the 80 % / 70 % of D-033 (at `87b56ce`: 218 of 218 lines, 43 of 46
-branches). Not covered: `row >= size()` true in the three `selected…` methods (the tables and the lists are always
+Result of JaCoCo for `client-c5-appointments` (`mvn -B verify`, `14de119` with these tests, 44 tests): 100 % of the
+lines (255 of 255) and 87.9 % of the branches (58 of 66), above the 80 % / 70 % of D-033 (at `844405d`: 252 of 252
+lines, 54 of 60 branches; at `87b56ce`: 218 of 218 lines, 43 of 46 branches). Not covered: `loadData()` false after a
+move and after a cancellation (the same failure of the reading as TC13C-46, which checks it after a booking only, as
+asked for F-01); `row >= size()` true in the three `selected…` methods (the tables and the lists are always
 filled together, so a selected row is always inside the list); `getValueIsAdjusting()` true in the two selection
 listeners (only a mouse drag sets it; the tests select by code); `getOrderDate() == null` (the analysis gives every
 need an order date, so the case has no expected result in the documents).
@@ -173,7 +179,13 @@ TC13C-11 now reaches *Book* with no need and no slot; the branch `need == null` 
 | TC13C-40 | *Move* | APT-0003 selected, no need; its slot of 12:00; answer Yes (F-02) | One move of APT-0003 to CT-1 12:00; `APT-0003 · P-0004 · CT-HEAD · 30/11/2026 12:00 · RESCHEDULED` (decision (a)) | `tc13c40MoveWithoutAnyNeed` |
 | TC13C-41 | constructor | Open the screen (F-03) | A column of the order date and a column of the due date, in that order: Lucía `20/11/2026` before `27/11/2026`; Mario `21/11/2026` before an empty due date (decision (b)) | `tc13c41NeedsShowTheOrderDateAndTheDueDate` |
 | TC13C-42 | constructor | The reading fails (Conjeture; F-04) | "The data could not be read: The server cannot be reached" in red (error style) | `tc13c42FailureWhileReadingIsRed` |
+| TC13C-43 | *Book* | Lucía, slot of 09:15; answer Yes (F-01) | One booking of NEED-0001 in XRAY-1 09:15–09:30; after the reload "Appointment APT-0004 booked on 30/11/2026 09:15." stays, in green (step 7) | `tc13c43BookingConfirmationIsShown` |
+| TC13C-44 | *Move*, *Cancel appointment* | APT-0001, *Find slots* `30/11/2026`, slot of 09:00, *Move*, answer Yes; APT-0003, *Cancel appointment*, answer Yes (F-01; flow of decision F-02 (Marcos, #210)) | One move of APT-0001 to XRAY-1 09:00 and one cancellation of APT-0003; after each reload "Appointment APT-0001 moved to 30/11/2026 09:00." and "Appointment APT-0003 cancelled." stay, in green (steps 10 and 13) | `tc13c44MoveAndCancelConfirmationsAreShown` |
 | TC13C-45 | *Move* | APT-0001, its slot of 09:00; answer No (N-08) | The question "Move the appointment APT-0001 to 30/11/2026 09:00?" asked; nothing sent; APT-0001 still BOOKED; "2 free slots." kept | `tc13c45MoveAnsweredNo` |
+| TC13C-46 | *Book* | Lucía, slot of 09:15; answer Yes; the reading fails after the booking (Conjeture; F-01) | One booking sent; "⚠ The data could not be read: The server cannot be reached" in red; no confirmation | `tc13c46ReloadFailsAfterBooking` |
+| TC13C-47 | constructor, *Find slots* | Clock fixed at Monday 30/11/2026 09:00, Europe/Madrid; Lucía selected; *Find slots* without writing the day (F-05) | The day starts as "30/11/2026"; one request `XRAY-CHEST` from 2026-11-30 to 2026-11-30 | `tc13c47DayStartsAsTheDayOfTheClock` |
+| TC13C-48 | `loadData` | Clock fixed at Monday 30/11/2026; the day `01/12/2026` and a reload (F-05) | "01/12/2026" is kept; the data are read again | `tc13c48DayWrittenIsKeptWithAFixedClock` |
+| TC13C-49 | constructor | Four-parameter constructor (system clock, F-05) | The day is today (the day taken just before or just after opening) | `tc13c49FourParameterConstructorUsesTheSystemClock` |
 
 Postcondition of every case: nothing is stored except by `bookAppointment`, `rescheduleAppointment` and
 `cancelAppointment` of the fake (TC13C-09, 20, 24, 40); after a rejected or denied change, or an error of the screen,
@@ -181,18 +193,18 @@ nothing is changed in C5; the screen is never shown.
 
 ## 5. Not covered / Not defined
 
-**Defects found** in the review of `feature/UC13-client` (`87b56ce`), checked again at `844405d`. F-02, F-03 and F-04
-are fixed in `844405d` and their cases are in the branch (TC13C-38 to 42). The cases of the defects still open are kept
-outside the branch until Implementation fixes the code (they fail now for these reasons only): TC13C-43 and 44 (F-01).
-F-05 and F-06 have no case yet.
+**Defects found** in the review of `feature/UC13-client` (`87b56ce`), checked again at `844405d` and at `14de119`.
+F-02, F-03 and F-04 are fixed in `844405d` (TC13C-38 to 42); F-01 is fixed in `89f2344` (TC13C-43, 44, 46) and F-05
+in `69bed6c` (TC13C-47 to 49). Still open: F-06.
 - **F-01 – The confirmation of a booking, a move or a cancellation is erased at once.** `onBookSlot`,
   `onRescheduleAppointment` and `onCancelAppointment` call `showConfirmation(...)` and then `loadData()`, which ends
   with `lblStatus.setText(" ")`, so the message area is empty after every success. The plan (*Messages*: "the success
   messages say the id of the appointment and its new moment") and steps 7, 10 and 13 of the analysis expect the
   confirmation. Expected: "Appointment APT-0004 booked on 30/11/2026 09:15.", "Appointment APT-0001 moved to
   30/11/2026 09:00.", "Appointment APT-0003 cancelled.", in green. **Not fixed in `844405d`**: the three methods now
-  empty the slots before `loadData()`, which still ends with `lblStatus.setText(" ")`. Cases TC13C-43, 44 (outside
-  the branch).
+  empty the slots before `loadData()`, which still ends with `lblStatus.setText(" ")`. **Fixed in `89f2344`**: the
+  three methods call `loadData()` first and `showConfirmation(...)` after it, only when the reading succeeded. Checked
+  by TC13C-43, 44 and 46.
 - **F-02 – Decision (a) of Design (PR #210) is not implemented.** `onFindSlots` always uses the selected need: with
   only an appointment selected it answers "Select a pending need before looking for slots.", and with a need and an
   appointment selected it asks for the test type of the need. Expected: with an appointment selected, *Find slots*
@@ -212,11 +224,13 @@ F-05 and F-06 have no case yet.
   injectable `Clock`. Its constructor is not decided yet, so no case checks it: TC13C-02 accepts the day before or
   after the call. **Not fixed in `844405d`**: the constructor agreed for the fix is
   `IU_ManageAppointments(service, requester, confirm, onBack, clock)` and the code still has only the four-parameter
-  one, so the cases of the default day from a fixed `Clock` are not written yet.
+  one, so the cases of the default day from a fixed `Clock` are not written yet. **Fixed in `69bed6c`**: the
+  constructor `IU_ManageAppointments(service, requester, confirm, onBack, clock)`; the four-parameter one uses
+  `Clock.systemDefaultZone()` and `loadData` writes `LocalDate.now(clock)`. Checked by TC13C-47 to 49.
 - **F-06 – The design lists `+onSelectNeed(needId: String): void`** (section 4 of `doc/plans/C5-design.md`, message 6
   of the analysis) and the screen has no such public method: the selection is the row of the table and the slots are
   asked with *Find slots*. Design decides whether the method is dropped from the design or added to the code. **Not
-  changed in `844405d`.**
+  changed in `844405d` nor in `14de119`.**
 
 **Changed expected values** (no expected value is changed without a line here):
 
@@ -228,7 +242,8 @@ F-05 and F-06 have no case yet.
 | TC13C-22, 23 | Same flow as the old TC13C-20 | APT-0001, *Find slots*, slot of 09:00, *Move* (helper `appointmentAndSlot`) | Decision F-02 (Marcos, #210) |
 | TC13C-29 | *Back* Alt+K; *Move* and *Cancel appointment* without key | *Back* Alt+B; *Move* Alt+M; *Cancel appointment* Alt+C | Not defined: code `844405d` (N-02) |
 
-**Not defined** (the plan does not say; Testing asks the team):
+**Not defined** (the plan does not say; Testing asks the team). Still open at `14de119`: N-01, N-02 (*Book* and
+*Back* both Alt+B), N-05, N-06, N-07 and N-08.
 - **N-01 – Failures of the server outside the reading.** Only `loadData` catches `RuntimeException`; a failure of
   `getFreeSlots`, `bookAppointment`, `rescheduleAppointment` or `cancelAppointment` escapes from the button and
   nothing is shown. UC06 shows "… could not be …" in that case. Not tested.
