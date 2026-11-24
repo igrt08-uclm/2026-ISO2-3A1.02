@@ -49,6 +49,11 @@ A question that does not change any file does not need a plan.
 ## Rules you must always follow
 1. **You suggest, the team decides** (D-008). Do not take requirements, analysis, design or architecture decisions,
    and do not change a decision of DECISIONS.md.
+   - **Micro-decision threshold:** non-contractual UI and code ergonomics that do not change a requirement, public
+     interface (`common`), DTO field or screen flow — such as unique keyboard mnemonics (`Alt+<key>`), clearing
+     dependent tables on selection change, disabling inputs on `AccessDeniedException` (keeping *Back* enabled),
+     confirmation dialogs on destructive/move actions, or removing unused test-only helpers — are decided by the
+     implementing member, logged in the plan, and do **not** require tagging other disciplines for approval.
 2. **Only your sub-issue.** One sub-issue and one branch per session. Change only what your sub-issue needs: do not
    refactor, rename or "improve" anything else; write it in the plan as an open question instead.
 3. **Only the current iteration.** Do not specify, model or implement use cases of other iterations (D-011;
@@ -123,6 +128,18 @@ A question that does not change any file does not need a plan.
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
+
+## Decision ownership
+When a genuine ambiguity arises (not covered by the micro-decision threshold in rule 1), tag **only the owning
+discipline** once, in a single thread (either the sub-issue or its pull request, not both):
+
+| Question about | Owner |
+|---|---|
+| Requirements, priorities, actor scope, acceptance criteria | **Requirements / Analysis** |
+| Domain rules, public interfaces (`common`), DTO fields/views, screen flows | **Design** |
+| Internal implementation, exception handling, validation messages, UI ergonomics | **Implementation** |
+| Seed data tuples, test cases (S.04.01 / T.04), expected test results | **Testing** |
+| Cross-component patches, versioning, branch bases, CI/process rules | **Coordinator** |
 
 ## Conventions
 | Topic | Convention | Source |
