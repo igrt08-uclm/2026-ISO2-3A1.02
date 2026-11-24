@@ -693,7 +693,7 @@ class IU_ManageAppointmentsTest {
     }
 
     @Test
-    @DisplayName("TC13C-29 The buttons and the keys of the code: Alt+F, Alt+B, Alt+M, Alt+C and Back Alt+B (N-02)")
+    @DisplayName("TC13C-29 The buttons and the keys of the code: Alt+F, Alt+B, Alt+M, Alt+C and Back Alt+K (N-02)")
     void tc13c29ButtonsAndMnemonics() {
         // Act
         IU_ManageAppointments screen = open();
@@ -706,7 +706,7 @@ class IU_ManageAppointmentsTest {
                 () -> assertEquals(KeyEvent.VK_B, Screen.button(screen, "Book").getMnemonic()),
                 () -> assertEquals(KeyEvent.VK_M, Screen.button(screen, "Move").getMnemonic()),
                 () -> assertEquals(KeyEvent.VK_C, Screen.button(screen, "Cancel appointment").getMnemonic()),
-                () -> assertEquals(KeyEvent.VK_B, Screen.button(screen, "Back").getMnemonic()));
+                () -> assertEquals(KeyEvent.VK_K, Screen.button(screen, "Back").getMnemonic()));
     }
 
     @Test
@@ -747,15 +747,16 @@ class IU_ManageAppointmentsTest {
     }
 
     @Test
-    @DisplayName("TC13C-32 isCancelled is true only for a cancelled appointment")
+    @DisplayName("TC13C-32 AppointmentStatus.CANCELLED matches only cancelled appointments")
     void tc13c32IsCancelled() {
         // Arrange
         List<Boolean> cancelled = new ArrayList<>();
 
         // Act
         for (AppointmentStatus status : AppointmentStatus.values()) {
-            cancelled.add(IU_ManageAppointments.isCancelled(new Appointment("APT-0001", "NEED-0009", "P-0003",
-                    "XRAY-CHEST", "XRAY-1", "mgarcia", null, null, status)));
+            Appointment appointment = new Appointment("APT-0001", "NEED-0009", "P-0003", "XRAY-CHEST", "XRAY-1",
+                    "mgarcia", null, null, status);
+            cancelled.add(appointment.getStatus() == AppointmentStatus.CANCELLED);
         }
 
         // Assert
@@ -974,5 +975,28 @@ class IU_ManageAppointmentsTest {
 
         // Assert
         assertTrue(shown.equals(before) || shown.equals(after), shown);
+    }
+
+    @Test
+    @DisplayName("TC13C-50 Selecting in one table clears the selection of the other")
+    void tc13c50TablesClearEachOthersSelection() {
+        // Arrange
+        IU_ManageAppointments screen = open();
+
+        // Act
+        select(screen.getNeedsTable(), LUCIA);
+        int needBefore = screen.getNeedsTable().getSelectedRow();
+        select(screen.getAppointmentsTable(), APT_0003);
+        int needAfterAppointment = screen.getNeedsTable().getSelectedRow();
+        int appointmentSelected = screen.getAppointmentsTable().getSelectedRow();
+        select(screen.getNeedsTable(), MARIO);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(LUCIA, needBefore),
+                () -> assertEquals(-1, needAfterAppointment),
+                () -> assertEquals(APT_0003, appointmentSelected),
+                () -> assertEquals(MARIO, screen.getNeedsTable().getSelectedRow()),
+                () -> assertEquals(-1, screen.getAppointmentsTable().getSelectedRow()));
     }
 }

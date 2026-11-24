@@ -47,6 +47,7 @@ public class AppointmentService implements IAppointmentService {
     private static final String APPOINTMENTS = "appointments";
     private static final String APPOINTMENT = "APPOINTMENT:";
     private static final DateTimeFormatter MOMENT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final int MAX_RANGE_DAYS = 31;
 
     private final IAppointmentRepository appointments;
     private final IClinicalOrderService orderService;
@@ -142,6 +143,8 @@ public class AppointmentService implements IAppointmentService {
             errors.add("The date range is required");
         } else if (toDate.isBefore(fromDate)) {
             errors.add("The last date cannot be before the first one");
+        } else if (toDate.isAfter(fromDate.plusDays(MAX_RANGE_DAYS - 1))) {
+            errors.add("The range cannot be longer than " + MAX_RANGE_DAYS + " days");
         }
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
@@ -198,11 +201,11 @@ public class AppointmentService implements IAppointmentService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-        orderService.markSchedulingNeedBooked(requester, needId);
         Appointment created = new Appointment(nextAppointmentId(), needId, order.getPatientId(),
                 order.getTestTypeId(), testType.getRoom(), order.getRequester(), slot.getStart(), slot.getEnd(),
                 AppointmentStatus.BOOKED);
         appointments.save(created);
+        orderService.markSchedulingNeedBooked(requester, needId);
         auditRecorder.register(requester, BOOKED, APPOINTMENT + created.getAppointmentId());
         return created;
     }
@@ -248,12 +251,14 @@ public class AppointmentService implements IAppointmentService {
         Appointment cancelled = new Appointment(current.getAppointmentId(), current.getNeedId(),
                 current.getPatientId(), current.getTestTypeId(), current.getRoom(), current.getPhysician(),
                 current.getStart(), current.getEnd(), AppointmentStatus.CANCELLED);
+        appointments.save(cancelled);
         try {
             orderService.markSchedulingNeedPending(requester, current.getNeedId());
-        } catch (ValidationException alreadyPending) {
-            // The need was already pending: nothing to do.
+        } catch (ValidationException notPending) {
+            if (!onlyAlreadyPending(notPending)) {
+                throw notPending;
+            }
         }
-        appointments.save(cancelled);
         auditRecorder.register(requester, CANCELLED, APPOINTMENT + cancelled.getAppointmentId());
         return cancelled;
     }
@@ -292,6 +297,9 @@ public class AppointmentService implements IAppointmentService {
         TestType testType = systemParameterService.getTestType(requester, testTypeId);
         if (!testType.isActive()) {
             throw new ValidationException(List.of("The test type " + testTypeId + " is not active"));
+        }
+        if (testType.getDurationMinutes() <= 0) {
+            throw new ValidationException(List.of("The test type " + testTypeId + " has no duration"));
         }
         return testType;
     }
@@ -348,10 +356,6 @@ public class AppointmentService implements IAppointmentService {
         return errors;
     }
 
-    /**
-     * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
-     * the room, for every active schedule of that room.
-     */
     /**
      * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
      * the room, for every active schedule of that room. The requester is used to read the schedules of C2.
@@ -412,6 +416,16 @@ public class AppointmentService implements IAppointmentService {
             id = String.format("APT-%04d", lastAppointmentNumber);
         } while (appointments.findById(id) != null);
         return id;
+    }
+
+    /**
+     * True when every error of C4 says that the need was already pending, the only failure that a cancellation ignores.
+     *
+     * @param exception the rejection of C4
+     * @return {@code true} if the need was already pending
+     */
+    private static boolean onlyAlreadyPending(ValidationException exception) {
+        return exception.getErrors().stream().allMatch(error -> error.endsWith("is already pending"));
     }
 
     private static boolean blank(String text) {

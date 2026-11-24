@@ -201,7 +201,7 @@ public class IU_ManageAppointments extends JPanel {
         footer.add(lblStatus, BorderLayout.CENTER);
         JPanel back = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
         JButton btnBack = new JButton("Back");
-        btnBack.setMnemonic('B');
+        btnBack.setMnemonic('K');
         btnBack.addActionListener(event -> onBack.run());
         back.add(btnBack);
         footer.add(back, BorderLayout.EAST);
@@ -500,10 +500,5 @@ public class IU_ManageAppointments extends JPanel {
     /** The text of the message area (for the tests). */
     public String getStatusMessage() {
         return lblStatus.getText();
-    }
-
-    /** Whether the status of an appointment is cancelled (helper for the tests). */
-    public static boolean isCancelled(Appointment appointment) {
-        return appointment.getStatus() == AppointmentStatus.CANCELLED;
     }
 }

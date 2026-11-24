@@ -45,6 +45,10 @@
     </dependency>
     <dependency>
       <groupId>es.uclm.esi.iso2</groupId>
+      <artifactId>client-c4-orders</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>es.uclm.esi.iso2</groupId>
       <artifactId>server-c5-appointments</artifactId>
     </dependency>
     <dependency>

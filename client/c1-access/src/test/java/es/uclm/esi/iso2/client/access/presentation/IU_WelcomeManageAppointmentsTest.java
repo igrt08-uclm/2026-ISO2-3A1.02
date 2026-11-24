@@ -57,7 +57,7 @@ class IU_WelcomeManageAppointmentsTest {
         // Arrange
         int[] opened = {0};
         IU_Welcome welcome = new IU_Welcome(admissions, NOTHING, NOTHING, List.of(MANAGE_PATIENTS, MANAGE_APPOINTMENTS),
-                NOTHING, NOTHING, NOTHING, NOTHING, () -> opened[0]++);
+                NOTHING, NOTHING, NOTHING, NOTHING, NOTHING, NOTHING, () -> opened[0]++);
 
         // Act
         JButton button = buttonWithText(welcome, "Manage appointments");
@@ -74,7 +74,8 @@ class IU_WelcomeManageAppointmentsTest {
     @DisplayName("TC13C-34 With every permission and action, Manage appointments goes after Manage patients")
     void tc13c34OrderWithTheOtherButtons() {
         // Act
-        IU_Welcome welcome = new IU_Welcome(admin, NOTHING, NOTHING, ALL, NOTHING, NOTHING, NOTHING, NOTHING, NOTHING);
+        IU_Welcome welcome = new IU_Welcome(admin, NOTHING, NOTHING, ALL, NOTHING, NOTHING, NOTHING, NOTHING,
+                NOTHING, NOTHING, NOTHING);
 
         // Assert
         assertEquals(List.of("View audit log", "Manage roles", "Configure system", "Configure integrations",
@@ -88,7 +89,8 @@ class IU_WelcomeManageAppointmentsTest {
         int[] others = {0};
         int[] appointments = {0};
         IU_Welcome welcome = new IU_Welcome(admin, () -> others[0]++, () -> others[0]++, ALL, () -> others[0]++,
-                () -> others[0]++, () -> others[0]++, () -> others[0]++, () -> appointments[0]++);
+                () -> others[0]++, () -> others[0]++, () -> others[0]++, NOTHING, NOTHING,
+                () -> appointments[0]++);
 
         // Act
         buttonWithText(welcome, "Manage appointments").doClick();
@@ -109,9 +111,9 @@ class IU_WelcomeManageAppointmentsTest {
         // Act
         IU_Welcome administrator = new IU_Welcome(admin, NOTHING, NOTHING,
                 List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, CONSULT_AUDIT), NOTHING, NOTHING,
-                NOTHING, NOTHING, NOTHING);
+                NOTHING, NOTHING, NOTHING, NOTHING, NOTHING);
         IU_Welcome withoutPermissions = new IU_Welcome(admissions, NOTHING, NOTHING, List.of(), NOTHING, NOTHING,
-                NOTHING, NOTHING, NOTHING);
+                NOTHING, NOTHING, NOTHING, NOTHING, NOTHING);
 
         // Assert
         assertAll(
@@ -125,21 +127,22 @@ class IU_WelcomeManageAppointmentsTest {
     void tc13c36WithoutTheActionNobodySeesTheButton() {
         // Act
         IU_Welcome welcome = new IU_Welcome(admissions, NOTHING, NOTHING, List.of(MANAGE_APPOINTMENTS), NOTHING,
-                NOTHING, NOTHING, NOTHING, null);
+                NOTHING, NOTHING, NOTHING, NOTHING, NOTHING, null);
 
         // Assert
         assertEquals(List.of("Log out"), buttonTexts(welcome));
     }
 
     @Test
-    @DisplayName("TC13C-37 The constructor of UC12 does not show Manage appointments")
+    @DisplayName("TC13C-37 The constructor of UC07 does not show Manage appointments")
     void tc13c37OlderConstructorDoesNotShowTheButton() {
         // Act
-        IU_Welcome ofUc12 = new IU_Welcome(admin, NOTHING, NOTHING, ALL, NOTHING, NOTHING, NOTHING, NOTHING);
+        IU_Welcome ofUc07 = new IU_Welcome(admin, NOTHING, NOTHING, ALL, NOTHING, NOTHING, NOTHING, NOTHING, NOTHING,
+                NOTHING);
 
         // Assert
         assertEquals(List.of("View audit log", "Manage roles", "Configure system", "Configure integrations",
-                "Manage patients", "Log out"), buttonTexts(ofUc12));
+                "Manage patients", "Log out"), buttonTexts(ofUc07));
     }
 
     private static List<String> buttonTexts(IU_Welcome welcome) {

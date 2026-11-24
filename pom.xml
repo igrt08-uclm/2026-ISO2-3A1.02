@@ -46,7 +46,7 @@
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>server-c4-orders</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
@@ -62,6 +62,11 @@
         <groupId>es.uclm.esi.iso2</groupId>
         <artifactId>client-c3-patients</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>es.uclm.esi.iso2</groupId>
+        <artifactId>client-c4-orders</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>es.uclm.esi.iso2</groupId>
