@@ -8,7 +8,8 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 ├── server/              aggregator of the server submodules (one per component)
 │   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.4-SNAPSHOT), depends on common
 │   ├── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.1.2-SNAPSHOT), depends only on common
-│   └── c3-patients/     server of C3 (artifactId `server-c3-patients`, version 1.0.1-SNAPSHOT), depends only on common
+│   ├── c3-patients/     server of C3 (artifactId `server-c3-patients`, version 1.0.1-SNAPSHOT), depends only on common
+│   └── c4-orders/       server of C4 (artifactId `server-c4-orders`, version 1.0.0-SNAPSHOT), depends only on common
 └── client/              aggregator of the client submodules (one per component)
     ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.4-SNAPSHOT), depends on common, server-c1-access and,
     │                    because its `Main` starts the whole program, on server-c2-configuration, client-c2-configuration,
@@ -39,6 +40,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 - JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
   build fails below 80 % of lines or 70 % of branches in any module (D-033).
 - When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). C1 is in `server/c1-access` (`server-c1-access`,
-  1.2.4-SNAPSHOT after the patches #109, #112, #172 and #173) and `client/c1-access` (`client-c1-access`, 1.2.4-SNAPSHOT after UC12-client and #172). A component does not depend
+  1.2.4-SNAPSHOT after the patches #109, #112, #116, #172 and #173) and `client/c1-access` (`client-c1-access`,
+  1.2.4-SNAPSHOT after UC12-client and #172). A component does not depend
   on the module of another one: what they share is a contract in `common`, for example `IAuditRecorder` or `IAuthenticatorSystem`.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).
