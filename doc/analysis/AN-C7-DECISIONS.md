@@ -4,12 +4,12 @@ Radiodiagnostics and Medical Imaging Management System (SESCAM)
 Iteration 7 (Milestone 4) – Analysis discipline
 - C7 Execution and reports ([#193](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/193)): UC10 ([#194](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/194)) and UC09 ([#197](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/197))
 
-Each entry records the context, the decision and the rationale. The numbering continues from [AN-C6-DECISIONS.md](AN-C6-DECISIONS.md); the rules of [AN-IT1-DECISIONS.md](AN-IT1-DECISIONS.md), [AN-C2-C3-DECISIONS.md](AN-C2-C3-DECISIONS.md), [AN-C4-DECISIONS.md](AN-C4-DECISIONS.md), [AN-C5-DECISIONS.md](AN-C5-DECISIONS.md) and [AN-C6-DECISIONS.md](AN-C6-DECISIONS.md) still apply (BCE pattern D07, naming D08, `AuditLog` written by every use case D10, permission check shown explicitly D16). The decisions of the team are written `D-0xx`; the decisions of the analysis, `Dxx`.
+Each entry records the context, the decision and the rationale. The numbering continues from [AN-C6-DECISIONS.md](AN-C6-DECISIONS.md); the rules of [AN-IT1-DECISIONS.md](../AN-IT1-DECISIONS.md), [AN-C2-C3-DECISIONS.md](../AN-C2-C3-DECISIONS.md), [AN-C4-DECISIONS.md](../AN-C4-DECISIONS.md), [AN-C5-DECISIONS.md](../AN-C5-DECISIONS.md) and [AN-C6-DECISIONS.md](AN-C6-DECISIONS.md) still apply (BCE pattern D07, naming D08, `AuditLog` written by every use case D10, permission check shown explicitly D16). The decisions of the team are written `D-0xx`; the decisions of the analysis, `Dxx`.
 Status: **Agreed** = decided by the team · **To confirm** = proposed, pending team approval.
 
 Artefacts of this iteration (PlantUML, the official version since D-046):
-- [`analysis/UC10-record-execution-sequence.puml`](analysis/UC10-record-execution-sequence.puml)
-- [`analysis/UC09-diagnostic-reports-sequence.puml`](analysis/UC09-diagnostic-reports-sequence.puml)
+- [`UC10-record-execution-sequence.puml`](UC10-record-execution-sequence.puml)
+- [`UC09-diagnostic-reports-sequence.puml`](UC09-diagnostic-reports-sequence.puml)
 
 As in C6, the alternative scenarios are `alt`/`else` fragments, and their messages take the number of the step where they start plus a letter.
 
