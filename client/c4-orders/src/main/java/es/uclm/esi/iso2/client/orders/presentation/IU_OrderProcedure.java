@@ -234,6 +234,9 @@ public class IU_OrderProcedure extends JPanel {
      * @param patients the patients to show
      */
     public void displayPatients(List<Patient> patients) {
+        selectedPatient = null;
+        setFormEnabled(false);
+        orderModel.setRowCount(0);
         patientModel.setRowCount(0);
         for (Patient patient : patients) {
             patientModel.addRow(new Object[] { patient.getIdentifier(), patient.getFullName(),
@@ -269,6 +272,9 @@ public class IU_OrderProcedure extends JPanel {
         try {
             Patient patient = findPatient(identifier);
             if (patient == null) {
+                selectedPatient = null;
+                setFormEnabled(false);
+                orderModel.setRowCount(0);
                 showOperationResultError("There is no patient with the identifier " + identifier);
                 return;
             }
@@ -283,6 +289,9 @@ public class IU_OrderProcedure extends JPanel {
             List<ClinicalOrder> orders = orderService.getOrdersOfPatient(requester, patient.getPatientId());
             displayOrderForm(testTypes, priorities, orders);
         } catch (AccessDeniedException deniedException) {
+            selectedPatient = null;
+            setFormEnabled(false);
+            orderModel.setRowCount(0);
             handleDenied();
         } catch (ValidationException validationException) {
             showValidationErrors(validationException.getErrors());
@@ -391,7 +400,11 @@ public class IU_OrderProcedure extends JPanel {
             showOperationResultSuccess("Order " + created.getOrderId() + " created.");
             txtIndication.setText("");
             txtJustification.setText("");
-            displayOrders(orderService.getOrdersOfPatient(requester, selectedPatient.getPatientId()));
+            try {
+                displayOrders(orderService.getOrdersOfPatient(requester, selectedPatient.getPatientId()));
+            } catch (RuntimeException exception) {
+                showOperationResultError("The orders could not be read: " + exception.getMessage());
+            }
         } catch (ValidationException validationException) {
             showValidationErrors(validationException.getErrors());
         } catch (AccessDeniedException deniedException) {
