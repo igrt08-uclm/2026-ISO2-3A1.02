@@ -12,7 +12,7 @@ Ignacio, 23/11/2026); nothing that those sources do not define is used as an exp
 first version of the cases (TC13S-01 to TC13S-32) was written by Ignacio Romero Torres on 23/11/2026; their ids and
 expected results are kept, except the four changes of section 5.
 
-Code under test (`server-c5-appointments` 1.0.0-SNAPSHOT, `feature/UC13-server` up to `e07c83c`, merged into this
+Code under test (`server-c5-appointments` 1.0.0-SNAPSHOT, `feature/UC13-server` up to `b3e7e58`, merged into this
 branch: `bcb06ae`, the plan `c775ff4` and the fixes of the defects of section 5, `c5f512d` (D1), `6a56ef9` (D5),
 `6721cfd` (D2) and `53ecd94` (D6)): the seven operations of `IAppointmentService` and `loadSeedData` implemented by
 `AppointmentService` (with the private `checkPermission`, `readActiveTestType`, `findPendingNeed`, `findAppointment`,
@@ -145,7 +145,7 @@ is saved.
 
 ## 3. Coverage (white box)
 
-Measured with JaCoCo in `mvn -B -ntp clean verify` on `feature/UC13-server` up to `e07c83c` merged into this
+Measured with JaCoCo in `mvn -B -ntp clean verify` on `feature/UC13-server` up to `b3e7e58` merged into this
 branch, with every case of section 4 in the suite and no disabled test (D-033: 80 % of lines, 70 % of branches of
 the bundle): `AppointmentService` 196 of 199 lines and 120 of 120 branches; `AppointmentSeedData` 7 of 7 lines;
 `InMemoryAppointmentRepository` 26 of 26 lines and 4 of 4 branches; the bundle 229 of 232 lines (98.7 %) and 124 of
@@ -353,7 +353,7 @@ call saves nothing, does not change the need in C4 and registers nothing; no app
     09:15-09:30; expected `The slot 24/11/2026 09:10 is not free` -> `The slot 24/11/2026 09:15 is not free`. Two
     slots of 15 minutes on the same grid never overlap in part, so the existing appointment is off the grid and the
     new slot is on it, which keeps the overlap as the only reason.
-- **Changed expected values after merging the fixes up to `e07c83c` (D1, D2, D5, D6):** none. TC13S-70, TC13S-72,
+- **Changed expected values after merging the fixes up to `b3e7e58` (D1, D2, D5, D6):** none. TC13S-70, TC13S-72,
   TC13S-73, TC13S-77, TC13S-78 and TC13S-81 are back with the ids and expected values they had while out of the
   suite; TC13S-89 (`nextWorkingDay`) is new, with the rule of #208 (D is the first working day after the start).
 - **New cases of the decided rules (TC13S-77 to TC13S-88).** One case or more per rule, alone, with a slot that is
@@ -413,4 +413,4 @@ call saves nothing, does not change the need in C4 and registers nothing; no app
 - **Defects found:** D1, D2, D5 and D6 (C5), fixed in `c5f512d`, `6721cfd`, `6a56ef9` and `53ecd94`; their cases
   (TC13S-70, TC13S-72, TC13S-73, TC13S-77, TC13S-78, TC13S-81) are back in the suite with no expected value changed,
   and TC13S-89 is new. D3 and D4 (C4, by reading), fixed in `6ca690e` and `65273ef`, tested in the C4 test branch.
-  Every case of section 4 passes against `feature/UC13-server` up to `e07c83c`, with no test disabled.
+  Every case of section 4 passes against `feature/UC13-server` up to `b3e7e58`, with no test disabled.
