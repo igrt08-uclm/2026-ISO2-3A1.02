@@ -60,8 +60,8 @@ class FakeClinicalOrderService implements IClinicalOrderService {
         nextFailure = failure;
     }
 
-    /** Every reading of the orders of a patient fails with this exception (a {@link ValidationException} or a
-     *  {@link RuntimeException}). */
+    /** Every reading of the orders of a patient fails with this exception (a {@link ValidationException}, an
+     *  {@link AccessDeniedException} or a {@link RuntimeException}). */
     void failReads(Exception failure) {
         readFailure = failure;
     }
@@ -117,6 +117,9 @@ class FakeClinicalOrderService implements IClinicalOrderService {
         reads.add(patientId);
         if (readFailure instanceof ValidationException validation) {
             throw validation;
+        }
+        if (readFailure instanceof AccessDeniedException denied) {
+            throw denied;
         }
         if (readFailure instanceof RuntimeException runtime) {
             throw runtime;
