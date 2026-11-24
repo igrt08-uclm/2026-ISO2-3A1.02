@@ -164,8 +164,14 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - **Tests of Testing:** they are headless (they build the screen and never show it), so they need no display and no desktop, but they do need fontconfig and fonts in the machine. `mvn -B verify` is green in the local machine (Maven 3.9.9, JDK 21, 23/11/2026): BUILD SUCCESS, all coverage checks met, 38 tests of `IU_OrderProcedureTest` and 104 of `client-c1-access`. Two traps of the environment, not of the code: without fonts the Swing components throw `Fontconfig head is null` (it happened in a container that had no `libfontconfig`), and with Maven 3.8.7 the old Surefire does not run JUnit 6 and reports 0 tests, which makes JaCoCo fail — the build needs Maven 3.9.x.
 - **Deviations:** steps 3 to 5 are one commit; `agents/components.md` still says 1.2.4 for `client-c1-access` (fixed in step 9); `IClinicalOrderService.getOrdersOfPatient` returns `ClinicalOrder`, which has no `getPriorityId`, so the column *Priority* is only filled when the order is a `DiagnosticOrder` — the contract of `common` is not changed here, to keep #202 as it was reviewed; `onSelectPatient` takes the health-card identifier (Q4).
 - **Not checked here:** the application was not started and the tests of the client could not run in this container (no fonts). The manual usability check is Testing's.
-- **Open questions:** TC06C-29 (the priority VIP) is still open for Design: the case and the *Usability decisions* do
-  not agree on whether a VIP priority is offered, and this plan does not decide it. Everything else of the review is
-  closed; F-05 is decided (`id · name`), implemented in step 12 and its expected values are in `7967dcc`.
+- **Open questions:** none. TC06C-29 is closed: Design (#67, Marcos) left it to Testing and Testing adapted the case
+  to an existing priority (`022d904`, `ROUTINE`). F-05 is decided (`id · name`), implemented in step 12 with its
+  expected values in `7967dcc`.
+- **Left for the integration:** the constructor of `IU_Welcome` with nine arguments collides with the one of
+  `feature/UC13-client` (#210), which also ends in a `Runnable`. It is resolved when #204, #207 and #210 meet in the
+  same branch, with one constructor that takes both `onOrderProcedure` and `onManageAppointments` (ten arguments,
+  nine of them unchanged); Testing then adapts `IU_WelcomeManageAppointmentsTest`, which calls it. This branch does
+  not touch it, because `feature/UC13-client` is not its base.
 - **Last update:** 24/11/2026, Ignacio — step 15 closed as decided by Design (#67, Marcos): the error replaces the
-  success when the reload fails, no change. `mvn -B -ntp verify` green with the tests of Adam.
+  success when the reload fails, no change. TC06C-29 closed by Testing (`022d904`). `mvn -B -ntp verify` green with
+  the tests of Adam (TC06C-50 to TC06C-61).
