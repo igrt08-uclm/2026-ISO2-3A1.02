@@ -916,9 +916,11 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 10. **Classes:** `ClinicalOrder` (through `DiagnosticOrder`), `DiagnosticOrder`, `SchedulingNeed` and `SchedulingNeedStatus` (getters, values); `InMemoryClinicalOrderRepository` and `InMemorySchedulingNeedRepository` (`findById` unknown → `null`, `findByPatient`, `findPending`, `save` replaces).
 
 ## Verification
-- [x] Every acceptance criterion of #68 is checked with Adam's tests: an order is only created for an active patient and an active test type, with one of the configured priorities; every created order appears as a pending scheduling need for C5 and its creation is registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
+- [ ] Every acceptance criterion of #68 is checked with Adam's tests (the tests are in the pull request #203, not in
+      this branch): an order is only created for an active patient and an active test type, with one of the configured priorities; every created order appears as a pending scheduling need for C5 and its creation is registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
 - [x] `server-c4-orders` depends only on `common`; no file of `client/`, of C1, C2 or C3 changed (`git diff --stat develop...HEAD`).
-- [x] `mvn -B verify` (full build) is green with Adam's tests, the coverage check of `server-c4-orders` and of `common` included.
+- [ ] `mvn -B verify` (full build) is green with Adam's tests (pull request #203), the coverage check of
+      `server-c4-orders` and of `common` included.
 - [x] The CI of the pull request (`Closes #68`) is green.
 
 ## Status
