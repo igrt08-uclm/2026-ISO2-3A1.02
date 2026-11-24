@@ -47,6 +47,7 @@ public class ClinicalOrderService implements IClinicalOrderService {
     private static final String ORDERS = "orders";
     private static final String ORDER = "ORDER:";
     private static final String SCHEDULING_NEED = "SCHEDULING_NEED:";
+    private static final int MAX_RECURRENCE_INTERVAL_MONTHS = 12;
 
     private final IClinicalOrderRepository orders;
     private final ISchedulingNeedRepository needs;
@@ -290,6 +291,8 @@ public class ClinicalOrderService implements IClinicalOrderService {
         checkFollowUpTestType(requester, order.getTestTypeId(), errors);
         if (order.getRecurrenceIntervalMonths() <= 0) {
             errors.add("The recurrence interval must be a positive number of months");
+        } else if (order.getRecurrenceIntervalMonths() > MAX_RECURRENCE_INTERVAL_MONTHS) {
+            errors.add("The recurrence interval cannot be more than 12 months");
         }
         if (blank(order.getIndication())) {
             errors.add("The clinical indication is required");
