@@ -271,18 +271,22 @@ public class IU_OrderFollowUp extends JPanel {
         }
     }
 
-    private Patient findPatient(String identifier) {
-        try {
-            for (Patient patient : patientService.searchPatients(requester, identifier)) {
-                if (identifier.equals(patient.getIdentifier())) {
-                    return patient;
-                }
+    /**
+     * Finds the patient whose identifier is exactly the one that the table shows. An {@code AccessDeniedException}
+     * of C3 is not caught here: it reaches the {@code catch} of {@link #onSelectPatient(String)}, so that the denial is
+     * handled in one place and its message is not overwritten by “There is no patient with the identifier …”.
+     *
+     * @param identifier the health card number of the patient
+     * @return the patient, or {@code null} when C3 does not know it
+     * @throws AccessDeniedException when the requester does not have the permission to search patients
+     */
+    private Patient findPatient(String identifier) throws AccessDeniedException {
+        for (Patient patient : patientService.searchPatients(requester, identifier)) {
+            if (identifier.equals(patient.getIdentifier())) {
+                return patient;
             }
-            return null;
-        } catch (AccessDeniedException deniedException) {
-            handleDenied();
-            return null;
         }
+        return null;
     }
 
     /**
