@@ -53,7 +53,7 @@ differ if a use case changes only one of them. `common` keeps one package per co
   the old cumulative numbering of D-014, and the table above replaces it.
 - **Patches of a finished component (D-036).** When a component needs a change in a finished one, the finished
   component raises PATCH, in its own branch and pull request approved by its owner, and `common` raises MINOR if
-  contracts are added to it. C1 is at 1.2.4 in the server and 1.2.4 in the client (#109, #112, #116, #172 and #173);
+  contracts are added to it. C1 is at 1.2.4 in the server and 1.2.5 in the client (#109, #112, #116, #172, #173, UC12-client and UC06-client);
   `common` is at 1.6.0-SNAPSHOT.
 - If a submodule name of the table is not the one used in the repository, the repository wins: tell the member and
   this file is corrected.
