@@ -60,8 +60,9 @@ is changed here (rule 17): Adam writes TC06C-44 and updates the expected values 
   from the plan), so Testing uploads those expected values first and step 12 comes after; this branch does not touch
   a test (rule 17). **Decided by Design:** `id · name` (Denis, `61e7246`); Testing
   uploaded the expected values in `7967dcc` (`test(UC06): client cases TC06C-44..49 and the priority as id · name`).
-- **Documents.** `agents/components.md` says `client-c1-access` is `1.2.4`; the pom is `1.2.5` (step 6).
-  `IU_OrderProcedure.java:405` is 121 characters.
+- **Documents.** `agents/components.md` says `client-c1-access` is `1.2.4`; the pom is `1.2.5` (step 6) and
+  `1.2.7-SNAPSHOT` since the UC07 and UC13 clients. The line 405 of `IU_OrderProcedure.java`, 121 characters, was
+  wrapped in step 10 (`c227441`), so it no longer is.
 - **Status of the tests.** The 43 tests of Testing (commit `6883914`) are headless: they build the screen and never
   show it, so `mvn -B verify` runs them without a display. In this container they still fail with
   `Fontconfig head is null`, because it has neither `libfontconfig` nor fonts: that is a machine without fonts, not a
@@ -158,7 +159,7 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 ## Status
 - **In progress:** nothing; the fixes of the review of Testing and of the review of the pull request are done (steps 9
   to 15).
-- **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7); step 8 is Testing's commit `6883914` (test design and 43 headless tests), step 9 `90c3fd8` (the answers of Testing and `agents/components.md`), step 10 `c227441` (F-01 and F-02) and step 11 `4fd6204` (F-03 and F-04). Of the five defects of the review only F-05 is open, and it is blocked outside this branch.
+- **Done:** `3eb55e2` approval of this plan, `2697fd2` the poms (step 2), `cef2828` the screen (steps 3 to 5, one commit because it is one class), `855e8ee` `IU_Welcome`, `Main`, the version 1.2.5 of `client-c1-access` and `agents/architecture.md` (steps 6 and 7); step 8 is Testing's commit `6883914` (test design and 43 headless tests), step 9 `90c3fd8` (the answers of Testing and `agents/components.md`), step 10 `c227441` (F-01 and F-02) and step 11 `4fd6204` (F-03 and F-04). The five defects of the review are closed: F-05 was the last one (`id · name`, step 12 and `61e7246`, with the expected values of `7967dcc`).
 - **Next step:** nothing in this branch. Testing (Adam) added the cases of steps 13 and 14 (`16918a7`, TC06C-55 to
   TC06C-61) and they pass; the message of the reload is decided by Design (step 15).
 - **Tests of Testing:** they are headless (they build the screen and never show it), so they need no display and no desktop, but they do need fontconfig and fonts in the machine. `mvn -B verify` is green in the local machine (Maven 3.9.9, JDK 21, 23/11/2026): BUILD SUCCESS, all coverage checks met, 38 tests of `IU_OrderProcedureTest` and 104 of `client-c1-access`. Two traps of the environment, not of the code: without fonts the Swing components throw `Fontconfig head is null` (it happened in a container that had no `libfontconfig`), and with Maven 3.8.7 the old Surefire does not run JUnit 6 and reports 0 tests, which makes JaCoCo fail — the build needs Maven 3.9.x.
