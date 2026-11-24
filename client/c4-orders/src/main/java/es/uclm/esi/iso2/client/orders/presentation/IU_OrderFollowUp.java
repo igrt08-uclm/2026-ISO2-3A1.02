@@ -215,6 +215,7 @@ public class IU_OrderFollowUp extends JPanel {
      * @param patients the patients to show
      */
     public void displayPatients(List<Patient> patients) {
+        clearSelection();
         patientModel.setRowCount(0);
         for (Patient patient : patients) {
             patientModel.addRow(new Object[] { patient.getIdentifier(), patient.getFullName(),
@@ -247,28 +248,56 @@ public class IU_OrderFollowUp extends JPanel {
         if (denied) {
             return;
         }
+        Patient patient;
         try {
-            Patient patient = findPatient(identifier);
-            if (patient == null) {
-                showOperationResultError("There is no patient with the identifier " + identifier);
-                return;
-            }
-            if (!patient.isActive()) {
-                selectedPatient = patient;
-                showPatientInactive(patient);
-                return;
-            }
+            patient = findPatient(identifier);
+        } catch (AccessDeniedException deniedException) {
+            clearSelection();
+            handleDenied();
+            return;
+        } catch (RuntimeException exception) {
+            clearSelection();
+            showOperationResultError("The patient could not be read: " + exception.getMessage());
+            return;
+        }
+        if (patient == null) {
+            clearSelection();
+            showOperationResultError("There is no patient with the identifier " + identifier);
+            return;
+        }
+        if (!patient.isActive()) {
+            clearSelection();
             selectedPatient = patient;
+            showPatientInactive(patient);
+            return;
+        }
+        try {
             List<TestType> testTypes = parameterService.getTestTypes(requester);
             List<ClinicalOrder> orders = orderService.getOrdersOfPatient(requester, patient.getPatientId());
+            selectedPatient = patient;
             displayOrderForm(testTypes, orders);
         } catch (AccessDeniedException deniedException) {
+            clearSelection();
             handleDenied();
         } catch (ValidationException validationException) {
+            clearSelection();
             showValidationErrors(validationException.getErrors());
         } catch (RuntimeException exception) {
+            clearSelection();
             showOperationResultError("The orders could not be read: " + exception.getMessage());
         }
+    }
+
+    /**
+     * Forgets the patient that was selected: the form, its texts and the table of orders are emptied, so that
+     * nothing of a previous patient stays on the screen or can be sent with the next order.
+     */
+    private void clearSelection() {
+        selectedPatient = null;
+        orderModel.setRowCount(0);
+        txtIndication.setText("");
+        txtJustification.setText("");
+        setFormEnabled(false);
     }
 
     /**
