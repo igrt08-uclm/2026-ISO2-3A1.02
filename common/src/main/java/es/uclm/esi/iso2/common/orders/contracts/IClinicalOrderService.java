@@ -93,7 +93,7 @@ public interface IClinicalOrderService {
     ClinicalOrder getOrder(String requester, String orderId) throws AccessDeniedException, ValidationException;
 
     /**
-     * Marks a booked scheduling need as pending again, when C5 cancels its appointment (D41).
+     * Marks a booked scheduling need as pending again, when C5 cancels its appointment (D-041).
      *
      * @param requester the username of the user who cancels
      * @param needId the id of the scheduling need

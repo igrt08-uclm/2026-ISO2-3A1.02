@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Orders diagnostic procedures and keeps their scheduling needs for C5 (UC06, Control_OrderProcedure). Ordering
@@ -31,7 +32,7 @@ import java.util.Locale;
  * patient (C3) and an active test type (C2), with one of the active priorities configured in C2, and with its
  * clinical indication and justification; every error is returned together. Reading the orders of a patient also
  * needs {@code ORDER_PROCEDURES}; the operations that C5 uses (the pending needs, one order, and marking a need as
- * booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D37, D41), and they are
+ * booked or pending again) accept {@code ORDER_PROCEDURES} or {@code MANAGE_APPOINTMENTS} (D-037, D-041), and they are
  * not audited. Each created order gets one pending
  * scheduling need, due on the day the order is created. A denied attempt is registered as
  * {@code ORDER_ACCESS_DENIED} (D30) and a created order as {@code ORDER_CREATED}. The server gives the ids
@@ -46,6 +47,7 @@ public class ClinicalOrderService implements IClinicalOrderService {
     private static final String ORDERS = "orders";
     private static final String ORDER = "ORDER:";
     private static final String SCHEDULING_NEED = "SCHEDULING_NEED:";
+    private static final int MAX_RECURRENCE_INTERVAL_MONTHS = 12;
 
     private final IClinicalOrderRepository orders;
     private final ISchedulingNeedRepository needs;
@@ -54,8 +56,8 @@ public class ClinicalOrderService implements IClinicalOrderService {
     private final ISystemParameterService systemParameterService;
     private final IPatientService patientService;
     private final Clock clock;
-    private int lastOrderNumber;
-    private int lastNeedNumber;
+    private final AtomicInteger lastOrderNumber = new AtomicInteger();
+    private final AtomicInteger lastNeedNumber = new AtomicInteger();
 
     /**
      * Creates the service with the given repositories and clock.
@@ -289,6 +291,8 @@ public class ClinicalOrderService implements IClinicalOrderService {
         checkFollowUpTestType(requester, order.getTestTypeId(), errors);
         if (order.getRecurrenceIntervalMonths() <= 0) {
             errors.add("The recurrence interval must be a positive number of months");
+        } else if (order.getRecurrenceIntervalMonths() > MAX_RECURRENCE_INTERVAL_MONTHS) {
+            errors.add("The recurrence interval cannot be more than 12 months");
         }
         if (blank(order.getIndication())) {
             errors.add("The clinical indication is required");
@@ -354,8 +358,7 @@ public class ClinicalOrderService implements IClinicalOrderService {
     private String nextOrderId() {
         String id;
         do {
-            lastOrderNumber++;
-            id = String.format("ORD-%04d", lastOrderNumber);
+            id = String.format("ORD-%04d", lastOrderNumber.incrementAndGet());
         } while (orders.findById(id) != null);
         return id;
     }
@@ -364,8 +367,7 @@ public class ClinicalOrderService implements IClinicalOrderService {
     private String nextNeedId() {
         String id;
         do {
-            lastNeedNumber++;
-            id = String.format("NEED-%04d", lastNeedNumber);
+            id = String.format("NEED-%04d", lastNeedNumber.incrementAndGet());
         } while (needs.findById(id) != null);
         return id;
     }

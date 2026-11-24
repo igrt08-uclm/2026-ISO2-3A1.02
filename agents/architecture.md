@@ -41,6 +41,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 - JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
   build fails below 80 % of lines or 70 % of branches in any module (D-033).
 - When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). C1 is in `server/c1-access` (`server-c1-access`,
-  1.2.4-SNAPSHOT after the patches #109, #112, #172 and #173) and `client/c1-access` (`client-c1-access`, 1.2.6-SNAPSHOT after UC12-client, #172, UC06-client and UC07-client). A component does not depend
+  1.2.4-SNAPSHOT after the patches #109, #112, #116, #172 and #173) and `client/c1-access` (`client-c1-access`,
+  1.2.6-SNAPSHOT after UC12-client, #172, UC06-client and UC07-client). A component does not depend
   on the module of another one: what they share is a contract in `common`, for example `IAuditRecorder` or `IAuthenticatorSystem`.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).
