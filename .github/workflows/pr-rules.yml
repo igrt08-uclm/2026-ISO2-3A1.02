@@ -1,7 +1,7 @@
 name: Pull request rules
 
 # Checks the two pull request rules of AGENTS.md (Conventions):
-#   - the description links its issue with "Closes #n"
+#   - the description links its issue with "Refs #n" or "Closes #n"
 #   - the branch name follows one of the agreed formats
 # It only uses bash and the data of the event: no checkout and no third-party actions (rule 6).
 
@@ -23,7 +23,6 @@ jobs:
         # so a strange title or description cannot run commands
         env:
           BRANCH: ${{ github.head_ref }}
-          TARGET: ${{ github.base_ref }}
           BODY: ${{ github.event.pull_request.body }}
         run: |
           errors=0
@@ -36,13 +35,16 @@ jobs:
             errors=1
           fi
 
-          # 2. "Closes #n" in the description, except for release/ and hotfix/ pull requests to main
-          if [[ "$TARGET" == "main" && "$BRANCH" =~ ^(release|hotfix)/ ]]; then
-            echo "OK: release and hotfix pull requests to main do not need 'Closes #n'"
-          elif echo "$BODY" | grep -qiE 'closes #[0-9]+'; then
+          # 2. "Refs #n" or "Closes #n" in the description. Refs is for a pull request that only does part of
+          #    the RADIT checklist of its issue, because Closes would close the issue when it is merged.
+          #    Not needed in release/ and hotfix/ pull requests,
+          #    which are merged into both main and develop (AGENTS.md, Releases)
+          if [[ "$BRANCH" =~ ^(release|hotfix)/ ]]; then
+            echo "OK: release and hotfix pull requests do not need to link an issue"
+          elif echo "$BODY" | grep -qiwE '(closes|refs) #[0-9]+'; then
             echo "OK: the description links its issue"
           else
-            echo "::error::The description must contain 'Closes #n' with the number of its issue"
+            echo "::error::The description must contain 'Refs #n' or 'Closes #n' with the number of its issue"
             errors=1
           fi
 
