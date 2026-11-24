@@ -58,13 +58,12 @@ Every question "Discard the unsaved changes?" is answered by the test (Yes or No
 | | | Inactive, eligible (not offered) | `XRAY-OLD` |
 | | | Inactive, not eligible (not offered) | `CT-OLD` |
 | | | No active eligible one (Limit Val.: 0) | every eligible type deactivated |
-| Recurrence interval (spinner, 0–120, step 1) | value set | Not positive: 0 (Limit Val., the minimum) | `0` |
+| Recurrence interval (spinner, 0–12, step 1) | value set | Not positive: 0 (Limit Val., the minimum) | `0` |
 | | | Valid: 1 (Limit Val.), 6 (default), 12 (the year of D-040) | `1`, `6`, `12` |
-| | | 13 to 120 | — (not defined, section 5) |
-| | value typed in the box | Out of the range (Limit Val.) | `-1`, `121` |
+| | value typed in the box | Outside 0–12 | `-1`, `13` (**Limit Val.**), `121` |
 | | | Not a number / too big (Conjeture) | `abc`, `99999999999` |
-| | | In the range (Limit Val.) | `0`, `120` |
-| | arrows of the spinner | At the minimum / at the maximum (Limit Val.) | previous of 0, next of 0; previous of 120, next of 120 |
+| | | In the range (**Limit Val.**) | `0`, `12` |
+| | Arrows | At the minimum and maximum (**Limit Val.**) | Previous and next at 0 and at 12 |
 | Clinical indication | text | Not blank / one character / empty / blank | `Meniscus repair`, `"  Meniscus repair "` (trimmed) / `a` / `""` / `"   "`, `"  "` |
 | Justification | text | Not blank / one character / empty / blank | `Check the evolution`, `" Check the evolution  "` / `b` / `""` / `" "` |
 | *Place order* | answer of C4 | Ok | ORD-0003 created |
@@ -89,7 +88,7 @@ testing value of section 1 appears in at least one case, and the rest of the for
 6 months, "Meniscus repair", "Check the evolution", Lucía). The pairs that the code combines in one decision are also
 covered **pairwise**: active × eligible of the test type (the four classes, TC07C-05), interval × texts (TC07C-15, 16,
 11, 19), blank indication × blank justification (TC07C-11 to 14, 19), patient selected × unsaved text (TC07C-32 to 38).
-Maximum number of test cases: the interval has 121 values (0 to 120) and the texts have no maximum, so the domain is
+Maximum number of test cases: the interval has 13 values (0 to 12) and the texts have no maximum, so the domain is
 divided into the classes of section 1; with them the full product of the form would be 4 patients × 5 test-type
 classes × 6 interval classes × 4 × 4 texts = 1,920 cases, which each use plus the pairs above reduce to the 45 of
 section 4.
@@ -145,6 +144,8 @@ exceptions; TC07C-03 exercises successful reads. R-01 adds no compound decision.
 
 With TC07C-49 to 57, the coverage report shows 270/270 lines and 69/70 branches for `IU_OrderFollowUp` itself.
 The module covers 546/552 lines (98.9 %) and 140/146 branches (95.9 %).
+The run with the revised TC07C-17/18 gives the same coverage. Both cases fail against the 0–120 spinner at `cefde9a`:
+the maximum is 120, the up arrow offers 13 after 12, and the editor accepts 13.
 
 ## 4. Test cases
 
@@ -166,8 +167,8 @@ The module covers 546/552 lines (98.9 %) and 140/146 branches (95.9 %).
 | TC07C-14 | *Place order* | Indication valid, justification `""` | Only "⚠ The justification is required"; the indication is kept | `tc07c14OnlyJustificationEmpty` |
 | TC07C-15 | *Place order* | Lucía, `MRI-KNEE`, interval **0**, texts valid | "⚠ The recurrence interval must be a positive number of months" in red (the text of #71, plan); nothing sent; the interval (0) and the texts are kept | `tc07c15IntervalZeroIsRejected` |
 | TC07C-16 | *Place order* | Lucía, interval 0, texts empty | "⚠ The recurrence interval must be a positive number of months The clinical indication is required The justification is required" (the order of the form); nothing sent | `tc07c16IntervalZeroAndEmptyTexts` |
-| TC07C-17 | spinner | Lucía; the arrows at 0 and at 120 | Minimum 0, maximum 120, step 1; below 0 nothing (`null`), above 0 is 1; below 120 is 119, above 120 nothing (plan: "from 0 to 120 months", "a negative value is still impossible") | `tc07c17SpinnerBoundaries` |
-| TC07C-18 | spinner box | Typed `-1`, `121`, `abc`, `99999999999`; then `0`, `120` | The four are refused (the value stays 6); `0` and `120` are taken; nothing sent (plan) | `tc07c18TypedIntervals` |
+| TC07C-17 | Spinner arrows | Lucía selected, at 0 and 12 | Range and neighbours below | `tc07c17SpinnerBoundaries` |
+| TC07C-18 | Spinner editor | Type values listed below | Accept 0 and 12, reject the rest | `tc07c18TypedIntervals` |
 | TC07C-19 | *Place order* | Lucía, `MRI-KNEE · Knee MRI`, interval **1**, `"  Meniscus repair "`, `" Check the evolution  "` | **Exactly one** `orderFollowUp` by `mgarcia` (no diagnostic order) with order id `null`, P-0001, `MRI-KNEE`, the texts trimmed, no date, interval 1; "Order ORD-0003 created." in green; fields emptied and interval back to 6; Lucía still selected; the orders read again, the new one last: `today · Knee MRI · 1 · Meniscus repair` (#70 criterion 3) | `tc07c19ValidOrder` |
 | TC07C-20 | *Place order* | Mario, `DEXA-SPINE`, interval **12**, `a`, `b` (Limit Val.) | Sent with 12, `a` and `b`; "Order ORD-0003 created."; one order in the list, interval `12` (D-040) | `tc07c20TwelveMonthsAndOneCharacterTexts` |
 | TC07C-21 | *Place order* | Valid form; C4 rejects with 2 errors | "⚠ The patient P-0001 is not active The test type MRI-KNEE is not eligible for follow-up" in red; the list is not read again; the form keeps the data and the interval (plan: errors shown as they come) | `tc07c21ServerRejectsWithTwoErrors` |
@@ -242,6 +243,14 @@ screen is never shown.
 
 ## 5. Not covered / Not defined
 
+**Changed expected values**
+
+- TC07C-17: range 0–120 → 0–12, step 1. At 0 the previous and next values are null and 1.
+  At 12 they are 11 and null (previously 119 and null at 120).
+- TC07C-18: typed upper endpoint 120 → 12. The editor accepts 0 and 12. It rejects 13 as well as
+  -1, 121, abc and 99999999999, keeping the previous value of 6 and sending no order.
+- Source for both changes: David, [#207](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/issues/207), 24/11/2026.
+
 **Defects found during review**
 F-01 and F-02 were already found and fixed in the screen of UC06 (F-01 and F-02 of
 `UC06-client-test-design.md`, commits `c227441` and `4fd6204`), but `IU_OrderFollowUp` was copied from the version
@@ -263,12 +272,9 @@ before those fixes.
 - R-01 defines the reset when a selected patient's lookup fails and when a new search displays its results.
   It gives no separate expected draft or order-table state for a failed search of the patient list before results
   reach `displayPatients`. TC07C-56 checks the successful list refresh.
-- **An interval of 13 to 120 months** (still an open question of the team): the spinner allows it and the client
-  sends it, but D-040 generates the needs of the next 12 months, so an order of 13 months or more would generate none.
-  No case sends 13 or more until the team decides (reject it in the client, in the server, or accept it).
 - Values typed in the box of the spinner that the formatter of Swing reads in its own way: `6.5` is taken as 6 and
   `6,5` as 65 (with the locale `en_US`; with `es_ES` the separators are the other way round), while `+6` and `" 6 "`
-  are refused. The plan only gives the range 0–120; no case asserts them.
+  are refused. The range decision does not specify how to interpret these strings.
 - The keys of the fields (UC06 has Alt+T, Alt+R, Alt+C, Alt+J after its F-04) and the red border of the fields with
   errors (UC06 Q6, F-03): the plan of UC07 says "Same layout" but does not ask for them, and `IU_OrderFollowUp` has
   neither. To confirm with Design whether they apply; no key is tested for the interval.

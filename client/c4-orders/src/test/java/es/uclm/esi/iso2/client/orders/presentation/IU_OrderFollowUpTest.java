@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests of the screen {@link IU_OrderFollowUp} of UC07 (#70): the patients and their orders with the interval, the
  * test types that are active and eligible for follow-up, the inactive patient, the recurrence interval (a spinner from
- * 0 to 120 months), the validation of the client, the order placed, the errors of the server and the denied access, the
+ * 0 to 12 months), the validation of the client, the order placed, the errors of the server and the denied access, the
  * unsaved changes, the keys and the orders that cannot be edited (D-039). The cases are those of
  * {@code doc/testing/test-cases/UC07-client-test-design.md}. The screen is only built, never shown, so the tests need
  * no display; every question is answered by the test, which also records it.
@@ -428,7 +428,7 @@ class IU_OrderFollowUpTest {
     }
 
     @Test
-    @DisplayName("TC07C-17 The spinner goes from 0 to 120 months in steps of 1: no value below 0 or above 120")
+    @DisplayName("TC07C-17 The spinner goes from 0 to 12 months in steps of 1: no value below 0 or above 12")
     void tc07c17SpinnerBoundaries() {
         // Arrange
         IU_OrderFollowUp screen = select(open(), LUCIA);
@@ -438,43 +438,43 @@ class IU_OrderFollowUpTest {
         model.setValue(0);
         Object belowZero = model.getPreviousValue();
         Object aboveZero = model.getNextValue();
-        model.setValue(120);
-        Object below120 = model.getPreviousValue();
-        Object above120 = model.getNextValue();
+        model.setValue(12);
+        Object below12 = model.getPreviousValue();
+        Object above12 = model.getNextValue();
 
         // Assert
         assertAll(
                 () -> assertEquals(spinner(screen), screen.getIntervalSpinner()),
                 () -> assertEquals(0, model.getMinimum()),
-                () -> assertEquals(120, model.getMaximum()),
+                () -> assertEquals(12, model.getMaximum()),
                 () -> assertEquals(1, model.getStepSize()),
                 () -> assertNull(belowZero),
                 () -> assertEquals(1, aboveZero),
-                () -> assertEquals(119, below120),
-                () -> assertNull(above120));
+                () -> assertEquals(11, below12),
+                () -> assertNull(above12));
     }
 
     @Test
-    @DisplayName("TC07C-18 Typed in the spinner, -1, 121, abc and 99999999999 are refused; 0 and 120 are taken")
+    @DisplayName("TC07C-18 The spinner refuses -1, 13, 121, abc and 99999999999 and accepts 0 and 12")
     void tc07c18TypedIntervals() throws ParseException {
         // Arrange
         IU_OrderFollowUp screen = select(open(), LUCIA);
         List<Object> kept = new ArrayList<>();
 
         // Act
-        for (String refused : List.of("-1", "121", "abc", "99999999999")) {
+        for (String refused : List.of("-1", "121", "abc", "99999999999", "13")) {
             assertThrows(ParseException.class, () -> typeInterval(screen, refused), refused);
             kept.add(spinner(screen).getValue());
         }
         typeInterval(screen, "0");
         Object zero = spinner(screen).getValue();
-        typeInterval(screen, "120");
+        typeInterval(screen, "12");
 
         // Assert
         assertAll(
-                () -> assertEquals(List.of(6, 6, 6, 6), kept),
+                () -> assertEquals(List.of(6, 6, 6, 6, 6), kept),
                 () -> assertEquals(0, zero),
-                () -> assertEquals(120, spinner(screen).getValue()),
+                () -> assertEquals(12, spinner(screen).getValue()),
                 () -> assertTrue(orders.followUpsSent().isEmpty()));
     }
 
