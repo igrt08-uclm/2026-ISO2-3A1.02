@@ -1108,4 +1108,22 @@ class IU_OrderFollowUpTest {
                 () -> assertEquals("⚠ The patient P-0009 is not active, so no order can be placed.",
                         screen.getStatusMessage()));
     }
+
+    @Test
+    @DisplayName("TC07C-58 After a failed read the same patient can be selected again")
+    void tc07c58SamePatientCanBeSelectedAgainAfterAFailure() {
+        // Arrange
+        IU_OrderFollowUp screen = select(open(), LUCIA);
+        parameters.failTestTypeReads(new IllegalStateException("Catalogue offline"));
+        select(screen, MARIO);
+        parameters.failTestTypeReads(null);
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertAll(
+                () -> assertEquals("P-0002", screen.getSelectedPatient().getPatientId()),
+                () -> assertTrue(formEnabled(screen)));
+    }
 }
