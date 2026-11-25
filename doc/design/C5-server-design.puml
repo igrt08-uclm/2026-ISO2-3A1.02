@@ -45,6 +45,8 @@ package "server" {
       +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
       +getAppointments(requester : String) : List<Appointment> throws AccessDeniedException
       +getAppointmentsOfPatient(requester : String, patientId : String) : List<Appointment> throws AccessDeniedException, ValidationException
+      +getAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+      +markAppointmentExecuted(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
       +loadSeedData() : void
     }
 

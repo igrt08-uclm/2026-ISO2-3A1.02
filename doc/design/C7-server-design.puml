@@ -1,0 +1,208 @@
+@startuml C7-server-design
+!include common/_style.puml
+left to right direction
+
+title C7 – Execution and Reports (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C5-common.puml!ScheduleEntry
+    !includesub common/C3-common.puml!Patient
+    !includesub common/C2-common.puml!TestType
+    !includesub common/C7-common.puml!ProcedureExecution
+    !includesub common/C7-common.puml!ExecutionFormView
+    !includesub common/C2-common.puml!ImagingStudy
+    !includesub common/C7-common.puml!ReportStatus
+    !includesub common/C7-common.puml!DiagnosticReport
+    !includesub common/C7-common.puml!Addendum
+    !includesub common/C7-common.puml!ReportableExecutionView
+    !includesub common/C7-common.puml!ReportWorkspaceView
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/C5-common.puml!IAppointmentService
+    !includesub common/C5-common.puml!IDailyScheduleService
+    !includesub common/C7-common.puml!IProcedureExecutionService
+    !includesub common/C2-common.puml!IIntegrationManagementService
+    !includesub common/C7-common.puml!IDiagnosticReportService
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class ProcedureExecutionService <<control>> {
+      +getMyWorklist(requester : String, date : LocalDate) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+      +startExecution(requester : String, appointmentId : String) : ExecutionFormView throws AccessDeniedException, ValidationException
+      +recordExecution(requester : String, execution : ProcedureExecution) : ProcedureExecution throws AccessDeniedException, ValidationException
+    }
+
+    class DiagnosticReportService <<control>> {
+      +getMyReportableExecutions(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
+      +openReport(requester : String, executionId : String) : ReportWorkspaceView throws AccessDeniedException, ValidationException
+      +saveDraft(requester : String, executionId : String, findings : String, impression : String, imageReferences : List<String>) : DiagnosticReport throws AccessDeniedException, ValidationException
+      +getReportsToValidate(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
+      +validateReport(requester : String, reportId : String) : DiagnosticReport throws AccessDeniedException, ValidationException
+      +addAddendum(requester : String, reportId : String, text : String) : Addendum throws AccessDeniedException, ValidationException
+    }
+
+  }
+
+  package "Persistence" {
+    interface IProcedureExecutionRepository {
+      +findById(executionId : String) : ProcedureExecution
+      +findByAppointment(appointmentId : String) : ProcedureExecution
+      +findByPhysician(physician : String) : List<ProcedureExecution>
+      +findAll() : List<ProcedureExecution>
+      +save(execution : ProcedureExecution) : void
+    }
+
+    class InMemoryProcedureExecutionRepository {
+      -executions : Map<String, ProcedureExecution>
+      +findById(executionId : String) : ProcedureExecution
+      +findByAppointment(appointmentId : String) : ProcedureExecution
+      +findByPhysician(physician : String) : List<ProcedureExecution>
+      +findAll() : List<ProcedureExecution>
+      +save(execution : ProcedureExecution) : void
+    }
+
+    interface IDiagnosticReportRepository {
+      +findById(reportId : String) : DiagnosticReport
+      +findByExecution(executionId : String) : DiagnosticReport
+      +findByStatus(status : ReportStatus) : List<DiagnosticReport>
+      +findAll() : List<DiagnosticReport>
+      +save(report : DiagnosticReport) : void
+    }
+
+    class InMemoryDiagnosticReportRepository {
+      -reports : Map<String, DiagnosticReport>
+      +findById(reportId : String) : DiagnosticReport
+      +findByExecution(executionId : String) : DiagnosticReport
+      +findByStatus(status : ReportStatus) : List<DiagnosticReport>
+      +findAll() : List<DiagnosticReport>
+      +save(report : DiagnosticReport) : void
+    }
+
+    interface IAddendumRepository {
+      +findById(addendumId : String) : Addendum
+      +findByReport(reportId : String) : List<Addendum>
+      +findAll() : List<Addendum>
+      +save(addendum : Addendum) : void
+    }
+
+    class InMemoryAddendumRepository {
+      -addenda : Map<String, Addendum>
+      +findById(addendumId : String) : Addendum
+      +findByReport(reportId : String) : List<Addendum>
+      +findAll() : List<Addendum>
+      +save(addendum : Addendum) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+ScheduleEntry "0..*" -- "1" Appointment : appointment
+ProcedureExecution "0..1" -- "1" Appointment : appointmentId
+ExecutionFormView "0..*" -- "1" Appointment : appointment
+ExecutionFormView "0..*" -- "1" Patient : patient
+ExecutionFormView "0..*" -- "1" TestType : testType
+ProcedureExecutionService ..|> IProcedureExecutionService
+InMemoryProcedureExecutionRepository ..|> IProcedureExecutionRepository
+ProcedureExecutionService ..> IProcedureExecutionRepository : <<use>>
+ProcedureExecutionService ..> IDailyScheduleService : <<use>>
+ProcedureExecutionService ..> IAppointmentService : <<use>>
+ProcedureExecutionService ..> IPatientService : <<use>>
+ProcedureExecutionService ..> ISystemParameterService : <<use>>
+ProcedureExecutionService ..> IRoleManagementService : <<use>>
+ProcedureExecutionService ..> IAuditRecorder : <<use>>
+ProcedureExecutionService ..> AccessDeniedException : <<throw>>
+ProcedureExecutionService ..> ValidationException : <<throw>>
+DiagnosticReport "*" -- "1" ReportStatus : status
+DiagnosticReport "0..1" -- "1" ProcedureExecution : executionId
+Addendum "*" -- "1" DiagnosticReport : reportId
+ReportableExecutionView "0..*" -- "1" ProcedureExecution : execution
+ReportableExecutionView "0..*" -- "0..1" DiagnosticReport : report
+ReportWorkspaceView "0..*" -- "1" ProcedureExecution : execution
+ReportWorkspaceView "0..*" -- "0..1" ImagingStudy : study
+ReportWorkspaceView "0..*" -- "0..1" DiagnosticReport : report
+ReportWorkspaceView "0..*" -- "*" Addendum : addenda
+DiagnosticReportService ..|> IDiagnosticReportService
+InMemoryDiagnosticReportRepository ..|> IDiagnosticReportRepository
+InMemoryAddendumRepository ..|> IAddendumRepository
+DiagnosticReportService ..> IDiagnosticReportRepository : <<use>>
+DiagnosticReportService ..> IAddendumRepository : <<use>>
+DiagnosticReportService ..> IProcedureExecutionRepository : <<use>>
+DiagnosticReportService ..> IPatientService : <<use>>
+DiagnosticReportService ..> ISystemParameterService : <<use>>
+DiagnosticReportService ..> IIntegrationManagementService : <<use>>
+DiagnosticReportService ..> IRoleManagementService : <<use>>
+DiagnosticReportService ..> IAuditRecorder : <<use>>
+DiagnosticReportService ..> AccessDeniedException : <<throw>>
+DiagnosticReportService ..> ValidationException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  One execution per appointment, immutable once
+  recorded (D61, D-022). performed = false records a
+  procedure not done, with the reason as incident (D62).
+  ID EXE-0001; physician = the physician of the appointment.
+end note
+N1 .. ProcedureExecution
+
+note as N2
+  Derived view, not persisted: what the execution
+  form shows (UC10 msg 15).
+end note
+N2 .. ExecutionFormView
+
+note as N3
+  Realizes Control_RecordExecution (UC10, C7 1.0.0).
+  Requires RECORD_EXECUTIONS (D57, C1 patch).
+  Worklist = getPhysicianWorklist(date, requester), only
+  BOOKED/RESCHEDULED (D60). Checks safety, consent and
+  contrast against TestType; marks the appointment
+  EXECUTED (D62, C5 patch). Uses Clock.
+  Audit: ACCESS_DENIED, WORKLIST_ACCESSED,
+  EXECUTION_RECORDED, INCIDENT_RECORDED (D58).
+end note
+N3 .. ProcedureExecutionService
+
+note as N4
+  One report per performed execution; DRAFT is
+  editable, VALIDATED never changes (D64). Stores only
+  image references of the RIS/PACS study (D67). ID REP-0001.
+end note
+N4 .. DiagnosticReport
+
+note as N5
+  Only on VALIDATED reports, by the physician of the
+  execution; never edited (D66). ID ADD-0001.
+end note
+N5 .. Addendum
+
+note as N6
+  Realizes Control_DiagnosticReports (UC09, C7 1.1.0).
+  Requires WRITE_REPORTS (D57, C1 patch). Assigned
+  patient = execution.physician == requester (Q3), checked
+  in saveDraft and addAddendum. openReport: author mode or
+  review mode (another physician's DRAFT).
+  Second opinion: validator != author (D65).
+  Study through getStudy(requester, appointmentId)
+  (C2 patch, D67). Uses Clock.
+  Audit: ACCESS_DENIED, REPORTS_ACCESSED, REPORT_SAVED,
+  REPORT_VALIDATED, ADDENDUM_ADDED (D58).
+end note
+N6 .. DiagnosticReportService
+
+@enduml
