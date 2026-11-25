@@ -37,7 +37,7 @@ Every question "Discard the unsaved changes?" is answered by the test (Yes or No
 |---|---|---|---|
 | Select patient | Previous form | Edited after validation | Two texts, four red borders and two order rows |
 | Select patient | Failed lookup (**Conjeture**) | C3 unavailable, denied or unknown ID | TC06C-56, 61, 60 |
-| Select patient | Failed form read (**Conjeture**) | C2 offline, C4 rejects, denies or fails | TC06C-55, 57 to 59 |
+| Select patient | Failed form read (**Conjeture**) | C2 offline, C4 rejects, denies or fails | TC06C-55, 57 to 59, 62 |
 | Opening (constructor, `onSearch`) | state of C3 | Allows, with patients | the three patients |
 | | | Denies | `denyAll()` before opening |
 | | | Fails (Conjeture) | `IllegalStateException("The server cannot be reached")` |
@@ -78,7 +78,7 @@ questions asked and whether *Back* runs its action.
 
 ## 2. Combination of the values
 
-TC06C-55 to 61 vary one failed read or lookup at a time with the same previous patient, draft and validation borders.
+TC06C-55 to 62 vary one failed read or lookup at a time with the same previous patient, draft and validation borders.
 The inputs of the form only matter after an active patient is selected, so the suite is built with **each use**: every
 testing value of section 1 appears in at least one case, and the rest of the form takes a valid value (`CT-HEAD`,
 `URGENT · Urgent`, "Headache after a fall", "Rule out bleeding", Lucía). The pairs that the code combines in one
@@ -142,7 +142,7 @@ the table (Swing only sends it while the mouse is dragged). The `catch` of `find
 was removed by `c227441`.
 
 Step 14 (`a2f6942`) separates patient lookup failures (TC06C-56, 60, 61) from failures loading the order form
-(TC06C-55, 57 to 59). TC06C-03 exercises both reads successfully. These exception paths add no compound decision.
+(TC06C-55, 57 to 59, 62). TC06C-03 exercises both reads successfully. These exception paths add no compound decision.
 With TC06C-55 to 61, the module's coverage CSV reports 321/321 lines (100 %) and 83/84 branches (98.8 %).
 All 60 tests in `IU_OrderProcedureTest` passed.
 
@@ -194,9 +194,13 @@ All 60 tests in `IU_OrderProcedureTest` passed.
 | TC06C-42 | `IU_Welcome` | The constructor of UC12 with every permission | The buttons of UC12, no *Order procedure* (Q9: the old constructors do not change) | `tc06c42OlderConstructorDoesNotShowTheButton` |
 | TC06C-43 | `onSelectPatient` | `HC-000000`: a part of every identifier (Conjeture) | "⚠ There is no patient with the identifier HC-000000"; no patient; no call to C4 | `tc06c43PartialIdentifier` |
 | TC06C-44 | select row | The permission of C3 is revoked after opening, then Lucía is selected (Conjeture; F-01) | "⚠ You do not have permission to order procedures." in red; no patient selected; form, table, search box and *Search* disabled; *Back* enabled; no call to C4 (Q8) | `tc06c44PermissionLostBeforeSelecting` |
-| TC06C-45 | *Place order*; constructor | Valid form and C4 denies; C3 denies on opening (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled (Q8) | `tc06c45SearchDisabledAfterDeniedOrder`, `tc06c45SearchDisabledWhenDeniedOnOpening` |
-| TC06C-46 | `onSubmitOrder`, *Place order* | Just opened, empty form; Lucía with only the indication `"  "` (F-03) | A `LineBorder` of red (180, 0, 0) on test type, priority, indication and justification; then only on the indication (Q6) | `tc06c46EmptyFormBordersTheFourFields`, `tc06c46OnlyIndicationBlankBordersOnlyIt` |
-| TC06C-47 | *Place order*, select row | Lucía, indication and justification empty: then the indication typed and ordered again; both typed and ordered (success); Mario selected (F-03) | Before: indication and justification bordered. Then only the justification; after the success none; after selecting Mario none (Q6, answer of Testing) | `tc06c47BordersClearedBeforeANewValidation`, `tc06c47BordersClearedAfterASuccess`, `tc06c47BordersClearedOnReload` |
+| TC06C-45a | *Place order* | Valid form and C4 denies (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled (Q8) | `tc06c45aSearchDisabledAfterDeniedOrder` |
+| TC06C-45b | constructor | C3 denies on opening (F-02) | The denied message; *Search* and *Place order* disabled; *Back* enabled (Q8) | `tc06c45bSearchDisabledWhenDeniedOnOpening` |
+| TC06C-46a | `onSubmitOrder`, *Place order* | Just opened, empty form (F-03) | A `LineBorder` of red (180, 0, 0) on test type, priority, indication and justification (Q6) | `tc06c46aEmptyFormBordersTheFourFields` |
+| TC06C-46b | `onSubmitOrder`, *Place order* | Lucía with only the indication `"  "` (F-03) | A `LineBorder` of red only on the indication (Q6) | `tc06c46bOnlyIndicationBlankBordersOnlyIt` |
+| TC06C-47a | *Place order* | Lucía, indication and justification empty; then the indication typed and ordered again (F-03) | Before: indication and justification bordered. Then only the justification (Q6, answer of Testing) | `tc06c47aBordersClearedBeforeANewValidation` |
+| TC06C-47b | *Place order* | Lucía, both texts typed and ordered (success) (F-03) | After the success no border (Q6, answer of Testing) | `tc06c47bBordersClearedAfterASuccess` |
+| TC06C-47c | select row | Lucía with bordered fields; Mario selected (F-03) | After selecting Mario no border (Q6, answer of Testing) | `tc06c47cBordersClearedOnReload` |
 | TC06C-48 | *Place order* | Valid form; C4 rejects with 2 errors (F-03) | The two messages in the message area; no field bordered (Q6, answer of Testing: the server's messages only appear in the message area) | `tc06c48ServerErrorsDoNotBorderTheFields` |
 | TC06C-49 | labels | Open the screen (F-04) | The labels *Test type*, *Priority*, *Clinical indication*, *Justification* show Alt+T, Alt+R, Alt+C, Alt+J and their `labelFor` is their own list or field (Q10) | `tc06c49FieldMnemonics` |
 | TC06C-50 | select row, *Search* | Lucía selected (form enabled, 2 orders), then search `mario` (`326d8ed`) | No patient selected; form disabled; orders table empty; only Mario listed (step 13 of the plan) | `tc06c50SearchClearsTheSelectedPatient` |
@@ -211,19 +215,21 @@ configured ROUTINE priority, followed by a non-diagnostic order for CT-HEAD. The
 - A: an empty date, `PET-BODY`, `ROUTINE · Routine`, `Staging`.
 - B: `22/11/2026`, `Head CT`, an empty priority, `Control`.
 
-TC06C-55 to 61 start with Lucía selected and two orders. Submit with all four fields empty to mark them red, then
+TC06C-55 to 62 start with Lucía selected and two orders. Submit with all four fields empty to mark them red, then
 type an indication and justification. Select Mario and confirm discarding the draft, except in TC06C-60, which calls
-`onSelectPatient("HC-9999999")`. Each failed lookup or read is a **Conjeture**. Source for all seven cases and
-their postcondition: step 14 of the client plan and `a2f6942`.
+`onSelectPatient("HC-9999999")`. Each failed lookup or read is a **Conjeture**. Source for TC06C-55 to 61 and their
+postcondition: step 14 of the client plan and `a2f6942`. TC06C-55 and TC06C-62 follow the texts that Design approved
+in #67 on 25/11/2026 (Marcos), written by Javier because Testing was not available (this once).
 
 **Reset** means no selected patient, all order controls disabled, both texts empty, no red borders and zero order rows.
 Each case also checks the red status message. Denied uses the Q8 message. The other messages are:
 
-- E1: “⚠ The orders could not be read: Catalogue offline”
+- E1: “⚠ The test types could not be read: Catalogue offline”
 - E2: “⚠ The patient could not be read: Registry offline”
 - E3: “⚠ Patient unavailable”
 - E4: “⚠ The orders could not be read: Orders offline”
 - E5: “⚠ There is no patient with the identifier HC-9999999”
+- E6: “⚠ The priorities could not be read: Priorities offline”
 
 | ID | Method | Input (and precondition) | Expected result | Test |
 |---|---|---|---|---|
@@ -234,6 +240,7 @@ Each case also checks the red status message. Denied uses the Q8 message. The ot
 | TC06C-59 | Select | C4 offline | Reset, E4 | `tc06c59OrderReadFails` |
 | TC06C-60 | Select | Unknown ID | Reset, E5 | `tc06c60UnknownPatientClearsDraft` |
 | TC06C-61 | Select | C3 denies lookup | Reset, denied | `tc06c61PatientLookupDenied` |
+| TC06C-62 | Select | C2 priorities offline | Reset, E6 | `tc06c62PriorityReadFails` |
 
 Postcondition of every case: nothing is stored except by `orderDiagnosticProcedure` of the fake (TC06C-17, 18); after
 a rejected, denied or failed order, or an error of the client, no order is created and the list of the patient is the
