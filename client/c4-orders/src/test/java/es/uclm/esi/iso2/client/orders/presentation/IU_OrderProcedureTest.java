@@ -1254,4 +1254,22 @@ class IU_OrderProcedureTest {
         // Assert
         assertFailedSelection(screen, "⚠ The priorities could not be read: Priorities offline");
     }
+
+    @Test
+    @DisplayName("TC06C-63 After a failed read the same patient can be selected again")
+    void tc06c63SamePatientCanBeSelectedAgainAfterAFailure() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        parameters.failTestTypeReads(new IllegalStateException("Catalogue offline"));
+        select(screen, MARIO);
+        parameters.failTestTypeReads(null);
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertAll(
+                () -> assertEquals("P-0002", screen.getSelectedPatient().getPatientId()),
+                () -> assertTrue(formEnabled(screen)));
+    }
 }

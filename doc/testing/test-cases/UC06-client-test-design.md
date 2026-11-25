@@ -78,7 +78,7 @@ questions asked and whether *Back* runs its action.
 
 ## 2. Combination of the values
 
-TC06C-55 to 62 vary one failed read or lookup at a time with the same previous patient, draft and validation borders.
+TC06C-55 to 63 vary one failed read or lookup at a time with the same previous patient, draft and validation borders.
 The inputs of the form only matter after an active patient is selected, so the suite is built with **each use**: every
 testing value of section 1 appears in at least one case, and the rest of the form takes a valid value (`CT-HEAD`,
 `URGENT · Urgent`, "Headache after a fall", "Rule out bleeding", Lucía). The pairs that the code combines in one
@@ -241,6 +241,7 @@ Each case also checks the red status message. Denied uses the Q8 message. The ot
 | TC06C-60 | Select | Unknown ID | Reset, E5 | `tc06c60UnknownPatientClearsDraft` |
 | TC06C-61 | Select | C3 denies lookup | Reset, denied | `tc06c61PatientLookupDenied` |
 | TC06C-62 | Select | C2 priorities offline | Reset, E6 | `tc06c62PriorityReadFails` |
+| TC06C-63 | Select | C2 types offline when Mario is selected; the read works again; Mario is selected again | The second selection works: Mario is the selected patient and the form is enabled (the failed row is not kept as the last one) | `tc06c63SamePatientCanBeSelectedAgainAfterAFailure` |
 
 Postcondition of every case: nothing is stored except by `orderDiagnosticProcedure` of the fake (TC06C-17, 18); after
 a rejected, denied or failed order, or an error of the client, no order is created and the list of the patient is the
