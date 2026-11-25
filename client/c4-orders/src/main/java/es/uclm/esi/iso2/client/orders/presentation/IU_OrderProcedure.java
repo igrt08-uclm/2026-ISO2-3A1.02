@@ -291,8 +291,14 @@ public class IU_OrderProcedure extends JPanel {
             return;
         }
         try {
-            List<TestType> testTypes = parameterService.getTestTypes(requester);
-            List<Priority> priorities = parameterService.getPriorities(requester);
+            List<TestType> testTypes = readTestTypes();
+            if (testTypes == null) {
+                return;
+            }
+            List<Priority> priorities = readPriorities();
+            if (priorities == null) {
+                return;
+            }
             List<ClinicalOrder> orders = orderService.getOrdersOfPatient(requester, patient.getPatientId());
             selectedPatient = patient;
             displayOrderForm(testTypes, priorities, orders);
@@ -305,6 +311,40 @@ public class IU_OrderProcedure extends JPanel {
         } catch (RuntimeException exception) {
             clearSelection();
             showOperationResultError("The orders could not be read: " + exception.getMessage());
+        }
+    }
+
+    /**
+     * Reads the test types of C2. When the read fails it clears the selection, shows its own message and gives
+     * {@code null}, so that the caller stops.
+     *
+     * @return the test types, or {@code null} when they could not be read
+     * @throws AccessDeniedException when the requester does not have the permission to read them
+     */
+    private List<TestType> readTestTypes() throws AccessDeniedException {
+        try {
+            return parameterService.getTestTypes(requester);
+        } catch (RuntimeException exception) {
+            clearSelection();
+            showOperationResultError("The test types could not be read: " + exception.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Reads the priorities of C2. When the read fails it clears the selection, shows its own message and gives
+     * {@code null}, so that the caller stops.
+     *
+     * @return the priorities, or {@code null} when they could not be read
+     * @throws AccessDeniedException when the requester does not have the permission to read them
+     */
+    private List<Priority> readPriorities() throws AccessDeniedException {
+        try {
+            return parameterService.getPriorities(requester);
+        } catch (RuntimeException exception) {
+            clearSelection();
+            showOperationResultError("The priorities could not be read: " + exception.getMessage());
+            return null;
         }
     }
 
