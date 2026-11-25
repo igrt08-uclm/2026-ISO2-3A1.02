@@ -49,7 +49,7 @@ package "server" {
       +getMyReportableExecutions(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
       +openReport(requester : String, executionId : String) : ReportWorkspaceView throws AccessDeniedException, ValidationException
       +saveDraft(requester : String, executionId : String, findings : String, impression : String, imageReferences : List<String>) : DiagnosticReport throws AccessDeniedException, ValidationException
-      +getReportsToValidate(requester : String) : List<DiagnosticReport> throws AccessDeniedException
+      +getReportsToValidate(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
       +validateReport(requester : String, reportId : String) : DiagnosticReport throws AccessDeniedException, ValidationException
       +addAddendum(requester : String, reportId : String, text : String) : Addendum throws AccessDeniedException, ValidationException
     }
@@ -194,7 +194,9 @@ N5 .. Addendum
 note as N6
   Realizes Control_DiagnosticReports (UC09, C7 1.1.0).
   Requires WRITE_REPORTS (D57, C1 patch). Assigned
-  patient = execution.physician == requester (Q3).
+  patient = execution.physician == requester (Q3), checked
+  in saveDraft and addAddendum. openReport: author mode or
+  review mode (another physician's DRAFT).
   Second opinion: validator != author (D65).
   Study through getStudy(requester, appointmentId)
   (C2 patch, D67). Uses Clock.

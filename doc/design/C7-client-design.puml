@@ -52,7 +52,7 @@ package "Presentation" {
     +onValidateReport(reportId : String) : void
     +onAddAddendum(reportId : String, text : String) : void
     +showExecutions(executions : List<ReportableExecutionView>) : void
-    +showReportsToValidate(reports : List<DiagnosticReport>) : void
+    +showReportsToValidate(reports : List<ReportableExecutionView>) : void
     +showWorkspace(workspace : ReportWorkspaceView) : void
     +showErrors(errors : List<String>) : void
     +showAccessDenied() : void
@@ -103,7 +103,9 @@ note as N2
   Tabs: My procedures (performed executions of the physician)
   and Reports to validate (drafts of other physicians, D65).
   Workspace: study images, findings, impression, addenda.
-  Save draft disabled for VALIDATED; Add addendum for DRAFT.
+  Author mode: Save draft (no report/DRAFT) or Add addendum
+  (VALIDATED). Review mode (other's DRAFT): read-only,
+  only Validate report enabled.
   Asks confirmation via confirm before validating.
 end note
 N2 .. IU_DiagnosticReports

@@ -150,6 +150,7 @@ IntegrationManagementService ..> IAuthenticatorSystem : <<use>> «use»
 IntegrationManagementService ..> IEhrGateway : <<use>> «use»
 IntegrationManagementService ..> IAdmissionsGateway : <<use>> «use»
 IntegrationManagementService ..> IRisPacsGateway : <<use>> «use»
+IIntegrationManagementService ..> ImagingStudy : <<use>>
 IntegrationManagementService ..> ConnectionTestResult : <<use>> «use»
 IntegrationManagementService ..> ValidationException : <<throw>>
 IntegrationManagementService ..> AccessDeniedException : <<throw>>

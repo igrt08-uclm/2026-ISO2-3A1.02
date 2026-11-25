@@ -43,8 +43,11 @@
 ## Sub-issues
 | Issue | Branch | Status |
 |---|---|---|
-| #195, #196 UC10 – Client, Server (C7 v1.0.0) | `feature/UC10-client`, `feature/UC10-server` | open (design in `feature/c7-design`) |
-| #198, #199 UC09 – Client, Server (C7 v1.1.0) | `feature/UC09-client`, `feature/UC09-server` | open (design in `feature/c7-design`) |
+| #195 UC10 – Client (C7 v1.0.0) | `feature/UC10-client` | open |
+| #196 UC10 – Server (C7 v1.0.0) | `feature/UC10-server` | open |
+| #198 UC09 – Client (C7 v1.1.0) | `feature/UC09-client` | open |
+| #199 UC09 – Server (C7 v1.1.0) | `feature/UC09-server` | open |
+| #193 C7 design (UC10, UC09) | `feature/c7-design` | PR #225 open |
 
 ## Links
 - Use case issues: #194 (UC10), #197 (UC09) · analysis: [AN-C7-DECISIONS.md](../analysis/AN-C7-DECISIONS.md),

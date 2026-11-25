@@ -92,7 +92,7 @@ interface IDiagnosticReportService {
   +getMyReportableExecutions(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
   +openReport(requester : String, executionId : String) : ReportWorkspaceView throws AccessDeniedException, ValidationException
   +saveDraft(requester : String, executionId : String, findings : String, impression : String, imageReferences : List<String>) : DiagnosticReport throws AccessDeniedException, ValidationException
-  +getReportsToValidate(requester : String) : List<DiagnosticReport> throws AccessDeniedException
+  +getReportsToValidate(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
   +validateReport(requester : String, reportId : String) : DiagnosticReport throws AccessDeniedException, ValidationException
   +addAddendum(requester : String, reportId : String, text : String) : Addendum throws AccessDeniedException, ValidationException
 }

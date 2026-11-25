@@ -138,7 +138,6 @@ interface IIntegrationManagementService {
 !startsub ImagingStudy
 class ImagingStudy <<entity>> {
   -studyId : String
-  -patientId : String
   -modality : String
   -studyDate : LocalDate
   -imageReferences : List<String>
