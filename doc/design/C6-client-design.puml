@@ -1,0 +1,58 @@
+@startuml C6_client_design
+!include common/_style.puml
+
+title C6 – Patient Portal (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C6-common.puml!PatientAppointmentView
+    !includesub common/C6-common.puml!RescheduleRequest
+    !includesub common/C6-common.puml!RescheduleRequestStatus
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C6-common.puml!IPatientAppointmentService
+    !includesub common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "Presentation" {
+  class IU_PatientAppointments <<boundary>> {
+    +IU_PatientAppointments(patientAppointmentService : IPatientAppointmentService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadData() : void
+    +onConfirmAppointment(appointmentId : String) : void
+    +onRequestReschedule(appointmentId : String, preferredDates : String, reason : String) : void
+    +onCancelAppointment(appointmentId : String) : void
+    +showAppointments(appointments : List<PatientAppointmentView>) : void
+    +showNoAppointments() : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+PatientAppointmentView "0..*" -- "1" Appointment : appointment
+RescheduleRequest "*" -- "1" RescheduleRequestStatus : status
+IPatientAppointmentService ..> AccessDeniedException : <<throw>>
+IPatientAppointmentService ..> ValidationException : <<throw>>
+IU_PatientAppointments ..> IPatientAppointmentService : <<use>>
+IU_PatientAppointments ..> AccessDeniedException : <<use>>
+IU_PatientAppointments ..> ValidationException : <<use>>
+
+' ==================== Notes ====================
+note as N1
+  Realizes IU_PatientAppointments (UC01, C6 1.0.0).
+  Shows upcoming non-cancelled appointments (D50).
+  Asks confirmation via confirm before cancelling (D-022).
+  Disables Confirm when confirmedByPatient is true.
+end note
+N1 .. IU_PatientAppointments
+
+@enduml

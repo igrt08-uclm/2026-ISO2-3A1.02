@@ -1,0 +1,42 @@
+' Shared common definitions: C6-common.puml (D-046)
+' Included via !includesub common/C6-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub PatientAppointmentView
+class PatientAppointmentView <<entity>> {
+  -appointment : Appointment
+  -testTypeName : String
+  -preparation : String
+  -hasPendingRescheduleRequest : boolean
+}
+!endsub
+
+!startsub RescheduleRequest
+class RescheduleRequest <<entity>> {
+  -requestId : String
+  -appointmentId : String
+  -patientId : String
+  -requestedAt : LocalDateTime
+  -preferredDates : String
+  -reason : String
+  -status : RescheduleRequestStatus
+  +handled() : RescheduleRequest
+}
+!endsub
+
+!startsub RescheduleRequestStatus
+enum RescheduleRequestStatus {
+  PENDING
+  HANDLED
+}
+!endsub
+
+!startsub IPatientAppointmentService
+interface IPatientAppointmentService {
+  +getMyUpcomingAppointments(requester : String) : List<PatientAppointmentView> throws AccessDeniedException, ValidationException
+  +confirmAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+  +requestReschedule(requester : String, appointmentId : String, preferredDates : String, reason : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+  +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+  +getPendingRescheduleRequests(requester : String) : List<RescheduleRequest> throws AccessDeniedException
+  +markRescheduleRequestHandled(requester : String, requestId : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+}
+!endsub

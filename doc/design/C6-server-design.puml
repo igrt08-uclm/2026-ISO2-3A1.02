@@ -1,0 +1,97 @@
+@startuml C6_server_design
+!include common/_style.puml
+
+title C6 – Patient Portal (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C6-common.puml!PatientAppointmentView
+    !includesub common/C6-common.puml!RescheduleRequest
+    !includesub common/C6-common.puml!RescheduleRequestStatus
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C5-common.puml!IAppointmentService
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C6-common.puml!IPatientAppointmentService
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class PatientAppointmentService <<control>> {
+      +getMyUpcomingAppointments(requester : String) : List<PatientAppointmentView> throws AccessDeniedException, ValidationException
+      +confirmAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+      +requestReschedule(requester : String, appointmentId : String, preferredDates : String, reason : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+      +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+      +getPendingRescheduleRequests(requester : String) : List<RescheduleRequest> throws AccessDeniedException
+      +markRescheduleRequestHandled(requester : String, requestId : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+    }
+
+  }
+
+  package "Persistence" {
+    interface IRescheduleRequestRepository {
+      +findById(requestId : String) : RescheduleRequest
+      +findPending() : List<RescheduleRequest>
+      +findPendingByAppointment(appointmentId : String) : RescheduleRequest
+      +findAll() : List<RescheduleRequest>
+      +save(request : RescheduleRequest) : void
+    }
+
+    class InMemoryRescheduleRequestRepository {
+      -requests : Map<String, RescheduleRequest>
+      +findById(requestId : String) : RescheduleRequest
+      +findPending() : List<RescheduleRequest>
+      +findPendingByAppointment(appointmentId : String) : RescheduleRequest
+      +findAll() : List<RescheduleRequest>
+      +save(request : RescheduleRequest) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+PatientAppointmentView "0..*" -- "1" Appointment : appointment
+RescheduleRequest "*" -- "1" RescheduleRequestStatus : status
+PatientAppointmentService ..|> IPatientAppointmentService
+InMemoryRescheduleRequestRepository ..|> IRescheduleRequestRepository
+PatientAppointmentService ..> IRescheduleRequestRepository : <<use>>
+PatientAppointmentService ..> IAppointmentService : <<use>>
+PatientAppointmentService ..> ISystemParameterService : <<use>>
+PatientAppointmentService ..> IRoleManagementService : <<use>>
+PatientAppointmentService ..> IAuditRecorder : <<use>>
+PatientAppointmentService ..> AccessDeniedException : <<throw>>
+PatientAppointmentService ..> ValidationException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  Derived query view, not persisted (D50).
+  Enriches C5 Appointment with C2 TestType
+  name, preparation and pending reschedule flag.
+end note
+N1 .. PatientAppointmentView
+
+note as N2
+  Realizes Control_PatientAppointments (UC01, C6 1.0.0).
+  Patient ops require USE_PATIENT_PORTAL (D46, C1 patch)
+  and resolve patientId via IRoleManagementService (D48).
+  Admissions ops (getPendingRescheduleRequests,
+  markRescheduleRequestHandled) require MANAGE_APPOINTMENTS.
+  Audit: ACCESS_DENIED, APPOINTMENTS_ACCESSED,
+  APPOINTMENT_CONFIRMED, RESCHEDULE_REQUESTED,
+  RESCHEDULE_REQUEST_HANDLED, APPOINTMENT_CANCELLED (D47).
+  Uses Clock for deterministic upcoming/past checks.
+end note
+N2 .. PatientAppointmentService
+
+@enduml
