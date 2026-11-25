@@ -147,13 +147,20 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
 - [x] 15. The reload after creating an order: decided by Design (#67, Marcos), no change. When the reload fails the
   error replaces the success, exactly as TC13C-46 does and as TC06C-53 and TC06C-54 expect; the id of the created
   order is not kept in the success line. The code already behaved this way (`ac200cf`).
+- [x] 16. Say which read fails: `onSelectPatient` reads the test types and the priorities apart, each with its own
+  message, “The test types could not be read: …” and “The priorities could not be read: …”, as Design approved in #67
+  (Marcos, 25/11/2026). First the tests, by Implementation this once to close C4 and C5 (TC06C-55 changes, TC06C-62
+  is new, TC06C-45 to 47 are split in a, b and c) — `20fd5d5`; then the code — `34ba1fc`.
+- [x] 17. Select the same patient again after a failed read: a failed read of the patient, the test types, the
+  priorities or the orders deselects the row of the table and forgets the last row (`clearFailedSelection`), so a
+  click on the same patient reads it again. First the test TC06C-63 — `345d634`; then the code — `fae6761`.
 
 ## Verification
 - [ ] Every acceptance criterion of #67: the physician creates an order for an active patient with an active test type and a configured priority and sees it in the list of the patient; invalid data is rejected with a message and nothing is created; deactivated test types are not offered; an inactive patient is not allowed to be ordered for; the denied access is explained.
-- [ ] `IU_OrderProcedure` only imports `common` and Swing.
+- [x] `IU_OrderProcedure` only imports `common` and Swing (checked on 25/11/2026: only `java`, `javax` and `common`).
 - [ ] No class of C1 changes except `IU_Welcome`, `Main` and the `pom.xml` of the last step.
 - [ ] Each row of *Usability decisions* is checked in the running application (Testing).
-- [ ] `mvn -B verify` is green with the tests of Testing (coverage included). They are headless and need no display and no desktop; they do need fontconfig and fonts installed in the machine.
+- [x] `mvn -B verify` is green with the tests of Testing (coverage included). They are headless and need no display and no desktop; they do need fontconfig and fonts installed in the machine. (25/11/2026, this branch: `mvn -B clean verify` gives `BUILD SUCCESS` in the 14 modules and all coverage checks met; `client-c4-orders` has 114 tests.)
 - [ ] The CI of the pull request is green.
 
 ## Status
@@ -173,6 +180,8 @@ One step = one commit, with `mvn -B verify -Djacoco.skip=true` green before it (
   same branch, with one constructor that takes both `onOrderProcedure` and `onManageAppointments` (ten arguments,
   nine of them unchanged); Testing then adapts `IU_WelcomeManageAppointmentsTest`, which calls it. This branch does
   not touch it, because `feature/UC13-client` is not its base.
-- **Last update:** 24/11/2026, Ignacio — step 15 closed as decided by Design (#67, Marcos): the error replaces the
-  success when the reload fails, no change. TC06C-29 closed by Testing (`022d904`). `mvn -B -ntp verify` green with
-  the tests of Adam (TC06C-50 to TC06C-61).
+- **Last update:** 25/11/2026, Javier — steps 16 and 17 done (the messages of the test types and the priorities, and the
+  retry of the same patient), with their tests TC06C-55, 62 and 63 and the ids TC06C-45 to 47 split; the tests were
+  written by Implementation this once to close C4 and C5. The Verification boxes that were checked on this date are
+  ticked; the others wait for the pull request and for Testing. Before: 24/11/2026, Ignacio — step 15 closed as
+  decided by Design (#67, Marcos); TC06C-29 closed by Testing (`022d904`).

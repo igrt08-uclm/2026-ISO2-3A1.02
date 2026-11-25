@@ -142,9 +142,9 @@ the table (Swing only sends it while the mouse is dragged). The `catch` of `find
 was removed by `c227441`.
 
 Step 14 (`a2f6942`) separates patient lookup failures (TC06C-56, 60, 61) from failures loading the order form
-(TC06C-55, 57 to 59, 62). TC06C-03 exercises both reads successfully. These exception paths add no compound decision.
-With TC06C-55 to 61, the module's coverage CSV reports 321/321 lines (100 %) and 83/84 branches (98.8 %).
-All 60 tests in `IU_OrderProcedureTest` passed.
+(TC06C-55, 57 to 59, 62, 63). TC06C-03 exercises both reads successfully. These exception paths add no compound decision.
+With TC06C-55 to 63, the coverage CSV of `IU_OrderProcedure` reports 329/329 lines (100 %) and 87/88 branches (98.9 %) (25/11/2026).
+All 62 tests in `IU_OrderProcedureTest` pass.
 
 ## 4. Test cases
 
