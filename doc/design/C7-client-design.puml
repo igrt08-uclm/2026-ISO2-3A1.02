@@ -1,0 +1,65 @@
+@startuml C7-client-design
+!include common/_style.puml
+left to right direction
+
+title C7 – Execution and Reports (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C5-common.puml!ScheduleEntry
+    !includesub common/C3-common.puml!Patient
+    !includesub common/C2-common.puml!TestType
+    !includesub common/C7-common.puml!ProcedureExecution
+    !includesub common/C7-common.puml!ExecutionFormView
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/shared-contracts.puml!ValidationException
+    !includesub common/C7-common.puml!IProcedureExecutionService
+  }
+
+}
+
+package "Presentation" {
+  class IU_RecordExecution <<boundary>> {
+    +IU_RecordExecution(procedureExecutionService : IProcedureExecutionService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadWorklist(date : LocalDate) : void
+    +onSelectProcedure(appointmentId : String) : void
+    +onSaveExecution() : void
+    +showWorklist(entries : List<ScheduleEntry>) : void
+    +showEmptyWorklist() : void
+    +showExecutionForm(form : ExecutionFormView) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+ScheduleEntry "0..*" -- "1" Appointment : appointment
+ProcedureExecution "0..1" -- "1" Appointment : appointmentId
+ExecutionFormView "0..*" -- "1" Appointment : appointment
+ExecutionFormView "0..*" -- "1" Patient : patient
+ExecutionFormView "0..*" -- "1" TestType : testType
+IProcedureExecutionService ..> AccessDeniedException : <<throw>>
+IProcedureExecutionService ..> ValidationException : <<throw>>
+IU_RecordExecution ..> IProcedureExecutionService : <<use>>
+IU_RecordExecution ..> AccessDeniedException : <<use>>
+IU_RecordExecution ..> ValidationException : <<use>>
+
+' ==================== Notes ====================
+note as N1
+  Realizes IU_RecordExecution (UC10, C7 1.0.0).
+  Shows the physician's worklist of a day; the form enables
+  consent and contrast fields only when the TestType needs them.
+  Asks confirmation via confirm before saving (immutable, D61).
+  Access denied: inputs disabled, Back enabled.
+end note
+N1 .. IU_RecordExecution
+
+@enduml

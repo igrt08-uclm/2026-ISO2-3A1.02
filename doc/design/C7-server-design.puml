@@ -1,0 +1,110 @@
+@startuml C7-server-design
+!include common/_style.puml
+left to right direction
+
+title C7 – Execution and Reports (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C5-common.puml!ScheduleEntry
+    !includesub common/C3-common.puml!Patient
+    !includesub common/C2-common.puml!TestType
+    !includesub common/C7-common.puml!ProcedureExecution
+    !includesub common/C7-common.puml!ExecutionFormView
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/shared-contracts.puml!ValidationException
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/C5-common.puml!IAppointmentService
+    !includesub common/C5-common.puml!IDailyScheduleService
+    !includesub common/C7-common.puml!IProcedureExecutionService
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class ProcedureExecutionService <<control>> {
+      +getMyWorklist(requester : String, date : LocalDate) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+      +startExecution(requester : String, appointmentId : String) : ExecutionFormView throws AccessDeniedException, ValidationException
+      +recordExecution(requester : String, execution : ProcedureExecution) : ProcedureExecution throws AccessDeniedException, ValidationException
+    }
+
+  }
+
+  package "Persistence" {
+    interface IProcedureExecutionRepository {
+      +findById(executionId : String) : ProcedureExecution
+      +findByAppointment(appointmentId : String) : ProcedureExecution
+      +findByPhysician(physician : String) : List<ProcedureExecution>
+      +findAll() : List<ProcedureExecution>
+      +save(execution : ProcedureExecution) : void
+    }
+
+    class InMemoryProcedureExecutionRepository {
+      -executions : Map<String, ProcedureExecution>
+      +findById(executionId : String) : ProcedureExecution
+      +findByAppointment(appointmentId : String) : ProcedureExecution
+      +findByPhysician(physician : String) : List<ProcedureExecution>
+      +findAll() : List<ProcedureExecution>
+      +save(execution : ProcedureExecution) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+ScheduleEntry "0..*" -- "1" Appointment : appointment
+ProcedureExecution "0..1" -- "1" Appointment : appointmentId
+ExecutionFormView "0..*" -- "1" Appointment : appointment
+ExecutionFormView "0..*" -- "1" Patient : patient
+ExecutionFormView "0..*" -- "1" TestType : testType
+ProcedureExecutionService ..|> IProcedureExecutionService
+InMemoryProcedureExecutionRepository ..|> IProcedureExecutionRepository
+ProcedureExecutionService ..> IProcedureExecutionRepository : <<use>>
+ProcedureExecutionService ..> IDailyScheduleService : <<use>>
+ProcedureExecutionService ..> IAppointmentService : <<use>>
+ProcedureExecutionService ..> IPatientService : <<use>>
+ProcedureExecutionService ..> ISystemParameterService : <<use>>
+ProcedureExecutionService ..> IRoleManagementService : <<use>>
+ProcedureExecutionService ..> IAuditRecorder : <<use>>
+ProcedureExecutionService ..> AccessDeniedException : <<throw>>
+ProcedureExecutionService ..> ValidationException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  One execution per appointment, immutable once
+  recorded (D61, D-022). performed = false records a
+  procedure not done, with the reason as incident (D62).
+  ID EXE-0001; physician = the physician of the appointment.
+end note
+N1 .. ProcedureExecution
+
+note as N2
+  Derived view, not persisted: what the execution
+  form shows (UC10 msg 15).
+end note
+N2 .. ExecutionFormView
+
+note as N3
+  Realizes Control_RecordExecution (UC10, C7 1.0.0).
+  Requires RECORD_EXECUTIONS (D57, C1 patch).
+  Worklist = getPhysicianWorklist(date, requester), only
+  BOOKED/RESCHEDULED (D60). Checks safety, consent and
+  contrast against TestType; marks the appointment
+  EXECUTED (D62, C5 patch). Uses Clock.
+  Audit: ACCESS_DENIED, WORKLIST_ACCESSED,
+  EXECUTION_RECORDED, INCIDENT_RECORDED (D58).
+end note
+N3 .. ProcedureExecutionService
+
+@enduml
