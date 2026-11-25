@@ -94,26 +94,30 @@ flowchart TD
 ```
 
 ## Verification
-- [ ] Every acceptance criterion of #71: a follow-up order is created only for a test type eligible for follow-up and an
+- [x] Every acceptance criterion of #71: a follow-up order is created only for a test type eligible for follow-up and an
       active patient; it generates its needs from the recurrence interval without any action of a person; every
-      operation checks the permission and is audited.
-- [ ] `mvn -B verify` green (`common` keeps at least 80 % of lines and 70 % of branches; JaCoCo skips the modules without
-      tests, so `server-c4-orders` passes until Adam's tests exist).
-- [ ] The 44 cases of UC06 still pass on the branch of tests of UC06 (`feature/UC06-server-tests`), which this branch does
-      not include.
-- [ ] The CI of the pull request is green.
+      operation checks the permission and is audited (checked with Adam's tests TC07S-01 to 36, `OrderFollowUpTest`,
+      in `develop` since #205; reviewed by Implementation on 25/11/2026).
+- [x] `mvn -B verify` green (`common` keeps at least 80 % of lines and 70 % of branches). On 25/11/2026, `develop`
+      (`4f0dbab`): `BUILD SUCCESS` in the 14 modules, all coverage checks met, with the tests of Adam in
+      `server-c4-orders`.
+- [x] The 44 cases of UC06 still pass: with the tests of UC06 in `develop` (#203 and #222) the same build is green.
+- [x] The CI of the pull request is green (#205, job `build`: success).
 
 ## Status
-- **In progress:** nothing; step 5 is done.
+- **In progress:** nothing; steps 1 to 6 are done and the pull request #205 was merged on 24/11/2026.
 - **Done:** `3891ee9` step 1 (`common` `1.7.0-SNAPSHOT`, raised to `1.8.0-SNAPSHOT` in #208, `server-c4-orders`
   `1.1.0-SNAPSHOT`, `FollowUpOrder` and
   `orderFollowUp`), `b6d1e74` step 2 (`orderFollowUp`, `validateFollowUp`, `checkFollowUpTestType` and
   `createFollowUpSchedulingNeeds`); `6c85236` step 5 (the Javadoc of `orderFollowUp` under 120 characters).
-- **State for Adam (Testing):** `server-c4-orders` has no tests in this branch, so JaCoCo skips the module; the coverage of `common` is 200/239 lines and 14/14 branches. The cases to cover: permission denied (with `ORDER_ACCESS_DENIED`), the ten messages of Q3, the order created with `ORD-nnnn` and `FOLLOW_UP_ORDER_CREATED`, the needs of D-040 for an interval of 12, 6, 5 and 1 months (one, two, two and twelve needs, `dueDate = creationDate.plusMonths(k * interval)`, all `PENDING`), that the diagnostic counter and the follow-up counter are shared, and that the follow-up orders appear in `getOrdersOfPatient`.
-- **Next step:** step 6, the rejection of the interval of 13 months or more; then the client (#70).
+- **State for Adam (Testing):** the tests of `server-c4-orders` are in `develop` (#203, #222 and #206; `OrderFollowUpTest` has 28 tests). At the time of this plan the module had no tests, so JaCoCo skipped it, and the coverage of `common` was 200/239 lines and 14/14 branches. The cases to cover were: permission denied (with `ORDER_ACCESS_DENIED`), the ten messages of Q3, the order created with `ORD-nnnn` and `FOLLOW_UP_ORDER_CREATED`, the needs of D-040 for an interval of 12, 6, 5 and 1 months (one, two, two and twelve needs, `dueDate = creationDate.plusMonths(k * interval)`, all `PENDING`), that the diagnostic counter and the follow-up counter are shared, and that the follow-up orders appear in `getOrdersOfPatient`.
+- **Next step:** none. Step 6, the rejection of the interval of 13 months or more, is done (`6e8dd58`); the client
+  (#70) was merged on 24/11/2026.
 - **Interval of 13 months or more: decided by David on 24/11/2026.** `validateFollowUp` rejects it with `The
   recurrence interval cannot be more than 12 months`, in the same format as the message of 0 months, and the screen
   keeps its spinner from 0 to 12 (TC07C-17 and 18), so the client adds no check of its own: it would be unreachable
   from the spinner and untested (rule 5). Testing covers the rejection in the service (TC07S-35 and 36) and Adam
   fixed that text, proposed by Implementation and confirmed by him; the final wording is Design's (#219).
-- **Last update:** 24/11/2026, Ignacio — step 6: the service rejects an interval of more than 12 months.
+- **Last update:** 25/11/2026, Javier — Verification boxes ticked with the build of `develop` and the CI of #205, and
+  the status brought up to date (no code changes). Before: 24/11/2026, Ignacio — step 6: the service rejects an
+  interval of more than 12 months.
