@@ -17,9 +17,13 @@ and run the tests (assignment, p. 3). "The engineer designs the interfaces; the 
 ## How you work: Spec-Driven Development (D-025)
 Every task that changes files follows this cycle. Do not skip steps, and do not write code before step 4.
 
-1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. Then read the sub-issue and its
-   use case issue (`gh issue view <n>`), the contracts (section 6 of the component issue), the approved design
-   (`doc/design/`), the decisions they cite and, if it exists, the plan of the sub-issue in `doc/plans/`.
+1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. First read the context file of
+   the component, `doc/plans/Cn-context.md` (D-047): the decisions, contracts, design classes and sub-issues, with
+   their sources. Then read the sub-issue and its use case issue (`gh issue view <n>`) and, if it exists, the plan of
+   the sub-issue in `doc/plans/`. Open the contracts (section 6 of the component issue), the approved design
+   (`doc/design/`) and the decisions only for what the task needs, or if the component has no context file yet. If
+   the context file disagrees with a source, the source wins (rule 11): tell the member. The pull request updates the
+   lines of its own sub-issue in the context file, and the member who merges it checks that it did.
    Check that the sub-issue is assigned to the member who asked for the work. If it is assigned to someone else, or
    its plan shows a step *In progress* by another member, stop and tell the member (D-041). Remind the member to move
    it to *In progress* on the project board.
@@ -159,6 +163,7 @@ To avoid several rounds between agents and the chat (D-048):
 | Why the project is the way it is | [DECISIONS.md](DECISIONS.md) |
 | Code structure, build and tests | [agents/architecture.md](agents/architecture.md) |
 | Components, iterations, versions and dependencies | [agents/components.md](agents/components.md) |
+| Summary of each component (read first in step 1) | `doc/plans/Cn-context.md`, from [doc/plans/CONTEXT-TEMPLATE.md](doc/plans/CONTEXT-TEMPLATE.md) |
 | Plan and progress of each sub-issue | [doc/plans/](doc/plans/) |
 | Approved UML models (PlantUML) | [doc/use-cases/](doc/use-cases/), [doc/analysis/](doc/analysis/) and [doc/design/](doc/design/) (official `.puml` sources; `doc/ISO-Project.vpp` retired by D-046) |
 | Requirements (FR table, actors) | Wiki: *Requirements and Use Cases* |
