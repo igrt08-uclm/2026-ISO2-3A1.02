@@ -181,7 +181,8 @@ note as N4
   (D44). C6 patch (D-036, D51): confirmAppointment sets
   confirmedByPatient=true (reset on reschedule);
   getAppointmentsOfPatient, confirmAppointment and
-  cancelAppointment also accept USE_PATIENT_PORTAL.
+  cancelAppointment also accept USE_PATIENT_PORTAL
+  (enforcing linked-patient ownership via C1).
 end note
 N4 .. AppointmentService
 

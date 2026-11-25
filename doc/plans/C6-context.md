@@ -8,7 +8,7 @@
 |---|---|
 | **Component** | C6 Patient portal · module `c6-portal` · UC01 → 1.0.0, UC04 → 1.1.0, UC03 → 1.2.0 and UC05 → 1.3.0 in It8 ([agents/components.md](../../agents/components.md)) |
 | **Iteration** | It6 · Milestone 4 · component issue #186 |
-| **Last update** | 25/11/2026, Marcos Loro, branch `feature/c6-design` |
+| **Last update** | 25/11/2026, Marcos Loro, pull request #224 (design) |
 
 ## Decisions that apply
 - D-011, AN-C6 D45 – It6 covers UC01 and UC04 only; UC03 and UC05 are deferred to It8 (#186).
@@ -57,4 +57,5 @@ Status: *open* · *PR #n open* · *merged in #n* · *deferred (Itn)*.
 
 ## Discrepancies between sources
 - `#186` §6 drafts `getPatientAppointments(patientId)` and `submitIncidentReport(patientId, ...)`, whereas `#189` and AN-C6 D48 require resolving the patient from the authenticated `requester` (no client-supplied `patientId`). Design follows `#189` / D48 (`requester` first).
+- `UC04-patient-feedback-sequence.puml` checks `belongsTo`, `isPast`, and `existsFor` on satisfaction surveys without mentioning cancelled appointments; Design additionally requires `status != CANCELLED` (`C6-design.md`, UC04 rule 5).
 - `#186`–`#192` still have the *Analysis* RADIT box unticked although PR #217 (`feature/c6-analysis`) is merged (rule 22).

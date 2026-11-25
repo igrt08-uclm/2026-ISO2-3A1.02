@@ -53,8 +53,8 @@ Per D-036, finished components are patched in their own branches/PRs approved by
 |---|---|---|---|
 | **C1** (`server-c1-access`, `common`) | Owner: Ignacio | 1) Add `USE_PATIENT_PORTAL` to `InMemoryPermissionRepository` and grant it to `PATIENT` in `InMemoryRoleRepository` (D46). 2) Add nullable `patientId : String` to `UserAccount` (keep 5-arg constructor defaulting to `null` + add 6-arg constructor) and `getLinkedPatientId(username : String) : String` to `IRoleManagementService` / `RoleManagementService` (D48). 3) Link seeded `jfernandez` → `"P-0001"` (and `mgarcia` → `"P-0002"`) in `InMemoryUserAccountRepository`. | Zero — 5-arg `UserAccount` constructor preserved |
 | **C2** (`server-c2-configuration`) | C2 owner | Add `USE_PATIENT_PORTAL` to `SystemParameterService.checkReadPermission` so patients can read `TestType` name and preparation instructions for UC01/UC04. | Zero — no interface change |
-| **C4** (`server-c4-orders`) | C4 owner | Add `USE_PATIENT_PORTAL` to `ClinicalOrderService.checkSchedulingPermission` so `markSchedulingNeedPending` succeeds when invoked during patient cancellation (D53). | Zero — no interface change |
-| **C5** (`server-c5-appointments`, `common`) | C5 owner | 1) Add `confirmedByPatient : boolean` to `Appointment` (keep 9-arg constructor defaulting to `false` + add 10-arg constructor; reset to `false` on reschedule in `AppointmentService.rescheduleAppointment`, D51). 2) Add `confirmAppointment(requester : String, appointmentId : String) : Appointment` to `IAppointmentService` / `AppointmentService` (idempotent if already confirmed; rejects past/cancelled). 3) Allow `USE_PATIENT_PORTAL` in `AppointmentService` on `getAppointmentsOfPatient`, `confirmAppointment`, and `cancelAppointment`. 4) *(Recommended for UC04 demo)* Seed at least one past `BOOKED` appointment for `"P-0001"` in `AppointmentSeedData` so UC04 satisfaction surveys can be exercised out of the box. | Zero — 9-arg `Appointment` constructor preserved |
+| **C4** (`server-c4-orders`) | C4 owner | Allow `USE_PATIENT_PORTAL` **strictly on `ClinicalOrderService.markSchedulingNeedPending`** (not on the shared `checkSchedulingPermission` helper that guards `getPendingSchedulingNeeds`, `markSchedulingNeedBooked`, and `getOrder`) so patient cancellation succeeds without exposing other patients' orders (D53). | Zero — no interface change |
+| **C5** (`server-c5-appointments`, `common`) | C5 owner | 1) Add `confirmedByPatient : boolean` to `Appointment` (keep 9-arg constructor defaulting to `false` + add 10-arg constructor; reset to `false` on reschedule in `AppointmentService.rescheduleAppointment`, D51). 2) Add `confirmAppointment(requester : String, appointmentId : String) : Appointment` to `IAppointmentService` / `AppointmentService` (idempotent if already confirmed; rejects past/cancelled). 3) Allow `USE_PATIENT_PORTAL` in `AppointmentService` on `getAppointmentsOfPatient`, `confirmAppointment`, and `cancelAppointment`, **enforcing patient ownership** (`IRoleManagementService.getLinkedPatientId(requester)` must match the target `patientId` / `appointment.getPatientId()`) whenever the caller relies on `USE_PATIENT_PORTAL`. 4) *(Recommended for UC04 demo)* Seed at least one past `BOOKED` appointment for `"P-0001"` in `AppointmentSeedData` so UC04 satisfaction surveys can be exercised out of the box. | Zero — 9-arg `Appointment` constructor preserved |
 
 ---
 
@@ -71,8 +71,9 @@ Per D-036, finished components are patched in their own branches/PRs approved by
 | `doc/design/common/C6-common.puml` | create | Single-source-of-truth `!startsub`/`!endsub` definitions for C6 domain types and contracts (UC01 in Step 1, UC04 in Step 2) |
 | `doc/design/C6-server-design.puml` | create | C6 Server Design Class Diagram (UC01 in Step 1, UC04 in Step 2) |
 | `doc/design/C6-client-design.puml` | create | C6 Client Design Class Diagram (UC01 in Step 1, UC04 in Step 2) |
-| `doc/design/C6-server-design.png` | create *(optional, IDE export by Marcos)* | Rendered preview from `C6-server-design.puml` (D-046) |
-| `doc/design/C6-client-design.png` | create *(optional, IDE export by Marcos)* | Rendered preview from `C6-client-design.puml` (D-046) |
+| `doc/design/C6-server-design.png` | create | Rendered preview from `C6-server-design.puml` (`plantuml -tpng`, D-046) |
+| `doc/design/C6-client-design.png` | create | Rendered preview from `C6-client-design.puml` (`plantuml -tpng`, D-046) |
+| `doc/design/C1-{server,client}-design.png`, `doc/design/C5-{server,client}-design.png` | update | Re-rendered from the patched C1 and C5 `.puml` files (D-046) |
 
 *(Note per Rule 23 / D-048: `AGENTS.md`, `DECISIONS.md`, `agents/*.md`, and `.github/` are NOT modified in this branch.)*
 
@@ -226,6 +227,7 @@ Explicitly fixed here per *Decision ownership* (`AGENTS.md`) so Implementation a
 | `IU_PatientAppointments` | Screen title / empty state | Title: `"My Appointments"`. Empty list: `"You have no upcoming scheduled appointments."` |
 | `IU_PatientAppointments` | Table columns | `ID`, `Date & Time`, `Test Type`, `Room`, `Preparation`, `Confirmed`, `Reschedule` (`"Pending"` / `"—"`) |
 | `IU_PatientAppointments` | Buttons & state | `Confirm appointment` (disabled if selected appointment is already confirmed), `Request reschedule`, `Cancel appointment`, `Back` |
+| `IU_PatientAppointments` | Reschedule request dialog | Title: `"Request Reschedule"`; fields `Preferred dates` (required) and `Reason` (required); buttons `Submit request` and `Cancel` |
 | `IU_PatientAppointments` | Cancel confirmation question | `"Cancel appointment " + appointmentId + "? This action cannot be undone."` — if declined, nothing is sent and nothing changes |
 | `IU_PatientAppointments` | Success confirmations | Confirm: `"Appointment " + appointmentId + " confirmed."` · Reschedule: `"Reschedule request " + requestId + " submitted to admissions staff."` · Cancel: `"Appointment " + appointmentId + " cancelled."` |
 | `IU_PatientAppointments` | Reload failure after action | `"Action completed, but the appointment list could not be refreshed."` |
@@ -264,7 +266,8 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 
 - [x] 1. **UC01 Design (C6 `1.0.0`):** Update `C1-common.puml`, `C1-server-design.puml`, `C5-common.puml`, and `C5-server-design.puml` for D48/D51 contracts; create `doc/design/common/C6-common.puml`, `doc/design/C6-server-design.puml`, `doc/design/C6-client-design.puml` (UC01 scope), and `doc/plans/C6-context.md` (D-047); verify `mvn -B verify` is green; commit on `feature/c6-design`. (`df9d9d1`)
 - [x] 2. **UC04 Design (C6 `1.1.0`):** Extend `doc/design/common/C6-common.puml`, `doc/design/C6-server-design.puml`, `doc/design/C6-client-design.puml`, and `doc/plans/C6-context.md` with UC04 (`SurveyAspect`, `IncidentReport`, `SatisfactionSurvey`, `IPatientFeedbackService`, `PatientFeedbackService`, repositories, `IU_PatientFeedback`); verify `mvn -B verify` is green; commit on `feature/c6-design`. (`d7c9537`)
-- [x] 3. **Rendered previews:** Generate `doc/design/C6-server-design.png` and `doc/design/C6-client-design.png` (plus updated `C1-server-design.png`, `C1-client-design.png`, `C5-server-design.png`, `C5-client-design.png` if desired) via `plantuml -tpng` (D-046) and commit on `feature/c6-design`. (`72d27d1`)
+- [x] 3. **Rendered previews:** Generate `doc/design/C6-server-design.png` and `doc/design/C6-client-design.png` via `plantuml -tpng` (D-046) and fix left-to-right layout so previews are not clipped. (`72d27d1`, `631cbe8`)
+- [ ] 4. **Review fixes & synced PNGs:** Scope C4 `USE_PATIENT_PORTAL` patch strictly to `markSchedulingNeedPending`, require ownership check on C5 `USE_PATIENT_PORTAL` patch, add reschedule dialog UI texts, re-render modified `C1`/`C5` PNGs (D-046), and update `C6-context.md`.
 
 ## Verification
 - [x] Every UC01 and UC04 requirement, alternative scenario, and acceptance criterion in `#186`–`#192` and `AN-C6-DECISIONS.md` (D45–D55) is covered by the design.
@@ -274,7 +277,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] `mvn -B verify` is green.
 
 ## Status
-- **In progress:** nothing
-- **Next step:** Review and push `feature/c6-design`, open PR to `develop` with `Refs #186` (D-048); once merged, tick the *Design* RADIT box on `#187`–`#192` (rule 22) and coordinate the D-036 PATCH PRs for C1, C2, C4, and C5 before UC01/UC04 implementation.
+- **In progress:** Step 4 (review fixes & synced PNGs)
+- **Next step:** Finish Step 4, verify `mvn -B verify`, commit and push to PR #224; once merged, tick the *Design* RADIT box on `#187`–`#192` (rule 22) and coordinate the D-036 PATCH PRs for C1, C2, C4, and C5 before UC01/UC04 implementation.
 - **Open questions:** none (all Step 2 defaults approved by Marcos on 25/11/2026).
 - **Last update:** 25/11/2026, Marcos Loro
