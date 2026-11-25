@@ -151,11 +151,11 @@ TC13S-90 to 97 vary one save, C4 response, range or duration at a time using the
 
 ## 3. Coverage (white box)
 
-Coverage through `b040e99` with TC13S-90 to 97:
-- `AppointmentService`: 203/206 lines and 126/126 branches. The three missed lines belong to the system-clock
+Coverage through TC13S-99 (25/11/2026; before: `b040e99` with TC13S-90 to 97):
+- `AppointmentService`: 204/207 lines and 128/128 branches. The three missed lines belong to the system-clock
   constructor (section 5).
 - `AppointmentSeedData`: 7/7 lines. `InMemoryAppointmentRepository`: 26/26 lines and 4/4 branches.
-- `server-c5-appointments`: 236/239 lines (98.7 %) and 130/130 branches (100 %).
+- `server-c5-appointments`: 237/240 lines (98.8 %) and 132/132 branches (100 %).
 - `common`: 252/287 lines (87.8 %) and 14/14 branches (100 %).
 
 **Decision coverage** (each decision true and false):
@@ -348,10 +348,12 @@ For TC13S-97 the room has no Wednesday schedule, so even a missing duration chec
 | TC13S-95 | Free slots | 31 days | 40 slots, last ends at 11:00 on day 31 | `FreeSlots.accepts31Days` | Read only |
 | TC13S-96 | Free slots | 32 days | Range error below | `FreeSlots.rejects32Days` | Read only |
 | TC13S-97 | Free slots | Active TT-ZERO, zero minutes | Duration error below | `FreeSlots.zeroDuration` | Read only |
+| TC13S-98 | Cancel | Booked `APT-0001`; its need is already `PENDING` and C4 would reject the call with “The need is broken” | `CANCELLED`; no error: C4 is not asked again | `Cancelling.alreadyPendingNeedIsNotMarkedAgain` | Appointment saved |
+| TC13S-99 | Cancel | Booked `APT-0001`; C4 also lists `NEED-0002` as pending | `CANCELLED`; `NEED-0001` and `NEED-0002` both `PENDING` | `Cancelling.cancelWithOtherPendingNeeds` | Appointment saved |
 
 TC13S-96 expects “The range cannot be longer than 31 days”. TC13S-97 expects “The test type TT-ZERO has no duration”.
 
-Validation before saving leaves the appointment and need untouched. TC13S-93 and 94 exercise rejection after saving.
+Validation before saving leaves the appointment and need untouched. TC13S-93 and 94 exercise rejection after saving. TC13S-98 covers a need that is already pending: the service does not ask C4 and does not read its text.
 Permission denial registers `APPOINTMENT_ACCESS_DENIED`. No appointment is deleted (D-022).
 
 ## 5. Not covered / Not defined

@@ -801,6 +801,38 @@ class AppointmentServiceTest {
             assertEquals(AppointmentStatus.CANCELLED, appointments.findById(id).getStatus());
         }
 
+        @Test
+        @DisplayName("TC13S-98 cancellation does not ask C4 again when the need is already pending, whatever C4 says")
+        void alreadyPendingNeedIsNotMarkedAgain() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            orders.forceStatus(NEEDED, SchedulingNeedStatus.PENDING);
+            orders.rejectPendingWith(new ValidationException(List.of("The need is broken")));
+
+            // Act
+            Appointment result = assertDoesNotThrow(() -> service.cancelAppointment(STAFF, id));
+
+            // Assert
+            assertEquals(AppointmentStatus.CANCELLED, result.getStatus());
+            assertEquals(AppointmentStatus.CANCELLED, appointments.findById(id).getStatus());
+        }
+
+        @Test
+        @DisplayName("TC13S-99 cancellation puts the need back to pending when C4 lists other pending needs")
+        void cancelWithOtherPendingNeeds() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            addSecondNeed("P-0002", TEST_TYPE);
+
+            // Act
+            Appointment result = service.cancelAppointment(STAFF, id);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(AppointmentStatus.CANCELLED, result.getStatus()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need("NEED-0002").getStatus()));
+        }
 
         @Test
         @DisplayName("TC13S-25 cancelling frees the slot, leaves the need pending and is audited")

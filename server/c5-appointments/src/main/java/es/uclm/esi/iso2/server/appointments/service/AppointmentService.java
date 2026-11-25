@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Books, moves and cancels the appointments of the patients (UC13, Control_ManageAppointments). Every operation needs
@@ -56,7 +57,7 @@ public class AppointmentService implements IAppointmentService {
     private final IRoleManagementService roleManagementService;
     private final IAuditRecorder auditRecorder;
     private final Clock clock;
-    private int lastAppointmentNumber;
+    private final AtomicInteger lastAppointmentNumber = new AtomicInteger();
 
     /**
      * Creates the service with the given repository and clock.
@@ -252,13 +253,7 @@ public class AppointmentService implements IAppointmentService {
                 current.getPatientId(), current.getTestTypeId(), current.getRoom(), current.getPhysician(),
                 current.getStart(), current.getEnd(), AppointmentStatus.CANCELLED);
         appointments.save(cancelled);
-        try {
-            orderService.markSchedulingNeedPending(requester, current.getNeedId());
-        } catch (ValidationException notPending) {
-            if (!onlyAlreadyPending(notPending)) {
-                throw notPending;
-            }
-        }
+        releaseNeed(requester, current.getNeedId());
         auditRecorder.register(requester, CANCELLED, APPOINTMENT + cancelled.getAppointmentId());
         return cancelled;
     }
@@ -358,7 +353,7 @@ public class AppointmentService implements IAppointmentService {
 
     /**
      * True if the start of the slot is a multiple of the duration of the test type from the start of the schedule of
-     * the room, for every active schedule of that room. The requester is used to read the schedules of C2.
+     * the room, for at least one active schedule of that room. The requester is used to read the schedules of C2.
      *
      * @param start the start of the slot
      * @param testType the test type whose room and duration define the grid
@@ -412,20 +407,28 @@ public class AppointmentService implements IAppointmentService {
     private String nextAppointmentId() {
         String id;
         do {
-            lastAppointmentNumber++;
-            id = String.format("APT-%04d", lastAppointmentNumber);
+            id = String.format("APT-%04d", lastAppointmentNumber.incrementAndGet());
         } while (appointments.findById(id) != null);
         return id;
     }
 
     /**
-     * True when every error of C4 says that the need was already pending, the only failure that a cancellation ignores.
+     * Puts the need of a cancelled appointment back to pending in C4. When C4 already lists it as pending, C4 is not
+     * asked again, so the cancellation does not depend on the text of any answer of C4; every other failure of C4
+     * reaches the caller.
      *
-     * @param exception the rejection of C4
-     * @return {@code true} if the need was already pending
+     * @param requester the user who cancels
+     * @param needId the id of the scheduling need of the appointment
+     * @throws AccessDeniedException when C4 denies the requester
+     * @throws ValidationException when C4 rejects the change
      */
-    private static boolean onlyAlreadyPending(ValidationException exception) {
-        return exception.getErrors().stream().allMatch(error -> error.endsWith("is already pending"));
+    private void releaseNeed(String requester, String needId) throws AccessDeniedException, ValidationException {
+        for (SchedulingNeed pending : orderService.getPendingSchedulingNeeds(requester)) {
+            if (needId.equals(pending.getNeedId())) {
+                return;
+            }
+        }
+        orderService.markSchedulingNeedPending(requester, needId);
     }
 
     private static boolean blank(String text) {
