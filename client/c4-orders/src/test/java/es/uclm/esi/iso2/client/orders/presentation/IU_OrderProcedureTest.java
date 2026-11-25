@@ -863,8 +863,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-45 After a denied order the button Search is disabled and only Back stays enabled")
-    void tc06c45SearchDisabledAfterDeniedOrder() {
+    @DisplayName("TC06C-45a After a denied order the button Search is disabled and only Back stays enabled")
+    void tc06c45aSearchDisabledAfterDeniedOrder() {
         // Arrange
         IU_OrderProcedure screen = validFormOfLucia();
         orders.denyAll();
@@ -881,8 +881,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-45 Denied on opening, the button Search is disabled and only Back stays enabled")
-    void tc06c45SearchDisabledWhenDeniedOnOpening() {
+    @DisplayName("TC06C-45b Denied on opening, the button Search is disabled and only Back stays enabled")
+    void tc06c45bSearchDisabledWhenDeniedOnOpening() {
         // Arrange
         patients.denyAll();
 
@@ -898,8 +898,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-46 An empty form gives a red border to the test type, priority, indication and justification")
-    void tc06c46EmptyFormBordersTheFourFields() {
+    @DisplayName("TC06C-46a An empty form gives a red border to the test type, priority, indication and justification")
+    void tc06c46aEmptyFormBordersTheFourFields() {
         // Arrange
         IU_OrderProcedure screen = open();
         List<Boolean> before = bordered(screen);
@@ -914,8 +914,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-46 Only the indication blank gives a red border to the indication and to no other field")
-    void tc06c46OnlyIndicationBlankBordersOnlyIt() {
+    @DisplayName("TC06C-46b Only the indication blank gives a red border to the indication and to no other field")
+    void tc06c46bOnlyIndicationBlankBordersOnlyIt() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
         fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "  ", "Rule out bleeding");
@@ -930,8 +930,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-47 The borders are cleared before a new validation: the field fixed loses its border")
-    void tc06c47BordersClearedBeforeANewValidation() {
+    @DisplayName("TC06C-47a The borders are cleared before a new validation: the field fixed loses its border")
+    void tc06c47aBordersClearedBeforeANewValidation() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
         placeOrder(screen);
@@ -949,8 +949,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-47 The borders are cleared after a successful order")
-    void tc06c47BordersClearedAfterASuccess() {
+    @DisplayName("TC06C-47b The borders are cleared after a successful order")
+    void tc06c47bBordersClearedAfterASuccess() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
         fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "", "");
@@ -970,8 +970,8 @@ class IU_OrderProcedureTest {
     }
 
     @Test
-    @DisplayName("TC06C-47 The borders are cleared when another patient is selected and the form is reloaded")
-    void tc06c47BordersClearedOnReload() {
+    @DisplayName("TC06C-47c The borders are cleared when another patient is selected and the form is reloaded")
+    void tc06c47cBordersClearedOnReload() {
         // Arrange
         IU_OrderProcedure screen = select(open(), LUCIA);
         fill(screen, "CT-HEAD · Head CT", "URGENT · Urgent", "", "");
@@ -1155,7 +1155,7 @@ class IU_OrderProcedureTest {
         select(screen, MARIO);
 
         // Assert
-        assertFailedSelection(screen, "⚠ The orders could not be read: Catalogue offline");
+        assertFailedSelection(screen, "⚠ The test types could not be read: Catalogue offline");
     }
 
     @Test
@@ -1239,5 +1239,37 @@ class IU_OrderProcedureTest {
 
         // Assert
         assertFailedSelection(screen, DENIED);
+    }
+
+    @Test
+    @DisplayName("TC06C-62 Reading priorities fails after a valid selection")
+    void tc06c62PriorityReadFails() {
+        // Arrange
+        IU_OrderProcedure screen = draftWithMarkedFields();
+        parameters.failPriorityReads(new IllegalStateException("Priorities offline"));
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertFailedSelection(screen, "⚠ The priorities could not be read: Priorities offline");
+    }
+
+    @Test
+    @DisplayName("TC06C-63 After a failed read the same patient can be selected again")
+    void tc06c63SamePatientCanBeSelectedAgainAfterAFailure() {
+        // Arrange
+        IU_OrderProcedure screen = select(open(), LUCIA);
+        parameters.failTestTypeReads(new IllegalStateException("Catalogue offline"));
+        select(screen, MARIO);
+        parameters.failTestTypeReads(null);
+
+        // Act
+        select(screen, MARIO);
+
+        // Assert
+        assertAll(
+                () -> assertEquals("P-0002", screen.getSelectedPatient().getPatientId()),
+                () -> assertTrue(formEnabled(screen)));
     }
 }
