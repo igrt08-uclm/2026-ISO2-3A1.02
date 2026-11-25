@@ -8,6 +8,7 @@ package "common" {
     !includesub common/C2-common.puml!AppointmentPolicy
     !includesub common/C2-common.puml!ConnectionTestResult
     !includesub common/C2-common.puml!HospitalSystemType
+    !includesub common/C2-common.puml!ImagingStudy
     !includesub common/C2-common.puml!IntegrationConfiguration
     !includesub common/C2-common.puml!IntegrationMode
     !includesub common/C2-common.puml!IntegrationStatus
@@ -45,6 +46,7 @@ package "server" {
       +getIntegration(requester : String, system : HospitalSystemType) : IntegrationConfiguration throws AccessDeniedException
       +configureIntegration(requester : String, configuration : IntegrationConfiguration) : IntegrationConfiguration throws AccessDeniedException, ValidationException
       +testConnection(requester : String, system : HospitalSystemType) : ConnectionTestResult throws AccessDeniedException
+      +getStudy(requester : String, studyId : String) : ImagingStudy throws AccessDeniedException, ValidationException
     }
 
     class SystemParameterService <<control>> {
@@ -89,10 +91,12 @@ package "server" {
 
     interface IRisPacsGateway {
       +ping() : boolean
+      +getStudy(studyId : String) : ImagingStudy
     }
 
     class RisPacsGatewaySimulator <<boundary>> {
       +ping() : boolean
+      +getStudy(studyId : String) : ImagingStudy
     }
 
   }
@@ -146,6 +150,7 @@ IntegrationManagementService ..> IAuthenticatorSystem : <<use>> «use»
 IntegrationManagementService ..> IEhrGateway : <<use>> «use»
 IntegrationManagementService ..> IAdmissionsGateway : <<use>> «use»
 IntegrationManagementService ..> IRisPacsGateway : <<use>> «use»
+IIntegrationManagementService ..> ImagingStudy : <<use>>
 IntegrationManagementService ..> ConnectionTestResult : <<use>> «use»
 IntegrationManagementService ..> ValidationException : <<throw>>
 IntegrationManagementService ..> AccessDeniedException : <<throw>>

@@ -1,0 +1,99 @@
+' Shared common definitions: C7-common.puml (D-046)
+' Included via !includesub common/C7-common.puml!<TypeName> so each type has a single source of truth.
+
+!startsub ProcedureExecution
+class ProcedureExecution <<entity>> {
+  -executionId : String
+  -appointmentId : String
+  -patientId : String
+  -testTypeId : String
+  -physician : String
+  -executedAt : LocalDateTime
+  -performed : boolean
+  -safetyChecked : boolean
+  -consentChecked : boolean
+  -contrastSubstance : String
+  -contrastDose : String
+  -incident : boolean
+  -incidentDescription : String
+}
+!endsub
+
+!startsub ExecutionFormView
+class ExecutionFormView <<entity>> {
+  -appointment : Appointment
+  -patient : Patient
+  -testType : TestType
+}
+!endsub
+
+!startsub IProcedureExecutionService
+interface IProcedureExecutionService {
+  +getMyWorklist(requester : String, date : LocalDate) : List<ScheduleEntry> throws AccessDeniedException, ValidationException
+  +startExecution(requester : String, appointmentId : String) : ExecutionFormView throws AccessDeniedException, ValidationException
+  +recordExecution(requester : String, execution : ProcedureExecution) : ProcedureExecution throws AccessDeniedException, ValidationException
+}
+!endsub
+
+!startsub ReportStatus
+enum ReportStatus {
+  DRAFT
+  VALIDATED
+}
+!endsub
+
+!startsub DiagnosticReport
+class DiagnosticReport <<entity>> {
+  -reportId : String
+  -executionId : String
+  -patientId : String
+  -author : String
+  -createdAt : LocalDateTime
+  -findings : String
+  -impression : String
+  -imageReferences : List<String>
+  -status : ReportStatus
+  -validator : String
+  -validatedAt : LocalDateTime
+  +validated(validator : String, validatedAt : LocalDateTime) : DiagnosticReport
+}
+!endsub
+
+!startsub Addendum
+class Addendum <<entity>> {
+  -addendumId : String
+  -reportId : String
+  -author : String
+  -addedAt : LocalDateTime
+  -text : String
+}
+!endsub
+
+!startsub ReportableExecutionView
+class ReportableExecutionView <<entity>> {
+  -execution : ProcedureExecution
+  -patientName : String
+  -testTypeName : String
+  -report : DiagnosticReport
+}
+!endsub
+
+!startsub ReportWorkspaceView
+class ReportWorkspaceView <<entity>> {
+  -execution : ProcedureExecution
+  -study : ImagingStudy
+  -report : DiagnosticReport
+  -addenda : List<Addendum>
+}
+!endsub
+
+!startsub IDiagnosticReportService
+interface IDiagnosticReportService {
+  +getMyReportableExecutions(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
+  +openReport(requester : String, executionId : String) : ReportWorkspaceView throws AccessDeniedException, ValidationException
+  +saveDraft(requester : String, executionId : String, findings : String, impression : String, imageReferences : List<String>) : DiagnosticReport throws AccessDeniedException, ValidationException
+  +getReportsToValidate(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
+  +validateReport(requester : String, reportId : String) : DiagnosticReport throws AccessDeniedException, ValidationException
+  +addAddendum(requester : String, reportId : String, text : String) : Addendum throws AccessDeniedException, ValidationException
+}
+!endsub
