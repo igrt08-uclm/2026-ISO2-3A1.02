@@ -818,6 +818,23 @@ class AppointmentServiceTest {
         }
 
         @Test
+        @DisplayName("TC13S-99 cancellation puts the need back to pending when C4 lists other pending needs")
+        void cancelWithOtherPendingNeeds() throws AccessDeniedException, ValidationException {
+            // Arrange
+            String id = bookFirst().getAppointmentId();
+            addSecondNeed("P-0002", TEST_TYPE);
+
+            // Act
+            Appointment result = service.cancelAppointment(STAFF, id);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(AppointmentStatus.CANCELLED, result.getStatus()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need(NEEDED).getStatus()),
+                    () -> assertEquals(SchedulingNeedStatus.PENDING, orders.need("NEED-0002").getStatus()));
+        }
+
+        @Test
         @DisplayName("TC13S-25 cancelling frees the slot, leaves the need pending and is audited")
         void cancel() throws AccessDeniedException, ValidationException {
             Appointment booked = bookFirst();

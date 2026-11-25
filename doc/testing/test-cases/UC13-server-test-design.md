@@ -349,6 +349,7 @@ For TC13S-97 the room has no Wednesday schedule, so even a missing duration chec
 | TC13S-96 | Free slots | 32 days | Range error below | `FreeSlots.rejects32Days` | Read only |
 | TC13S-97 | Free slots | Active TT-ZERO, zero minutes | Duration error below | `FreeSlots.zeroDuration` | Read only |
 | TC13S-98 | Cancel | Booked `APT-0001`; its need is already `PENDING` and C4 would reject the call with “The need is broken” | `CANCELLED`; no error: C4 is not asked again | `Cancelling.alreadyPendingNeedIsNotMarkedAgain` | Appointment saved |
+| TC13S-99 | Cancel | Booked `APT-0001`; C4 also lists `NEED-0002` as pending | `CANCELLED`; `NEED-0001` and `NEED-0002` both `PENDING` | `Cancelling.cancelWithOtherPendingNeeds` | Appointment saved |
 
 TC13S-96 expects “The range cannot be longer than 31 days”. TC13S-97 expects “The test type TT-ZERO has no duration”.
 
