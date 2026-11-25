@@ -7,9 +7,12 @@ package "common" {
   package "Domain (entities)" {
     !includesub common/C5-common.puml!Appointment
     !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C6-common.puml!IncidentReport
     !includesub common/C6-common.puml!PatientAppointmentView
     !includesub common/C6-common.puml!RescheduleRequest
     !includesub common/C6-common.puml!RescheduleRequestStatus
+    !includesub common/C6-common.puml!SatisfactionSurvey
+    !includesub common/C6-common.puml!SurveyAspect
   }
 
   package "Contracts (interfaces)" {
@@ -17,6 +20,7 @@ package "common" {
     !includesub common/C5-common.puml!IAppointmentService
     !includesub common/shared-contracts.puml!IAuditRecorder
     !includesub common/C6-common.puml!IPatientAppointmentService
+    !includesub common/C6-common.puml!IPatientFeedbackService
     !includesub common/C1-common.puml!IRoleManagementService
     !includesub common/C2-common.puml!ISystemParameterService
     !includesub common/shared-contracts.puml!ValidationException
@@ -33,6 +37,12 @@ package "server" {
       +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
       +getPendingRescheduleRequests(requester : String) : List<RescheduleRequest> throws AccessDeniedException
       +markRescheduleRequestHandled(requester : String, requestId : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+    }
+
+    class PatientFeedbackService <<control>> {
+      +getMyAppointments(requester : String) : List<PatientAppointmentView> throws AccessDeniedException, ValidationException
+      +submitIncidentReport(requester : String, appointmentId : String, description : String) : IncidentReport throws AccessDeniedException, ValidationException
+      +submitSatisfactionSurvey(requester : String, appointmentId : String, ratings : Map<SurveyAspect, Integer>, comments : String) : SatisfactionSurvey throws AccessDeniedException, ValidationException
     }
 
   }
@@ -55,6 +65,40 @@ package "server" {
       +save(request : RescheduleRequest) : void
     }
 
+    interface IIncidentReportRepository {
+      +findById(reportId : String) : IncidentReport
+      +findByPatient(patientId : String) : List<IncidentReport>
+      +findByAppointment(appointmentId : String) : List<IncidentReport>
+      +findAll() : List<IncidentReport>
+      +save(report : IncidentReport) : void
+    }
+
+    class InMemoryIncidentReportRepository {
+      -reports : Map<String, IncidentReport>
+      +findById(reportId : String) : IncidentReport
+      +findByPatient(patientId : String) : List<IncidentReport>
+      +findByAppointment(appointmentId : String) : List<IncidentReport>
+      +findAll() : List<IncidentReport>
+      +save(report : IncidentReport) : void
+    }
+
+    interface ISatisfactionSurveyRepository {
+      +findById(surveyId : String) : SatisfactionSurvey
+      +findByAppointment(appointmentId : String) : SatisfactionSurvey
+      +findByPatient(patientId : String) : List<SatisfactionSurvey>
+      +findAll() : List<SatisfactionSurvey>
+      +save(survey : SatisfactionSurvey) : void
+    }
+
+    class InMemorySatisfactionSurveyRepository {
+      -surveys : Map<String, SatisfactionSurvey>
+      +findById(surveyId : String) : SatisfactionSurvey
+      +findByAppointment(appointmentId : String) : SatisfactionSurvey
+      +findByPatient(patientId : String) : List<SatisfactionSurvey>
+      +findAll() : List<SatisfactionSurvey>
+      +save(survey : SatisfactionSurvey) : void
+    }
+
   }
 
 }
@@ -72,6 +116,18 @@ PatientAppointmentService ..> IRoleManagementService : <<use>>
 PatientAppointmentService ..> IAuditRecorder : <<use>>
 PatientAppointmentService ..> AccessDeniedException : <<throw>>
 PatientAppointmentService ..> ValidationException : <<throw>>
+SatisfactionSurvey "*" -- "*" SurveyAspect : ratings
+PatientFeedbackService ..|> IPatientFeedbackService
+InMemoryIncidentReportRepository ..|> IIncidentReportRepository
+InMemorySatisfactionSurveyRepository ..|> ISatisfactionSurveyRepository
+PatientFeedbackService ..> IIncidentReportRepository : <<use>>
+PatientFeedbackService ..> ISatisfactionSurveyRepository : <<use>>
+PatientFeedbackService ..> IAppointmentService : <<use>>
+PatientFeedbackService ..> ISystemParameterService : <<use>>
+PatientFeedbackService ..> IRoleManagementService : <<use>>
+PatientFeedbackService ..> IAuditRecorder : <<use>>
+PatientFeedbackService ..> AccessDeniedException : <<throw>>
+PatientFeedbackService ..> ValidationException : <<throw>>
 
 ' ==================== Notes ====================
 note as N1
@@ -93,5 +149,17 @@ note as N2
   Uses Clock for deterministic upcoming/past checks.
 end note
 N2 .. PatientAppointmentService
+
+note as N3
+  Realizes Control_PatientFeedback (UC04, C6 1.1.0).
+  Requires USE_PATIENT_PORTAL (D46) and linked patient (D48).
+  Incident reports: any own appointment (past/upcoming/cancelled).
+  Surveys: past non-cancelled own appointments only, one per
+  appointment, all 4 SurveyAspect ratings in 1..5, optional
+  comments; immutable once submitted (D54, D55).
+  Audit: ACCESS_DENIED, APPOINTMENTS_ACCESSED,
+  INCIDENT_REPORTED, SURVEY_SUBMITTED (D47).
+end note
+N3 .. PatientFeedbackService
 
 @enduml

@@ -40,3 +40,41 @@ interface IPatientAppointmentService {
   +markRescheduleRequestHandled(requester : String, requestId : String) : RescheduleRequest throws AccessDeniedException, ValidationException
 }
 !endsub
+
+!startsub SurveyAspect
+enum SurveyAspect {
+  CARE_QUALITY
+  WAITING_TIME
+  COMMUNICATION
+  FACILITIES
+}
+!endsub
+
+!startsub IncidentReport
+class IncidentReport <<entity>> {
+  -reportId : String
+  -appointmentId : String
+  -patientId : String
+  -submittedAt : LocalDateTime
+  -description : String
+}
+!endsub
+
+!startsub SatisfactionSurvey
+class SatisfactionSurvey <<entity>> {
+  -surveyId : String
+  -appointmentId : String
+  -patientId : String
+  -submittedAt : LocalDateTime
+  -ratings : Map<SurveyAspect, Integer>
+  -comments : String
+}
+!endsub
+
+!startsub IPatientFeedbackService
+interface IPatientFeedbackService {
+  +getMyAppointments(requester : String) : List<PatientAppointmentView> throws AccessDeniedException, ValidationException
+  +submitIncidentReport(requester : String, appointmentId : String, description : String) : IncidentReport throws AccessDeniedException, ValidationException
+  +submitSatisfactionSurvey(requester : String, appointmentId : String, ratings : Map<SurveyAspect, Integer>, comments : String) : SatisfactionSurvey throws AccessDeniedException, ValidationException
+}
+!endsub

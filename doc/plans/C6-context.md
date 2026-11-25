@@ -29,15 +29,18 @@
 | `requestReschedule(requester, appointmentId, preferredDates, reason)` | UC01: validates & stores `PENDING` `RescheduleRequest` (no duplicate pending); `USE_PATIENT_PORTAL`; audited. |
 | `cancelAppointment(requester, appointmentId)` | UC01: delegates cancellation to C5 (status `CANCELLED`, reverts need to `PENDING`); `USE_PATIENT_PORTAL`; audited. |
 | `getPendingRescheduleRequests(requester)`, `markRescheduleRequestHandled(requester, requestId)` | UC01/C5 handoff (#186 §9): admissions staff (`MANAGE_APPOINTMENTS`) read & handle reschedule requests. |
+| `getMyAppointments(requester)` | UC04: all own appointments (past, upcoming, cancelled) as `PatientAppointmentView`; `USE_PATIENT_PORTAL`; audited. |
+| `submitIncidentReport(requester, appointmentId, description)` | UC04: validates & stores immutable `IncidentReport` for any own appointment; `USE_PATIENT_PORTAL`; audited. |
+| `submitSatisfactionSurvey(requester, appointmentId, ratings, comments)` | UC04: validates & stores immutable `SatisfactionSurvey` (past non-cancelled own appointment, 1 per appointment, 4 `SurveyAspect` ratings 1..5); `USE_PATIENT_PORTAL`; audited. |
 | `getCompletedProcedureHistory`, `getClinicalGuidelines` | UC03 and UC05, deferred to It8 (D-011, D45). |
 | Uses `IRoleManagementService`, `IAuditRecorder`, `ISystemParameterService`, `IAppointmentService` | Provided by C1, C2 and C5 (D-023; D-036 patches tracked in [C6-design.md](C6-design.md)). |
 
 ## Approved design (`doc/design/`)
 | Side | Classes | File |
 |---|---|---|
-| common | `PatientAppointmentView`, `RescheduleRequest`, `RescheduleRequestStatus`, `IPatientAppointmentService` | `common/C6-common.puml` |
-| server | `PatientAppointmentService`, `IRescheduleRequestRepository`, `InMemoryRescheduleRequestRepository` | `C6-server-design.puml` |
-| client | `IU_PatientAppointments` | `C6-client-design.puml` |
+| common | `PatientAppointmentView`, `RescheduleRequest`, `RescheduleRequestStatus`, `SurveyAspect`, `IncidentReport`, `SatisfactionSurvey`, `IPatientAppointmentService`, `IPatientFeedbackService` | `common/C6-common.puml` |
+| server | `PatientAppointmentService`, `PatientFeedbackService`, `IRescheduleRequestRepository`, `InMemoryRescheduleRequestRepository`, `IIncidentReportRepository`, `InMemoryIncidentReportRepository`, `ISatisfactionSurveyRepository`, `InMemorySatisfactionSurveyRepository` | `C6-server-design.puml` |
+| client | `IU_PatientAppointments`, `IU_PatientFeedback` | `C6-client-design.puml` |
 
 ## Sub-issues
 Status: *open* · *PR #n open* · *merged in #n* · *deferred (Itn)*.
