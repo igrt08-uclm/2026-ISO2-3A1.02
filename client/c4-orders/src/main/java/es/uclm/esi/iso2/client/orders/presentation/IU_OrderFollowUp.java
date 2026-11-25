@@ -256,7 +256,7 @@ public class IU_OrderFollowUp extends JPanel {
             handleDenied();
             return;
         } catch (RuntimeException exception) {
-            clearSelection();
+            clearFailedSelection();
             showOperationResultError("The patient could not be read: " + exception.getMessage());
             return;
         }
@@ -272,7 +272,10 @@ public class IU_OrderFollowUp extends JPanel {
             return;
         }
         try {
-            List<TestType> testTypes = parameterService.getTestTypes(requester);
+            List<TestType> testTypes = readTestTypes();
+            if (testTypes == null) {
+                return;
+            }
             List<ClinicalOrder> orders = orderService.getOrdersOfPatient(requester, patient.getPatientId());
             selectedPatient = patient;
             displayOrderForm(testTypes, orders);
@@ -280,11 +283,38 @@ public class IU_OrderFollowUp extends JPanel {
             clearSelection();
             handleDenied();
         } catch (ValidationException validationException) {
-            clearSelection();
+            clearFailedSelection();
             showValidationErrors(validationException.getErrors());
         } catch (RuntimeException exception) {
-            clearSelection();
+            clearFailedSelection();
             showOperationResultError("The orders could not be read: " + exception.getMessage());
+        }
+    }
+
+    /**
+     * Forgets the patient like {@link #clearSelection()} and also deselects the row of the table, so that a click on
+     * the same patient reads it again after a failed read.
+     */
+    private void clearFailedSelection() {
+        clearSelection();
+        patientTable.clearSelection();
+        lastPatientRow = -1;
+    }
+
+    /**
+     * Reads the test types of C2. When the read fails it clears the selection, shows its own message and gives
+     * {@code null}, so that the caller stops.
+     *
+     * @return the test types, or {@code null} when they could not be read
+     * @throws AccessDeniedException when the requester does not have the permission to read them
+     */
+    private List<TestType> readTestTypes() throws AccessDeniedException {
+        try {
+            return parameterService.getTestTypes(requester);
+        } catch (RuntimeException exception) {
+            clearFailedSelection();
+            showOperationResultError("The test types could not be read: " + exception.getMessage());
+            return null;
         }
     }
 

@@ -14,7 +14,8 @@
   and *Back*. It is a `JPanel` so the tests can create it without a display.
 - **Only eligible test types are offered:** the screen asks C2 for the catalogue and shows the test types that are
   `isActive() && isFollowUpEligible()`. If there is none, the form is disabled and the reason is shown.
-- **Recurrence interval:** a `JSpinner` from 0 to 120 months. The minimum is 0 and not 1 on purpose: with a minimum of
+- **Recurrence interval:** a `JSpinner` from 0 to 12 months (David, #207, 24/11/2026: an interval of more than 12
+  months is not offered and the server rejects it; it was 0 to 120 before). The minimum is 0 and not 1 on purpose: with a minimum of
   1 the check `<= 0` of the screen would never run and its message would be dead code. So the user can choose 0 and the
   screen shows `The recurrence interval must be a positive number of months`, which is the same text as the server of
   #71, and a negative value is still impossible.
@@ -51,6 +52,11 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
 - [x] F-01: the denied message is kept when a patient is selected (`da9a75d`).
 - [x] R-01: `clearSelection` forgets the patient, its texts and its orders when the search fails, returns nobody or
   the reads of the types and the orders fail; the patient is only selected when the reads went well (`9583556`).
+- [x] R-02: say which read fails: the message of the test types is “The test types could not be read: …”, as Design
+  approved in #67 for the same screen of UC06 (Marcos, 25/11/2026). First the test, written by Implementation this
+  once to close C4 and C5 (TC07C-49) — `7cb8ecb`; then the code — `92b2751`.
+- [x] R-03: select the same patient again after a failed read: a failed read deselects the row of the table and
+  forgets the last row (`clearFailedSelection`). First the test TC07C-58 — `7aefd2f`; then the code — `711bb47`.
 
 ## Verification
 - [x] Every acceptance criterion of #70 that the screen can satisfy: the form offers only eligible test types, it
@@ -58,22 +64,25 @@ No other file changes: nothing under `server/`, nothing of `common`, no other sc
       the patient with their interval.
 - [x] `mvn -B verify -DskipTests -Djacoco.skip=true` green for `client-c1-access` and its tree.
 - [ ] The usability decisions, walked in the running application (Testing: this machine has no desktop).
-- [ ] `mvn -B verify` green with the tests of Adam (Testing).
+- [x] `mvn -B verify` green with the tests of Adam (25/11/2026, this branch: `BUILD SUCCESS` in the 14 modules, all
+      coverage checks met; `IU_OrderFollowUpTest` has 53 tests).
 
 ## Status
 - **In progress:** nothing. The review of the pull request added R-01. **Next step:** nothing in this branch;
-  Testing (Adam) added the cases of F-01, F-02 and R-01 (`bae659a`, TC07C-49 to TC07C-57) and they pass.
-  Still open for the group: the interval of 13 months or more.
+  Testing (Adam) added the cases of F-01, F-02 and R-01 (`bae659a`, TC07C-49 to TC07C-57) and they pass. R-02 and R-03
+  were added on 25/11/2026 (TC07C-49 and TC07C-58). The interval of 13 months or more is decided (0 to 12).
 - **Done:** `da1ee8c` the screen, `74de1d5` the button *Order follow-up*, `Main` and the versions, `6c82beb` this plan.
   Correction of the review of 23/11/2026: the `JSpinner` of the interval goes from **0** to 120 months, because with a
   minimum of 1 the check `<= 0` of the screen never ran; the message of the design is now reachable (0 months) and the
   negative values are still impossible.
 - **Open questions:**
-  1. Interval of 13 months or more: today the screen accepts it, the server creates the order with 0 scheduling needs
-     and the user gets no warning. Proposal (Javier): reject it with a message and limit the spinner to 12 months.
-     David decides it, and Testing then changes TC07C-17 and 18, which expect 0 to 120 months.
+  1. Interval of 13 months or more: **closed.** David decided in #207 (24/11/2026) that it is rejected; the spinner
+     goes from 0 to 12 months, the server rejects more than 12 (`6e8dd58`) and TC07C-17 and 18 and TC07S-35 and 36
+     expect it.
   2. The defects of the review of Testing: F-01, the denied access was hidden when a patient was selected (the
      “There is no patient with the identifier …” message overwrote it), fixed in `da9a75d`; F-02, *Search* stayed
      enabled after a denial, fixed in `5732b3c`. Nothing is pending in the code; Testing adds the cases.
-- **Last update:** 24/11/2026, Ignacio (F-01 and F-02 of the review of Testing, R-01 of the review of the pull
-  request and `mvn -B -ntp verify` green with the tests of Adam, 75 in `client-c4-orders`, #207).
+- **Last update:** 25/11/2026, Javier — R-02 and R-03 done with their tests TC07C-49 and TC07C-58, written by
+  Implementation this once to close C4 and C5; the interval of 0 to 12 months written as decided; the Verification box
+  of the build ticked. Before: 24/11/2026, Ignacio (F-01 and F-02 of the review of Testing, R-01 of the review of
+  the pull request and `mvn -B -ntp verify` green with the tests of Adam, 75 in `client-c4-orders`, #207).
