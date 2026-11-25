@@ -33,9 +33,9 @@
 
 ## Steps
 
-- [ ] 1. `common`: `WaitlistEntry`, `WaitlistStatus`, `IWaitlistService`; `common` to `1.9.0-SNAPSHOT`.
-- [ ] 2. `server`: `IWaitlistRepository`, `InMemoryWaitlistRepository`, `waitlistEntries()`; `server-c5-appointments` to `1.1.0-SNAPSHOT`.
-- [ ] 3. `server`: `WaitlistService` (permission `MANAGE_APPOINTMENTS`, validations of the alternative flows, ordering by tier and date, audit `WAITLIST_CHANGED`, `WAITLIST_ENTRY_REMOVED`, `OPENING_FILLED`, and the booking of UC15 through `IAppointmentService`).
+- [x] 1. `common`: `WaitlistEntry`, `WaitlistStatus`, `IWaitlistService`; `common` to `1.9.0-SNAPSHOT`. (8be6f37)
+- [x] 2. `server`: `IWaitlistRepository`, `InMemoryWaitlistRepository`, `waitlistEntries()`; `server-c5-appointments` to `1.1.0-SNAPSHOT`. (8be6f37)
+- [x] 3. `server`: `WaitlistService` (permission `MANAGE_APPOINTMENTS`, validations of the alternative flows, ordering by tier and date, audit `WAITLIST_CHANGED`, `WAITLIST_ENTRY_REMOVED`, `OPENING_FILLED`, and the booking of UC15 through `IAppointmentService`).
 - [ ] 4. Hand the waitlist part over to Testing in the pull request.
 
 ## Verification
