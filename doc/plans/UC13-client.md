@@ -42,7 +42,9 @@
 ## Verification
 - [x] `mvn -B verify -DskipTests -Djacoco.skip=true` green for `client-c1-access` and its tree.
 - [ ] The usability of the screen walked in the running application (Testing: this machine has no desktop).
-- [ ] The tests of the screen in `feature/UC13-client-tests`.
+- [x] The tests of the screen: they are in `develop` with #209 and #210 (`IU_ManageAppointmentsTest`, 46 tests with
+      TC13C-51); `mvn -B clean verify` on this branch (25/11/2026) gives `BUILD SUCCESS` in the 14 modules and all
+      coverage checks met; `IU_ManageAppointments` has 267/276 lines and 60/68 branches.
 
 ## Status
 - **In progress:** nothing; the implementation is complete in `feature/UC13-client`.
@@ -58,10 +60,18 @@
   row *Common* is in `agents/components.md`; `common` is `1.8.0-SNAPSHOT`. **Pending, for Testing:** the names instead
   of the ids (TC13C-01, 09, 20 and 40), removing `isCancelled` (TC13C-32) and the keys Alt+F/B/M/C/K and Alt+D
   (TC13C-29 expects Alt+B on *Back*); the code changes with the new values, not before (rule 17).
-- **Open questions:** N-03, N-04 and N-08 are resolved (decided by the group, see *Decisions*). N-02 has an agreement
-  (Alt+F, Alt+B, Alt+M, Alt+C, Alt+K and Alt+D) that waits for TC13C-29. Still open: N-01, N-05, N-06, N-07 (Adam,
-  #210) and F-06 for Design (the `onSelectNeed` of `C5-design.md`, which the screen does not have). The wiring of
+- **Review of C4 and C5 (25/11/2026), done by Implementation this once to close C4 and C5 (#130 reopened):** the label
+  *Day* has the key Alt+D and points to its field, with the test TC13C-51 first (`3a8339e`) and the code after
+  (`6864910`); an import of `AppointmentStatus` that nothing used is removed; TC13C-29 now expects Alt+K on *Back*
+  in the design (the code has it since `0428ec0`) and TC13C-50 (one table clears the other) is in the design.
+  `isCancelled` is already gone (`0428ec0`). Design answered in #130 on 25/11/2026: the ids stay in the table of
+  appointments (N-05, no change of `common`), `onSelectNeed` is removed from the diagrams (F-06) and *Move* with a
+  question is right (N-08).
+- **Open questions:** N-03, N-04 and N-08 are resolved (decided by the group, see *Decisions*). N-02 is closed: the keys
+  are Alt+F, Alt+B, Alt+M, Alt+C, Alt+K and Alt+D. N-05 and F-06 are closed by Design (see above). Still open: N-01,
+  N-06 and N-07 (Adam, #210). The wiring of
   `Main` and the constructors of `IU_Welcome` will have to be rebased when the clients of UC06 (#204) and UC07 (#207)
   are merged, because the three add a button and a full constructor on the same branch point.
-- **Last update:** 24/11/2026, Ignacio (fixes of the review of the pull request; the keys, the names and
-  `isCancelled` wait for Testing).
+- **Last update:** 25/11/2026, Javier — Alt+D with its test TC13C-51, the design of TC13C-29 and TC13C-50, the
+  decisions of Design and the Verification boxes ticked. Before: 24/11/2026, Ignacio (fixes of the review of the pull
+  request; the keys, the names and `isCancelled` wait for Testing).

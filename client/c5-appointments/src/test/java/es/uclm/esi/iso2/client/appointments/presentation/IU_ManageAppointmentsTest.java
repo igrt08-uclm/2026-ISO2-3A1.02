@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -998,5 +999,20 @@ class IU_ManageAppointmentsTest {
                 () -> assertEquals(APT_0003, appointmentSelected),
                 () -> assertEquals(MARIO, screen.getNeedsTable().getSelectedRow()),
                 () -> assertEquals(-1, screen.getAppointmentsTable().getSelectedRow()));
+    }
+
+    @Test
+    @DisplayName("TC13C-51 The label Day gives the key Alt+D to the field of the day")
+    void tc13c51DayFieldMnemonic() {
+        // Arrange
+        IU_ManageAppointments screen = open();
+
+        // Act
+        JLabel day = Screen.label(screen, "Day");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(KeyEvent.VK_D, day.getDisplayedMnemonic()),
+                () -> assertEquals(Screen.field(screen, "Day"), day.getLabelFor()));
     }
 }

@@ -165,7 +165,7 @@ TC13C-11 now reaches *Book* with no need and no slot; the branch `need == null` 
 | TC13C-26 | *Cancel appointment* | Only a need selected | "⚠ Select the appointment to cancel." in red; no question; nothing sent | `tc13c26CancelWithoutAppointment` |
 | TC13C-27 | *Cancel appointment*, `onCancelAppointment` | C5 rejects; then C5 denies | "⚠ The appointment APT-0001 is already cancelled"; then the denied message and only *Back* enabled (12a) | `tc13c27CancelRejectedAndDenied` |
 | TC13C-28 | tables | Lucía and her slots shown | No cell of the three tables is editable; each table selects a single row | `tc13c28CellsAreNotEditable` |
-| TC13C-29 | buttons | Open the screen | Buttons *Find slots* Alt+F, *Book* Alt+B, *Move* Alt+M, *Cancel appointment* Alt+C, *Back* Alt+B (keys of the code `844405d`, not defined: N-02) | `tc13c29ButtonsAndMnemonics` |
+| TC13C-29 | buttons | Open the screen | Buttons *Find slots* Alt+F, *Book* Alt+B, *Move* Alt+M, *Cancel appointment* Alt+C, *Back* Alt+K (keys of the code `0428ec0`; the keys are Implementation's, #219) | `tc13c29ButtonsAndMnemonics` |
 | TC13C-30 | *Back* | Lucía and a slot selected | Runs its action once; no question; no call to C5 | `tc13c30Back` |
 | TC13C-31 | `showConfirmation`, `showErrors` | A confirmation; two errors | The confirmation in green; "⚠ First error Second error" in red (plan: *Messages*) | `tc13c31Callbacks` |
 | TC13C-32 | `isCancelled` | BOOKED, RESCHEDULED, CANCELLED | `false`, `false`, `true` | `tc13c32IsCancelled` |
@@ -186,6 +186,8 @@ TC13C-11 now reaches *Book* with no need and no slot; the branch `need == null` 
 | TC13C-47 | constructor, *Find slots* | Clock fixed at Monday 30/11/2026 09:00, Europe/Madrid; Lucía selected; *Find slots* without writing the day (F-05) | The day starts as "30/11/2026"; one request `XRAY-CHEST` from 2026-11-30 to 2026-11-30 | `tc13c47DayStartsAsTheDayOfTheClock` |
 | TC13C-48 | `loadData` | Clock fixed at Monday 30/11/2026; the day `01/12/2026` and a reload (F-05) | "01/12/2026" is kept; the data are read again | `tc13c48DayWrittenIsKeptWithAFixedClock` |
 | TC13C-49 | constructor | Four-parameter constructor (system clock, F-05) | The day is today (the day taken just before or just after opening) | `tc13c49FourParameterConstructorUsesTheSystemClock` |
+| TC13C-50 | select row | A need, then an appointment, then another need | Selecting in one table clears the selection of the other (one selection at a time, so *Book* and *Find slots* never mix a need with an appointment) | `tc13c50TablesClearEachOthersSelection` |
+| TC13C-51 | labels | Open the screen | The label *Day* shows Alt+D and its `labelFor` is the field of the day (N-02) | `tc13c51DayFieldMnemonic` |
 
 Postcondition of every case: nothing is stored except by `bookAppointment`, `rescheduleAppointment` and
 `cancelAppointment` of the fake (TC13C-09, 20, 24, 40); after a rejected or denied change, or an error of the screen,
@@ -241,9 +243,10 @@ in `69bed6c` (TC13C-47 to 49). Still open: F-06.
 | TC13C-20 | No question before the move | The question "Move the appointment APT-0001 to 30/11/2026 09:00?", answered Yes | Not defined: code `844405d` (N-08) |
 | TC13C-22, 23 | Same flow as the old TC13C-20 | APT-0001, *Find slots*, slot of 09:00, *Move* (helper `appointmentAndSlot`) | Decision F-02 (Marcos, #210) |
 | TC13C-29 | *Back* Alt+K; *Move* and *Cancel appointment* without key | *Back* Alt+B; *Move* Alt+M; *Cancel appointment* Alt+C | Not defined: code `844405d` (N-02) |
+| TC13C-29 | *Back* Alt+B (as the line above) | *Back* Alt+K | The keys are Implementation's (#219): Alt+K does not clash with *Book* Alt+B; code `0428ec0`, N-02 closed |
 
-**Not defined** (the plan does not say; Testing asks the team). Still open at `14de119`: N-01, N-02 (*Book* and
-*Back* both Alt+B), N-05, N-06, N-07 and N-08.
+**Not defined** (the plan does not say; Testing asks the team). Still open at `14de119`: N-01, N-05, N-06, N-07 and
+N-08 (N-02, the keys, was closed on 25/11/2026: see below).
 - **N-01 – Failures of the server outside the reading.** Only `loadData` catches `RuntimeException`; a failure of
   `getFreeSlots`, `bookAppointment`, `rescheduleAppointment` or `cancelAppointment` escapes from the button and
   nothing is shown. UC06 shows "… could not be …" in that case. Not tested.
@@ -251,6 +254,8 @@ in `69bed6c` (TC13C-47 to 49). Still open: F-06.
   `87b56ce`: Alt+F, Alt+B, Alt+K (*Back*); at `844405d`: Alt+F, Alt+B (*Book*), Alt+M (*Move*), Alt+C (*Cancel
   appointment*) and Alt+B (*Back*); Alt+A in `IU_Welcome`. *Book* and *Back* now share Alt+B, so one key names two
   buttons (Conjeture: only one of them runs with the key). The field *Day* has no key. The team decides the keys.
+  **Closed on 25/11/2026:** by the micro-decision threshold of #219 the keys are Implementation's. *Back* is Alt+K
+  (`0428ec0`), so every button has its own key (Alt+F, B, M, C, K), and the label *Day* has Alt+D (TC13C-51).
 - **N-03 – Slots after a change.** After a booking or a move the slots table is not read again, so the slot just
   taken can be selected again (the server would reject it). **Changed by the code `844405d` without a recorded
   decision:** the slots are emptied after a booking, a move or a cancellation. No case checks it until the team
