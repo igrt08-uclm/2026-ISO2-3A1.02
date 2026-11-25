@@ -987,7 +987,7 @@ class IU_OrderFollowUpTest {
         select(screen, MARIO);
 
         // Assert
-        assertSelectionFailure(screen, "⚠ The orders could not be read: Catalogue offline");
+        assertSelectionFailure(screen, "⚠ The test types could not be read: Catalogue offline");
     }
 
     @Test

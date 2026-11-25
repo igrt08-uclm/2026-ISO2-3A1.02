@@ -207,7 +207,7 @@ R-01 in the client plan (`6a8179b`) and `9583556`.
 
 | ID | Method | Input (and precondition) | Expected result | Test |
 |---|---|---|---|---|
-| TC07C-49 | Select | C2 offline | Orders read error (catalogue) | `tc07c49TestTypesOffline` |
+| TC07C-49 | Select | C2 offline | Test types read error | `tc07c49TestTypesOffline` |
 | TC07C-50 | Select | C3 offline | Patient read error | `tc07c50PatientLookupFails` |
 | TC07C-51 | Select | C4 rejects | Validation error | `tc07c51OrderReadRejected` |
 | TC07C-52 | Select | C4 denies | Denied | `tc07c52OrderReadDenied` |
@@ -219,7 +219,7 @@ R-01 in the client plan (`6a8179b`) and `9583556`.
 
 The error messages for TC07C-49 to 55 appear in red:
 
-- TC07C-49: “⚠ The orders could not be read: Catalogue offline”.
+- TC07C-49: “⚠ The test types could not be read: Catalogue offline”.
 - TC07C-53: “⚠ The orders could not be read: Orders offline”.
 - TC07C-50: “⚠ The patient could not be read: Registry offline”.
 - TC07C-51: “⚠ Patient unavailable”.
