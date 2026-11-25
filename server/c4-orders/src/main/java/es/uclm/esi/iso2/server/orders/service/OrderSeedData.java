@@ -6,7 +6,10 @@ import es.uclm.esi.iso2.common.orders.domain.SchedulingNeedStatus;
 import java.time.LocalDate;
 import java.util.List;
 
-/** The orders and scheduling needs that the server loads when it starts with no data (UC06, UC13). Invented examples. */
+/**
+ * The orders and scheduling needs that the server loads when it starts with no data (UC06, UC13). Invented
+ * examples.
+ */
 final class OrderSeedData {
     private OrderSeedData() {
     }
