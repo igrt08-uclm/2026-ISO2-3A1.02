@@ -256,7 +256,7 @@ public class IU_OrderFollowUp extends JPanel {
             handleDenied();
             return;
         } catch (RuntimeException exception) {
-            clearSelection();
+            clearFailedSelection();
             showOperationResultError("The patient could not be read: " + exception.getMessage());
             return;
         }
@@ -283,12 +283,22 @@ public class IU_OrderFollowUp extends JPanel {
             clearSelection();
             handleDenied();
         } catch (ValidationException validationException) {
-            clearSelection();
+            clearFailedSelection();
             showValidationErrors(validationException.getErrors());
         } catch (RuntimeException exception) {
-            clearSelection();
+            clearFailedSelection();
             showOperationResultError("The orders could not be read: " + exception.getMessage());
         }
+    }
+
+    /**
+     * Forgets the patient like {@link #clearSelection()} and also deselects the row of the table, so that a click on
+     * the same patient reads it again after a failed read.
+     */
+    private void clearFailedSelection() {
+        clearSelection();
+        patientTable.clearSelection();
+        lastPatientRow = -1;
     }
 
     /**
@@ -302,7 +312,7 @@ public class IU_OrderFollowUp extends JPanel {
         try {
             return parameterService.getTestTypes(requester);
         } catch (RuntimeException exception) {
-            clearSelection();
+            clearFailedSelection();
             showOperationResultError("The test types could not be read: " + exception.getMessage());
             return null;
         }
