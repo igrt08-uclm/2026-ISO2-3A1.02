@@ -916,26 +916,26 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
 10. **Classes:** `ClinicalOrder` (through `DiagnosticOrder`), `DiagnosticOrder`, `SchedulingNeed` and `SchedulingNeedStatus` (getters, values); `InMemoryClinicalOrderRepository` and `InMemorySchedulingNeedRepository` (`findById` unknown → `null`, `findByPatient`, `findPending`, `save` replaces).
 
 ## Verification
-- [ ] Every acceptance criterion of #68 is checked with Adam's tests (the tests are in the pull request #203, not in
-      this branch): an order is only created for an active patient and an active test type, with one of the
+- [x] Every acceptance criterion of #68 is checked with Adam's tests (merged in `develop` with the pull requests #203
+      and #222): an order is only created for an active patient and an active test type, with one of the
       configured priorities; every created order appears as a pending scheduling need for C5 and its creation is
       registered in the audit log; a denied attempt is rejected and registered; the interfaces match the contract of
       #65 and of `C4-common.puml` (`b8a8983`), except `orderFollowUp`, which comes with UC07 (Q11).
 - [x] `server-c4-orders` depends only on `common`; no file of `client/`, of C1, C2 or C3 changed (`git diff --stat develop...HEAD`).
-- [ ] `mvn -B verify` (full build) is green with Adam's tests (pull request #203), the coverage check of
-      `server-c4-orders` and of `common` included.
+- [x] `mvn -B verify` (full build) is green with Adam's tests, the coverage check of `server-c4-orders` and of
+      `common` included (`develop` `4f0dbab`, 25/11/2026: `BUILD SUCCESS`, 14 modules, all coverage checks met).
 - [x] The CI of the pull request (`Closes #68`) is green.
 
 ## Status
 - **In progress:** nothing; steps 1 to 7 are done.
-- **Next step:** Testing (Adam) runs his tests of `feature/UC06-server-tests` against this branch and confirms the
-  coverage of `server-c4-orders`; the pull request #202 (`Closes #68`) is then merged.
-- **Tests branch:** `feature/UC06-server-tests` forks from `92d38bb`, with the test design in
+- **Next step:** none. The pull request #202 was merged on 24/11/2026; #68 was reopened on 25/11/2026 only to close
+  the findings of the implementation review of #66 (the line of 121 characters of `OrderSeedData.java`).
+- **Tests:** in `develop` with the pull requests #203 and #222; the test design is in
   `doc/testing/test-cases/UC06-server-test-design.md`; steps 2 to 6 were done by Ignacio on 23/11/2026.
 - **Build of the branch (24/11/2026):** `mvn -B -ntp clean verify` gives `BUILD SUCCESS` with the eight modules of
   this branch, every one `Failures: 0, Errors: 0` (52, 182, 171, 151, 124, 112 and 98 tests) and "All coverage checks
-  have been met" 7 times; `common` covers 200/235 lines (85 %) and 14/14 branches. `server-c4-orders` still has no
-  tests, so JaCoCo skips its check until Adam's tests exist.
+  have been met" 7 times; `common` covers 200/235 lines (85 %) and 14/14 branches. At that moment `server-c4-orders`
+  had no tests, so JaCoCo skipped its check; its tests came afterwards with #203 and #222.
 - **Open questions:**
   1. Javier (with Adam): seed data of C4 (`loadSeedData()`, in the design): needed or not, and which. If they are, a step is added (Q8).
   2. Requirements (David and Ignacio): are the clinical indication and the justification required, and with a maximum length (Q5)? Which `dueDate` has the need of a diagnostic order: the date of the order, or one that depends on the priority (Q6)? Does a deactivated priority count as a "configured tier" (Q4)?
@@ -944,5 +944,5 @@ Adam designs the table (rule 17); the agent does not invent expected results. Ca
   5. `agents/architecture.md:20` says that `common` only has the package of C1; it is out of date and not changed here (rule 2).
   6. The texts of the order are saved as they are sent (C3 removes the spaces at the ends, `PatientService.java:249`); not decided, kept as the smallest change.
   7. #68 is assigned to the seven members of the team; D-041 asks that only the member who works on it is assigned.
-- **Last update:** 24/11/2026, Ignacio — step 7 done: steps 1 to 6 ticked with their hashes, the final checkboxes
-  checked and the build of the branch green.
+- **Last update:** 25/11/2026, Javier — verification boxes ticked with the build of `develop` and the status brought up
+  to date; the comment of `OrderSeedData` wrapped under 120 characters. Before: 24/11/2026, Ignacio — step 7 done.
