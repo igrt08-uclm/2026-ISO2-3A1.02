@@ -151,11 +151,11 @@ TC13S-90 to 97 vary one save, C4 response, range or duration at a time using the
 
 ## 3. Coverage (white box)
 
-Coverage through `b040e99` with TC13S-90 to 97:
-- `AppointmentService`: 203/206 lines and 126/126 branches. The three missed lines belong to the system-clock
+Coverage through TC13S-99 (25/11/2026; before: `b040e99` with TC13S-90 to 97):
+- `AppointmentService`: 204/207 lines and 128/128 branches. The three missed lines belong to the system-clock
   constructor (section 5).
 - `AppointmentSeedData`: 7/7 lines. `InMemoryAppointmentRepository`: 26/26 lines and 4/4 branches.
-- `server-c5-appointments`: 236/239 lines (98.7 %) and 130/130 branches (100 %).
+- `server-c5-appointments`: 237/240 lines (98.8 %) and 132/132 branches (100 %).
 - `common`: 252/287 lines (87.8 %) and 14/14 branches (100 %).
 
 **Decision coverage** (each decision true and false):

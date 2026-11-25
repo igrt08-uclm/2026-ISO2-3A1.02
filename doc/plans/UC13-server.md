@@ -55,13 +55,14 @@
 | `agents/architecture.md`, `agents/components.md` | change | the tree and the versions (rule 9) |
 
 ## Verification
-- [ ] Every acceptance criterion of #131: booking only in a free slot of the room of the test type, inside the schedule
+- [x] Every acceptance criterion of #131: booking only in a free slot of the room of the test type, inside the schedule
       and not in the past, for an active patient; booking marks the need as booked in C4; rescheduling frees the old slot;
-      cancelling changes the status and frees the slot; every operation checks the permission and is audited.
-- [ ] `mvn -B verify` green for `common` and `server-c5-appointments`; `common` keeps at least 80 % of lines and 70 % of
-      branches.
-- [ ] The CI of the pull request is green (the workflow only runs against `main` and `develop`, so this is checked when
-      the branch reaches `develop`).
+      cancelling changes the status and frees the slot; every operation checks the permission and is audited (checked
+      with the tests TC13S-01 to 99 in this branch; reviewed by Implementation on 25/11/2026).
+- [x] `mvn -B verify` green for `common` and `server-c5-appointments`; `common` keeps at least 80 % of lines and 70 % of
+      branches (25/11/2026, this branch: `BUILD SUCCESS` in the 14 modules, all coverage checks met).
+- [x] The CI of the pull request is green (the workflow only runs against `main` and `develop`, so this is checked when
+      the branch reaches `develop`): #208 reached `develop` on 24/11/2026.
 
 ## Status
 - **In progress:** nothing.
@@ -74,7 +75,7 @@
   slots (decided with Testing, 23/11/2026); `common` at `1.8.0-SNAPSHOT`.
 - **Review of the pull request (#208, 24/11/2026):** `bookAppointment` and `cancelAppointment` save the appointment
   before calling C4, so a failed save no longer leaves the need marked; `cancelAppointment` only ignores the
-  "already pending" of C4 and rethrows any other error; the orphan Javadoc of `startOnGrid` is gone; `getFreeSlots`
+  "already pending" of C4 and rethrows any other error (changed on 25/11/2026, step 8 below); the orphan Javadoc of `startOnGrid` is gone; `getFreeSlots`
   rejects a range of more than 31 days and `readActiveTestType` rejects a test type with a duration of 0, which used
   to loop for ever — `d933b30`.
 - **Fixes from the review of Testing:**
@@ -88,12 +89,24 @@
     identified by its room and its start, so the class does not promise an identity it does not have.
   - Seeds: checked on 24/11/2026 — the appointments are on the first working day after the start (`nextWorkingDay`)
     and `OrderSeedData` takes the date from the clock of the service, as Adam asked.
+- **Review of C4 and C5 (25/11/2026), done by Implementation this once to close C4 and C5 (#131 reopened):**
+  - Step 7 – the ids of the appointments use an `AtomicInteger`, as C4 does (`1412e4e`).
+  - Step 8 – `cancelAppointment` no longer reads the text of C4: it asks C4 for the pending needs and, when the need is
+    already pending, it does not mark it again (`releaseNeed`); the method `onlyAlreadyPending` is removed. First the
+    test TC13S-98 (`ada5425`), then the code (`1412e4e`); TC13S-99 covers the other branch of the loop (`26ad7ed`).
+    TC13S-27, 92, 93 and 94 still pass without changes; TC13S-92 and 94 no longer exercise the reading of the text.
+    The cost is one more call to C4 in each cancellation.
+  - The Javadoc of `startOnGrid` says "at least one active schedule", as the code does (`1412e4e`).
+  - The "D41" of the test design is the decision D41 of `doc/AN-C5-DECISIONS.md`, not D-041: it stays as it is.
 - **State for Adam (Testing):** to cover in `feature/UC13-server-tests`: the permission and `APPOINTMENT_ACCESS_DENIED`;
   the seven operations with their messages; the free slots for a schedule of a room (days, duration, occupied and
   cancelled appointments, range with `toDate` before `fromDate`); the booking of a pending need, of a need already booked,
   of a slot of another room, outside the schedule, in the past and taken; the active and inactive patient; the reschedule
   of a booked, cancelled and unknown appointment; the cancellation and the need pending again in C4; the four audit
   actions; the cases of D1, D2, D5, D6 (TC13S-70, 72, 73, 77, 78, 81).
-- **Next step:** Testing adds TC13S-67..76 and the cases of D1, D2, D5 and D6.
-- **Last update:** 24/11/2026, Ignacio (Javadoc of `TimeSlot`, the seed dates and the fixes of the review of the pull
-  request).
+- **Next step:** none. Testing added TC13S-67 to 97 (#209) and the pull request #208 was merged on 24/11/2026.
+- **Open question (Javier):** `bookAppointment` and `cancelAppointment` still have no transaction: if C4 fails after the
+  appointment is saved, the need keeps its old status. It is the order chosen on 24/11/2026 (save first), not changed.
+- **Last update:** 25/11/2026, Javier — steps 7 and 8 and the Javadoc of `startOnGrid`, with the tests TC13S-98 and 99
+  written by Implementation this once; the Verification boxes ticked. Before: 24/11/2026, Ignacio (Javadoc of
+  `TimeSlot`, the seed dates and the fixes of the review of the pull request).
