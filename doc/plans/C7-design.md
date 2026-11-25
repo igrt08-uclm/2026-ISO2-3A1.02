@@ -223,7 +223,7 @@ Tick each step with the hash of its commit.
 - [x] 1. **UC10 (C7 `1.0.0`):** this plan (with the *Design diagrams* previews); `C7-common.puml`, `C7-server-design.puml`, `C7-client-design.puml` (UC10 scope); `C5-common.puml`, `C5-server-design.puml` (EXECUTED, `getAppointment`, `markAppointmentExecuted`); `C7-context.md`; `C7-server-design.png`, `C7-client-design.png`. (`9c2b659`)
 - [x] 2. **UC09 (C7 `1.1.0`):** extend the C7 files with `DiagnosticReport`, `ReportStatus`, `Addendum`, the views, `IDiagnosticReportService`, `DiagnosticReportService`, repositories and `IU_DiagnosticReports`; `C2-common.puml`, `C2-server-design.puml` (`ImagingStudy`, `getStudy`); C7, C2 and C5 PNGs re-rendered. (`cf6da7d`)
 - [x] 2b. **Review fixes (PR #225, Marcos):** reviewer can open a draft (review mode), `REPORTS_ACCESSED` on `getReportsToValidate`, audit targets, `getStudy` behaviour, `EXECUTED` guards in the C5 patch, screen enablement and texts, `ImagingStudy` dependency in C2, one row per sub-issue in `C7-context.md`.
-- [ ] 3. **Sync with `develop`:** after #186 (C6 design) is merged, `git merge origin/develop` and re-render the C5 and C7 PNGs so `Appointment` shows `confirmedByPatient`. Skipped if this PR is merged first.
+- [x] 3. **Sync with `develop`:** #186 (C6 design, PR #224) was merged first: `git merge origin/develop`, the C5 `.puml` files merged automatically (C6 + C7 changes kept), and the C5 and C7 PNGs were re-rendered so `Appointment` shows `confirmedByPatient` and `EXECUTED`.
 
 ## Verification
 - [x] Every flow and alternative of UC10 and UC09 in AN-C7 (msgs and 3a…48c) maps to an operation, a rule or a text of this plan.

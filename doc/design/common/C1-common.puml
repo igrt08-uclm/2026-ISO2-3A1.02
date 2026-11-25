@@ -8,6 +8,7 @@ class UserAccount <<entity>> {
   -email : String
   -active : boolean
   -roles : List<Role>
+  -patientId : String
 }
 !endsub
 
@@ -51,6 +52,7 @@ interface IRoleManagementService {
   +getUsers() : List<UserAccount>
   +getAvailableRoles() : List<Role>
   +hasPermission(username : String, permissionCode : String) : boolean
+  +getLinkedPatientId(username : String) : String
   +assignRole(requester : String, role : Role, user : UserAccount) : void throws AccessDeniedException
   +revokeRole(requester : String, role : Role, user : UserAccount) : void throws AccessDeniedException
   +assignPermission(requester : String, role : Role, permission : Permission) : void throws AccessDeniedException

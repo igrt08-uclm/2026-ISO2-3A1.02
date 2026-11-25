@@ -12,6 +12,7 @@ class Appointment <<entity>> {
   -start : LocalDateTime
   -end : LocalDateTime
   -status : AppointmentStatus
+  -confirmedByPatient : boolean
 }
 !endsub
 
@@ -81,6 +82,7 @@ interface IAppointmentService {
   +getFreeSlots(requester : String, testTypeId : String, fromDate : LocalDate, toDate : LocalDate) : List<TimeSlot> throws AccessDeniedException, ValidationException
   +bookAppointment(requester : String, needId : String, slot : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
   +rescheduleAppointment(requester : String, appointmentId : String, newSlot : TimeSlot) : Appointment throws AccessDeniedException, ValidationException
+  +confirmAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
   +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
   +getAppointments(requester : String) : List<Appointment> throws AccessDeniedException
   +getAppointmentsOfPatient(requester : String, patientId : String) : List<Appointment> throws AccessDeniedException, ValidationException
