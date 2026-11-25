@@ -546,3 +546,28 @@ This file is also context for the AI agent: it must follow these decisions and n
 - **Reason:** Plain-text `.puml` files support parallel work, line-by-line PR reviews, zero round-trip corruption, direct readability by Spec-Driven Development agents (D-025), and single-source-of-truth contract reuse via `!includesub`. Human review and approval in PRs preserve the discipline ownership of D-008.
 - **Consequences:** Replaces D-017, updates D-008 (official models are PlantUML in `doc/`, AI proposals still require human approval) and retires assumption A4 of D-031. `AGENTS.md`, `README.md`, `doc/design/README.md` and the wiki (*Traceability and releases*, *Requirements and Use Cases*, *Iterations*, *Home*, *Working with AI*, *Decisions*, *Planification*) are updated.
 - **Status:** Approved in Meeting 9 (22/11/2026) and implemented in #177; pending pull request review by another member (D-001).
+
+## D-048 · Links to issues in pull requests, shared documents and handoff between Implementation and Testing
+**Date:** 24/11/2026 · **Iteration:** 4–5 · **Minutes:** — · **Issues:** #215 · **Pull requests:** #212
+
+- **Context:** The implementation and testing of C4 and C5 (#202 to #210) showed four problems. The pull request
+  template starts with `Closes #`, so #202 and #204 closed #68 and #67 when they were merged, with *Implementation* and
+  *Testing* not ticked. The parallel branches changed the same shared documents, and #210 conflicted with another branch in
+  `agents/components.md`. Testing and Implementation needed several rounds on the same pull requests (#204, #207, #210).
+  Implementation changed a test of Testing (E-23), and a build looked red because of the compiled tests of another branch (E-24).
+- **Decision:**
+  - **Links:** a pull request that belongs to an issue has `Refs #n`, and `Closes #n` only if it completes the last box
+    of the RADIT checklist. A standalone `docs/` or `ci/` pull request may have no issue. The CI checks only the name
+    of the branch (#212). The agent proposes ticking the box of each discipline that is merged (rule 22).
+  - **Shared documents:** `AGENTS.md`, `DECISIONS.md`, `agents/*.md` and the templates of `.github/` change only in
+    `docs/` branches (rule 23). The context file of a component (`doc/plans/Cn-context.md`, proposed in D-047) is not one of
+    them: each use case branch changes only the lines of its own sub-issue. `docs/` and `ci/` are added to the table of
+    branches.
+  - **Handoff:** the section *Cross-agent handoff* of AGENTS.md, proposed by Marcos in #212.
+- **Alternatives:** The CI also checks `Refs #n` or `Closes #n` (first version of #212). An orchestrator agent.
+- **Reason:** An issue is closed when its work is finished, each shared document changes in one place, and the two
+  disciplines hand over the work once, in writing.
+- **Consequences:** Updates D-010 and D-015 (`Closes #n` is no longer in every pull request). D-010 still applies: every
+  task assigned in a meeting has its issue. Rule 23 is compatible with the proposal D-047 (#213).
+- **Status:** Proposed by Marcos (comment in #212) and by David on 24/11/2026, outside a meeting; pending pull request
+  review by another member (D-001).
