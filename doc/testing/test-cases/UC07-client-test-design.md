@@ -142,7 +142,7 @@ After R-01, TC07C-56 exercises the negative row index when a new search clears L
 and 57 exercise the unknown and inactive patient branches with a draft. TC07C-49 to 53 and 55 exercise read
 exceptions; TC07C-03 exercises successful reads. R-01 adds no compound decision.
 
-With TC07C-49 to 57, the coverage report shows 270/270 lines and 69/70 branches for `IU_OrderFollowUp` itself.
+With TC07C-49 to 58, the coverage report shows 281/281 lines and 71/72 branches for `IU_OrderFollowUp` itself (25/11/2026).
 The module covers 546/552 lines (98.9 %) and 140/146 branches (95.9 %).
 The run with the revised TC07C-17/18 gives the same coverage. Both cases fail against the 0–120 spinner at `cefde9a`:
 the maximum is 120, the up arrow offers 13 after 12, and the editor accepts 13.
