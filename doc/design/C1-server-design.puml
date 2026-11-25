@@ -1,0 +1,179 @@
+@startuml C1_server_design
+!include common/_style.puml
+
+title C1 – Access and Security (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C1-common.puml!AuditLog
+    !includesub common/C1-common.puml!Permission
+    !includesub common/C1-common.puml!Role
+    !includesub common/C1-common.puml!UserAccount
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C1-common.puml!AuthenticationException
+    !includesub common/C1-common.puml!AuthenticationFailureReason
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C1-common.puml!IAuditService
+    !includesub common/C1-common.puml!IAuthenticationService
+    !includesub common/C1-common.puml!IAuthenticatorSystem
+    !includesub common/C1-common.puml!IRoleManagementService
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class AuditService <<control>> {
+      +register(author : String, action : String, targetResource : String) : void
+      +getActivityLog(requester : String, filters : String) : List<AuditLog> throws AccessDeniedException
+    }
+
+    class AuthenticationService <<control>> {
+      +login(username : String, password : String) : UserAccount throws AuthenticationException
+    }
+
+    class RoleManagementService <<control>> {
+      +getRoles(username : String) : List<Role>
+      +getPermissions(username : String) : List<Permission>
+      +getAvailablePermissions() : List<Permission>
+      +getUsers() : List<UserAccount>
+      +getAvailableRoles() : List<Role>
+      +hasPermission(username : String, permissionCode : String) : boolean
+      +assignRole(requester : String, role : Role, user : UserAccount) : void throws AccessDeniedException
+      +revokeRole(requester : String, role : Role, user : UserAccount) : void throws AccessDeniedException
+      +assignPermission(requester : String, role : Role, permission : Permission) : void throws AccessDeniedException
+      +revokePermission(requester : String, role : Role, permission : Permission) : void throws AccessDeniedException
+    }
+
+  }
+
+  package "Integration (simulated SSO)" {
+    class AuthenticatorSystemSimulator <<boundary>> {
+      +validateCredentials(username : String, password : String) : boolean
+      +ping() : boolean
+    }
+
+  }
+
+  package "Persistence" {
+    interface IAuditLogRepository {
+      +save(entry : AuditLog) : void
+      +find(filters : String) : List<AuditLog>
+    }
+
+    interface IPermissionRepository {
+      +findByCode(code : String) : Permission
+      +findAll() : List<Permission>
+    }
+
+    interface IRoleRepository {
+      +findById(id : String) : Role
+      +findAll() : List<Role>
+      +save(role : Role) : void
+    }
+
+    interface IUserAccountRepository {
+      +findByUsername(username : String) : UserAccount
+      +findAll() : List<UserAccount>
+      +save(user : UserAccount) : void
+    }
+
+    class InMemoryAuditLogRepository {
+      -entries : List<AuditLog>
+      +save(entry : AuditLog) : void
+      +find(filters : String) : List<AuditLog>
+    }
+
+    class InMemoryPermissionRepository {
+      +findByCode(code : String) : Permission
+      +findAll() : List<Permission>
+    }
+
+    class InMemoryRoleRepository {
+      -roles : List<Role>
+      +findById(id : String) : Role
+      +findAll() : List<Role>
+      +save(role : Role) : void
+    }
+
+    class InMemoryUserAccountRepository {
+      -users : List<UserAccount>
+      +findByUsername(username : String) : UserAccount
+      +findAll() : List<UserAccount>
+      +save(user : UserAccount) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+UserAccount "*" -- "*" Role : has
+Role "*" -- "*" Permission : grants
+IAuthenticationService ..> UserAccount : <<use>>
+IRoleManagementService ..> UserAccount : <<use>>
+IRoleManagementService ..> Role : <<use>>
+IRoleManagementService ..> Permission : <<use>>
+IAuditService ..> AuditLog : <<use>>
+AuthenticationService ..|> IAuthenticationService
+RoleManagementService ..|> IRoleManagementService
+AuditService ..|> IAuditService
+AuditService ..|> IAuditRecorder
+AuthenticatorSystemSimulator ..|> IAuthenticatorSystem
+InMemoryUserAccountRepository ..|> IUserAccountRepository
+InMemoryRoleRepository ..|> IRoleRepository
+InMemoryPermissionRepository ..|> IPermissionRepository
+InMemoryAuditLogRepository ..|> IAuditLogRepository
+AuthenticationService ..> IAuditRecorder : <<use>>
+RoleManagementService ..> IAuditRecorder : <<use>>
+AuthenticationService ..> IAuthenticatorSystem : <<use>>
+AuthenticationService ..> IUserAccountRepository : <<use>>
+RoleManagementService ..> IUserAccountRepository : <<use>>
+RoleManagementService ..> IRoleRepository : <<use>>
+RoleManagementService ..> IPermissionRepository : <<use>>
+AuditService ..> IUserAccountRepository : <<use>>
+AuditService ..> IRoleRepository : <<use>>
+AuditService ..> IAuditLogRepository : <<use>>
+AuthenticationService ..> AuthenticationException : <<throw>>
+AuthenticationException ..> AuthenticationFailureReason
+RoleManagementService ..> AccessDeniedException : <<throw>>
+AuditService ..> AccessDeniedException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  realizes Control_Login (UC22)
+end note
+N1 .. AuthenticationService
+
+note as N2
+  realizes Control_ManageRoles
+  (UC18)
+end note
+N2 .. RoleManagementService
+
+note as N3
+  realizes Control_Audit (UC19)
+end note
+N3 .. AuditService
+
+note as N4
+  server only: every service logs its actions (D10); the
+  client cannot write logs
+end note
+N4 .. IAuditRecorder
+
+note as N5
+  realizes IU_AuthenticatorSystem (corporate SSO,
+  simulated)
+end note
+N5 .. IAuthenticatorSystem
+
+note as N6
+  append-only: no update or delete (D11)
+end note
+N6 .. IAuditLogRepository
+
+@enduml

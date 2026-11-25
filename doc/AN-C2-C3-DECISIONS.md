@@ -8,11 +8,11 @@ Milestone 2 (Iterations 2 and 3) – Analysis discipline
 Each entry records the context, the decision and the rationale. The numbering continues from [AN-IT1-DECISIONS.md](AN-IT1-DECISIONS.md), whose rules still apply (BCE pattern D07, naming D08, `AuditLog` written by every use case D10).
 Status: **Agreed** = decided by the team · **To confirm** = proposed, pending team approval.
 
-Artefacts of this iteration (PlantUML proposals, D-008; the official versions are in `doc/ISO-Project.vpp`):
-- `doc/analysis/UC17-communication.puml`
-- `doc/analysis/UC20-communication.puml`
-- `doc/analysis/UC12-communication.puml`
-- `doc/analysis/M2-analysis-class-diagram.puml`
+Artefacts of this iteration (PlantUML, the official version since D-046):
+- [`analysis/UC17-configure-parameters-sequence.puml`](analysis/UC17-configure-parameters-sequence.puml)
+- [`analysis/UC20-manage-integrations-sequence.puml`](analysis/UC20-manage-integrations-sequence.puml)
+- [`analysis/UC12-manage-patients-sequence.puml`](analysis/UC12-manage-patients-sequence.puml)
+- [`analysis/analysis-class-diagram.puml`](analysis/analysis-class-diagram.puml) (shared by every iteration)
 
 ---
 

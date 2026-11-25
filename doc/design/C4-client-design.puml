@@ -1,0 +1,77 @@
+@startuml C4_client_design
+!include common/_style.puml
+
+title C4 – Clinical Orders (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C4-common.puml!ClinicalOrder
+    !includesub common/C4-common.puml!DiagnosticOrder
+    !includesub common/C4-common.puml!FollowUpOrder
+    !includesub common/C4-common.puml!SchedulingNeed
+    !includesub common/C4-common.puml!SchedulingNeedStatus
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C4-common.puml!IClinicalOrderService
+    !includesub common/C3-common.puml!IPatientService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "Presentation" {
+  class IU_OrderFollowUp <<boundary>> {
+    -selectedPatient : Patient
+    +onSelectPatient(patientId : String) : void
+    +displayFollowUpForm(testTypes : List<TestType>, orders : List<ClinicalOrder>) : void
+    +onSubmitFollowUp() : void
+    +showPatientInactive(patient : Patient) : void
+    +showValidationErrors(errors : List<String>) : void
+    +showOperationResultSuccess(msg : String) : void
+    +showOperationResultError(msg : String) : void
+  }
+
+  class IU_OrderProcedure <<boundary>> {
+    -selectedPatient : Patient
+    +onSelectPatient(patientId : String) : void
+    +displayOrderForm(testTypes : List<TestType>, priorities : List<Priority>, orders : List<ClinicalOrder>) : void
+    +onSubmitOrder() : void
+    +showPatientInactive(patient : Patient) : void
+    +showValidationErrors(errors : List<String>) : void
+    +showOperationResultSuccess(msg : String) : void
+    +showOperationResultError(msg : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+DiagnosticOrder --|> ClinicalOrder
+FollowUpOrder --|> ClinicalOrder
+ClinicalOrder "1" --> "1..*" SchedulingNeed : generates
+SchedulingNeed --> SchedulingNeedStatus : status
+IU_OrderProcedure ..> IPatientService : <<use>>
+IU_OrderProcedure ..> ISystemParameterService : <<use>>
+IU_OrderProcedure ..> ValidationException : <<use>>
+IU_OrderProcedure ..> AccessDeniedException : <<use>>
+IU_OrderProcedure ..> IClinicalOrderService : <<use>>
+IU_OrderFollowUp ..> IClinicalOrderService : <<use>>
+IU_OrderFollowUp ..> IPatientService : <<use>>
+IU_OrderFollowUp ..> ISystemParameterService : <<use>>
+IU_OrderFollowUp ..> ValidationException : <<use>>
+IU_OrderFollowUp ..> AccessDeniedException : <<use>>
+
+' ==================== Notes ====================
+note as N1
+  realizes IU_OrderProcedure (UC06)
+end note
+N1 .. IU_OrderProcedure
+
+note as N2
+  realizes IU_OrderFollowUp (UC07)
+end note
+N2 .. IU_OrderFollowUp
+
+@enduml

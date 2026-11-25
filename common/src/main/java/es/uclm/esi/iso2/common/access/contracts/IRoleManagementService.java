@@ -10,16 +10,41 @@ import java.util.List;
  * active user with the permission {@code MANAGE_ROLES}.
  */
 public interface IRoleManagementService {
+    /**
+     * Returns the roles assigned to a user.
+     *
+     * @param username the username of the user
+     * @return the list of roles assigned to the user
+     */
     List<Role> getRoles(String username);
 
+    /**
+     * Returns the permissions granted to a user.
+     *
+     * @param username the username of the user
+     * @return the list of permissions granted to the user
+     */
     List<Permission> getPermissions(String username);
 
+    /**
+     * Returns all permissions available in the system.
+     *
+     * @return the list of all available permissions
+     */
     List<Permission> getAvailablePermissions();
 
-    /** Every user account, ordered by username, so that the client can show them in a list. */
+    /**
+     * Every user account, ordered by username, so that the client can show them in a list.
+     *
+     * @return the list of all user accounts ordered by username
+     */
     List<UserAccount> getUsers();
 
-    /** Every role, ordered by name, so that the client can show them in a list. */
+    /**
+     * Every role, ordered by name, so that the client can show them in a list.
+     *
+     * @return the list of all roles ordered by name
+     */
     List<Role> getAvailableRoles();
 
     /**
@@ -42,11 +67,43 @@ public interface IRoleManagementService {
                 .anyMatch(permission -> permission.getCode().equals(permissionCode));
     }
 
+    /**
+     * Assigns a role to a user account.
+     *
+     * @param requester the username of the user requesting the assignment
+     * @param role the role to assign
+     * @param user the user account receiving the role
+     * @throws AccessDeniedException if the requester does not have permission to manage roles
+     */
     void assignRole(String requester, Role role, UserAccount user) throws AccessDeniedException;
 
+    /**
+     * Revokes a role from a user account.
+     *
+     * @param requester the username of the user requesting the revocation
+     * @param role the role to revoke
+     * @param user the user account losing the role
+     * @throws AccessDeniedException if the requester does not have permission to manage roles
+     */
     void revokeRole(String requester, Role role, UserAccount user) throws AccessDeniedException;
 
+    /**
+     * Assigns a permission to a role.
+     *
+     * @param requester the username of the user requesting the assignment
+     * @param role the role receiving the permission
+     * @param permission the permission to assign
+     * @throws AccessDeniedException if the requester does not have permission to manage roles
+     */
     void assignPermission(String requester, Role role, Permission permission) throws AccessDeniedException;
 
+    /**
+     * Revokes a permission from a role.
+     *
+     * @param requester the username of the user requesting the revocation
+     * @param role the role losing the permission
+     * @param permission the permission to revoke
+     * @throws AccessDeniedException if the requester does not have permission to manage roles
+     */
     void revokePermission(String requester, Role role, Permission permission) throws AccessDeniedException;
 }

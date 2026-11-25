@@ -39,13 +39,13 @@ class InMemoryRoleRepositoryTest {
 
     @ParameterizedTest(name = "{0} has the permissions [{1}]")
     @CsvSource({
-        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS",
-        "PHYSICIAN,            ''",
-        "ADMISSIONS_STAFF,     MANAGE_PATIENTS",
+        "SYSTEM_ADMINISTRATOR, MANAGE_ROLES;CONFIGURE_SYSTEM;CONFIGURE_INTEGRATIONS;CONSULT_AUDIT",
+        "PHYSICIAN,            ORDER_PROCEDURES",
+        "ADMISSIONS_STAFF,     MANAGE_PATIENTS;MANAGE_APPOINTMENTS",
         "PATIENT,              ''"
     })
-    @DisplayName("Only the System administrator and the Admissions staff have permissions")
-    void onlyTheAdministratorAndTheAdmissionsStaffHavePermissions(String id, String expectedPermissions) {
+    @DisplayName("TC18S-03: each role has its permissions, and only the Patient has none")
+    void eachRoleHasItsPermissions(String id, String expectedPermissions) {
         // Act
         Role role = repository.findById(id);
 
@@ -53,6 +53,40 @@ class InMemoryRoleRepositoryTest {
         assertNotNull(role);
         List<String> codes = role.getPermissions().stream().map(Permission::getCode).toList();
         assertEquals(expectedPermissions.isEmpty() ? List.of() : List.of(expectedPermissions.split(";")), codes);
+    }
+
+    @Test
+    @DisplayName("TC19S-10: only the System administrator has CONSULT_AUDIT, as its last permission")
+    void tc19s10OnlyTheAdministratorHasConsultAuditAsItsLastPermission() {
+        // Act
+        List<String> rolesWithConsultAudit = repository.findAll().stream()
+                .filter(role -> role.getPermissions().stream().anyMatch(p -> p.getCode().equals("CONSULT_AUDIT")))
+                .map(Role::getId).toList();
+
+        // Assert
+        List<Permission> administrator = repository.findById("SYSTEM_ADMINISTRATOR").getPermissions();
+        assertAll(
+                () -> assertEquals(List.of("SYSTEM_ADMINISTRATOR"), rolesWithConsultAudit),
+                () -> assertEquals("CONSULT_AUDIT", administrator.get(administrator.size() - 1).getCode()));
+    }
+
+    @Test
+    @DisplayName("TC18S-04: ORDER_PROCEDURES only for the Physician, MANAGE_APPOINTMENTS only for Admissions")
+    void tc18s04EachNewPermissionBelongsToOneRole() {
+        // Act
+        List<String> withOrderProcedures = rolesWith("ORDER_PROCEDURES");
+        List<String> withManageAppointments = rolesWith("MANAGE_APPOINTMENTS");
+
+        // Assert
+        assertAll(
+                () -> assertEquals(List.of("PHYSICIAN"), withOrderProcedures),
+                () -> assertEquals(List.of("ADMISSIONS_STAFF"), withManageAppointments));
+    }
+
+    private List<String> rolesWith(String code) {
+        return repository.findAll().stream()
+                .filter(role -> role.getPermissions().stream().anyMatch(p -> p.getCode().equals(code)))
+                .map(Role::getId).toList();
     }
 
     // "physician" shows that the lookup is case sensitive.

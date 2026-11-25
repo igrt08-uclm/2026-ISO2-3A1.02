@@ -1,0 +1,44 @@
+name: Publish the Javadoc
+
+# Every push to develop publishes the Javadoc of all the modules on GitHub Pages,
+# so that the wiki can link each class to its page (D-034).
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  javadoc:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Generate the Javadoc of all the modules
+        run: mvn -B -DskipTests -Djacoco.skip=true install javadoc:aggregate -Ddoclint=none
+      - name: Prepare GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload the Javadoc
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/reports/apidocs
+      - name: Publish it
+        id: deployment
+        uses: actions/deploy-pages@v4

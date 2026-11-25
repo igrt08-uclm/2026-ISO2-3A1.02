@@ -6,15 +6,17 @@ Since D-032, each component is a Maven submodule of `server` and `client`, with 
 radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SNAPSHOT during It2), Java 21, JUnit 6.1.3
 ├── common/              shared contracts (interfaces and data classes), with its own version
 ├── server/              aggregator of the server submodules (one per component)
-│   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.2-SNAPSHOT), depends on common
-│   ├── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.1.1-SNAPSHOT), depends only on common
-│   └── c3-patients/     server of C3 (artifactId `server-c3-patients`, version 1.0.0-SNAPSHOT), depends only on common
+│   ├── c1-access/       server of C1 (artifactId `server-c1-access`, version 1.2.4-SNAPSHOT), depends on common
+│   ├── c2-configuration/ server of C2 (artifactId `server-c2-configuration`, version 1.1.2-SNAPSHOT), depends only on common
+│   ├── c3-patients/     server of C3 (artifactId `server-c3-patients`, version 1.0.1-SNAPSHOT), depends only on common
+│   └── c4-orders/       server of C4 (artifactId `server-c4-orders`, version 1.1.0-SNAPSHOT), depends only on common
 └── client/              aggregator of the client submodules (one per component)
-    ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.3-SNAPSHOT), depends on common, server-c1-access and,
+    ├── c1-access/       client of C1 (artifactId `client-c1-access`, version 1.2.6-SNAPSHOT), depends on common, server-c1-access and,
     │                    because its `Main` starts the whole program, on server-c2-configuration, client-c2-configuration,
-    │                    server-c3-patients and client-c3-patients
+    │                    server-c3-patients, client-c3-patients, server-c4-orders and client-c4-orders
     ├── c2-configuration/ client of C2 (artifactId `client-c2-configuration`, version 1.1.2-SNAPSHOT), depends only on common
-    └── c3-patients/     client of C3 (artifactId `client-c3-patients`, version 1.0.0-SNAPSHOT), depends only on common
+    ├── c3-patients/     client of C3 (artifactId `client-c3-patients`, version 1.0.0-SNAPSHOT), depends only on common
+    └── c4-orders/       client of C4 (artifactId `client-c4-orders`, version 1.1.0-SNAPSHOT), depends only on common
 ```
 - One Java package per component in each module, e.g. `es.uclm.esi.iso2.server.access` for C1. A component's package
   is created in its own iteration; for now `common` only has `es.uclm.esi.iso2.common.access` (C1).
@@ -39,6 +41,7 @@ radiodiagnostics/        parent pom, es.uclm.esi.iso2, product version (0.2.0-SN
 - JaCoCo measures the coverage in `mvn verify` (#90): the report is in `target/site/jacoco` of each module, and the
   build fails below 80 % of lines or 70 % of branches in any module (D-033).
 - When a use case is delivered, the version of its component goes up (D-014, D-021, D-032). C1 is in `server/c1-access` (`server-c1-access`,
-  1.2.2-SNAPSHOT after the patches #109 and #112) and `client/c1-access` (`client-c1-access`, 1.2.3-SNAPSHOT after UC12-client). A component does not depend
+  1.2.4-SNAPSHOT after the patches #109, #112, #116, #172 and #173) and `client/c1-access` (`client-c1-access`,
+  1.2.6-SNAPSHOT after UC12-client, #172, UC06-client and UC07-client). A component does not depend
   on the module of another one: what they share is a contract in `common`, for example `IAuditRecorder` or `IAuthenticatorSystem`.
   Changing a `pom.xml` needs the member's approval (rule 9 in [AGENTS.md](../AGENTS.md)).

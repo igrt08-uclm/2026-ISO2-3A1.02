@@ -15,26 +15,53 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/**
+ * Displays the welcome screen with the options available for the logged user. Each button is only shown to a user
+ * with its permission; for example, View audit log only to a user with {@code CONSULT_AUDIT}.
+ */
 public class IU_Welcome extends JPanel {
-    // Temporary: with UC18 this check uses the permissions of the role.
-    private static final String ADMINISTRATOR_ROLE = "SYSTEM_ADMINISTRATOR";
+    private static final String CONSULT_AUDIT = "CONSULT_AUDIT";
     private static final String MANAGE_ROLES = "MANAGE_ROLES";
     private static final String CONFIGURE_SYSTEM = "CONFIGURE_SYSTEM";
     private static final String CONFIGURE_INTEGRATIONS = "CONFIGURE_INTEGRATIONS";
     private static final String MANAGE_PATIENTS = "MANAGE_PATIENTS";
-    private static final int COLUMNS = 6;
+    private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
+    private static final int COLUMNS = 8;
 
+    /**
+     * Creates the welcome screen with the button <em>Log out</em>. It passes no action and an empty list of
+     * permissions, so it shows no other button.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     */
     public IU_Welcome(UserAccount user, Runnable onLogout) {
         this(user, onLogout, null);
     }
 
+    /**
+     * Creates the welcome screen with the button <em>View audit log</em> of UC19.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em>; the button is only shown to a user
+     *                    with the permission {@code CONSULT_AUDIT}, and not at all if this is {@code null}. This
+     *                    constructor passes an empty list of permissions, so it never shows the button.
+     */
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit) {
         this(user, onLogout, onViewAudit, List.of(), null);
     }
 
     /**
+     * Creates the welcome screen with the button <em>Manage roles</em> of UC18.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructor)
      * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
      *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em>; the button is only shown to a user
+     *                      with the permission {@code MANAGE_ROLES}, and not at all if this is {@code null}
      */
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
             Runnable onManageRoles) {
@@ -44,8 +71,12 @@ public class IU_Welcome extends JPanel {
     /**
      * Creates the welcome screen with the button <em>Configure system</em> of UC17.
      *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructor)
      * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
      *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructor)
      * @param onConfigureSystem is run when the user presses <em>Configure system</em>; the button is only shown to a
      *                          user with the permission {@code CONFIGURE_SYSTEM}, and not at all if this is
      *                          {@code null}
@@ -58,8 +89,12 @@ public class IU_Welcome extends JPanel {
     /**
      * Creates the welcome screen with the button <em>Configure integrations</em> of UC20.
      *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructor)
      * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
      *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructor)
      * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructor)
      * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em>; the button is only
      *                                shown to a user with the permission {@code CONFIGURE_INTEGRATIONS}, and not at
@@ -73,8 +108,12 @@ public class IU_Welcome extends JPanel {
     /**
      * Creates the welcome screen with the button <em>Manage patients</em> of UC12.
      *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructor)
      * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
      *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructor)
      * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructors)
      * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em> (see the other
      *                                constructors)
@@ -84,6 +123,54 @@ public class IU_Welcome extends JPanel {
     public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
             Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
             Runnable onManagePatients) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, onConfigureIntegrations,
+                onManagePatients, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Order procedure</em> of UC06.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructors)
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructors)
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructors)
+     * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em> (see the other
+     *                                constructors)
+     * @param onManagePatients is run when the user presses <em>Manage patients</em> (see the other constructors)
+     * @param onOrderProcedure is run when the user presses <em>Order procedure</em>; the button is only shown to a
+     *                         user with the permission {@code ORDER_PROCEDURES}, and not at all if this is
+     *                         {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
+            Runnable onManagePatients, Runnable onOrderProcedure) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, onConfigureIntegrations,
+                onManagePatients, onOrderProcedure, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Order follow-up</em> of UC07.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructors)
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructors)
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructors)
+     * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em> (see the other
+     *                                constructors)
+     * @param onManagePatients is run when the user presses <em>Manage patients</em> (see the other constructors)
+     * @param onOrderProcedure is run when the user presses <em>Order procedure</em> (see the other constructor)
+     * @param onOrderFollowUp is run when the user presses <em>Order follow-up</em>; the button is only shown to a user
+     *                        with the permission {@code ORDER_PROCEDURES}, and not at all if this is {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
+            Runnable onManagePatients, Runnable onOrderProcedure, Runnable onOrderFollowUp) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -97,7 +184,7 @@ public class IU_Welcome extends JPanel {
         addRow(lblWelcome, 0, 0, GridBagConstraints.HORIZONTAL);
         addRow(new JLabel("You are logged in as: " + roles), 1, 12, GridBagConstraints.HORIZONTAL);
         addRow(new JLabel("The functions of your role will appear here."), 2, 12, GridBagConstraints.HORIZONTAL);
-        if (onViewAudit != null && isAdministrator(user)) {
+        if (onViewAudit != null && hasPermission(permissions, CONSULT_AUDIT)) {
             JButton btnViewAudit = new JButton("View audit log");
             btnViewAudit.setMnemonic('V');
             btnViewAudit.addActionListener(event -> onViewAudit.run());
@@ -127,15 +214,23 @@ public class IU_Welcome extends JPanel {
             btnManagePatients.addActionListener(event -> onManagePatients.run());
             addButton(btnManagePatients, 4);
         }
-        addButton(btnLogout, 5);
+        if (onOrderProcedure != null && hasPermission(permissions, ORDER_PROCEDURES)) {
+            JButton btnOrderProcedure = new JButton("Order procedure");
+            btnOrderProcedure.setMnemonic('O');
+            btnOrderProcedure.addActionListener(event -> onOrderProcedure.run());
+            addButton(btnOrderProcedure, 5);
+        }
+        if (onOrderFollowUp != null && hasPermission(permissions, ORDER_PROCEDURES)) {
+            JButton btnOrderFollowUp = new JButton("Order follow-up");
+            btnOrderFollowUp.setMnemonic('F');
+            btnOrderFollowUp.addActionListener(event -> onOrderFollowUp.run());
+            addButton(btnOrderFollowUp, 6);
+        }
+        addButton(btnLogout, 7);
     }
 
     private static boolean hasPermission(List<Permission> permissions, String code) {
         return permissions.stream().anyMatch(permission -> code.equals(permission.getCode()));
-    }
-
-    private static boolean isAdministrator(UserAccount user) {
-        return user.getRoles().stream().anyMatch(role -> ADMINISTRATOR_ROLE.equals(role.getId()));
     }
 
     private void addButton(JButton button, int column) {

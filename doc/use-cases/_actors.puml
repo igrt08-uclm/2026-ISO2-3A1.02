@@ -1,0 +1,41 @@
+' Shared actor declarations for Use Case diagrams (D-004, D-015, D-046)
+
+!startsub User
+actor "User" as User
+!endsub
+
+!startsub SystemAdmin
+actor "System administrator" as SysAdmin
+!endsub
+
+!startsub AdmissionsStaff
+actor "Admissions staff" as Admissions
+!endsub
+
+!startsub Patient
+actor "Patient" as Patient
+!endsub
+
+!startsub Physician
+actor "Physician" as Physician
+!endsub
+
+!startsub AuthenticatorSystem
+actor "Authenticator System" as AuthSystem
+!endsub
+
+!startsub SSO
+actor "SSO" as SSO
+!endsub
+
+!startsub RisPacs
+actor "RIS/PACS" as RisPacs
+!endsub
+
+!startsub Client
+actor "Client" as ClientActor
+!endsub
+
+!startsub Server
+actor "Server" as ServerActor
+!endsub

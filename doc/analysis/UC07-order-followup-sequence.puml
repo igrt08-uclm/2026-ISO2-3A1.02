@@ -1,0 +1,35 @@
+@startuml UC07_OrderFollowUp_Sequence
+!include ../design/common/_style.puml
+
+title UC07 – Order periodic follow-up procedures (Analysis Sequence Diagram)
+
+actor "Physician" as Physician
+boundary "IU_OrderFollowUp" as IU
+control "Control_OrderFollowUp" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Patient" as Patient
+entity "TestType" as TestType
+entity "FollowUpOrder" as Order
+entity "SchedulingNeed" as Need
+entity "AuditLog" as Audit
+
+Physician -> IU : 1: selectPatient(patientId)
+IU -> Ctrl : 2: startFollowUpOrder(patientId)
+Ctrl -> UserAcc : 3: hasPermission(physician, ORDER_PROCEDURES)
+Ctrl -> Patient : 4: getPatient(patientId)
+Ctrl -> TestType : 5: getFollowUpEligibleTestTypes()
+Ctrl -> Order : 6: getFollowUpByPatient(patientId)
+Ctrl --> IU : 7: showFollowUpForm(patient, testTypes, orders)
+
+Physician -> IU : 8: enterFollowUpOrder(testTypeId, indication, justification, recurrenceInterval)
+IU -> Ctrl : 9: createFollowUpOrder(patientId, testTypeId, indication, justification, recurrenceInterval)
+Ctrl -> UserAcc : 10: hasPermission(physician, ORDER_PROCEDURES)
+Ctrl -> Order : 11: validate(patientId, testTypeId, indication, justification, recurrenceInterval)
+Ctrl -> Order : 12: create(patientId, testTypeId, indication, justification, recurrenceInterval, physician)
+loop for each due date in the next 12 months
+  Ctrl -> Need : 13: create(orderId, dueDate)
+end
+Ctrl -> Audit : 14: register(physician, FOLLOW_UP_ORDER_CREATED, orderId)
+Ctrl --> IU : 15: showConfirmation(order)
+
+@enduml

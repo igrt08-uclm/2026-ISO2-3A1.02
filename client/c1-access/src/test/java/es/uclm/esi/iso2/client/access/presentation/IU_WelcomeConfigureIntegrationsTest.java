@@ -26,6 +26,8 @@ class IU_WelcomeConfigureIntegrationsTest {
             new Permission("CONFIGURE_INTEGRATIONS", "Configure the integrations with other hospital systems");
     private static final Permission CONFIGURE_SYSTEM =
             new Permission("CONFIGURE_SYSTEM", "Configure the parameters of the system");
+    private static final Permission CONSULT_AUDIT =
+            new Permission("CONSULT_AUDIT", "Consult the audit log of the system activity");
     private static final Permission MANAGE_ROLES =
             new Permission("MANAGE_ROLES", "Assign roles to users and permissions to roles");
     private static final Runnable NOTHING = () -> { };
@@ -62,7 +64,8 @@ class IU_WelcomeConfigureIntegrationsTest {
     void administratorSeesTheFiveButtonsInOrder() {
         // Act
         IU_Welcome welcome = new IU_Welcome(admin, NOTHING, NOTHING,
-                List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS), NOTHING, NOTHING, NOTHING);
+                List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, CONSULT_AUDIT), NOTHING, NOTHING,
+                NOTHING);
 
         // Assert
         assertEquals(List.of("View audit log", "Manage roles", "Configure system", "Configure integrations",
@@ -120,7 +123,7 @@ class IU_WelcomeConfigureIntegrationsTest {
     @DisplayName("TC20C-09 The older constructors do not show Configure integrations")
     void olderConstructorsDoNotShowTheButton() {
         // Arrange
-        List<Permission> all = List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS);
+        List<Permission> all = List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, CONSULT_AUDIT);
 
         // Act
         IU_Welcome ofUc17 = new IU_Welcome(admin, NOTHING, NOTHING, all, NOTHING, NOTHING);

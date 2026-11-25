@@ -1,0 +1,35 @@
+@startuml UC06_OrderProcedure_Sequence
+!include ../design/common/_style.puml
+
+title UC06 – Order a diagnostic procedure (Analysis Sequence Diagram)
+
+actor "Physician" as Physician
+boundary "IU_OrderProcedure" as IU
+control "Control_OrderProcedure" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Patient" as Patient
+entity "TestType" as TestType
+entity "Priority" as Priority
+entity "DiagnosticOrder" as Order
+entity "SchedulingNeed" as Need
+entity "AuditLog" as Audit
+
+Physician -> IU : 1: selectPatient(patientId)
+IU -> Ctrl : 2: startOrder(patientId)
+Ctrl -> UserAcc : 3: hasPermission(physician, ORDER_PROCEDURES)
+Ctrl -> Patient : 4: getPatient(patientId)
+Ctrl -> TestType : 5: getActiveTestTypes()
+Ctrl -> Priority : 6: getPriorities()
+Ctrl -> Order : 7: getOrdersByPatient(patientId)
+Ctrl --> IU : 8: showOrderForm(patient, testTypeId, indication, justification, priorityId)
+
+Physician -> IU : 9: enterOrder(testTypeId, indication, justification, priorityId)
+IU -> Ctrl : 10: createOrder(patientId, testTypeId, indication, justification, priorityId)
+Ctrl -> UserAcc : 11: hasPermission(physician, ORDER_PROCEDURES)
+Ctrl -> Order : 12: validate(patientId, testTypeId, indication, justification, priorityId)
+Ctrl -> Order : 13: create(patientId, testTypeId, indication, justification, priorityId, physician)
+Ctrl -> Need : 14: create(orderId)
+Ctrl -> Audit : 15: register(physician, ORDER_CREATED, orderId)
+Ctrl --> IU : 16: showConfirmation(order)
+
+@enduml

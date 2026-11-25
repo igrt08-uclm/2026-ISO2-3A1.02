@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Manages roles and permissions for user accounts (UC18).
+ */
 public class RoleManagementService implements IRoleManagementService {
     private static final String MANAGE_ROLES = "MANAGE_ROLES";
     private static final String ROLE_ASSIGNED = "ROLE_ASSIGNED";
@@ -30,6 +33,14 @@ public class RoleManagementService implements IRoleManagementService {
     private final IUserAccountRepository userAccountRepository;
     private final IAuditRecorder auditRecorder;
 
+    /**
+     * Creates the service with the given repositories and audit recorder.
+     *
+     * @param roleRepository the repository for roles
+     * @param permissionRepository the repository for permissions
+     * @param userAccountRepository the repository for user accounts
+     * @param auditRecorder the audit recorder to register role changes
+     */
     public RoleManagementService(IRoleRepository roleRepository, IPermissionRepository permissionRepository,
             IUserAccountRepository userAccountRepository, IAuditRecorder auditRecorder) {
         this.roleRepository = roleRepository;

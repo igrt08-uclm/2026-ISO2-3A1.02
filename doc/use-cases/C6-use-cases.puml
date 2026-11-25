@@ -1,0 +1,33 @@
+@startuml Component_6
+!include ../design/common/_style.puml
+left to right direction
+
+title Component 6 – Patient Portal (Client & Server Use Cases)
+
+!includesub _actors.puml!User
+!includesub _actors.puml!Patient
+!includesub _actors.puml!Client
+!includesub _actors.puml!Server
+
+Patient --|> User
+
+package "C6 Client" {
+  usecase "View and manage own scheduled appointments (Client)" as UC01_C
+  usecase "Submit incident reports and satisfaction surveys (Client)" as UC04_C
+}
+
+package "C6 Server" {
+  usecase "View and manage own scheduled appointments (Server)" as UC01_S
+  usecase "Submit incident reports and satisfaction surveys (Server)" as UC04_S
+}
+
+Patient -- UC01_C
+Patient -- UC04_C
+
+UC01_C -- ServerActor
+UC04_C -- ServerActor
+
+ClientActor -- UC01_S
+ClientActor -- UC04_S
+
+@enduml

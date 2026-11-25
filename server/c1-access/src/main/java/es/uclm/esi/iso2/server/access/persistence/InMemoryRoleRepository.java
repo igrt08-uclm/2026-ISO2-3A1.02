@@ -9,10 +9,13 @@ public class InMemoryRoleRepository implements IRoleRepository {
     private final List<Role> roles = new ArrayList<>(List.of(
             new Role("SYSTEM_ADMINISTRATOR", "System administrator", "Configures and manages the system",
                     List.of(InMemoryPermissionRepository.MANAGE_ROLES, InMemoryPermissionRepository.CONFIGURE_SYSTEM,
-                            InMemoryPermissionRepository.CONFIGURE_INTEGRATIONS)),
-            new Role("PHYSICIAN", "Physician", "Requests and reviews tests and reports"),
+                            InMemoryPermissionRepository.CONFIGURE_INTEGRATIONS,
+                            InMemoryPermissionRepository.CONSULT_AUDIT)),
+            new Role("PHYSICIAN", "Physician", "Requests and reviews tests and reports",
+                    List.of(InMemoryPermissionRepository.ORDER_PROCEDURES)),
             new Role("ADMISSIONS_STAFF", "Admissions staff", "Registers patients and manages appointments",
-                    List.of(InMemoryPermissionRepository.MANAGE_PATIENTS)),
+                    List.of(InMemoryPermissionRepository.MANAGE_PATIENTS,
+                            InMemoryPermissionRepository.MANAGE_APPOINTMENTS)),
             new Role("PATIENT", "Patient", "Accesses their own appointments and results")));
 
     @Override

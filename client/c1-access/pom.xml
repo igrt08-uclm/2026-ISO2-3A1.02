@@ -7,12 +7,12 @@
   <parent>
     <groupId>es.uclm.esi.iso2</groupId>
     <artifactId>radiodiagnostics</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>client-c1-access</artifactId>
-  <version>1.2.3</version>
+  <version>1.2.6</version>
 
   <dependencies>
     <dependency>
@@ -38,6 +38,14 @@
     <dependency>
       <groupId>es.uclm.esi.iso2</groupId>
       <artifactId>client-c3-patients</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>es.uclm.esi.iso2</groupId>
+      <artifactId>server-c4-orders</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>es.uclm.esi.iso2</groupId>
+      <artifactId>client-c4-orders</artifactId>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

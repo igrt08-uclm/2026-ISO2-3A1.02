@@ -20,6 +20,9 @@ Every task that changes files follows this cycle. Do not skip steps, and do not 
 1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. Then read the sub-issue and its
    use case issue (`gh issue view <n>`), the contracts (section 6 of the component issue), the approved design
    (`doc/design/`), the decisions they cite and, if it exists, the plan of the sub-issue in `doc/plans/`.
+   Check that the sub-issue is assigned to the member who asked for the work. If it is assigned to someone else, or
+   its plan shows a step *In progress* by another member, stop and tell the member (D-041). Remind the member to move
+   it to *In progress* on the project board.
 2. **Ask.** Write every doubt, ambiguity or missing piece in one message and wait for the answers. Never fill a gap
    with an assumption. If the design or a contract is missing or looks wrong, say so.
 3. **Plan.** Write or update `doc/plans/UCxx-server.md` or `doc/plans/UCxx-client.md` from
@@ -86,6 +89,25 @@ A question that does not change any file does not need a plan.
     the production code. When a test fails, explain whether the error is in the test or in the code, and never change
     an expected value to make a test pass. The build fails below 80 % of lines or 70 % of branches (D-033).
 18. **Javadoc as you write** (D-034). Every class and public method you create or change has its Javadoc in English.
+19. **Tokens of each iteration** (D-043). When an iteration ends, or when the member asks, count the tokens that the
+    member used with you in that iteration from the logs of your tool (models with their % of output, calls, new
+    input, cached input and output; premium requests if you are GitHub Copilot and have no local logs). Show the row
+    to the member and, after a "yes", add it to their section of the wiki page *Token usage*, in the same format as
+    the other rows. Never show paths, prompts or contents of the logs: only the counts.
+20. **Traceability matrix** (D-044). When the pull request of a sub-issue is merged, or when the member asks, fill in
+    its row of the wiki page *Requirements traceability matrix*: the pull request, the control class or the screen,
+    and its test classes, with links to `develop`. Show the change to the member and update the page only after a
+    "yes". Do not fill in cells you cannot cite (rule 12).
+21. **Spend tokens where they add quality** (D-045). Every call re-reads the whole conversation:
+    our calls re-read about 370,000 tokens each (wiki *Token usage*). Saving tokens never skips a rule above.
+    - One task per conversation: when a step is committed and the plan updated (step 8), start a new conversation
+      from AGENTS.md and the plan. Write first in the plan or the issue anything agreed only in the chat.
+    - Read only what the task needs: the decisions cited (`grep -n "^## D-0" DECISIONS.md`, then only those
+      entries), the *Status* of the plan first, and no file twice unless it changed.
+    - Filter long output without hiding failures: the build as in
+      [agents/token-efficiency.md](agents/token-efficiency.md), never `mvn -q`.
+    - Read [agents/token-efficiency.md](agents/token-efficiency.md) before your first build, before you delegate to a
+      subagent and when you count tokens (rule 19).
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
@@ -100,7 +122,7 @@ choose on your own: tell the member.
 | Issues | Component issue → use case issue → client and server sub-issues, using the templates in `.github/ISSUE_TEMPLATE/`; the title of a use case issue carries its component and version, e.g. `UC20 – Server (C2 v1.1.0)` | D-015, D-018, D-032 |
 | Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); each component submodule (`server/cN`, `client/cN`) has its own version: MINOR per use case of that component, PATCH per fix. Always write the component with its version (`C2 1.1.0`); names and versions are in [agents/components.md](agents/components.md) | D-014, D-021, D-032, Maven practice p. 19 |
 | Releases | `release/0.x.0` from `develop`, merged into `main` and `develop`, annotated tag `v0.x.0` on `main` | Kickoff p. 9, Git practice p. 19 |
-| Diagrams | Propose them as PlantUML text, never as images; the team imports and approves them in Visual Paradigm 18.1 | D-008, D-017, assignment p. 5, note 9 |
+| Diagrams | Modular PlantUML text files (`.puml`) under `doc/` (`doc/use-cases/`, `doc/analysis/`, `doc/design/`), with shared definitions via `!includesub`; AI-generated diagrams are only proposals and become official once reviewed and approved in their pull request | D-008, D-046, assignment p. 5, note 9 |
 | Language | Code, comments, commits, issues and documents in English | D-016 |
 | Tests | Test class `<Class>Test` in `src/test/java`, same package; one method per case of the member's table; `@DisplayName` in English; arrange, act, assert | D-034, S.04.01 |
 | Javadoc | Every class and public method, in English, written together with the code | D-034 |
@@ -112,12 +134,13 @@ choose on your own: tell the member.
 | Code structure, build and tests | [agents/architecture.md](agents/architecture.md) |
 | Components, iterations, versions and dependencies | [agents/components.md](agents/components.md) |
 | Plan and progress of each sub-issue | [doc/plans/](doc/plans/) |
-| Approved design that agents can read | [doc/design/](doc/design/) (agents cannot open `doc/ISO-Project.vpp`) |
+| Approved UML models (PlantUML) | [doc/use-cases/](doc/use-cases/), [doc/analysis/](doc/analysis/) and [doc/design/](doc/design/) (official `.puml` sources; `doc/ISO-Project.vpp` retired by D-046) |
 | Requirements (FR table, actors) | Wiki: *Requirements and Use Cases* |
 | Plan, effort and cost | Wiki: *Planification* |
 | Iterations, dates and versions | Wiki: *Traceability and releases* |
 | Meeting minutes and assigned tasks | Wiki: *Minutes of meetings* and the issues |
 | Errors already made | Wiki: *Errors and lessons learned* |
+| How to spend fewer tokens without losing quality | [agents/token-efficiency.md](agents/token-efficiency.md) |
 | How the professor solved a similar problem (inspiration only, rule 16) | https://github.com/IsmaelCaballero/PrISO2-25-26 |
 
 The wiki is at https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki. The course guidelines (assignment, Kickoff, Git

@@ -1,0 +1,18 @@
+@startuml UC19_Audit_Sequence
+!include ../design/common/_style.puml
+
+title UC19 – Audit system activity and access to clinical data (Analysis Sequence Diagram)
+
+actor "System administrator" as Admin
+boundary "IU_Audit" as IU
+control "Control_Audit" as Ctrl
+entity "AuditLog" as Audit
+entity "UserAccount" as UserAcc
+
+Admin -> IU : 1: enterFilters(dateRange, user, event, patient)
+IU -> Ctrl : 2: searchRecords(filters)
+Ctrl -> Audit : 3: search(filters)
+Ctrl -> UserAcc : 4: obtainUserData(id)
+Ctrl --> IU : 5: showRecords(records)
+
+@enduml

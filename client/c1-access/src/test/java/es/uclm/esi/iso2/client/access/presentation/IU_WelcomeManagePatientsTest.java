@@ -30,8 +30,10 @@ class IU_WelcomeManagePatientsTest {
             new Permission("CONFIGURE_SYSTEM", "Configure the parameters of the system");
     private static final Permission MANAGE_ROLES =
             new Permission("MANAGE_ROLES", "Assign roles to users and permissions to roles");
+    private static final Permission CONSULT_AUDIT =
+            new Permission("CONSULT_AUDIT", "Consult the audit log of the system activity");
     private static final List<Permission> ALL =
-            List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, MANAGE_PATIENTS);
+            List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, MANAGE_PATIENTS, CONSULT_AUDIT);
     private static final Runnable NOTHING = () -> { };
 
     private UserAccount admissions;
@@ -102,7 +104,8 @@ class IU_WelcomeManagePatientsTest {
     void userWithoutManagePatientsDoesNotSeeTheButton() {
         // Act
         IU_Welcome administrator = new IU_Welcome(admin, NOTHING, NOTHING,
-                List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS), NOTHING, NOTHING, NOTHING, NOTHING);
+                List.of(MANAGE_ROLES, CONFIGURE_SYSTEM, CONFIGURE_INTEGRATIONS, CONSULT_AUDIT), NOTHING, NOTHING,
+                NOTHING, NOTHING);
         IU_Welcome withoutPermissions =
                 new IU_Welcome(admissions, NOTHING, NOTHING, List.of(), NOTHING, NOTHING, NOTHING, NOTHING);
 
