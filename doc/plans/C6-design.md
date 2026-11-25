@@ -267,7 +267,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] 1. **UC01 Design (C6 `1.0.0`):** Update `C1-common.puml`, `C1-server-design.puml`, `C5-common.puml`, and `C5-server-design.puml` for D48/D51 contracts; create `doc/design/common/C6-common.puml`, `doc/design/C6-server-design.puml`, `doc/design/C6-client-design.puml` (UC01 scope), and `doc/plans/C6-context.md` (D-047); verify `mvn -B verify` is green; commit on `feature/c6-design`. (`df9d9d1`)
 - [x] 2. **UC04 Design (C6 `1.1.0`):** Extend `doc/design/common/C6-common.puml`, `doc/design/C6-server-design.puml`, `doc/design/C6-client-design.puml`, and `doc/plans/C6-context.md` with UC04 (`SurveyAspect`, `IncidentReport`, `SatisfactionSurvey`, `IPatientFeedbackService`, `PatientFeedbackService`, repositories, `IU_PatientFeedback`); verify `mvn -B verify` is green; commit on `feature/c6-design`. (`d7c9537`)
 - [x] 3. **Rendered previews:** Generate `doc/design/C6-server-design.png` and `doc/design/C6-client-design.png` via `plantuml -tpng` (D-046) and fix left-to-right layout so previews are not clipped. (`72d27d1`, `631cbe8`)
-- [ ] 4. **Review fixes & synced PNGs:** Scope C4 `USE_PATIENT_PORTAL` patch strictly to `markSchedulingNeedPending`, require ownership check on C5 `USE_PATIENT_PORTAL` patch, add reschedule dialog UI texts, re-render modified `C1`/`C5` PNGs (D-046), and update `C6-context.md`.
+- [x] 4. **Review fixes & synced PNGs:** Scope C4 `USE_PATIENT_PORTAL` patch strictly to `markSchedulingNeedPending`, require ownership check on C5 `USE_PATIENT_PORTAL` patch, add reschedule dialog UI texts, re-render modified `C1`/`C5` PNGs (D-046), and update `C6-context.md`. (`de3e4be`)
 
 ## Verification
 - [x] Every UC01 and UC04 requirement, alternative scenario, and acceptance criterion in `#186`–`#192` and `AN-C6-DECISIONS.md` (D45–D55) is covered by the design.
@@ -277,7 +277,7 @@ Tick each step with the hash of its commit (green `mvn -B verify`).
 - [x] `mvn -B verify` is green.
 
 ## Status
-- **In progress:** Step 4 (review fixes & synced PNGs)
-- **Next step:** Finish Step 4, verify `mvn -B verify`, commit and push to PR #224; once merged, tick the *Design* RADIT box on `#187`–`#192` (rule 22) and coordinate the D-036 PATCH PRs for C1, C2, C4, and C5 before UC01/UC04 implementation.
+- **In progress:** nothing
+- **Next step:** Review and merge PR #224 (`Refs #186`); once merged, tick the *Design* RADIT box on `#187`–`#192` (rule 22) and coordinate the D-036 PATCH PRs for C1, C2, C4, and C5 before UC01/UC04 implementation.
 - **Open questions:** none (all Step 2 defaults approved by Marcos on 25/11/2026).
 - **Last update:** 25/11/2026, Marcos Loro
