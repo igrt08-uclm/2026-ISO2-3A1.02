@@ -1,5 +1,6 @@
 @startuml C6-server-design
 !include common/_style.puml
+left to right direction
 
 title C6 – Patient Portal (Server Design)
 
