@@ -131,5 +131,16 @@ interface IIntegrationManagementService {
   +getIntegration(requester : String, system : HospitalSystemType) : IntegrationConfiguration throws AccessDeniedException
   +configureIntegration(requester : String, configuration : IntegrationConfiguration) : IntegrationConfiguration throws AccessDeniedException, ValidationException
   +testConnection(requester : String, system : HospitalSystemType) : ConnectionTestResult throws AccessDeniedException
+  +getStudy(requester : String, studyId : String) : ImagingStudy throws AccessDeniedException, ValidationException
+}
+!endsub
+
+!startsub ImagingStudy
+class ImagingStudy <<entity>> {
+  -studyId : String
+  -patientId : String
+  -modality : String
+  -studyDate : LocalDate
+  -imageReferences : List<String>
 }
 !endsub

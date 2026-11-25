@@ -34,3 +34,66 @@ interface IProcedureExecutionService {
   +recordExecution(requester : String, execution : ProcedureExecution) : ProcedureExecution throws AccessDeniedException, ValidationException
 }
 !endsub
+
+!startsub ReportStatus
+enum ReportStatus {
+  DRAFT
+  VALIDATED
+}
+!endsub
+
+!startsub DiagnosticReport
+class DiagnosticReport <<entity>> {
+  -reportId : String
+  -executionId : String
+  -patientId : String
+  -author : String
+  -createdAt : LocalDateTime
+  -findings : String
+  -impression : String
+  -imageReferences : List<String>
+  -status : ReportStatus
+  -validator : String
+  -validatedAt : LocalDateTime
+  +validated(validator : String, validatedAt : LocalDateTime) : DiagnosticReport
+}
+!endsub
+
+!startsub Addendum
+class Addendum <<entity>> {
+  -addendumId : String
+  -reportId : String
+  -author : String
+  -addedAt : LocalDateTime
+  -text : String
+}
+!endsub
+
+!startsub ReportableExecutionView
+class ReportableExecutionView <<entity>> {
+  -execution : ProcedureExecution
+  -patientName : String
+  -testTypeName : String
+  -report : DiagnosticReport
+}
+!endsub
+
+!startsub ReportWorkspaceView
+class ReportWorkspaceView <<entity>> {
+  -execution : ProcedureExecution
+  -study : ImagingStudy
+  -report : DiagnosticReport
+  -addenda : List<Addendum>
+}
+!endsub
+
+!startsub IDiagnosticReportService
+interface IDiagnosticReportService {
+  +getMyReportableExecutions(requester : String) : List<ReportableExecutionView> throws AccessDeniedException
+  +openReport(requester : String, executionId : String) : ReportWorkspaceView throws AccessDeniedException, ValidationException
+  +saveDraft(requester : String, executionId : String, findings : String, impression : String, imageReferences : List<String>) : DiagnosticReport throws AccessDeniedException, ValidationException
+  +getReportsToValidate(requester : String) : List<DiagnosticReport> throws AccessDeniedException
+  +validateReport(requester : String, reportId : String) : DiagnosticReport throws AccessDeniedException, ValidationException
+  +addAddendum(requester : String, reportId : String, text : String) : Addendum throws AccessDeniedException, ValidationException
+}
+!endsub

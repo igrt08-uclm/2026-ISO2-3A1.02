@@ -8,7 +8,7 @@
 |---|---|
 | **Component** | C7 Execution and reports · module `c7-reports` · UC10 → 1.0.0, UC09 → 1.1.0 ([agents/components.md](../../agents/components.md)) |
 | **Iteration** | It7 · Milestone 4 · component issue #193 |
-| **Last update** | 25/11/2026, Denis Ionescu, `feature/c7-design` (design) |
+| **Last update** | 25/11/2026, Denis Ionescu, pull request #225 (design) |
 
 ## Decisions that apply
 - D-011 – Only UC10 and UC09 are modelled in It7 (AN-C7 D56).
@@ -36,9 +36,9 @@
 ## Approved design (`doc/design/`)
 | Side | Classes | File |
 |---|---|---|
-| common | `ProcedureExecution`, `ExecutionFormView`, `IProcedureExecutionService` (UC09 types added in step 2) | `common/C7-common.puml` |
-| server | `ProcedureExecutionService`, `IProcedureExecutionRepository`, `InMemoryProcedureExecutionRepository` | `C7-server-design.puml` |
-| client | `IU_RecordExecution` | `C7-client-design.puml` |
+| common | `ProcedureExecution`, `ExecutionFormView`, `IProcedureExecutionService` (UC10); `DiagnosticReport`, `ReportStatus`, `Addendum`, `ReportableExecutionView`, `ReportWorkspaceView`, `IDiagnosticReportService` (UC09); `ImagingStudy` in `common/C2-common.puml` | `common/C7-common.puml` |
+| server | `ProcedureExecutionService`, `DiagnosticReportService`, `IProcedureExecutionRepository`, `IDiagnosticReportRepository`, `IAddendumRepository` and their `InMemory*` classes | `C7-server-design.puml` |
+| client | `IU_RecordExecution`, `IU_DiagnosticReports` | `C7-client-design.puml` |
 
 ## Sub-issues
 | Issue | Branch | Status |

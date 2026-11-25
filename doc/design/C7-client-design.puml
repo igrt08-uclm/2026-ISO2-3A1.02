@@ -13,12 +13,19 @@ package "common" {
     !includesub common/C2-common.puml!TestType
     !includesub common/C7-common.puml!ProcedureExecution
     !includesub common/C7-common.puml!ExecutionFormView
+    !includesub common/C2-common.puml!ImagingStudy
+    !includesub common/C7-common.puml!ReportStatus
+    !includesub common/C7-common.puml!DiagnosticReport
+    !includesub common/C7-common.puml!Addendum
+    !includesub common/C7-common.puml!ReportableExecutionView
+    !includesub common/C7-common.puml!ReportWorkspaceView
   }
 
   package "Contracts (interfaces)" {
     !includesub common/shared-contracts.puml!AccessDeniedException
     !includesub common/shared-contracts.puml!ValidationException
     !includesub common/C7-common.puml!IProcedureExecutionService
+    !includesub common/C7-common.puml!IDiagnosticReportService
   }
 
 }
@@ -32,6 +39,21 @@ package "Presentation" {
     +showWorklist(entries : List<ScheduleEntry>) : void
     +showEmptyWorklist() : void
     +showExecutionForm(form : ExecutionFormView) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+  class IU_DiagnosticReports <<boundary>> {
+    +IU_DiagnosticReports(diagnosticReportService : IDiagnosticReportService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadData() : void
+    +onOpenReport(executionId : String) : void
+    +onSaveDraft(executionId : String, findings : String, impression : String, imageReferences : List<String>) : void
+    +onValidateReport(reportId : String) : void
+    +onAddAddendum(reportId : String, text : String) : void
+    +showExecutions(executions : List<ReportableExecutionView>) : void
+    +showReportsToValidate(reports : List<DiagnosticReport>) : void
+    +showWorkspace(workspace : ReportWorkspaceView) : void
     +showErrors(errors : List<String>) : void
     +showAccessDenied() : void
     +showConfirmation(message : String) : void
@@ -51,6 +73,20 @@ IProcedureExecutionService ..> ValidationException : <<throw>>
 IU_RecordExecution ..> IProcedureExecutionService : <<use>>
 IU_RecordExecution ..> AccessDeniedException : <<use>>
 IU_RecordExecution ..> ValidationException : <<use>>
+DiagnosticReport "*" -- "1" ReportStatus : status
+DiagnosticReport "0..1" -- "1" ProcedureExecution : executionId
+Addendum "*" -- "1" DiagnosticReport : reportId
+ReportableExecutionView "0..*" -- "1" ProcedureExecution : execution
+ReportableExecutionView "0..*" -- "0..1" DiagnosticReport : report
+ReportWorkspaceView "0..*" -- "1" ProcedureExecution : execution
+ReportWorkspaceView "0..*" -- "0..1" ImagingStudy : study
+ReportWorkspaceView "0..*" -- "0..1" DiagnosticReport : report
+ReportWorkspaceView "0..*" -- "*" Addendum : addenda
+IDiagnosticReportService ..> AccessDeniedException : <<throw>>
+IDiagnosticReportService ..> ValidationException : <<throw>>
+IU_DiagnosticReports ..> IDiagnosticReportService : <<use>>
+IU_DiagnosticReports ..> AccessDeniedException : <<use>>
+IU_DiagnosticReports ..> ValidationException : <<use>>
 
 ' ==================== Notes ====================
 note as N1
@@ -61,5 +97,15 @@ note as N1
   Access denied: inputs disabled, Back enabled.
 end note
 N1 .. IU_RecordExecution
+
+note as N2
+  Realizes IU_DiagnosticReports (UC09, C7 1.1.0).
+  Tabs: My procedures (performed executions of the physician)
+  and Reports to validate (drafts of other physicians, D65).
+  Workspace: study images, findings, impression, addenda.
+  Save draft disabled for VALIDATED; Add addendum for DRAFT.
+  Asks confirmation via confirm before validating.
+end note
+N2 .. IU_DiagnosticReports
 
 @enduml

@@ -87,7 +87,7 @@ Open items of #193 §10 and AN-C7 D57–D67, answered by Denis (owner of C7 Desi
 | `doc/design/common/C2-common.puml` | update (Step 2) | `ImagingStudy`; `getStudy` in `IIntegrationManagementService` |
 | `doc/design/C2-server-design.puml` | update (Step 2) | `getStudy` in `IntegrationManagementService`, `IRisPacsGateway`, `RisPacsGatewaySimulator` |
 | `doc/design/C7-server-design.png`, `doc/design/C7-client-design.png` | create | Previews rendered with `plantuml -tpng` (D-046), shown in *Design diagrams* below |
-| Patched C2/C5 PNGs | update (Step 3) | Re-rendered previews of the patched diagrams |
+| `doc/design/C2-server-design.png`, `C2-client-design.png`, `C5-server-design.png`, `C5-client-design.png` | update | Re-rendered from the patched `.puml` files (D-046) |
 
 *(Rule 23 / D-048: `AGENTS.md`, `DECISIONS.md`, `agents/*.md` and `.github/` are not modified in this branch.)*
 
@@ -200,7 +200,7 @@ All validation errors of one call are collected into one `ValidationException`; 
 
 ---
 
-## Design diagrams (Step 1 – UC10)
+## Design diagrams (UC10 and UC09)
 
 Rendered previews of the `.puml` files (D-046). The `.puml` files are the source of truth; the PNGs are regenerated
 with `plantuml -tpng` whenever they change.
@@ -219,18 +219,18 @@ Source: [`C7-client-design.puml`](../design/C7-client-design.puml)
 
 ## Steps
 Tick each step with the hash of its commit.
-- [ ] 1. **UC10 (C7 `1.0.0`):** this plan (with the *Design diagrams* previews); `C7-common.puml`, `C7-server-design.puml`, `C7-client-design.puml` (UC10 scope); `C5-common.puml`, `C5-server-design.puml` (EXECUTED, `getAppointment`, `markAppointmentExecuted`); `C7-context.md`; `C7-server-design.png`, `C7-client-design.png`.
-- [ ] 2. **UC09 (C7 `1.1.0`):** extend the C7 files with `DiagnosticReport`, `ReportStatus`, `Addendum`, the views, `IDiagnosticReportService`, `DiagnosticReportService`, repositories and `IU_DiagnosticReports`; `C2-common.puml`, `C2-server-design.puml` (`ImagingStudy`, `getStudy`).
-- [ ] 3. **Previews:** re-render `C7-server-design.png`, `C7-client-design.png` with UC09 and the patched C2/C5 PNGs with `plantuml -tpng`, and update *Design diagrams*.
+- [x] 1. **UC10 (C7 `1.0.0`):** this plan (with the *Design diagrams* previews); `C7-common.puml`, `C7-server-design.puml`, `C7-client-design.puml` (UC10 scope); `C5-common.puml`, `C5-server-design.puml` (EXECUTED, `getAppointment`, `markAppointmentExecuted`); `C7-context.md`; `C7-server-design.png`, `C7-client-design.png`. (`9c2b659`)
+- [x] 2. **UC09 (C7 `1.1.0`):** extend the C7 files with `DiagnosticReport`, `ReportStatus`, `Addendum`, the views, `IDiagnosticReportService`, `DiagnosticReportService`, repositories and `IU_DiagnosticReports`; `C2-common.puml`, `C2-server-design.puml` (`ImagingStudy`, `getStudy`); C7, C2 and C5 PNGs re-rendered.
+- [ ] 3. **Sync with `develop`:** after #186 (C6 design) is merged, `git merge origin/develop` and re-render the C5 and C7 PNGs so `Appointment` shows `confirmedByPatient`. Skipped if this PR is merged first.
 
 ## Verification
-- [ ] Every flow and alternative of UC10 and UC09 in AN-C7 (msgs and 3a…48c) maps to an operation, a rule or a text of this plan.
-- [ ] All `!includesub` references resolve; the four diagrams render without errors.
-- [ ] `C7-context.md` follows `CONTEXT-TEMPLATE.md` and cites its sources.
-- [ ] No shared process files changed (rule 23, D-048).
+- [x] Every flow and alternative of UC10 and UC09 in AN-C7 (msgs and 3a…48c) maps to an operation, a rule or a text of this plan.
+- [x] All `!includesub` references resolve; the C7, C2 and C5 diagrams render without errors.
+- [x] `C7-context.md` follows `CONTEXT-TEMPLATE.md` and cites its sources.
+- [x] No shared process files changed (rule 23, D-048).
 
 ## Status
-- **In progress:** Step 1
-- **Next step:** review of this plan and the UC10 diagrams by Denis
+- **In progress:** nothing
+- **Next step:** review of PR #225 (`Refs #193, #194, #197`); after the merge, tick *Design* on #193, #194, #197 and ask the owners of C1, C2, C3 and C5 for the D-036 code patches
 - **Open questions:** none
 - **Last update:** 25/11/2026, Denis Ionescu
