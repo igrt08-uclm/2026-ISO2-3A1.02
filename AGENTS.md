@@ -49,6 +49,12 @@ A question that does not change any file does not need a plan.
 ## Rules you must always follow
 1. **You suggest, the team decides** (D-008). Do not take requirements, analysis, design or architecture decisions,
    and do not change a decision of DECISIONS.md.
+   - **Micro-decision threshold:** non-contractual UI and code ergonomics that do not change a requirement, public
+     interface (`common`), DTO field or screen flow — such as unique keyboard mnemonics (`Alt+<key>`), clearing
+     dependent tables on selection change, disabling inputs on `AccessDeniedException` (keeping *Back* enabled), or
+     removing an unused helper that only a test uses — are decided by the implementing member, logged in the plan,
+     and do **not** require tagging other disciplines for approval. It does **not** cover a text the user reads, a
+     confirmation question or a limit of the domain: those are Design's (see *Decision ownership*).
 2. **Only your sub-issue.** One sub-issue and one branch per session. Change only what your sub-issue needs: do not
    refactor, rename or "improve" anything else; write it in the plan as an open question instead.
 3. **Only the current iteration.** Do not specify, model or implement use cases of other iterations (D-011;
@@ -123,6 +129,31 @@ A question that does not change any file does not need a plan.
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
+
+## Decision ownership
+When a genuine ambiguity arises (not covered by the micro-decision threshold in rule 1), tag **only the owning
+discipline** once, in a single thread (either the sub-issue or its pull request, not both):
+
+| Question about | Owner |
+|---|---|
+| Requirements, priorities, actor scope, acceptance criteria | **Requirements / Analysis** |
+| Domain rules, limits and validations (how many months, which patient is active) | **Design** |
+| Public interfaces (`common`), DTO fields and views, screen flows | **Design** |
+| The text a user reads: messages, labels, confirmation questions | **Design** |
+| Internal implementation: exception handling inside a class, logging, collections, code layout,
+  unique mnemonics (`Alt+<key>`) and the other ergonomics of the threshold in rule 1 | **Implementation** |
+| Seed data tuples, test cases (S.04.01 / T.04), expected test results | **Testing** |
+| Iteration and scope of the sub-issues, version numbers, branch bases, cross-component patches, CI and
+  process rules | **Coordinator** |
+
+Two rules of precedence, learned in the clients of UC06, UC07 and UC13 (24/11/2026):
+
+- A message that reports an exception or a validation is still **Design's**, because the user reads it: the text
+  that replaces the success after a failed reload (#67) and the limit of 0 to 12 months of the interval (#207) are
+  examples, not *internal exception handling* nor *validation messages* of Implementation.
+- When an expected value of Testing contradicts a decision of Design, **Design** says which behaviour is right;
+  Testing changes the value first and Implementation changes the code after, so that no branch shows a test that
+  contradicts its own code (rule 17: an implementation member does not change a test).
 
 ## Conventions
 | Topic | Convention | Source |
