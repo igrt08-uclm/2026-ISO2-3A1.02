@@ -62,7 +62,7 @@ public final class Main {
     private final AppointmentService appointmentService = new AppointmentService(clinicalOrderService, patientService,
             systemParameterService, roleManagementService, auditService);
     private final WaitlistService waitlistService = new WaitlistService(appointmentService, clinicalOrderService,
-            systemParameterService, roleManagementService, auditService);
+            patientService, systemParameterService, roleManagementService, auditService);
 
     /**
      * Starts the application in the event dispatch thread of Swing: it loads the initial data of the components and
