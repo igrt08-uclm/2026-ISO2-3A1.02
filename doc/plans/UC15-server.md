@@ -85,7 +85,7 @@ Test data: `lmartin` has `MANAGE_APPOINTMENTS` and `mgarcia` has not; tiers `URG
 - [x] 1. `common`: `WaitlistEntry`, `WaitlistStatus`, `IWaitlistService`; `common` to `1.9.0-SNAPSHOT`. (8be6f37)
 - [x] 2. `server`: `IWaitlistRepository`, `InMemoryWaitlistRepository`, `waitlistEntries()`; `server-c5-appointments` to `1.1.0-SNAPSHOT`. (8be6f37)
 - [x] 3. `server`: `WaitlistService` (permission `MANAGE_APPOINTMENTS`, validations of the alternative flows, ordering by tier and date, audit `WAITLIST_CHANGED`, `WAITLIST_ENTRY_REMOVED`, `OPENING_FILLED`, and the booking of UC15 through `IAppointmentService`). (8be6f37)
-- [ ] 4. `server`: `WaitlistService` receives `IPatientService` (Q7).
+- [x] 4. `server`: `WaitlistService` receives `IPatientService` (Q7). (31904cc)
 - [ ] 5. `feature/UC15-server-tests`: tests TC15S-01 to TC15S-34 and their design.
 - [ ] 6. Merge the tests; fix the proposal, the errors of `addToWaitlist`, the seed and the Javadoc (Q7 to Q9).
 - [ ] 7. Verification and close of the plan.
@@ -97,7 +97,7 @@ Test data: `lmartin` has `MANAGE_APPOINTMENTS` and `mgarcia` has not; tiers `URG
 
 ## Status
 
-- **In progress:** step 4 (Javier Villanueva Crespo)
-- **Next step:** step 4, constructor of `WaitlistService`
+- **In progress:** nothing
+- **Next step:** step 5: the member creates `feature/UC15-server-tests` from this branch; then `WaitlistServiceTest`
 - **Open questions:** none
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
