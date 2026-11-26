@@ -82,7 +82,7 @@ follow-up order sent to `orderFollowUp`, the questions asked and whether *Back* 
 
 ## 2. Combination of the values
 
-TC07C-49 to 57 hold Lucía's draft constant and vary the result of the next lookup, read or search.
+TC07C-49 to 58 hold Lucía's draft constant and vary the result of the next lookup, read or search.
 The inputs of the form only matter after an active patient is selected, so the suite is built with **each use**: every
 testing value of section 1 appears in at least one case, and the rest of the form takes a valid value (`MRI-KNEE`,
 6 months, "Meniscus repair", "Check the evolution", Lucía). The pairs that the code combines in one decision are also
@@ -142,7 +142,7 @@ After R-01, TC07C-56 exercises the negative row index when a new search clears L
 and 57 exercise the unknown and inactive patient branches with a draft. TC07C-49 to 53 and 55 exercise read
 exceptions; TC07C-03 exercises successful reads. R-01 adds no compound decision.
 
-With TC07C-49 to 57, the coverage report shows 270/270 lines and 69/70 branches for `IU_OrderFollowUp` itself.
+With TC07C-49 to 58, the coverage report shows 281/281 lines and 71/72 branches for `IU_OrderFollowUp` itself (25/11/2026).
 The module covers 546/552 lines (98.9 %) and 140/146 branches (95.9 %).
 The run with the revised TC07C-17/18 gives the same coverage. Both cases fail against the 0–120 spinner at `cefde9a`:
 the maximum is 120, the up arrow offers 13 after 12, and the editor accepts 13.
@@ -207,7 +207,7 @@ R-01 in the client plan (`6a8179b`) and `9583556`.
 
 | ID | Method | Input (and precondition) | Expected result | Test |
 |---|---|---|---|---|
-| TC07C-49 | Select | C2 offline | Orders read error (catalogue) | `tc07c49TestTypesOffline` |
+| TC07C-49 | Select | C2 offline | Test types read error | `tc07c49TestTypesOffline` |
 | TC07C-50 | Select | C3 offline | Patient read error | `tc07c50PatientLookupFails` |
 | TC07C-51 | Select | C4 rejects | Validation error | `tc07c51OrderReadRejected` |
 | TC07C-52 | Select | C4 denies | Denied | `tc07c52OrderReadDenied` |
@@ -216,10 +216,11 @@ R-01 in the client plan (`6a8179b`) and `9583556`.
 | TC07C-55 | Select | C3 denies | Denied | `tc07c55PatientLookupDenied` |
 | TC07C-56 | Search | Search Mario | Only Mario listed | `tc07c56SearchClearsDraft` |
 | TC07C-57 | Select | Select Inés | Inés selected, inactive error | `tc07c57InactivePatientClearsDraft` |
+| TC07C-58 | Select | C2 offline when Mario is selected; the read works again; Mario is selected again | The second selection works: Mario is the selected patient and the form is enabled (the failed row is not kept as the last one) | `tc07c58SamePatientCanBeSelectedAgainAfterAFailure` |
 
 The error messages for TC07C-49 to 55 appear in red:
 
-- TC07C-49: “⚠ The orders could not be read: Catalogue offline”.
+- TC07C-49: “⚠ The test types could not be read: Catalogue offline”.
 - TC07C-53: “⚠ The orders could not be read: Orders offline”.
 - TC07C-50: “⚠ The patient could not be read: Registry offline”.
 - TC07C-51: “⚠ Patient unavailable”.

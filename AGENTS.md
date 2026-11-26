@@ -17,9 +17,13 @@ and run the tests (assignment, p. 3). "The engineer designs the interfaces; the 
 ## How you work: Spec-Driven Development (D-025)
 Every task that changes files follows this cycle. Do not skip steps, and do not write code before step 4.
 
-1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. Then read the sub-issue and its
-   use case issue (`gh issue view <n>`), the contracts (section 6 of the component issue), the approved design
-   (`doc/design/`), the decisions they cite and, if it exists, the plan of the sub-issue in `doc/plans/`.
+1. **Read.** Run `git fetch origin` and `git pull` on the branch of your sub-issue. First read the context file of
+   the component, `doc/plans/Cn-context.md` (D-047): the decisions, contracts, design classes and sub-issues, with
+   their sources. Then read the sub-issue and its use case issue (`gh issue view <n>`) and, if it exists, the plan of
+   the sub-issue in `doc/plans/`. Open the contracts (section 6 of the component issue), the approved design
+   (`doc/design/`) and the decisions only for what the task needs, or if the component has no context file yet. If
+   the context file disagrees with a source, the source wins (rule 11): tell the member. The pull request updates the
+   lines of its own sub-issue in the context file, and the member who merges it checks that it did.
    Check that the sub-issue is assigned to the member who asked for the work. If it is assigned to someone else, or
    its plan shows a step *In progress* by another member, stop and tell the member (D-041). Remind the member to move
    it to *In progress* on the project board.
@@ -45,6 +49,12 @@ A question that does not change any file does not need a plan.
 ## Rules you must always follow
 1. **You suggest, the team decides** (D-008). Do not take requirements, analysis, design or architecture decisions,
    and do not change a decision of DECISIONS.md.
+   - **Micro-decision threshold:** non-contractual UI and code ergonomics that do not change a requirement, public
+     interface (`common`), DTO field or screen flow — such as unique keyboard mnemonics (`Alt+<key>`), clearing
+     dependent tables on selection change, disabling inputs on `AccessDeniedException` (keeping *Back* enabled), or
+     removing an unused helper that only a test uses — are decided by the implementing member, logged in the plan,
+     and do **not** require tagging other disciplines for approval. It does **not** cover a text the user reads, a
+     confirmation question or a limit of the domain: those are Design's (see *Decision ownership*).
 2. **Only your sub-issue.** One sub-issue and one branch per session. Change only what your sub-issue needs: do not
    refactor, rename or "improve" anything else; write it in the plan as an open question instead.
 3. **Only the current iteration.** Do not specify, model or implement use cases of other iterations (D-011;
@@ -108,17 +118,50 @@ A question that does not change any file does not need a plan.
       [agents/token-efficiency.md](agents/token-efficiency.md), never `mvn -q`.
     - Read [agents/token-efficiency.md](agents/token-efficiency.md) before your first build, before you delegate to a
       subagent and when you count tokens (rule 19).
+22. **The RADIT checklist of the issue** (D-048). When a pull request completes a discipline of its sub-issue and is
+    merged, propose to the member to tick that box and, after a "yes" (rule 8), tick it. `Closes #n` closes the issue
+    on merge, so use it only in the pull request that completes the last open box; in the others use `Refs #n`.
+23. **Shared documents only in a `docs/` branch** (D-048). `AGENTS.md`, `DECISIONS.md`, `agents/*.md` and the templates
+    of `.github/` are never changed in a `feature/` or `bugfix/` branch: the parallel branches conflict in them. A use
+    case branch changes only its own plan and test design and, if its component has a context file (D-047), the lines
+    of its own sub-issue in `doc/plans/Cn-context.md`. The versions in `agents/` are updated afterwards, in one `docs/`
+    pull request.
 
 If two sources disagree, DECISIONS.md wins, then the wiki, then the issues, then the files in `agents/`. Do not
 choose on your own: tell the member.
+
+## Decision ownership
+When a genuine ambiguity arises (not covered by the micro-decision threshold in rule 1), tag **only the owning
+discipline** once, in a single thread (either the sub-issue or its pull request, not both):
+
+| Question about | Owner |
+|---|---|
+| Requirements, priorities, actor scope, acceptance criteria | **Requirements / Analysis** |
+| Domain rules, limits and validations (how many months, which patient is active) | **Design** |
+| Public interfaces (`common`), DTO fields and views, screen flows | **Design** |
+| The text a user reads: messages, labels, confirmation questions | **Design** |
+| Internal implementation: exception handling inside a class, logging, collections, code layout,
+  unique mnemonics (`Alt+<key>`) and the other ergonomics of the threshold in rule 1 | **Implementation** |
+| Seed data tuples, test cases (S.04.01 / T.04), expected test results | **Testing** |
+| Iteration and scope of the sub-issues, version numbers, branch bases, cross-component patches, CI and
+  process rules | **Coordinator** |
+
+Two rules of precedence, learned in the clients of UC06, UC07 and UC13 (24/11/2026):
+
+- A message that reports an exception or a validation is still **Design's**, because the user reads it: the text
+  that replaces the success after a failed reload (#67) and the limit of 0 to 12 months of the interval (#207) are
+  examples, not *internal exception handling* nor *validation messages* of Implementation.
+- When an expected value of Testing contradicts a decision of Design, **Design** says which behaviour is right;
+  Testing changes the value first and Implementation changes the code after, so that no branch shows a test that
+  contradicts its own code (rule 17: an implementation member does not change a test).
 
 ## Conventions
 | Topic | Convention | Source |
 |---|---|---|
 | Names | Use cases `UCxx`, functional requirements `FRxx` (1 FR = 1 UC) | D-002, D-015 |
-| Branches | `feature/UCxx-server`, `feature/UCxx-client`, `feature/short-description`, `bugfix/…`, `release/x.y.z`, `hotfix/x.y.z` | D-015, Kickoff p. 9, 19 |
+| Branches | `feature/UCxx-server`, `feature/UCxx-client`, `feature/short-description`, `bugfix/…`, `docs/…`, `ci/…`, `release/x.y.z`, `hotfix/x.y.z` | D-015, D-048, Kickoff p. 9, 19 |
 | Commits | Conventional Commits: `type(scope): summary (#issue)`, e.g. `feat(UC22): validate credentials against the SSO (#13)`, `fix(UC22): … (#13)`, `docs(UC22): plan for the server part (#13)` | Git practice p. 28, Kickoff p. 9 |
-| Pull requests | To `develop`, with `Closes #n` in the description; one sub-issue = one branch = one pull request | Kickoff p. 19 |
+| Pull requests | To `develop`. When the pull request belongs to an issue, the description has `Refs #n`, or `Closes #n` only in the one that finishes the issue (rule 22); a standalone `docs/` or `ci/` pull request may have none | D-048, Kickoff p. 19 |
 | Issues | Component issue → use case issue → client and server sub-issues, using the templates in `.github/ISSUE_TEMPLATE/`; the title of a use case issue carries its component and version, e.g. `UC20 – Server (C2 v1.1.0)` | D-015, D-018, D-032 |
 | Versions | Product in the parent pom (`0.x.0-SNAPSHOT`, tag `v0.x.0` on `main`); each component submodule (`server/cN`, `client/cN`) has its own version: MINOR per use case of that component, PATCH per fix. Always write the component with its version (`C2 1.1.0`); names and versions are in [agents/components.md](agents/components.md) | D-014, D-021, D-032, Maven practice p. 19 |
 | Releases | `release/0.x.0` from `develop`, merged into `main` and `develop`, annotated tag `v0.x.0` on `main` | Kickoff p. 9, Git practice p. 19 |
@@ -127,12 +170,31 @@ choose on your own: tell the member.
 | Tests | Test class `<Class>Test` in `src/test/java`, same package; one method per case of the member's table; `@DisplayName` in English; arrange, act, assert | D-034, S.04.01 |
 | Javadoc | Every class and public method, in English, written together with the code | D-034 |
 
+## Cross-agent handoff (Implementation ↔ Testing)
+To avoid several rounds between agents and the chat (D-048):
+
+1. **The pull request is the handoff channel, not WhatsApp.** Testing posts one comment on the pull request with all
+   the defects and the exact expected values or signatures, after the member's "yes" (rule 8). The agent of
+   Implementation reads it with `gh pr view <n> --comments` and shows its plan before changing anything (step 4).
+2. **One test update before one fix.** When a test expects an old or wrong behaviour, Testing pushes all the new
+   expectations in one commit and lists the red tests in the comment. Implementation then pulls and fixes the code in
+   one pass, and never edits a test (rule 17; error E-23 of the wiki).
+3. **Tests come from the approved specification and plan, not from code in progress.** An open question is not fixed in
+   an assertion. If Design has not decided the text of an error, the test checks the error state and the identifier or
+   keyword, not the whole sentence.
+4. **One use case at a time.** Finish and merge a use case (server, client and tests) before branching the next one of
+   the same component.
+5. **Build before every push** (step 5), with `mvn -B clean verify` after changing branch (error E-24 of the wiki). The
+   tests of the Swing client need JDK 21 and, on Linux, `fontconfig` and fonts (`doc/plans/UC06-client.md`). Never push
+   code for another member to build it for you.
+
 ## Where to find things
 | What | Where |
 |---|---|
 | Why the project is the way it is | [DECISIONS.md](DECISIONS.md) |
 | Code structure, build and tests | [agents/architecture.md](agents/architecture.md) |
 | Components, iterations, versions and dependencies | [agents/components.md](agents/components.md) |
+| Summary of each component (read first in step 1) | `doc/plans/Cn-context.md`, from [doc/plans/CONTEXT-TEMPLATE.md](doc/plans/CONTEXT-TEMPLATE.md) |
 | Plan and progress of each sub-issue | [doc/plans/](doc/plans/) |
 | Approved UML models (PlantUML) | [doc/use-cases/](doc/use-cases/), [doc/analysis/](doc/analysis/) and [doc/design/](doc/design/) (official `.puml` sources; `doc/ISO-Project.vpp` retired by D-046) |
 | Requirements (FR table, actors) | Wiki: *Requirements and Use Cases* |

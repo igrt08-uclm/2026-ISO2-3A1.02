@@ -1,0 +1,29 @@
+name: Pull request rules
+
+# Checks that the branch name follows one of the formats agreed in AGENTS.md (Conventions).
+# It only uses bash and the data of the event: no checkout and no third-party actions (rule 6).
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        # The value goes through an env variable, never straight into the script,
+        # so a strange branch name cannot run commands
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          # feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z
+          if [[ "$BRANCH" =~ ^(feature|bugfix|docs|ci)/.+$ ]] || [[ "$BRANCH" =~ ^(release|hotfix)/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "OK: branch '$BRANCH' follows the naming rules"
+          else
+            echo "::error::Branch '$BRANCH' does not follow AGENTS.md: use feature/..., bugfix/..., docs/..., ci/..., release/x.y.z or hotfix/x.y.z"
+            exit 1
+          fi

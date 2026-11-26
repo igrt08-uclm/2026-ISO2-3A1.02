@@ -7,7 +7,7 @@
   <parent>
     <groupId>es.uclm.esi.iso2</groupId>
     <artifactId>radiodiagnostics</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
   </parent>
 
   <artifactId>server</artifactId>
@@ -18,5 +18,6 @@
     <module>c2-configuration</module>
     <module>c3-patients</module>
     <module>c4-orders</module>
+    <module>c5-appointments</module>
   </modules>
 </project>

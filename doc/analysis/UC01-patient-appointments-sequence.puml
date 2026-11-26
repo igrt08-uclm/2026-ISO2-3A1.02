@@ -1,0 +1,106 @@
+@startuml UC01_PatientAppointments_Sequence
+!include ../design/common/_style.puml
+
+title UC01 – View and manage own scheduled appointments (Analysis Sequence Diagram)
+
+actor "Patient" as Patient
+boundary "IU_PatientAppointments" as IU
+control "Control_PatientAppointments" as Ctrl
+entity "UserAccount" as UserAcc
+entity "Appointment" as Appt
+entity "TestType" as TestType
+entity "RescheduleRequest" as Request
+entity "SchedulingNeed" as Need
+entity "AuditLog" as Audit
+
+== View own appointments ==
+Patient -> IU : 1: openMyAppointments()
+IU -> Ctrl : 2: obtainMyAppointments()
+Ctrl -> UserAcc : 3: hasPermission(patient, USE_PATIENT_PORTAL)
+alt permission granted
+  Ctrl -> UserAcc : 4: getLinkedPatient(patient)
+  Ctrl -> Appt : 5: getUpcomingAppointments(patientId)
+  loop for each appointment
+    Ctrl -> TestType : 6: getTestType(testTypeId)
+  end
+  Ctrl -> Audit : 7: register(patient, APPOINTMENTS_ACCESSED, patientId)
+  alt there are upcoming appointments
+    Ctrl --> IU : 8: showAppointments(appointments)
+  else no upcoming appointments
+    Ctrl --> IU : 8a: showNoAppointments()
+  end
+else no permission
+  Ctrl -> Audit : 3a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+  Ctrl --> IU : 3b: showError(accessDenied)
+end
+
+== Confirm appointment ==
+Patient -> IU : 9: confirmAppointment(appointmentId)
+IU -> Ctrl : 10: confirm(appointmentId)
+Ctrl -> UserAcc : 11: hasPermission(patient, USE_PATIENT_PORTAL)
+alt permission granted
+  Ctrl -> UserAcc : 12: getLinkedPatient(patient)
+  Ctrl -> Appt : 13: isManageable(appointmentId, patientId)
+  alt own, upcoming and not cancelled
+    Ctrl -> Appt : 14: confirm(appointmentId)
+    Ctrl -> Audit : 15: register(patient, APPOINTMENT_CONFIRMED, appointmentId)
+    Ctrl --> IU : 16: showConfirmation(appointment)
+  else not found, not own, past or cancelled
+    Ctrl --> IU : 16a: showError(reason)
+  end
+else no permission
+  Ctrl -> Audit : 11a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+  Ctrl --> IU : 11b: showError(accessDenied)
+end
+
+== Request reschedule ==
+Patient -> IU : 17: requestReschedule(appointmentId, preferredDates, reason)
+IU -> Ctrl : 18: requestReschedule(appointmentId, preferredDates, reason)
+Ctrl -> UserAcc : 19: hasPermission(patient, USE_PATIENT_PORTAL)
+alt permission granted
+  Ctrl -> UserAcc : 20: getLinkedPatient(patient)
+  Ctrl -> Appt : 21: isManageable(appointmentId, patientId)
+  Ctrl -> Request : 22: validate(preferredDates, reason)
+  alt valid request
+    Ctrl -> Request : 23: create(appointmentId, preferredDates, reason)
+    Ctrl -> Audit : 24: register(patient, RESCHEDULE_REQUESTED, requestId)
+    Ctrl --> IU : 25: showConfirmation(request)
+  else not found, not own, past or cancelled
+    Ctrl --> IU : 25a: showError(reason)
+  else mandatory field missing
+    Ctrl --> IU : 25b: showError(missingFields)
+  end
+else no permission
+  Ctrl -> Audit : 19a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+  Ctrl --> IU : 19b: showError(accessDenied)
+end
+
+== Cancel appointment ==
+Patient -> IU : 26: cancelAppointment(appointmentId)
+IU --> Patient : 27: askConfirmation()
+alt patient confirms
+  Patient -> IU : 28: confirmCancellation()
+  IU -> Ctrl : 29: cancel(appointmentId)
+  Ctrl -> UserAcc : 30: hasPermission(patient, USE_PATIENT_PORTAL)
+  alt permission granted
+    Ctrl -> UserAcc : 31: getLinkedPatient(patient)
+    Ctrl -> Appt : 32: isManageable(appointmentId, patientId)
+    alt own, upcoming and not cancelled
+      Ctrl -> Appt : 33: cancel(appointmentId)
+      Ctrl -> Need : 34: markPending(needId)
+      note right : only if AN-C5 D41 is approved
+      Ctrl -> Audit : 35: register(patient, APPOINTMENT_CANCELLED, appointmentId)
+      Ctrl --> IU : 36: showConfirmation(appointment)
+    else not found, not own, past or cancelled
+      Ctrl --> IU : 36a: showError(reason)
+    end
+  else no permission
+    Ctrl -> Audit : 30a: register(patient, ACCESS_DENIED, USE_PATIENT_PORTAL)
+    Ctrl --> IU : 30b: showError(accessDenied)
+  end
+else patient does not confirm
+  Patient -> IU : 28a: declineCancellation()
+  note right of IU : nothing is sent, nothing changes
+end
+
+@enduml

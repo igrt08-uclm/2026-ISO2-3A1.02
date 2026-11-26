@@ -1,0 +1,166 @@
+@startuml C6-server-design
+!include common/_style.puml
+left to right direction
+
+title C6 – Patient Portal (Server Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C6-common.puml!IncidentReport
+    !includesub common/C6-common.puml!PatientAppointmentView
+    !includesub common/C6-common.puml!RescheduleRequest
+    !includesub common/C6-common.puml!RescheduleRequestStatus
+    !includesub common/C6-common.puml!SatisfactionSurvey
+    !includesub common/C6-common.puml!SurveyAspect
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/C5-common.puml!IAppointmentService
+    !includesub common/shared-contracts.puml!IAuditRecorder
+    !includesub common/C6-common.puml!IPatientAppointmentService
+    !includesub common/C6-common.puml!IPatientFeedbackService
+    !includesub common/C1-common.puml!IRoleManagementService
+    !includesub common/C2-common.puml!ISystemParameterService
+    !includesub common/shared-contracts.puml!ValidationException
+  }
+
+}
+
+package "server" {
+  package "Service (control)" {
+    class PatientAppointmentService <<control>> {
+      +getMyUpcomingAppointments(requester : String) : List<PatientAppointmentView> throws AccessDeniedException, ValidationException
+      +confirmAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+      +requestReschedule(requester : String, appointmentId : String, preferredDates : String, reason : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+      +cancelAppointment(requester : String, appointmentId : String) : Appointment throws AccessDeniedException, ValidationException
+      +getPendingRescheduleRequests(requester : String) : List<RescheduleRequest> throws AccessDeniedException
+      +markRescheduleRequestHandled(requester : String, requestId : String) : RescheduleRequest throws AccessDeniedException, ValidationException
+    }
+
+    class PatientFeedbackService <<control>> {
+      +getMyAppointments(requester : String) : List<PatientAppointmentView> throws AccessDeniedException, ValidationException
+      +submitIncidentReport(requester : String, appointmentId : String, description : String) : IncidentReport throws AccessDeniedException, ValidationException
+      +submitSatisfactionSurvey(requester : String, appointmentId : String, ratings : Map<SurveyAspect, Integer>, comments : String) : SatisfactionSurvey throws AccessDeniedException, ValidationException
+    }
+
+  }
+
+  package "Persistence" {
+    interface IRescheduleRequestRepository {
+      +findById(requestId : String) : RescheduleRequest
+      +findPending() : List<RescheduleRequest>
+      +findPendingByAppointment(appointmentId : String) : RescheduleRequest
+      +findAll() : List<RescheduleRequest>
+      +save(request : RescheduleRequest) : void
+    }
+
+    class InMemoryRescheduleRequestRepository {
+      -requests : Map<String, RescheduleRequest>
+      +findById(requestId : String) : RescheduleRequest
+      +findPending() : List<RescheduleRequest>
+      +findPendingByAppointment(appointmentId : String) : RescheduleRequest
+      +findAll() : List<RescheduleRequest>
+      +save(request : RescheduleRequest) : void
+    }
+
+    interface IIncidentReportRepository {
+      +findById(reportId : String) : IncidentReport
+      +findByPatient(patientId : String) : List<IncidentReport>
+      +findByAppointment(appointmentId : String) : List<IncidentReport>
+      +findAll() : List<IncidentReport>
+      +save(report : IncidentReport) : void
+    }
+
+    class InMemoryIncidentReportRepository {
+      -reports : Map<String, IncidentReport>
+      +findById(reportId : String) : IncidentReport
+      +findByPatient(patientId : String) : List<IncidentReport>
+      +findByAppointment(appointmentId : String) : List<IncidentReport>
+      +findAll() : List<IncidentReport>
+      +save(report : IncidentReport) : void
+    }
+
+    interface ISatisfactionSurveyRepository {
+      +findById(surveyId : String) : SatisfactionSurvey
+      +findByAppointment(appointmentId : String) : SatisfactionSurvey
+      +findByPatient(patientId : String) : List<SatisfactionSurvey>
+      +findAll() : List<SatisfactionSurvey>
+      +save(survey : SatisfactionSurvey) : void
+    }
+
+    class InMemorySatisfactionSurveyRepository {
+      -surveys : Map<String, SatisfactionSurvey>
+      +findById(surveyId : String) : SatisfactionSurvey
+      +findByAppointment(appointmentId : String) : SatisfactionSurvey
+      +findByPatient(patientId : String) : List<SatisfactionSurvey>
+      +findAll() : List<SatisfactionSurvey>
+      +save(survey : SatisfactionSurvey) : void
+    }
+
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+PatientAppointmentView "0..*" -- "1" Appointment : appointment
+RescheduleRequest "*" -- "1" RescheduleRequestStatus : status
+PatientAppointmentService ..|> IPatientAppointmentService
+InMemoryRescheduleRequestRepository ..|> IRescheduleRequestRepository
+PatientAppointmentService ..> IRescheduleRequestRepository : <<use>>
+PatientAppointmentService ..> IAppointmentService : <<use>>
+PatientAppointmentService ..> ISystemParameterService : <<use>>
+PatientAppointmentService ..> IRoleManagementService : <<use>>
+PatientAppointmentService ..> IAuditRecorder : <<use>>
+PatientAppointmentService ..> AccessDeniedException : <<throw>>
+PatientAppointmentService ..> ValidationException : <<throw>>
+SatisfactionSurvey "*" -- "*" SurveyAspect : ratings
+PatientFeedbackService ..|> IPatientFeedbackService
+InMemoryIncidentReportRepository ..|> IIncidentReportRepository
+InMemorySatisfactionSurveyRepository ..|> ISatisfactionSurveyRepository
+PatientFeedbackService ..> IIncidentReportRepository : <<use>>
+PatientFeedbackService ..> ISatisfactionSurveyRepository : <<use>>
+PatientFeedbackService ..> IAppointmentService : <<use>>
+PatientFeedbackService ..> ISystemParameterService : <<use>>
+PatientFeedbackService ..> IRoleManagementService : <<use>>
+PatientFeedbackService ..> IAuditRecorder : <<use>>
+PatientFeedbackService ..> AccessDeniedException : <<throw>>
+PatientFeedbackService ..> ValidationException : <<throw>>
+
+' ==================== Notes ====================
+note as N1
+  Derived query view, not persisted (D50).
+  Enriches C5 Appointment with C2 TestType
+  name, preparation and pending reschedule flag.
+end note
+N1 .. PatientAppointmentView
+
+note as N2
+  Realizes Control_PatientAppointments (UC01, C6 1.0.0).
+  Patient ops require USE_PATIENT_PORTAL (D46, C1 patch)
+  and resolve patientId via IRoleManagementService (D48).
+  Admissions ops (getPendingRescheduleRequests,
+  markRescheduleRequestHandled) require MANAGE_APPOINTMENTS.
+  Audit: ACCESS_DENIED, APPOINTMENTS_ACCESSED,
+  APPOINTMENT_CONFIRMED, RESCHEDULE_REQUESTED,
+  RESCHEDULE_REQUEST_HANDLED, APPOINTMENT_CANCELLED (D47).
+  Uses Clock for deterministic upcoming/past checks.
+end note
+N2 .. PatientAppointmentService
+
+note as N3
+  Realizes Control_PatientFeedback (UC04, C6 1.1.0).
+  Requires USE_PATIENT_PORTAL (D46) and linked patient (D48).
+  Incident reports: any own appointment (past/upcoming/cancelled).
+  Surveys: past non-cancelled own appointments only, one per
+  appointment, all 4 SurveyAspect ratings in 1..5, optional
+  comments; immutable once submitted (D54, D55).
+  Audit: ACCESS_DENIED, APPOINTMENTS_ACCESSED,
+  INCIDENT_REPORTED, SURVEY_SUBMITTED (D47).
+end note
+N3 .. PatientFeedbackService
+
+@enduml

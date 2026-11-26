@@ -1,0 +1,113 @@
+@startuml C7-client-design
+!include common/_style.puml
+left to right direction
+
+title C7 – Execution and Reports (Client Design)
+
+package "common" {
+  package "Domain (entities)" {
+    !includesub common/C5-common.puml!Appointment
+    !includesub common/C5-common.puml!AppointmentStatus
+    !includesub common/C5-common.puml!ScheduleEntry
+    !includesub common/C3-common.puml!Patient
+    !includesub common/C2-common.puml!TestType
+    !includesub common/C7-common.puml!ProcedureExecution
+    !includesub common/C7-common.puml!ExecutionFormView
+    !includesub common/C2-common.puml!ImagingStudy
+    !includesub common/C7-common.puml!ReportStatus
+    !includesub common/C7-common.puml!DiagnosticReport
+    !includesub common/C7-common.puml!Addendum
+    !includesub common/C7-common.puml!ReportableExecutionView
+    !includesub common/C7-common.puml!ReportWorkspaceView
+  }
+
+  package "Contracts (interfaces)" {
+    !includesub common/shared-contracts.puml!AccessDeniedException
+    !includesub common/shared-contracts.puml!ValidationException
+    !includesub common/C7-common.puml!IProcedureExecutionService
+    !includesub common/C7-common.puml!IDiagnosticReportService
+  }
+
+}
+
+package "Presentation" {
+  class IU_RecordExecution <<boundary>> {
+    +IU_RecordExecution(procedureExecutionService : IProcedureExecutionService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadWorklist(date : LocalDate) : void
+    +onSelectProcedure(appointmentId : String) : void
+    +onSaveExecution() : void
+    +showWorklist(entries : List<ScheduleEntry>) : void
+    +showEmptyWorklist() : void
+    +showExecutionForm(form : ExecutionFormView) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+  class IU_DiagnosticReports <<boundary>> {
+    +IU_DiagnosticReports(diagnosticReportService : IDiagnosticReportService, requester : String, confirm : Predicate<String>, onBack : Runnable)
+    +loadData() : void
+    +onOpenReport(executionId : String) : void
+    +onSaveDraft(executionId : String, findings : String, impression : String, imageReferences : List<String>) : void
+    +onValidateReport(reportId : String) : void
+    +onAddAddendum(reportId : String, text : String) : void
+    +showExecutions(executions : List<ReportableExecutionView>) : void
+    +showReportsToValidate(reports : List<ReportableExecutionView>) : void
+    +showWorkspace(workspace : ReportWorkspaceView) : void
+    +showErrors(errors : List<String>) : void
+    +showAccessDenied() : void
+    +showConfirmation(message : String) : void
+  }
+
+}
+
+' ==================== Relationships ====================
+Appointment "*" -- "1" AppointmentStatus : status
+ScheduleEntry "0..*" -- "1" Appointment : appointment
+ProcedureExecution "0..1" -- "1" Appointment : appointmentId
+ExecutionFormView "0..*" -- "1" Appointment : appointment
+ExecutionFormView "0..*" -- "1" Patient : patient
+ExecutionFormView "0..*" -- "1" TestType : testType
+IProcedureExecutionService ..> AccessDeniedException : <<throw>>
+IProcedureExecutionService ..> ValidationException : <<throw>>
+IU_RecordExecution ..> IProcedureExecutionService : <<use>>
+IU_RecordExecution ..> AccessDeniedException : <<use>>
+IU_RecordExecution ..> ValidationException : <<use>>
+DiagnosticReport "*" -- "1" ReportStatus : status
+DiagnosticReport "0..1" -- "1" ProcedureExecution : executionId
+Addendum "*" -- "1" DiagnosticReport : reportId
+ReportableExecutionView "0..*" -- "1" ProcedureExecution : execution
+ReportableExecutionView "0..*" -- "0..1" DiagnosticReport : report
+ReportWorkspaceView "0..*" -- "1" ProcedureExecution : execution
+ReportWorkspaceView "0..*" -- "0..1" ImagingStudy : study
+ReportWorkspaceView "0..*" -- "0..1" DiagnosticReport : report
+ReportWorkspaceView "0..*" -- "*" Addendum : addenda
+IDiagnosticReportService ..> AccessDeniedException : <<throw>>
+IDiagnosticReportService ..> ValidationException : <<throw>>
+IU_DiagnosticReports ..> IDiagnosticReportService : <<use>>
+IU_DiagnosticReports ..> AccessDeniedException : <<use>>
+IU_DiagnosticReports ..> ValidationException : <<use>>
+
+' ==================== Notes ====================
+note as N1
+  Realizes IU_RecordExecution (UC10, C7 1.0.0).
+  Shows the physician's worklist of a day; the form enables
+  consent and contrast fields only when the TestType needs them.
+  Asks confirmation via confirm before saving (immutable, D61).
+  Access denied: inputs disabled, Back enabled.
+end note
+N1 .. IU_RecordExecution
+
+note as N2
+  Realizes IU_DiagnosticReports (UC09, C7 1.1.0).
+  Tabs: My procedures (performed executions of the physician)
+  and Reports to validate (drafts of other physicians, D65).
+  Workspace: study images, findings, impression, addenda.
+  Author mode: Save draft (no report/DRAFT) or Add addendum
+  (VALIDATED). Review mode (other's DRAFT): read-only,
+  only Validate report enabled.
+  Asks confirmation via confirm before validating.
+end note
+N2 .. IU_DiagnosticReports
+
+@enduml

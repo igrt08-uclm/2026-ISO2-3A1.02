@@ -96,6 +96,32 @@ public class ClinicalOrderService implements IClinicalOrderService {
                 auditRecorder, systemParameterService, patientService, Clock.systemDefaultZone());
     }
 
+    /**
+     * Loads four invented orders with their scheduling needs, only if the system starts with no data at all. It is
+     * called when the program starts, not by a user, so it does not need a permission and it is not registered in
+     * the audit log.
+     */
+    public void loadSeedData() {
+        if (seedIdsFree()) {
+            LocalDate day = LocalDate.now(clock);
+            OrderSeedData.orders(day).forEach(orders::save);
+            OrderSeedData.needs(day).forEach(needs::save);
+        }
+    }
+
+    /**
+     * True only when none of the eight seed ids exists in the repositories. There is no {@code findAll} in the
+     * repositories (rule 2 of the task), so the seed is skipped as soon as any of its ids is already present.
+     *
+     * @return {@code true} if all of {@code ORD-0001..ORD-0004} and {@code NEED-0001..NEED-0004} are free
+     */
+    private boolean seedIdsFree() {
+        return orders.findById("ORD-0001") == null && orders.findById("ORD-0002") == null
+                && orders.findById("ORD-0003") == null && orders.findById("ORD-0004") == null
+                && needs.findById("NEED-0001") == null && needs.findById("NEED-0002") == null
+                && needs.findById("NEED-0003") == null && needs.findById("NEED-0004") == null;
+    }
+
     @Override
     public DiagnosticOrder orderDiagnosticProcedure(String requester, DiagnosticOrder order)
             throws AccessDeniedException, ValidationException {
