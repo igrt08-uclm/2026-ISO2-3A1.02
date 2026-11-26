@@ -68,16 +68,16 @@ Test data: the screen with a double of `IDailyScheduleService`, the requester `l
 - [x] 4. Merge `origin/develop` (UC15 and UC14 server): solve `Main`, `IU_Welcome` and the versions (Q7, Q8, defect C). (9dcae82)
 - [x] 5. Tests TC14C-01 to TC14C-20 and their design (red on purpose, Q9). (3715645) Red on purpose: TC14C-06, 09, 13, 14 and 15.
 - [x] 6. `IU_DailySchedule`: defects A and B and the singular of Q6. (cbf25b1)
-- [ ] 7. Verification and close of the plan.
+- [x] 7. Verification and close of the plan.
 
 ## Verification
 
-- [ ] Acceptance criteria of #136: the diagram and the models are the ones of the design; the screen shows the schedule per room and the worklists in time order and never shows a cancelled appointment.
-- [ ] `mvn -B clean verify` is green, with the coverage of D-033.
+- [x] Acceptance criteria of #136: the screen has the operations of the design, shows the schedule per room and the worklists in time order (TC14C-02, 05, 08) and a notice when there are none (TC14C-04, 07, 10); cancelled appointments are left out by the server (TC14S-02 and 04). Still open in the issue: wiki links, human review of the code and review of the tests.
+- [x] `mvn -B -ntp clean verify` is green on 26/11/2026 (`cbf25b1`): `client-c5-appointments` 95.5 % of lines and 86.0 % of branches, `client-c1-access` 83.6 % and 86.4 %.
 
 ## Status
 
-- **In progress:** step 7
-- **Next step:** step 7
+- **In progress:** nothing
+- **Next step:** push when the member asks, new description of #239 and review by another member
 - **Open questions:** the confirmation of the texts of the screen (Design)
 - **Last update:** 26/11/2026, Javier Villanueva Crespo

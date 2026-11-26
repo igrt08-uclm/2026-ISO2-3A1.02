@@ -60,3 +60,6 @@ Measured on 26/11/2026, before step 6 of the plan: `IU_DailySchedule` 156/170 li
 `client-c5-appointments` 94.0 % of lines and 86.0 % of branches; `client-c1-access` 83.6 % and 86.4 %.
 
 Red before step 6 of the plan: TC14C-06, 09, 13, 14 and 15.
+
+After step 6 (`cbf25b1`), all green: `IU_DailySchedule` 166/168 lines and 20/20 branches; `client-c5-appointments` 95.5 % of
+lines and 86.0 % of branches.
