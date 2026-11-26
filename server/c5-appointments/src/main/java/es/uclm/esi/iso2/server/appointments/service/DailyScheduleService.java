@@ -13,7 +13,6 @@ import es.uclm.esi.iso2.common.patients.contracts.IPatientService;
 import es.uclm.esi.iso2.common.patients.domain.Patient;
 import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.appointments.persistence.IAppointmentRepository;
-import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,21 +57,6 @@ public class DailyScheduleService implements IDailyScheduleService {
         this.systemParameterService = systemParameterService;
         this.roleManagementService = roleManagementService;
         this.auditRecorder = auditRecorder;
-    }
-
-    /**
-     * Creates the service with an empty in-memory repository (D-030). It is used when the schedule has its own
-     * repository, not the one of UC13.
-     *
-     * @param patientService the contract of C3
-     * @param systemParameterService the contract of C2
-     * @param roleManagementService the contract of C1 for the permissions
-     * @param auditRecorder the contract of C1 for the audit log
-     */
-    public DailyScheduleService(IPatientService patientService, ISystemParameterService systemParameterService,
-            IRoleManagementService roleManagementService, IAuditRecorder auditRecorder) {
-        this(new InMemoryAppointmentRepository(), patientService, systemParameterService, roleManagementService,
-                auditRecorder);
     }
 
     @Override
@@ -141,7 +125,8 @@ public class DailyScheduleService implements IDailyScheduleService {
     /** The appointments that are shown: the booked and the moved ones, in time order, never the cancelled ones. */
     private static List<Appointment> bookedOf(List<Appointment> read) {
         return read.stream()
-                .filter(appointment -> appointment.getStatus() != AppointmentStatus.CANCELLED)
+                .filter(appointment -> appointment.getStatus() == AppointmentStatus.BOOKED
+                        || appointment.getStatus() == AppointmentStatus.RESCHEDULED)
                 .sorted(Comparator.comparing(Appointment::getStart))
                 .toList();
     }
