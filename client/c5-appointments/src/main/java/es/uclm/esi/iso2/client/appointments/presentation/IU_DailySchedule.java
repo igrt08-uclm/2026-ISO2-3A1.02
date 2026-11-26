@@ -58,7 +58,6 @@ public class IU_DailySchedule extends JPanel {
         }
     };
     private final JTable scheduleTable = new JTable(model);
-    private final List<ScheduleEntry> entries = new ArrayList<>();
 
     private final JButton btnShowDay = new JButton("Show schedule");
     private final JButton btnRoom = new JButton("Room worklist");
@@ -188,8 +187,6 @@ public class IU_DailySchedule extends JPanel {
         try {
             return LocalDate.parse(txtDay.getText().trim(), DAY);
         } catch (DateTimeParseException invalid) {
-            entries.clear();
-            model.setRowCount(0);
             showErrors(List.of("The day must be written as dd/MM/yyyy"));
             return null;
         }
@@ -212,7 +209,7 @@ public class IU_DailySchedule extends JPanel {
             if (rows.isEmpty()) {
                 showInformation("There are no appointments on that day.");
             } else {
-                showInformation(rows.size() == 1 ? "1 appointment." : rows.size() + " appointments.");
+                showInformation(count(rows) + ".");
             }
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
@@ -234,7 +231,7 @@ public class IU_DailySchedule extends JPanel {
             List<ScheduleEntry> rows = service.getRoomWorklist(requester, date, room);
             display(rows);
             showInformation(rows.isEmpty() ? "There are no appointments in that room that day."
-                    : "Worklist of the room: " + rows.size() + " appointments.");
+                    : "Worklist of the room: " + count(rows) + ".");
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
         } catch (ValidationException validationException) {
@@ -255,7 +252,7 @@ public class IU_DailySchedule extends JPanel {
             List<ScheduleEntry> rows = service.getPhysicianWorklist(requester, date, physician);
             display(rows);
             showInformation(rows.isEmpty() ? "There are no appointments of that physician that day."
-                    : "Worklist of the physician: " + rows.size() + " appointments.");
+                    : "Worklist of the physician: " + count(rows) + ".");
         } catch (AccessDeniedException deniedException) {
             showAccessDenied();
         } catch (ValidationException validationException) {
@@ -266,8 +263,6 @@ public class IU_DailySchedule extends JPanel {
     }
 
     private void display(List<ScheduleEntry> rows) {
-        entries.clear();
-        entries.addAll(rows);
         model.setRowCount(0);
         for (ScheduleEntry entry : rows) {
             Appointment appointment = entry.getAppointment();
@@ -277,23 +272,29 @@ public class IU_DailySchedule extends JPanel {
         }
     }
 
+    private static String count(List<ScheduleEntry> rows) {
+        return rows.size() == 1 ? "1 appointment" : rows.size() + " appointments";
+    }
+
     private void showInformation(String message) {
         lblStatus.setForeground(textColor);
         lblStatus.setText(message);
     }
 
     /**
-     * Shows every error, together and in red.
+     * Empties the table and shows every error, together and in red.
      *
      * @param errors the messages to show
      */
     public void showErrors(List<String> errors) {
+        model.setRowCount(0);
         lblStatus.setForeground(ERROR_COLOR);
         lblStatus.setText(errors.size() == 1 ? "⚠ " + errors.get(0) : "⚠ " + String.join(" ", errors));
     }
 
-    /** Explains that the user does not have the permission and disables the actions. */
+    /** Empties the table, explains that the user does not have the permission and disables the actions. */
     public void showAccessDenied() {
+        model.setRowCount(0);
         btnShowDay.setEnabled(false);
         btnRoom.setEnabled(false);
         btnPhysician.setEnabled(false);
