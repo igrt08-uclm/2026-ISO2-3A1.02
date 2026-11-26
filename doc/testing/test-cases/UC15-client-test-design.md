@@ -73,4 +73,4 @@ table of `doc/plans/UC15-client.md`; each test method names its case.
 Measured on 26/11/2026, before the fixes of the plan: `IU_ManageWaitlist` 339/364 lines and 65/80 branches;
 `client-c5-appointments` 94.3 % of lines and 84.5 % of branches; `client-c1-access` 84.4 % and 85.8 %.
 
-Red until step 6 of the plan, because the screen still has the defects A to E: TC15C-03, 05, 09, 22 and 34.
+Red before step 6 of the plan, green since its fix: TC15C-03, 05, 09, 22 and 34.

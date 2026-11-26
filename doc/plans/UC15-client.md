@@ -76,17 +76,17 @@
 - [x] 3. `Main`: the service, its seed entries and the screen; `client-c5-appointments` to `1.1.0-SNAPSHOT`.
 - [x] 4. Merge the server part; the patient service in `Main`; `client-c1-access` `1.2.8-SNAPSHOT`. (e16cd1a)
 - [x] 5. `feature/UC15-client-tests`: tests TC15C-01 to TC15C-34 and their design. (d7cd841) Red on purpose: TC15C-03, 05, 09, 22 and 34.
-- [ ] 6. Merge the tests and fix the defects A to E.
-- [ ] 7. Verification and close of the plan.
+- [x] 6. Merge the tests and fix the defects A to E. (6dc03d0)
+- [x] 7. Verification and close of the plan.
 
 ## Verification
 
-- [ ] Acceptance criteria of #133: the diagrams and models are the ones of the design; the screen shows the waitlist ordered by tier and date, adds and changes entries, removes with confirmation, and fills an opening through UC13.
-- [ ] `mvn -B verify` is green: **blocked** by the coverage rule until the tests of `feature/UC15-client-tests` are merged. Checked with `-Djacoco.skip=true`: BUILD SUCCESS, 1,348 tests green.
+- [x] Acceptance criteria of #133: the diagrams and models are the ones of the design; the screen shows the waitlist ordered by tier and date, adds and changes entries, removes with confirmation, and fills an opening through UC13. (TC15C-01 to 34). Still open in the issue: wiki links, human review of the code and review of the tests.
+- [x] `mvn -B -ntp clean verify` is green on 26/11/2026 (`6dc03d0`): `client-c5-appointments` 94.8 % of lines and 84.2 % of branches, `client-c1-access` 84.4 % and 85.8 %.
 
 ## Status
 
 - **In progress:** nothing
-- **Next step:** step 6, fix `IU_ManageWaitlist`
+- **Next step:** push when the member asks and review of #237 by another member, after #236 is merged; then UC14 (#238, #239), where `client-c1-access` goes to `1.2.9-SNAPSHOT`
 - **Open questions:** confirmation of Design for the text of Q6
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
