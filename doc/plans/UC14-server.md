@@ -72,7 +72,7 @@ The order of the rooms in the daily schedule and the order of two appointments a
 - [x] 1. `common`: `ScheduleEntry` and `IDailyScheduleService`; `common` to `1.10.0-SNAPSHOT`. (20a2a90)
 - [x] 2. `server`: `DailyScheduleService`; `server-c5-appointments` to `1.2.0-SNAPSHOT`. (20a2a90)
 - [x] 3. Merge `origin/develop` (UC15) and solve the versions; `mvn -B clean verify` green. (38a3412)
-- [ ] 4. Tests TC14S-01 to TC14S-16 and their design.
+- [x] 4. Tests TC14S-01 to TC14S-16 and their design. (9e56cf9)
 - [ ] 5. `DailyScheduleService`: filter of Q7 and constructor of Q8.
 - [ ] 6. Verification and close of the plan.
 
@@ -83,7 +83,7 @@ The order of the rooms in the daily schedule and the order of two appointments a
 
 ## Status
 
-- **In progress:** step 4
-- **Next step:** step 4
+- **In progress:** step 5
+- **Next step:** step 5
 - **Open questions:** none for this branch. D43 and D44 are still *To confirm* in `doc/AN-C5-DECISIONS.md`
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
