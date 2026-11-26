@@ -66,7 +66,7 @@ Test data: the screen with a double of `IDailyScheduleService`, the requester `l
 - [x] 2. `IU_Welcome`: <em>Daily schedule</em> (Alt+D), only with `MANAGE_APPOINTMENTS`. (25d76e9)
 - [x] 3. `Main`: the shared repository, the service and the screen; `client-c5-appointments` to `1.2.0-SNAPSHOT`. (25d76e9)
 - [x] 4. Merge `origin/develop` (UC15 and UC14 server): solve `Main`, `IU_Welcome` and the versions (Q7, Q8, defect C). (9dcae82)
-- [ ] 5. Tests TC14C-01 to TC14C-20 and their design (red on purpose, Q9).
+- [x] 5. Tests TC14C-01 to TC14C-20 and their design (red on purpose, Q9). (3715645) Red on purpose: TC14C-06, 09, 13, 14 and 15.
 - [ ] 6. `IU_DailySchedule`: defects A and B and the singular of Q6.
 - [ ] 7. Verification and close of the plan.
 
@@ -77,7 +77,7 @@ Test data: the screen with a double of `IDailyScheduleService`, the requester `l
 
 ## Status
 
-- **In progress:** step 5
-- **Next step:** step 5
+- **In progress:** step 6
+- **Next step:** step 6
 - **Open questions:** the confirmation of the texts of the screen (Design)
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
