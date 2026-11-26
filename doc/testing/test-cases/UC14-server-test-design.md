@@ -69,3 +69,6 @@ Measured on 26/11/2026, before step 5 of the plan: `DailyScheduleService` 58/60 
 
 Not covered: the design does not define the order of the rooms in the daily schedule or the order of two appointments
 at the same time.
+
+After step 5 (`8b3c636`): `DailyScheduleService` 59/59 lines and 28/28 branches; `server-c5-appointments` 98.5 % of lines and
+99.1 % of branches.

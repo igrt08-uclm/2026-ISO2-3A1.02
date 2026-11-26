@@ -74,16 +74,16 @@ The order of the rooms in the daily schedule and the order of two appointments a
 - [x] 3. Merge `origin/develop` (UC15) and solve the versions; `mvn -B clean verify` green. (38a3412)
 - [x] 4. Tests TC14S-01 to TC14S-16 and their design. (9e56cf9)
 - [x] 5. `DailyScheduleService`: filter of Q7 and constructor of Q8. (8b3c636)
-- [ ] 6. Verification and close of the plan.
+- [x] 6. Verification and close of the plan.
 
 ## Verification
 
-- [ ] Acceptance criteria of #137: the daily schedule and the worklists only contain the booked appointments of that day, ordered by time; every access is registered in the audit log.
-- [ ] `mvn -B clean verify` is green, with the coverage of D-033.
+- [x] Acceptance criteria of #137: the daily schedule and the worklists only contain the booked appointments of that day, ordered by time (TC14S-02, 04, 07, 11); every access is registered in the audit log (TC14S-01, 02, 04, 05, 07, 08, 11, 12; a rejected read returns nothing and registers no access, Q6). Still open in the issue: wiki links, human review of the code and review of the tests.
+- [x] `mvn -B -ntp clean verify` is green on 26/11/2026 (`8b3c636`): `server-c5-appointments` 98.5 % of lines and 99.1 % of branches, `common` 87.9 % and 100 %.
 
 ## Status
 
-- **In progress:** step 6
-- **Next step:** step 6
+- **In progress:** nothing
+- **Next step:** push when the member asks, new description of #238 and review by another member; then `feature/UC14-client` (#239) takes this branch
 - **Open questions:** none for this branch. D43 and D44 are still *To confirm* in `doc/AN-C5-DECISIONS.md`
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
