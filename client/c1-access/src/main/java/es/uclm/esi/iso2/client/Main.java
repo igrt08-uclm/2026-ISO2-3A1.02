@@ -4,6 +4,7 @@ import es.uclm.esi.iso2.client.access.presentation.IU_Audit;
 import es.uclm.esi.iso2.client.access.presentation.IU_Login;
 import es.uclm.esi.iso2.client.access.presentation.IU_ManageRoles;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
+import es.uclm.esi.iso2.client.appointments.presentation.IU_DailySchedule;
 import es.uclm.esi.iso2.client.appointments.presentation.IU_ManageAppointments;
 import es.uclm.esi.iso2.client.appointments.presentation.IU_ManageWaitlist;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ConfigureParameters;
@@ -24,13 +25,16 @@ import es.uclm.esi.iso2.server.access.persistence.InMemoryUserAccountRepository;
 import es.uclm.esi.iso2.server.access.service.AuditService;
 import es.uclm.esi.iso2.server.access.service.AuthenticationService;
 import es.uclm.esi.iso2.server.access.service.RoleManagementService;
+import es.uclm.esi.iso2.server.appointments.persistence.InMemoryAppointmentRepository;
 import es.uclm.esi.iso2.server.appointments.service.AppointmentService;
+import es.uclm.esi.iso2.server.appointments.service.DailyScheduleService;
 import es.uclm.esi.iso2.server.appointments.service.WaitlistService;
 import es.uclm.esi.iso2.server.configuration.service.IntegrationManagementService;
 import es.uclm.esi.iso2.server.configuration.service.SystemParameterService;
 import es.uclm.esi.iso2.server.orders.service.ClinicalOrderService;
 import es.uclm.esi.iso2.server.patients.service.PatientService;
 import java.awt.Container;
+import java.time.Clock;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -59,9 +63,13 @@ public final class Main {
     private final PatientService patientService = new PatientService(roleManagementService, auditService);
     private final ClinicalOrderService clinicalOrderService =
             new ClinicalOrderService(roleManagementService, auditService, systemParameterService, patientService);
-    private final AppointmentService appointmentService = new AppointmentService(clinicalOrderService, patientService,
-            systemParameterService, roleManagementService, auditService);
+    private final InMemoryAppointmentRepository appointmentRepository = new InMemoryAppointmentRepository();
+    private final AppointmentService appointmentService = new AppointmentService(appointmentRepository,
+            clinicalOrderService, patientService, systemParameterService, roleManagementService, auditService,
+            Clock.systemDefaultZone());
     private final WaitlistService waitlistService = new WaitlistService(appointmentService, clinicalOrderService,
+            patientService, systemParameterService, roleManagementService, auditService);
+    private final DailyScheduleService dailyScheduleService = new DailyScheduleService(appointmentRepository,
             patientService, systemParameterService, roleManagementService, auditService);
 
     /**
@@ -107,7 +115,7 @@ public final class Main {
                 roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user),
                 () -> showConfigureSystem(user), () -> showManageIntegrations(user), () -> showManagePatients(user),
                 () -> showOrderProcedure(user), () -> showOrderFollowUp(user), () -> showManageAppointments(user),
-                () -> showManageWaitlist(user)));
+                () -> showManageWaitlist(user), () -> showDailySchedule(user)));
     }
 
     private void showManageRoles(UserAccount user) {
@@ -145,6 +153,12 @@ public final class Main {
     private void showManageAppointments(UserAccount user) {
         window.setTitle(APPLICATION_TITLE + " - Manage appointments");
         show(new IU_ManageAppointments(appointmentService, user.getUsername(), this::confirm,
+                () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
+    }
+
+    private void showDailySchedule(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Daily schedule");
+        show(new IU_DailySchedule(dailyScheduleService, user.getUsername(),
                 () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
     }
 
