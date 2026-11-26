@@ -16,6 +16,6 @@ Each file ends with what is not covered yet and the findings found while designi
 | C2 Configuration and integrations | UC17 Configure system parameters | `UC17-server-test-design.md`, `UC17-client-test-design.md` |
 | | UC20 Configure integrations | `UC20-server-test-design.md`, `UC20-client-test-design.md` |
 | C3 Patients | UC12 Manage patient demographic data | `UC12-server-test-design.md`, `UC12-client-test-design.md` |
-| C5 Appointment planning | UC15 Manage waitlists | `UC15-server-test-design.md` |
+| C5 Appointment planning | UC15 Manage waitlists | `UC15-server-test-design.md`, `UC15-client-test-design.md` |
 
 The test design of each new patch or use case is added here with its pull request.
