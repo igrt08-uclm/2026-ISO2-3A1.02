@@ -10,8 +10,8 @@ A Java client–server application for the radiodiagnostics service of SESCAM. P
 
 | | |
 |---|---|
-| **Last release** | [v0.1.0](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/releases/tag/v0.1.0) (7 November 2026): C1 Access and security (UC22 log in, UC18 roles and permissions, UC19 audit log) |
-| **In progress** | Iterations 2 and 3: C2 Configuration and integrations, and C3 Patients ([Milestone 2](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/milestones), 15 November) |
+| **Latest tagged version** | [v0.5.0](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/tree/v0.5.0) (26 November 2026): C5 Appointment planning (UC13, UC15 and UC14). C4 Clinical orders was tagged as [v0.4.0](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/tree/v0.4.0) (UC06 and UC07). |
+| **In progress** | Milestone 4: C6 Patient portal and C7 Execution and reports. Requirements, analysis and design are on `develop`. The next step is to assign implementation owners and sequence the required cross-component patches. |
 | **Delivery** | Version 1.0.0 on 15 December 2026 |
 
 The full calendar, with the component, use cases, versions and date of every iteration, is on the wiki page [Traceability and releases](https://github.com/igrt08-uclm/2026-ISO2-3A1.02/wiki/Traceability-and-releases).
