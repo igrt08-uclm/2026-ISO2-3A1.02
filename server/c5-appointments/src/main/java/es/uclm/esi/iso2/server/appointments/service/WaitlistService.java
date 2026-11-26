@@ -132,10 +132,22 @@ public class WaitlistService implements IWaitlistService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-        Priority priority = readPriority(requester, priorityId);
-        ClinicalOrder order = readPendingOrder(requester, needId);
+        Priority priority = null;
+        try {
+            priority = readPriority(requester, priorityId);
+        } catch (ValidationException invalidPriority) {
+            errors.addAll(invalidPriority.getErrors());
+        }
+        ClinicalOrder order = null;
+        try {
+            order = readPendingOrder(requester, needId);
+        } catch (ValidationException invalidNeed) {
+            errors.addAll(invalidNeed.getErrors());
+        }
         if (waitlist.findWaitingByNeed(needId) != null) {
             errors.add("The scheduling need " + needId + " is already in the waitlist");
+        }
+        if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
         WaitlistEntry entry = new WaitlistEntry(nextEntryId(), needId, order.getPatientId(),
@@ -211,13 +223,17 @@ public class WaitlistService implements IWaitlistService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-        List<WaitlistEntry> waiting = waitingOf(requester, testTypeId);
-        if (waiting.isEmpty()) {
-            throw new ValidationException(List.of("There is no patient waiting for the test type "
-                    + testTypeId));
-        }
         auditRecorder.register(requester, ACCESSED, WAITLIST + ":" + testTypeId);
-        return waiting.get(0);
+        List<String> pendingNeeds = orderService.getPendingSchedulingNeeds(requester).stream()
+                .map(SchedulingNeed::getNeedId)
+                .toList();
+        for (WaitlistEntry entry : waitingOf(requester, testTypeId)) {
+            if (pendingNeeds.contains(entry.getNeedId())
+                    && patientService.getPatient(requester, entry.getPatientId()).isActive()) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     @Override
