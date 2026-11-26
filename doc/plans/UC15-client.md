@@ -30,7 +30,7 @@
 | TC15C-04 | list with several entries | the order of the service |
 | TC15C-05 | open and change the test type | one query each time |
 | TC15C-06 | no permission when opening | message, actions disabled, *Back* enabled |
-| TC15C-07 | C2 rejects the reading | its errors |
+| TC15C-07 | the reading is rejected | its errors |
 | TC15C-08 | the reading fails | the error |
 | TC15C-09 | the list fails after changing the test type | empty table and error |
 | TC15C-10 | valid add | confirmation and lists reloaded |
@@ -75,7 +75,7 @@
 - [x] 2. `IU_Welcome`: <em>Manage waitlist</em> (Alt+W), only with `MANAGE_APPOINTMENTS`.
 - [x] 3. `Main`: the service, its seed entries and the screen; `client-c5-appointments` to `1.1.0-SNAPSHOT`.
 - [x] 4. Merge the server part; the patient service in `Main`; `client-c1-access` `1.2.8-SNAPSHOT`. (e16cd1a)
-- [ ] 5. `feature/UC15-client-tests`: tests TC15C-01 to TC15C-34 and their design.
+- [x] 5. `feature/UC15-client-tests`: tests TC15C-01 to TC15C-34 and their design. (d7cd841) Red on purpose: TC15C-03, 05, 09, 22 and 34.
 - [ ] 6. Merge the tests and fix the defects A to E.
 - [ ] 7. Verification and close of the plan.
 
@@ -87,6 +87,6 @@
 ## Status
 
 - **In progress:** nothing
-- **Next step:** step 5, tests in `feature/UC15-client-tests`
+- **Next step:** step 6, fix `IU_ManageWaitlist`
 - **Open questions:** confirmation of Design for the text of Q6
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
