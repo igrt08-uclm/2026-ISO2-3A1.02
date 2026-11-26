@@ -82,4 +82,4 @@ Measured on 26/11/2026, before the fixes of the plan: `WaitlistService` 130/134 
 `InMemoryWaitlistRepository` 15/15 and 4/4; `server-c5-appointments` 98.2 % of lines and 99.0 % of branches; `common`
 87.5 % and 100 %.
 
-Red until step 6 of the plan, because the code does not follow Q7 to Q9 yet: TC15S-12, 24, 25, 26, 27 and 33.
+Red before step 6 of the plan, green since its fix: TC15S-12, 24, 25, 26, 27 and 33.

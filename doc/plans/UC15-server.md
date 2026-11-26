@@ -87,17 +87,17 @@ Test data: `lmartin` has `MANAGE_APPOINTMENTS` and `mgarcia` has not; tiers `URG
 - [x] 3. `server`: `WaitlistService` (permission `MANAGE_APPOINTMENTS`, validations of the alternative flows, ordering by tier and date, audit `WAITLIST_CHANGED`, `WAITLIST_ENTRY_REMOVED`, `OPENING_FILLED`, and the booking of UC15 through `IAppointmentService`). (8be6f37)
 - [x] 4. `server`: `WaitlistService` receives `IPatientService` (Q7). (31904cc)
 - [x] 5. `feature/UC15-server-tests`: tests TC15S-01 to TC15S-34 and their design. (6de4acc) Red on purpose: TC15S-12, 24 to 27 and 33.
-- [ ] 6. Merge the tests; fix the proposal, the errors of `addToWaitlist`, the seed and the Javadoc (Q7 to Q9).
-- [ ] 7. Verification and close of the plan.
+- [x] 6. Merge the tests; fix the proposal, the errors of `addToWaitlist`, the seed and the Javadoc (Q7 to Q9). (0305079)
+- [x] 7. Verification and close of the plan.
 
 ## Verification
 
-- [ ] Acceptance criteria of #134: the waitlist is ordered by priority tier and then by date; a cancelled appointment becomes an opening and filling it books through UC13.
-- [ ] `mvn -B verify` is green: **blocked** by the coverage rule until the tests of `feature/UC15-server-tests` are merged into this branch. Until then, `mvn -B -ntp verify -Djacoco.skip=true` must be green (compile and the existing tests).
+- [x] Acceptance criteria of #134: the waitlist is ordered by priority tier and then by date; a cancelled appointment becomes an opening and filling it books through UC13. (TC15S-02, 03, 20, 29; the freed slot of a cancellation, TC13S-05). Still open in the issue: wiki links, human review of the code and review of the tests.
+- [x] `mvn -B -ntp clean verify` is green on 26/11/2026 (`0305079`): `server-c5-appointments` 98.3 % of lines and 99.0 % of branches, `common` 87.5 % and 100 %.
 
 ## Status
 
 - **In progress:** nothing
-- **Next step:** step 6: merge `feature/UC15-server-tests` into `feature/UC15-server` and fix `WaitlistService`, `IWaitlistService` and `AppointmentSeedData`
+- **Next step:** push when the member asks and review of #236 by another member; then `feature/UC15-client` (#237) takes this branch: the constructor of `WaitlistService` in `Main` and the `null` proposal
 - **Open questions:** none
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
