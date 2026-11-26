@@ -217,6 +217,13 @@ final class TestDoubles {
         private final Set<String> deniedRequesters = new HashSet<>();
         private boolean deniesSchedules;
         private int calls;
+        private List<Priority> priorities =
+                List.of(new Priority("URGENT", "Urgent", "As soon as possible", true));
+
+        /** Replaces the priority tiers that C2 returns, in their order. */
+        void usePriorities(Priority... tiers) {
+            priorities = List.of(tiers);
+        }
 
         void addTestType(TestType type) {
             testTypes.add(type);
@@ -235,7 +242,7 @@ final class TestDoubles {
         @Override
         public List<Priority> getPriorities(String requester) {
             calls++;
-            return List.of(new Priority("URGENT", "Urgent", "As soon as possible", true));
+            return priorities;
         }
 
         int calls() {

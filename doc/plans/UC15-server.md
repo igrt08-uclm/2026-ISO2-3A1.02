@@ -15,7 +15,7 @@
 - **Q3 – Who creates the branches?** **A:** The agent (member's authorisation of 26/11/2026), as with `release/0.4.0`. Rule 7 of AGENTS.md is kept in spirit: one branch per sub-issue.
 - **Q4 – Seed data?** **A:** `AppointmentSeedData` gains `waitlistEntries(day)` and `WaitlistService.loadSeedData()` loads it, as the design shows (`WaitlistService ..> AppointmentSeedData`).
 - **Q5 – Where do the priorities come from?** **A:** From C2 (`ISystemParameterService.getPriorities`), as the design note N5 says: index in `getPriorities()` and then `addedAt` ascending. A tier that is not a configured priority is rejected (alternative flow 4b of the analysis).
-- **Q6 – Who finishes the sub-issue?** **A:** Javier Villanueva Crespo takes over the code and the tests (26/11/2026). The tests still go in `feature/UC15-server-tests` (Q1), which the member creates from this branch; it is merged back into this one.
+- **Q6 – Who finishes the sub-issue?** **A:** Javier Villanueva Crespo takes over the code and the tests (26/11/2026). The tests still go in `feature/UC15-server-tests` (Q1), created from this branch on the member's request (26/11/2026); it is merged back into this one.
 - **Q7 – Which entry does `proposePatientForOpening` return?** **A:** Design (Marcos Loro, 25/11/2026): the first entry of `getWaitlist` whose patient is active (`IPatientService.getPatient(...).isActive()`) and whose scheduling need is still pending in C4; `null` if there is none. The service receives `IPatientService`, as the design shows, and the Javadoc of `IWaitlistService` is corrected.
 - **Q8 – Errors of `addToWaitlist`.** **A:** As its contract says, every reason comes together: the tier, the pending need and the need that already waits.
 - **Q9 – Seed entry `WL-0002`.** **A:** It waits for `NEED-0003`, which is booked. It moves to `NEED-0004` (`P-0003`, `XRAY-CHEST`, `ROUTINE`), so the two seed entries are of different test types (Javier Villanueva Crespo, 26/11/2026; Testing owns the seed data and is told).
@@ -86,7 +86,7 @@ Test data: `lmartin` has `MANAGE_APPOINTMENTS` and `mgarcia` has not; tiers `URG
 - [x] 2. `server`: `IWaitlistRepository`, `InMemoryWaitlistRepository`, `waitlistEntries()`; `server-c5-appointments` to `1.1.0-SNAPSHOT`. (8be6f37)
 - [x] 3. `server`: `WaitlistService` (permission `MANAGE_APPOINTMENTS`, validations of the alternative flows, ordering by tier and date, audit `WAITLIST_CHANGED`, `WAITLIST_ENTRY_REMOVED`, `OPENING_FILLED`, and the booking of UC15 through `IAppointmentService`). (8be6f37)
 - [x] 4. `server`: `WaitlistService` receives `IPatientService` (Q7). (31904cc)
-- [ ] 5. `feature/UC15-server-tests`: tests TC15S-01 to TC15S-34 and their design.
+- [x] 5. `feature/UC15-server-tests`: tests TC15S-01 to TC15S-34 and their design. (6de4acc) Red on purpose: TC15S-12, 24 to 27 and 33.
 - [ ] 6. Merge the tests; fix the proposal, the errors of `addToWaitlist`, the seed and the Javadoc (Q7 to Q9).
 - [ ] 7. Verification and close of the plan.
 
@@ -98,6 +98,6 @@ Test data: `lmartin` has `MANAGE_APPOINTMENTS` and `mgarcia` has not; tiers `URG
 ## Status
 
 - **In progress:** nothing
-- **Next step:** step 5: the member creates `feature/UC15-server-tests` from this branch; then `WaitlistServiceTest`
+- **Next step:** step 6: merge `feature/UC15-server-tests` into `feature/UC15-server` and fix `WaitlistService`, `IWaitlistService` and `AppointmentSeedData`
 - **Open questions:** none
 - **Last update:** 26/11/2026, Javier Villanueva Crespo
