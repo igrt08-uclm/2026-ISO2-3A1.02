@@ -100,6 +100,9 @@ public class IU_ManageWaitlist extends JPanel {
     private final JTable openingTable = new JTable(openingModel);
     private final List<TimeSlot> openings = new ArrayList<>();
 
+    /** True while the combos are being filled, so that their events do not ask for the waitlist. */
+    private boolean fillingCombos;
+
     private final JButton btnFindOpenings = new JButton("Find openings");
     private final JButton btnAdd = new JButton("Add to waitlist");
     private final JButton btnChangeTier = new JButton("Change tier");
@@ -174,14 +177,14 @@ public class IU_ManageWaitlist extends JPanel {
         top.add(lblTestType, constraints);
         constraints.gridx = 1;
         cboTestType.addActionListener(event -> {
-            if (cboTestType.getSelectedItem() != null) {
+            if (!fillingCombos && cboTestType.getSelectedItem() != null) {
                 onSelectTestType((String) cboTestType.getSelectedItem());
             }
         });
         top.add(cboTestType, constraints);
         constraints.gridx = 2;
         JLabel lblPriority = new JLabel("Tier");
-        lblPriority.setDisplayedMnemonic('R');
+        lblPriority.setDisplayedMnemonic('E');
         lblPriority.setLabelFor(cboPriority);
         top.add(lblPriority, constraints);
         constraints.gridx = 3;
@@ -261,19 +264,24 @@ public class IU_ManageWaitlist extends JPanel {
             priorities = parameterService.getPriorities(requester);
             readNeeds = appointmentService.getPendingSchedulingNeeds(requester);
         } catch (AccessDeniedException deniedException) {
+            clearData();
             showAccessDenied();
             return false;
         } catch (ValidationException validationException) {
+            clearData();
             showErrors(validationException.getErrors());
             return false;
         } catch (RuntimeException exception) {
+            clearData();
             showErrors(List.of("The data could not be read: " + exception.getMessage()));
             return false;
         }
+        fillingCombos = true;
         String selectedTestType = (String) cboTestType.getSelectedItem();
         fillCombo(cboTestType, testTypeIds, testTypes.stream().map(TestType::getId).toList(), selectedTestType);
         String selectedPriority = (String) cboPriority.getSelectedItem();
         fillCombo(cboPriority, priorityIds, priorities.stream().map(Priority::getId).toList(), selectedPriority);
+        fillingCombos = false;
         needs.clear();
         needs.addAll(readNeeds);
         needModel.setRowCount(0);
@@ -307,14 +315,14 @@ public class IU_ManageWaitlist extends JPanel {
             cboTestType.setSelectedItem(testTypeId);
         }
         clearOpenings();
+        showInformation(" ");
         refreshWaitlist();
     }
 
     private boolean refreshWaitlist() {
         String testTypeId = (String) cboTestType.getSelectedItem();
+        clearEntries();
         if (testTypeId == null) {
-            entries.clear();
-            entryModel.setRowCount(0);
             return false;
         }
         List<WaitlistEntry> read;
@@ -330,13 +338,23 @@ public class IU_ManageWaitlist extends JPanel {
             showErrors(List.of("The waitlist could not be read: " + exception.getMessage()));
             return false;
         }
-        entries.clear();
         entries.addAll(read);
         displayEntries();
         if (entries.isEmpty()) {
             showInformation("The waitlist of that test type is empty.");
         }
         return true;
+    }
+
+    private void clearEntries() {
+        entries.clear();
+        entryModel.setRowCount(0);
+    }
+
+    private void clearData() {
+        needs.clear();
+        needModel.setRowCount(0);
+        clearEntries();
     }
 
     private void displayEntries() {
@@ -505,6 +523,11 @@ public class IU_ManageWaitlist extends JPanel {
         String testTypeId = (String) cboTestType.getSelectedItem();
         try {
             WaitlistEntry proposed = waitlistService.proposePatientForOpening(requester, testTypeId, opening);
+            if (proposed == null) {
+                entryTable.clearSelection();
+                showInformation("There is no patient who can fill this opening.");
+                return;
+            }
             int row = indexOfEntry(proposed.getEntryId());
             if (row >= 0) {
                 entryTable.setRowSelectionInterval(row, row);
