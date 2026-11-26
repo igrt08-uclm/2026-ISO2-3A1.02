@@ -85,15 +85,15 @@ public interface IWaitlistService {
             throws AccessDeniedException, ValidationException;
 
     /**
-     * Returns the first patient of the waitlist of a test type who could fill an opening: the waiting entry with the
-     * highest priority tier and, among the entries of that tier, the oldest one.
+     * Returns the first patient of the waitlist of a test type who could fill an opening: the first entry, in the order
+     * of {@link #getWaitlist(String, String)}, whose patient is active and whose scheduling need is still pending.
      *
      * @param requester the username of the user who asks
      * @param testTypeId the id of the test type (C2)
      * @param opening the opening to fill
-     * @return the entry that is proposed to fill the opening
+     * @return the entry that is proposed to fill the opening, or {@code null} if no waiting entry can fill it
      * @throws AccessDeniedException if the requester does not have {@code MANAGE_APPOINTMENTS}
-     * @throws ValidationException if the test type or the opening is not given, or nobody waits for that test type
+     * @throws ValidationException if the test type or the opening is not given
      */
     WaitlistEntry proposePatientForOpening(String requester, String testTypeId, TimeSlot opening)
             throws AccessDeniedException, ValidationException;

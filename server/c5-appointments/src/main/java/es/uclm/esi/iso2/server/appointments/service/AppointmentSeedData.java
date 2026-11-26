@@ -35,12 +35,12 @@ final class AppointmentSeedData {
                         AppointmentStatus.RESCHEDULED));
     }
 
-    /** Two patients waiting for the same test type, added the same morning (UC15). */
+    /** Two patients waiting for different test types, added the same morning, with pending needs of C4 (UC15). */
     static List<WaitlistEntry> waitlistEntries(LocalDate day) {
         return List.of(
                 new WaitlistEntry("WL-0001", "NEED-0002", "P-0002", "CT-HEAD", "URGENT",
                         LocalDateTime.of(day, LocalTime.of(8, 0)), WaitlistStatus.WAITING),
-                new WaitlistEntry("WL-0002", "NEED-0003", "P-0003", "CT-HEAD", "PREFERENTIAL",
+                new WaitlistEntry("WL-0002", "NEED-0004", "P-0003", "XRAY-CHEST", "ROUTINE",
                         LocalDateTime.of(day, LocalTime.of(8, 5)), WaitlistStatus.WAITING));
     }
 }

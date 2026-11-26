@@ -14,6 +14,7 @@ import es.uclm.esi.iso2.common.configuration.domain.Priority;
 import es.uclm.esi.iso2.common.orders.contracts.IClinicalOrderService;
 import es.uclm.esi.iso2.common.orders.domain.ClinicalOrder;
 import es.uclm.esi.iso2.common.orders.domain.SchedulingNeed;
+import es.uclm.esi.iso2.common.patients.contracts.IPatientService;
 import es.uclm.esi.iso2.common.shared.ValidationException;
 import es.uclm.esi.iso2.server.appointments.persistence.IWaitlistRepository;
 import es.uclm.esi.iso2.server.appointments.persistence.InMemoryWaitlistRepository;
@@ -46,6 +47,7 @@ public class WaitlistService implements IWaitlistService {
     private final IWaitlistRepository waitlist;
     private final IAppointmentService appointmentService;
     private final IClinicalOrderService orderService;
+    private final IPatientService patientService;
     private final ISystemParameterService systemParameterService;
     private final IRoleManagementService roleManagementService;
     private final IAuditRecorder auditRecorder;
@@ -58,17 +60,20 @@ public class WaitlistService implements IWaitlistService {
      * @param waitlist where the entries are kept
      * @param appointmentService the contract of UC13, to read the openings and to book the appointment
      * @param orderService the contract of C4, to read the pending needs and their orders
+     * @param patientService the contract of C3, to know whether a patient is active
      * @param systemParameterService the contract of C2, to read the priority tiers
      * @param roleManagementService used to know the permissions of the requester (contract of C1)
      * @param auditRecorder where the accesses, the changes and the denied attempts are registered (contract of C1)
      * @param clock gives the current moment, which is the moment in which an entry is added
      */
     public WaitlistService(IWaitlistRepository waitlist, IAppointmentService appointmentService,
-            IClinicalOrderService orderService, ISystemParameterService systemParameterService,
-            IRoleManagementService roleManagementService, IAuditRecorder auditRecorder, Clock clock) {
+            IClinicalOrderService orderService, IPatientService patientService,
+            ISystemParameterService systemParameterService, IRoleManagementService roleManagementService,
+            IAuditRecorder auditRecorder, Clock clock) {
         this.waitlist = waitlist;
         this.appointmentService = appointmentService;
         this.orderService = orderService;
+        this.patientService = patientService;
         this.systemParameterService = systemParameterService;
         this.roleManagementService = roleManagementService;
         this.auditRecorder = auditRecorder;
@@ -80,15 +85,16 @@ public class WaitlistService implements IWaitlistService {
      *
      * @param appointmentService the contract of UC13
      * @param orderService the contract of C4
+     * @param patientService the contract of C3
      * @param systemParameterService the contract of C2
      * @param roleManagementService the contract of C1 for the permissions
      * @param auditRecorder the contract of C1 for the audit log
      */
     public WaitlistService(IAppointmentService appointmentService, IClinicalOrderService orderService,
-            ISystemParameterService systemParameterService, IRoleManagementService roleManagementService,
-            IAuditRecorder auditRecorder) {
-        this(new InMemoryWaitlistRepository(), appointmentService, orderService, systemParameterService,
-                roleManagementService, auditRecorder, Clock.systemDefaultZone());
+            IPatientService patientService, ISystemParameterService systemParameterService,
+            IRoleManagementService roleManagementService, IAuditRecorder auditRecorder) {
+        this(new InMemoryWaitlistRepository(), appointmentService, orderService, patientService,
+                systemParameterService, roleManagementService, auditRecorder, Clock.systemDefaultZone());
     }
 
     /**
@@ -126,10 +132,22 @@ public class WaitlistService implements IWaitlistService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-        Priority priority = readPriority(requester, priorityId);
-        ClinicalOrder order = readPendingOrder(requester, needId);
+        Priority priority = null;
+        try {
+            priority = readPriority(requester, priorityId);
+        } catch (ValidationException invalidPriority) {
+            errors.addAll(invalidPriority.getErrors());
+        }
+        ClinicalOrder order = null;
+        try {
+            order = readPendingOrder(requester, needId);
+        } catch (ValidationException invalidNeed) {
+            errors.addAll(invalidNeed.getErrors());
+        }
         if (waitlist.findWaitingByNeed(needId) != null) {
             errors.add("The scheduling need " + needId + " is already in the waitlist");
+        }
+        if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
         WaitlistEntry entry = new WaitlistEntry(nextEntryId(), needId, order.getPatientId(),
@@ -205,13 +223,17 @@ public class WaitlistService implements IWaitlistService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-        List<WaitlistEntry> waiting = waitingOf(requester, testTypeId);
-        if (waiting.isEmpty()) {
-            throw new ValidationException(List.of("There is no patient waiting for the test type "
-                    + testTypeId));
-        }
         auditRecorder.register(requester, ACCESSED, WAITLIST + ":" + testTypeId);
-        return waiting.get(0);
+        List<String> pendingNeeds = orderService.getPendingSchedulingNeeds(requester).stream()
+                .map(SchedulingNeed::getNeedId)
+                .toList();
+        for (WaitlistEntry entry : waitingOf(requester, testTypeId)) {
+            if (pendingNeeds.contains(entry.getNeedId())
+                    && patientService.getPatient(requester, entry.getPatientId()).isActive()) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     @Override
