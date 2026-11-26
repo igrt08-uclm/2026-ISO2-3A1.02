@@ -31,7 +31,7 @@ differ if a use case changes only one of them. `common` keeps one package per co
 | Component | Submodule folder | Use case → component version |
 |---|---|---|
 | C1 Access and security | `c1-access` | UC22 → 1.0.0, UC19 → 1.1.0, UC18 → 1.2.0 |
-| Common | `common` | UC06 → 1.6.0, UC07 → 1.8.0, UC13 → 1.9.0 (v0.5.0) |
+| Common | `common` | UC06 → 1.6.0, UC07 → 1.8.0, UC13 → 1.8.0 (no MINOR raised), UC15 → 1.9.0, UC14 → 1.10.0 (v0.5.0) |
 | C2 Configuration and integrations | `c2-configuration` | UC17 → 1.0.0, UC20 → 1.1.0 |
 | C3 Patients | `c3-patients` | UC12 register and modify → 1.0.0 (now 1.0.1-SNAPSHOT in the server and 1.0.0-SNAPSHOT in the client), UC12 discharge → 1.1.0 (It8) |
 | C4 Clinical orders | `c4-orders` | UC06 → 1.0.0, UC07 → 1.1.0, UC08 → 1.2.0 (It9) |
@@ -54,11 +54,14 @@ differ if a use case changes only one of them. `common` keeps one package per co
   the old cumulative numbering of D-014, and the table above replaces it.
 - **Patches of a finished component (D-036).** When a component needs a change in a finished one, the finished
   component raises PATCH, in its own branch and pull request approved by its owner, and `common` raises MINOR if
-  contracts are added to it. C1 is at 1.2.4 in the server and 1.2.7 in the client (#109, #112, #116, #172, #173,
-  UC12-client, UC06-client, UC07-client and UC13-client); `common` is at `1.8.0-SNAPSHOT`.
+  contracts are added to it. C1 is at 1.2.4 in the server and 1.2.9 in the client (#109, #112, #116, #172, #173,
+  UC12-client, UC06-client, UC07-client, UC13-client, UC15-client and UC14-client); `common` is at
+  `1.10.0-SNAPSHOT`.
 - **The version of `common` (D-036).** UC06 raised it to `1.6.0` and UC07 to `1.8.0`: its two branches used
   `1.7.0` and `1.8.0`, and the team kept `1.8.0`. `1.8.0` is the version released in `v0.4.0`; UC13 added the
-  `appointments` package without raising the MINOR, so `release/0.5.0` publishes `1.9.0`, as the table above says.
+  `appointments` package without raising the MINOR, UC15 used `1.9.0-SNAPSHOT` and UC14 raised it to
+  `1.10.0-SNAPSHOT` (D-036), so `release/0.5.0` publishes `1.10.0`, as the table above says. `1.9.0` is not
+  released on its own: UC15 and UC14 ship in the same product version.
 - If a submodule name of the table is not the one used in the repository, the repository wins: tell the member and
   this file is corrected.
 
