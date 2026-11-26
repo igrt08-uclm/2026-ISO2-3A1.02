@@ -5,6 +5,7 @@ import es.uclm.esi.iso2.client.access.presentation.IU_Login;
 import es.uclm.esi.iso2.client.access.presentation.IU_ManageRoles;
 import es.uclm.esi.iso2.client.access.presentation.IU_Welcome;
 import es.uclm.esi.iso2.client.appointments.presentation.IU_ManageAppointments;
+import es.uclm.esi.iso2.client.appointments.presentation.IU_ManageWaitlist;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ConfigureParameters;
 import es.uclm.esi.iso2.client.configuration.presentation.IU_ManageIntegrations;
 import es.uclm.esi.iso2.client.orders.presentation.IU_OrderFollowUp;
@@ -24,6 +25,7 @@ import es.uclm.esi.iso2.server.access.service.AuditService;
 import es.uclm.esi.iso2.server.access.service.AuthenticationService;
 import es.uclm.esi.iso2.server.access.service.RoleManagementService;
 import es.uclm.esi.iso2.server.appointments.service.AppointmentService;
+import es.uclm.esi.iso2.server.appointments.service.WaitlistService;
 import es.uclm.esi.iso2.server.configuration.service.IntegrationManagementService;
 import es.uclm.esi.iso2.server.configuration.service.SystemParameterService;
 import es.uclm.esi.iso2.server.orders.service.ClinicalOrderService;
@@ -59,6 +61,8 @@ public final class Main {
             new ClinicalOrderService(roleManagementService, auditService, systemParameterService, patientService);
     private final AppointmentService appointmentService = new AppointmentService(clinicalOrderService, patientService,
             systemParameterService, roleManagementService, auditService);
+    private final WaitlistService waitlistService = new WaitlistService(appointmentService, clinicalOrderService,
+            patientService, systemParameterService, roleManagementService, auditService);
 
     /**
      * Starts the application in the event dispatch thread of Swing: it loads the initial data of the components and
@@ -76,6 +80,7 @@ public final class Main {
         patientService.loadSeedData();
         clinicalOrderService.loadSeedData();
         appointmentService.loadSeedData();
+        waitlistService.loadSeedData();
         useNativeLookAndFeel();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
@@ -101,7 +106,8 @@ public final class Main {
         show(new IU_Welcome(user, this::showLogin, () -> showAudit(user),
                 roleManagementService.getPermissions(user.getUsername()), () -> showManageRoles(user),
                 () -> showConfigureSystem(user), () -> showManageIntegrations(user), () -> showManagePatients(user),
-                () -> showOrderProcedure(user), () -> showOrderFollowUp(user), () -> showManageAppointments(user)));
+                () -> showOrderProcedure(user), () -> showOrderFollowUp(user), () -> showManageAppointments(user),
+                () -> showManageWaitlist(user)));
     }
 
     private void showManageRoles(UserAccount user) {
@@ -139,6 +145,13 @@ public final class Main {
     private void showManageAppointments(UserAccount user) {
         window.setTitle(APPLICATION_TITLE + " - Manage appointments");
         show(new IU_ManageAppointments(appointmentService, user.getUsername(), this::confirm,
+                () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
+    }
+
+    private void showManageWaitlist(UserAccount user) {
+        window.setTitle(APPLICATION_TITLE + " - Manage waitlist");
+        show(new IU_ManageWaitlist(waitlistService, appointmentService, systemParameterService,
+                user.getUsername(), this::confirm,
                 () -> showWelcome(userAccountRepository.findByUsername(user.getUsername()))));
     }
 

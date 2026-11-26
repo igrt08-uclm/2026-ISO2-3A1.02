@@ -27,7 +27,7 @@ public class IU_Welcome extends JPanel {
     private static final String MANAGE_PATIENTS = "MANAGE_PATIENTS";
     private static final String ORDER_PROCEDURES = "ORDER_PROCEDURES";
     private static final String MANAGE_APPOINTMENTS = "MANAGE_APPOINTMENTS";
-    private static final int COLUMNS = 9;
+    private static final int COLUMNS = 10;
 
     /**
      * Creates the welcome screen with the button <em>Log out</em>. It passes no action and an empty list of
@@ -173,11 +173,11 @@ public class IU_Welcome extends JPanel {
             Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
             Runnable onManagePatients, Runnable onOrderProcedure, Runnable onOrderFollowUp) {
         this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, onConfigureIntegrations,
-                onManagePatients, onOrderProcedure, onOrderFollowUp, null);
+                onManagePatients, onOrderProcedure, onOrderFollowUp, null, null);
     }
 
     /**
-     * Creates the welcome screen with the button <em>Manage appointments</em> of UC13.
+     * Creates the welcome screen with the button <em>Manage appointments</em> of UC13 (see the other constructor).
      *
      * @param user the logged user
      * @param onLogout is run when the user presses <em>Log out</em>
@@ -199,6 +199,37 @@ public class IU_Welcome extends JPanel {
             Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
             Runnable onManagePatients, Runnable onOrderProcedure, Runnable onOrderFollowUp,
             Runnable onManageAppointments) {
+        this(user, onLogout, onViewAudit, permissions, onManageRoles, onConfigureSystem, onConfigureIntegrations,
+                onManagePatients, onOrderProcedure, onOrderFollowUp, onManageAppointments, null);
+    }
+
+    /**
+     * Creates the welcome screen with the button <em>Manage appointments</em> of UC13 and <em>Manage waitlist</em> of
+     * UC15.
+     *
+     * @param user the logged user
+     * @param onLogout is run when the user presses <em>Log out</em>
+     * @param onViewAudit is run when the user presses <em>View audit log</em> (see the other constructors)
+     * @param permissions the permissions of the user, read from the server, because the roles of the logged user do not
+     *                    carry them
+     * @param onManageRoles is run when the user presses <em>Manage roles</em> (see the other constructors)
+     * @param onConfigureSystem is run when the user presses <em>Configure system</em> (see the other constructors)
+     * @param onConfigureIntegrations is run when the user presses <em>Configure integrations</em> (see the other
+     *                                constructors)
+     * @param onManagePatients is run when the user presses <em>Manage patients</em> (see the other constructors)
+     * @param onOrderProcedure is run when the user presses <em>Order procedure</em> (see the other constructors)
+     * @param onOrderFollowUp is run when the user presses <em>Order follow-up</em> (see the other constructor)
+     * @param onManageAppointments is run when the user presses <em>Manage appointments</em>; the button is only shown
+     *                             to a user with the permission {@code MANAGE_APPOINTMENTS}, and not at all if this is
+     *                             {@code null}
+     * @param onManageWaitlist is run when the user presses <em>Manage waitlist</em>; the button is only shown to a
+     *                         user with the permission {@code MANAGE_APPOINTMENTS}, and not at all if this is
+     *                         {@code null}
+     */
+    public IU_Welcome(UserAccount user, Runnable onLogout, Runnable onViewAudit, List<Permission> permissions,
+            Runnable onManageRoles, Runnable onConfigureSystem, Runnable onConfigureIntegrations,
+            Runnable onManagePatients, Runnable onOrderProcedure, Runnable onOrderFollowUp,
+            Runnable onManageAppointments, Runnable onManageWaitlist) {
         super(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
@@ -260,7 +291,13 @@ public class IU_Welcome extends JPanel {
             btnManageAppointments.addActionListener(event -> onManageAppointments.run());
             addButton(btnManageAppointments, 7);
         }
-        addButton(btnLogout, 8);
+        if (onManageWaitlist != null && hasPermission(permissions, MANAGE_APPOINTMENTS)) {
+            JButton btnManageWaitlist = new JButton("Manage waitlist");
+            btnManageWaitlist.setMnemonic('W');
+            btnManageWaitlist.addActionListener(event -> onManageWaitlist.run());
+            addButton(btnManageWaitlist, 8);
+        }
+        addButton(btnLogout, 9);
     }
 
     private static boolean hasPermission(List<Permission> permissions, String code) {

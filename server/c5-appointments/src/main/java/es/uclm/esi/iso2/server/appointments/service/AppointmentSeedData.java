@@ -3,6 +3,8 @@ package es.uclm.esi.iso2.server.appointments.service;
 import es.uclm.esi.iso2.common.appointments.domain.Appointment;
 import es.uclm.esi.iso2.common.appointments.domain.AppointmentStatus;
 import es.uclm.esi.iso2.common.appointments.domain.TimeSlot;
+import es.uclm.esi.iso2.common.appointments.domain.WaitlistEntry;
+import es.uclm.esi.iso2.common.appointments.domain.WaitlistStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,5 +33,14 @@ final class AppointmentSeedData {
                         LocalDateTime.of(day, LocalTime.of(10, 0)),
                         LocalDateTime.of(day, LocalTime.of(10, 20)),
                         AppointmentStatus.RESCHEDULED));
+    }
+
+    /** Two patients waiting for different test types, added the same morning, with pending needs of C4 (UC15). */
+    static List<WaitlistEntry> waitlistEntries(LocalDate day) {
+        return List.of(
+                new WaitlistEntry("WL-0001", "NEED-0002", "P-0002", "CT-HEAD", "URGENT",
+                        LocalDateTime.of(day, LocalTime.of(8, 0)), WaitlistStatus.WAITING),
+                new WaitlistEntry("WL-0002", "NEED-0004", "P-0003", "XRAY-CHEST", "ROUTINE",
+                        LocalDateTime.of(day, LocalTime.of(8, 5)), WaitlistStatus.WAITING));
     }
 }
